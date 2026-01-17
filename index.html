@@ -2071,7 +2071,7 @@ const selectResult = (item) => {
 
   // 3. Logic phân trang (giữ nguyên)
   const pages = useMemo(() => {
-      const contentToShow = (config.text && config.text.trim().length > 0) ? config.text : "日本漢字"; 
+      const contentToShow = (config.text && config.text.trim().length > 0) ? config.text : "日本語"; 
       const chars = Array.from(contentToShow).filter(c => c.trim().length > 0);
       const chunks = [];
       const ROWS_PER_PAGE = 10;
