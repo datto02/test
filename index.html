@@ -368,7 +368,7 @@ const useKanjiReadings = (char, active) => {
     return readings;
 };
 
-// --- COMPONENT POPUP HOẠT HỌA (Phiên bản Compact - Nhỏ gọn) ---
+// --- COMPONENT POPUP HOẠT HỌA (Final Polish: Icon Tua, Fix Đóng, Fix Romaji) ---
 const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) => {
     const [key, setKey] = useState(0); 
     const [strokeNumbers, setStrokeNumbers] = useState([]); 
@@ -377,7 +377,7 @@ const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) 
     const [speedConfig, setSpeedConfig] = useState({ duration: 3.5, delay: 0.4 });
     const [activeSpeed, setActiveSpeed] = useState('normal'); 
 
-    // Logic khóa cuộn
+    // 1. LOGIC KHÓA CUỘN (Giữ nguyên)
     useEffect(() => {
         if (isOpen) document.body.style.overflow = 'hidden';
         else document.body.style.overflow = 'unset';
@@ -409,47 +409,57 @@ const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) 
 
     if (!isOpen) return null;
 
-    const info = dbData?.KANJI_DB?.[char] || {};
+    // 2. LOGIC LẤY DỮ LIỆU: Tìm cả trong Kanji, Hiragana và Katakana
+    // dbData.KANJI_DB, dbData.ALPHABETS.hiragana, dbData.ALPHABETS.katakana
+    let info = {};
+    if (dbData?.KANJI_DB?.[char]) info = dbData.KANJI_DB[char];
+    else if (dbData?.ALPHABETS?.hiragana?.[char]) info = dbData.ALPHABETS.hiragana[char];
+    else if (dbData?.ALPHABETS?.katakana?.[char]) info = dbData.ALPHABETS.katakana[char];
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            {/* THAY ĐỔI: max-w-sm (nhỏ hơn), p-5 (ít padding hơn) */}
-            <div className="bg-white rounded-2xl shadow-2xl p-5 w-[90%] max-w-sm flex flex-col items-center relative animate-in zoom-in-95 duration-200">
+        <div 
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={onClose} // 3. FIX: Click nền đóng Modal
+        >
+            <div 
+                className="bg-white rounded-2xl shadow-2xl p-5 w-[90%] max-w-sm flex flex-col items-center relative animate-in zoom-in-95 duration-200"
+                onClick={(e) => e.stopPropagation()} // 3. FIX: Click vào nội dung không bị đóng
+            >
                 
-                {/* Nút X đóng */}
+                {/* 4. FIX: Nút X to hơn */}
                 <button 
                     onClick={onClose}
-                    className="absolute top-3 right-3 p-1.5 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-full transition-colors z-10"
+                    className="absolute top-3 right-3 p-2 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-full transition-colors z-10"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    {/* Icon size 20 (to hơn 16) */}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
 
-                {/* --- HEADER (Thu nhỏ font chữ) --- */}
-                <div className="flex items-center justify-center gap-4 mb-3 mt-1 w-full px-2">
-                    {/* Kanji: text-5xl (nhỏ hơn 6xl) */}
+                {/* --- HEADER --- */}
+                <div className="flex items-center justify-center gap-5 mb-3 mt-2 w-full px-2">
                     <h3 className="text-5xl font-black text-indigo-600 font-['Klee_One'] leading-none">
                         {char}
                     </h3>
                     <div className="flex flex-col items-start justify-center h-full pt-1">
+                        {/* 5. FIX: Luôn hiện Sound (Kể cả bảng chữ cái) */}
                         {info.sound ? (
                             <>
-                                {/* Sound: text-lg */}
-                                <span className="text-lg font-black text-gray-800 uppercase font-sans tracking-wide leading-tight mb-0.5">
+                                <span className="text-xl font-black text-gray-800 uppercase font-sans tracking-wide leading-tight mb-0.5">
                                     {info.sound}
                                 </span>
-                                {/* Meaning: text-xs */}
-                                <span className="text-xs text-gray-500 font-medium font-sans italic leading-tight text-left">
-                                    {info.meaning}
-                                </span>
+                                {info.meaning && (
+                                    <span className="text-xs text-gray-500 font-medium font-sans italic leading-tight text-left">
+                                        {info.meaning}
+                                    </span>
+                                )}
                             </>
                         ) : (
-                            <span className="text-xs text-gray-400 font-sans">(Chưa có dữ liệu)</span>
+                            <span className="text-xs text-gray-400 font-sans">---</span>
                         )}
                     </div>
                 </div>
 
-                {/* --- KHUNG VẼ (Thu nhỏ kích thước) --- */}
-                {/* THAY ĐỔI: w-60 h-40 (nhỏ gọn hơn w-72 h-60) */}
+                {/* --- KHUNG VẼ --- */}
                 <div key={key} className="w-60 h-40 bg-white border border-indigo-50 rounded-xl relative mb-4 shadow-inner flex-shrink-0 flex items-center justify-center">
                     <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20" viewBox="0 0 100 100" preserveAspectRatio="none">
                         <line x1="50" y1="0" x2="50" y2="100" stroke="black" strokeWidth="0.5" strokeDasharray="4 4" />
@@ -481,39 +491,38 @@ const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) 
                     </svg>
                 </div>
 
-                {/* --- 3 NÚT ĐIỀU KHIỂN (Thu nhỏ padding & icon) --- */}
-                <div className="flex justify-center gap-3 w-full px-2">
+                {/* --- 3 NÚT ĐIỀU KHIỂN (FIX: Tinh gọn & Đổi Icon) --- */}
+                <div className="flex justify-center gap-2 w-full px-2">
                     
-                    {/* Nút CHẬM */}
+                    {/* Nút CHẬM (Icon Tua Lùi - Rewind) */}
                     <button 
                         onClick={() => handleReplay('slow')}
-                        title="Vẽ chậm"
-                        // p-2.5 (nhỏ hơn p-4)
-                        className={`p-2.5 rounded-xl transition-all active:scale-90 flex flex-col items-center gap-0.5 ${activeSpeed === 'slow' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-300 scale-105' : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-100'}`}
+                        title="Tua chậm"
+                        // Compact style: py-2 px-3
+                        className={`py-2 px-3 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-1 ${activeSpeed === 'slow' ? 'bg-indigo-100 text-indigo-700 font-bold ring-1 ring-indigo-300' : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-200 shadow-sm'}`}
                     >
-                        {/* Icon size 18 (nhỏ hơn 24) */}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
-                        <span className="text-[9px] font-bold uppercase">Chậm</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+                        <span className="text-[10px] font-bold uppercase">Chậm</span>
                     </button>
 
-                    {/* Nút VẼ LẠI */}
+                    {/* Nút VẼ LẠI (Icon Refresh) */}
                     <button 
                         onClick={() => handleReplay('normal')}
-                        title="Bình thường"
-                        className={`p-2.5 rounded-xl transition-all active:scale-90 flex flex-col items-center gap-0.5 ${activeSpeed === 'normal' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-300 scale-105' : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-100'}`}
+                        title="Vẽ lại"
+                        className={`py-2 px-4 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-1.5 ${activeSpeed === 'normal' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-200'}`}
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-                        <span className="text-[9px] font-bold uppercase">Vẽ lại</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+                        <span className="text-[10px] font-bold uppercase">Vẽ lại</span>
                     </button>
 
-                    {/* Nút NHANH */}
+                    {/* Nút NHANH (Icon Tua Nhanh - Fast Forward) */}
                     <button 
                         onClick={() => handleReplay('fast')}
-                        title="Vẽ nhanh"
-                        className={`p-2.5 rounded-xl transition-all active:scale-90 flex flex-col items-center gap-0.5 ${activeSpeed === 'fast' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-300 scale-105' : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-100'}`}
+                        title="Tua nhanh"
+                        className={`py-2 px-3 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-1 ${activeSpeed === 'fast' ? 'bg-indigo-100 text-indigo-700 font-bold ring-1 ring-indigo-300' : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-200 shadow-sm'}`}
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
-                        <span className="text-[9px] font-bold uppercase">Nhanh</span>
+                        <span className="text-[10px] font-bold uppercase">Nhanh</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
                     </button>
 
                 </div>
@@ -616,7 +625,7 @@ const isJLPT = dbData.KANJI_LEVELS.N5.includes(char) ||
         return (
           // Main Container
           <div 
-            className={`relative w-[16mm] h-[16mm] border-r border-b box-border flex justify-center items-center overflow-hidden bg-transparent ${isReference ? 'cursor-pointer hover:bg-indigo-50/30 transition-colors' : ''}`}
+            className={`relative w-[16mm] h-[16mm] border-r border-b box-border flex justify-center items-center overflow-hidden bg-transparent ${isReference ? 'cursor-pointer hover:bg-indigo-100 transition-colors' : ''}`}
             style={{ borderColor: gridColor }}
             onClick={isReference ? onClick : undefined} // Chỉ box đầu tiên mới click được
             title={isReference ? "Bấm để xem cách viết" : ""}
