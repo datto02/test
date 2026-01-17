@@ -368,11 +368,25 @@ const useKanjiReadings = (char, active) => {
     return readings;
 };
 
-// --- COMPONENT POPUP HOẠT HỌA (Đã fix khoảng trắng & Thêm nút Đóng) ---
+// --- COMPONENT POPUP HOẠT HỌA (Đã khóa cuộn & Khóa click nền) ---
 const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) => {
     const [key, setKey] = useState(0); 
     const [strokeNumbers, setStrokeNumbers] = useState([]); 
 
+    // 1. LOGIC KHÓA CUỘN TRANG KHI POPUP MỞ
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden'; // Khóa cuộn
+        } else {
+            document.body.style.overflow = 'unset';  // Mở lại cuộn
+        }
+        // Dọn dẹp khi component bị hủy (để chắc chắn không bị kẹt)
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen]);
+
+    // Logic lấy số thứ tự
     useEffect(() => {
         if (fullSvg) {
             const parser = new DOMParser();
@@ -389,18 +403,17 @@ const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) 
     if (!isOpen) return null;
 
     const info = dbData?.KANJI_DB?.[char] || {};
-    const handleContentClick = (e) => e.stopPropagation();
 
     return (
         <div 
             className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-            onClick={onClose} 
+            // ĐÃ XÓA: onClick={onClose} -> Để click vào nền không bị đóng
         >
             <div 
                 className="bg-white rounded-3xl shadow-2xl p-6 w-[90%] max-w-md flex flex-col items-center relative animate-in zoom-in-95 duration-200"
-                onClick={handleContentClick}
+                // Không cần stopPropagation nữa vì lớp cha không bắt sự kiện click
             >
-                {/* Nút X đóng ở góc trên (Giữ lại cho thuận tiện) */}
+                {/* Nút X đóng ở góc trên */}
                 <button 
                     onClick={onClose}
                     className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-full transition-colors"
@@ -408,7 +421,7 @@ const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) 
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
 
-                {/* --- BỐ CỤC NGANG: KANJI TRÁI - THÔNG TIN PHẢI --- */}
+                {/* --- BỐ CỤC NGANG --- */}
                 <div className="flex items-center justify-center gap-6 mb-4 mt-2 w-full px-2">
                     {/* Cột Trái: Kanji Lớn */}
                     <h3 className="text-6xl font-black text-indigo-600 font-['Klee_One'] leading-none">
@@ -432,15 +445,13 @@ const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) 
                     </div>
                 </div>
 
-                {/* KHUNG HIỂN THỊ ANIMATION (Đã thu gọn khoảng trắng thừa) */}
-                {/* Giảm size từ w-64 xuống w-52, giảm padding p-4 xuống p-2 */}
+                {/* KHUNG HIỂN THỊ ANIMATION */}
                 <div key={key} className="w-52 h-52 bg-white border-2 border-indigo-50 rounded-2xl relative mb-6 shadow-inner flex-shrink-0">
                     <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20" viewBox="0 0 100 100">
                         <line x1="50" y1="0" x2="50" y2="100" stroke="black" strokeWidth="0.5" strokeDasharray="4 4" />
                         <line x1="0" y1="50" x2="100" y2="50" stroke="black" strokeWidth="0.5" strokeDasharray="4 4" />
                     </svg>
 
-                    {/* Giảm padding để chữ to hơn */}
                     <svg viewBox="0 0 109 109" className="w-full h-full p-2">
                         {/* LAYER 1: SỐ THỨ TỰ */}
                         {strokeNumbers.map((num, idx) => (
@@ -466,9 +477,8 @@ const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) 
                     </svg>
                 </div>
 
-                {/* --- KHU VỰC NÚT BẤM (2 NÚT) --- */}
+                {/* --- KHU VỰC NÚT BẤM --- */}
                 <div className="flex gap-3 w-full px-4">
-                    {/* Nút Xem lại */}
                     <button 
                         onClick={() => setKey(prev => prev + 1)} 
                         className="flex-1 flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-95 font-sans"
@@ -477,7 +487,6 @@ const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) 
                         Xem lại
                     </button>
 
-                    {/* Nút Đóng (Mới thêm) */}
                     <button 
                         onClick={onClose} 
                         className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition-all active:scale-95 font-sans"
