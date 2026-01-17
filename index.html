@@ -1827,7 +1827,7 @@ const selectResult = (item) => {
         try {
             // CẤU HÌNH GEMINI API
             const { GoogleGenerativeAI } = await import("@google/genai");
-            const genAI = new GoogleGenerativeAI("AIzaSyDtVOXUszhy1hqYCcdECHB218BedZ6kHrQ"); // <--- THAY API KEY CỦA BẠN VÀO ĐÂY
+            const genAI = new GoogleGenerativeAI("AIzaSyDbziwOHQhJjeRT4WuZyn3dhsgYx_C-f_U"); // <--- THAY API KEY CỦA BẠN VÀO ĐÂY
             const model = genAI.getGenerativeModel({ 
                 model: "gemini-1.5-flash",
                 systemInstruction: "Bạn là một chuyên gia tiếng Nhật từ kênh Phá Đảo Tiếng Nhật. Hãy trả lời ngắn gọn, thân thiện, tập trung vào giải thích Kanji, cách nhớ chữ qua hình ảnh và ví dụ thực tế. Ưu tiên sử dụng tiếng Việt."
