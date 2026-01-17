@@ -1846,14 +1846,28 @@ const selectResult = (item) => {
 
   // 3. Logic phân trang (giữ nguyên)
   const pages = useMemo(() => {
-      const contentToShow = (config.text && config.text.trim().length > 0) ? config.text : "日本漢字"; 
-      const chars = Array.from(contentToShow).filter(c => c.trim().length > 0);
-      const chunks = [];
-      const ROWS_PER_PAGE = 10;
-      for (let i = 0; i < chars.length; i += ROWS_PER_PAGE) { chunks.push(chars.slice(i, i + ROWS_PER_PAGE)); }
-      if (chunks.length === 0) return [[]];
-      return chunks;
-  }, [config.text]);
+    const content = (config.text && config.text.trim().length > 0) ? config.text : "日本漢字";
+    
+    // Logic mới: Gom nhóm âm ghép
+    const items = [];
+    for (let i = 0; i < content.length; i++) {
+        let char = content[i];
+        // Nếu ký tự tiếp theo là một chữ Kana nhỏ (âm ghép)
+        if (i + 1 < content.length && /[ぁぃぅぇぉゃゅょゎァィゥェォャュョヮ]/.test(content[i+1])) {
+            char += content[i+1]; // Ghép chúng lại thành "きょ"
+            i++; // Nhảy qua ký tự tiếp theo
+        }
+        if (char.trim()) items.push(char);
+    }
+
+    const chunks = [];
+    const ROWS_PER_PAGE = 10;
+    for (let i = 0; i < items.length; i += ROWS_PER_PAGE) { 
+        chunks.push(items.slice(i, i + ROWS_PER_PAGE)); 
+    }
+    if (chunks.length === 0) return [[]];
+    return chunks;
+}, [config.text]);
 
   // 4. Logic in ấn (giữ nguyên)
   const handlePrint = () => {
