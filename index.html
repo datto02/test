@@ -214,34 +214,6 @@
     const removeAccents = (str) => {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
 };
-
-      const sendTelegramMessage = async (content) => {
-    // 1. Điền thông tin của bạn
-    const token = "8431379699:AAFOUHfPbj16ALqdPSQix-oRl0dXhnT-358"; 
-    const chatId = "5227758970";
-
-    // 2. Nội dung thông báo (Có thể tùy chỉnh theo ý bạn)
-    const message = `🚀 *THÔNG BÁO MỚI*\n\n` +
-                  `📝 Nội dung in: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}\n` +
-                  `⏰ Thời gian: ${new Date().toLocaleString('vi-VN')}`;
-
-    const url = `https://api.telegram.org/bot${token}/sendMessage`;
-
-    try {
-        await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: chatId,
-                text: message,
-                parse_mode: 'Markdown'
-            })
-        });
-    } catch (error) {
-        console.error("Lỗi khi gửi thông báo Telegram:", error);
-    }
-};
-      
       const { useState, useEffect, useMemo, useRef } = React;
 
       // --- FETCH DATA FROM GITHUB ---
@@ -1830,118 +1802,6 @@ const selectResult = (item) => {
           </div>
         );
       };
-      const AIChat = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([
-        { role: 'ai', text: 'Chào bạn! Mình là trợ lý Phá Đảo Tiếng Nhật. Bạn cần giúp gì về Kanji hay từ vựng không?' }
-    ]);
-    const [input, setInput] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
-    const chatEndRef = useRef(null);
-
-    // CUỘN XUỐNG KHI CÓ TIN NHẮN MỚI
-    useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
-
-    const handleSendMessage = async () => {
-        if (!input.trim()) return;
-
-        const userMsg = input.trim();
-        setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
-        setInput('');
-        setIsTyping(true);
-
-        try {
-            // CẤU HÌNH GEMINI API
-            const { GoogleGenerativeAI } = await import("@google/genai");
-            const genAI = new GoogleGenerativeAI("AIzaSyCIy8208WYsvabgQsbcAX34rTpVN3oDVno"); // <--- THAY API KEY CỦA BẠN VÀO ĐÂY
-            const model = genAI.getGenerativeModel({ 
-                model: "gemini-1.5-flash",
-                systemInstruction: "Bạn là một chuyên gia tiếng Nhật từ kênh Phá Đảo Tiếng Nhật. Hãy trả lời ngắn gọn, thân thiện, tập trung vào giải thích Kanji, cách nhớ chữ qua hình ảnh và ví dụ thực tế. Ưu tiên sử dụng tiếng Việt."
-            });
-
-            const result = await model.generateContent(userMsg);
-            const response = await result.response;
-            const text = response.text();
-
-            setMessages(prev => [...prev, { role: 'ai', text: text }]);
-        } catch (error) {
-            setMessages(prev => [...prev, { role: 'ai', text: 'Lỗi kết nối rồi! Bạn kiểm tra lại API Key nhé.' }]);
-        } finally {
-            setIsTyping(false);
-        }
-    };
-
-    return (
-        <div className="fixed bottom-6 right-6 z-[100] no-print font-sans">
-            {/* NÚT BẤM MỞ CHAT */}
-            <button 
-                onClick={() => setIsOpen(!isOpen)}
-                className="w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all active:scale-95 group"
-            >
-                {isOpen ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 6-12 12"/><path d="m6 6 12 12"/></svg>
-                ) : (
-                    <div className="relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-ping"></span>
-                    </div>
-                )}
-            </button>
-
-            {/* KHUNG CHAT */}
-            {isOpen && (
-                <div className="absolute bottom-16 right-0 w-[350px] h-[500px] bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300">
-                    <div className="p-4 bg-indigo-600 text-white flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-xl">⛩️</div>
-                        <div>
-                            <p className="text-sm font-bold leading-none">Phá Đảo AI</p>
-                            <p className="text-[10px] opacity-80 mt-1">Trợ lý học tiếng Nhật thông minh</p>
-                        </div>
-                    </div>
-
-                    {/* NỘI DUNG TIN NHẮN */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-gray-50">
-                        {messages.map((msg, i) => (
-                            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${
-                                    msg.role === 'user' 
-                                        ? 'bg-indigo-600 text-white rounded-tr-none' 
-                                        : 'bg-white text-gray-800 shadow-sm border border-gray-100 rounded-tl-none'
-                                }`}>
-                                    {msg.text}
-                                </div>
-                            </div>
-                        ))}
-                        {isTyping && (
-                            <div className="flex justify-start italic text-[10px] text-gray-400 animate-pulse">AI đang suy nghĩ...</div>
-                        )}
-                        <div ref={chatEndRef} />
-                    </div>
-
-                    {/* Ô NHẬP LIỆU */}
-                    <div className="p-3 bg-white border-t border-gray-100 flex gap-2">
-                        <input 
-                            type="text" 
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                            placeholder="Hỏi về Kanji, ngữ pháp..."
-                            className="flex-1 px-4 py-2 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        />
-                        <button 
-                            onClick={handleSendMessage}
-                            className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                        </button>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
      const App = () => {
   // --- Các state cũ giữ nguyên ---
   const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
@@ -1996,19 +1856,11 @@ const selectResult = (item) => {
   }, [config.text]);
 
   // 4. Logic in ấn (giữ nguyên)
- const handlePrint = () => {
-    // Gửi thông báo về Telegram nếu ô nhập liệu có chữ
-    if (config.text && config.text.trim().length > 0) {
-        sendTelegramMessage(config.text);
-    }
-
-    const handleAfterPrint = () => { 
-        setShowPostPrintDonate(true); 
-        window.removeEventListener("afterprint", handleAfterPrint); 
-    };
-    window.addEventListener("afterprint", handleAfterPrint);
-    window.print();
-};
+  const handlePrint = () => {
+      const handleAfterPrint = () => { setShowPostPrintDonate(true); window.removeEventListener("afterprint", handleAfterPrint); };
+      window.addEventListener("afterprint", handleAfterPrint);
+      window.print();
+  };
 
   // --- MÀN HÌNH CHỜ (LOADING) ---
   // Nếu dữ liệu chưa tải xong, hiện màn hình xoay vòng tròn
@@ -2067,7 +1919,6 @@ const selectResult = (item) => {
           </div>
         </div>
       )}
-      <AIChat /> {/* CHÈN VÀO ĐÂY */}
     </div>
   );
 };
