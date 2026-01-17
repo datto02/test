@@ -368,14 +368,14 @@ const useKanjiReadings = (char, active) => {
     return readings;
 };
 
-// --- COMPONENT POPUP HOẠT HỌA (Điều khiển tốc độ & Khung chữ nhật) ---
+// --- COMPONENT POPUP HOẠT HỌA (Phiên bản Compact - Nhỏ gọn) ---
 const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) => {
     const [key, setKey] = useState(0); 
     const [strokeNumbers, setStrokeNumbers] = useState([]); 
     
-    // State tốc độ (Mặc định là Bình thường: 3.5s)
+    // State tốc độ
     const [speedConfig, setSpeedConfig] = useState({ duration: 3.5, delay: 0.4 });
-    const [activeSpeed, setActiveSpeed] = useState('normal'); // Để highlight nút đang chọn
+    const [activeSpeed, setActiveSpeed] = useState('normal'); 
 
     // Logic khóa cuộn
     useEffect(() => {
@@ -397,16 +397,14 @@ const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) 
         }
     }, [fullSvg]);
 
-    // Hàm xử lý đổi tốc độ và vẽ lại
     const handleReplay = (mode) => {
         let newConfig = { duration: 3.5, delay: 0.4 };
-        
-        if (mode === 'slow') newConfig = { duration: 6, delay: 0.8 };     // Chậm
-        if (mode === 'fast') newConfig = { duration: 1.5, delay: 0.15 };  // Nhanh
+        if (mode === 'slow') newConfig = { duration: 6, delay: 0.8 };     
+        if (mode === 'fast') newConfig = { duration: 1.5, delay: 0.15 };  
         
         setSpeedConfig(newConfig);
         setActiveSpeed(mode);
-        setKey(prev => prev + 1); // Kích hoạt vẽ lại
+        setKey(prev => prev + 1); 
     };
 
     if (!isOpen) return null;
@@ -415,47 +413,50 @@ const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) 
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl shadow-2xl p-6 w-[95%] max-w-lg flex flex-col items-center relative animate-in zoom-in-95 duration-200">
+            {/* THAY ĐỔI: max-w-sm (nhỏ hơn), p-5 (ít padding hơn) */}
+            <div className="bg-white rounded-2xl shadow-2xl p-5 w-[90%] max-w-sm flex flex-col items-center relative animate-in zoom-in-95 duration-200">
                 
-                {/* Nút X đóng ở góc trên */}
+                {/* Nút X đóng */}
                 <button 
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-full transition-colors z-10"
+                    className="absolute top-3 right-3 p-1.5 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-full transition-colors z-10"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
 
-                {/* --- HEADER --- */}
-                <div className="flex items-center justify-center gap-8 mb-4 mt-2 w-full px-4">
-                    <h3 className="text-6xl font-black text-indigo-600 font-['Klee_One'] leading-none">
+                {/* --- HEADER (Thu nhỏ font chữ) --- */}
+                <div className="flex items-center justify-center gap-4 mb-3 mt-1 w-full px-2">
+                    {/* Kanji: text-5xl (nhỏ hơn 6xl) */}
+                    <h3 className="text-5xl font-black text-indigo-600 font-['Klee_One'] leading-none">
                         {char}
                     </h3>
                     <div className="flex flex-col items-start justify-center h-full pt-1">
                         {info.sound ? (
                             <>
-                                <span className="text-xl font-black text-gray-800 uppercase font-sans tracking-wide leading-tight mb-1">
+                                {/* Sound: text-lg */}
+                                <span className="text-lg font-black text-gray-800 uppercase font-sans tracking-wide leading-tight mb-0.5">
                                     {info.sound}
                                 </span>
-                                <span className="text-sm text-gray-500 font-medium font-sans italic leading-tight text-left">
+                                {/* Meaning: text-xs */}
+                                <span className="text-xs text-gray-500 font-medium font-sans italic leading-tight text-left">
                                     {info.meaning}
                                 </span>
                             </>
                         ) : (
-                            <span className="text-sm text-gray-400 font-sans">(Chưa có dữ liệu)</span>
+                            <span className="text-xs text-gray-400 font-sans">(Chưa có dữ liệu)</span>
                         )}
                     </div>
                 </div>
 
-                {/* --- KHUNG VẼ HÌNH CHỮ NHẬT --- */}
-                {/* w-72 h-60: Tạo hình chữ nhật. px-10: Padding lớn để Kanji không sát mép */}
-                <div key={key} className="w-72 h-60 bg-white border-2 border-indigo-50 rounded-2xl relative mb-6 shadow-inner flex-shrink-0 flex items-center justify-center">
+                {/* --- KHUNG VẼ (Thu nhỏ kích thước) --- */}
+                {/* THAY ĐỔI: w-60 h-40 (nhỏ gọn hơn w-72 h-60) */}
+                <div key={key} className="w-60 h-40 bg-white border border-indigo-50 rounded-xl relative mb-4 shadow-inner flex-shrink-0 flex items-center justify-center">
                     <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20" viewBox="0 0 100 100" preserveAspectRatio="none">
                         <line x1="50" y1="0" x2="50" y2="100" stroke="black" strokeWidth="0.5" strokeDasharray="4 4" />
                         <line x1="0" y1="50" x2="100" y2="50" stroke="black" strokeWidth="0.5" strokeDasharray="4 4" />
                     </svg>
 
-                    {/* SVG Kanji giữ tỉ lệ vuông 1:1 nhưng nằm giữa khung chữ nhật */}
-                    <svg viewBox="0 0 109 109" className="h-full w-auto p-4">
+                    <svg viewBox="0 0 109 109" className="h-full w-auto p-2">
                         {strokeNumbers.map((num, idx) => (
                             <text 
                                 key={`num-${idx}`} 
@@ -472,45 +473,47 @@ const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) 
                                 d={d} 
                                 className="stroke-anim-path"
                                 style={{ 
-                                    animationDuration: `${speedConfig.duration}s`, // Tốc độ nét
-                                    animationDelay: `${index * speedConfig.delay}s` // Tốc độ xuất hiện nét tiếp theo
+                                    animationDuration: `${speedConfig.duration}s`, 
+                                    animationDelay: `${index * speedConfig.delay}s` 
                                 }} 
                             />
                         ))}
                     </svg>
                 </div>
 
-                {/* --- 3 NÚT ĐIỀU KHIỂN (BIỂU TƯỢNG) --- */}
-                <div className="flex justify-center gap-6 w-full px-4">
+                {/* --- 3 NÚT ĐIỀU KHIỂN (Thu nhỏ padding & icon) --- */}
+                <div className="flex justify-center gap-3 w-full px-2">
                     
-                    {/* Nút CHẬM (Con rùa/Mũi tên lùi) */}
+                    {/* Nút CHẬM */}
                     <button 
                         onClick={() => handleReplay('slow')}
                         title="Vẽ chậm"
-                        className={`p-4 rounded-2xl transition-all active:scale-90 flex flex-col items-center gap-1 ${activeSpeed === 'slow' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-300 scale-110' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                        // p-2.5 (nhỏ hơn p-4)
+                        className={`p-2.5 rounded-xl transition-all active:scale-90 flex flex-col items-center gap-0.5 ${activeSpeed === 'slow' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-300 scale-105' : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-100'}`}
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
-                        <span className="text-[10px] font-bold uppercase">Chậm</span>
+                        {/* Icon size 18 (nhỏ hơn 24) */}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+                        <span className="text-[9px] font-bold uppercase">Chậm</span>
                     </button>
 
-                    {/* Nút VẼ LẠI/BÌNH THƯỜNG (Play/Refresh) */}
+                    {/* Nút VẼ LẠI */}
                     <button 
                         onClick={() => handleReplay('normal')}
                         title="Bình thường"
-                        className={`p-4 rounded-2xl transition-all active:scale-90 flex flex-col items-center gap-1 ${activeSpeed === 'normal' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-300 scale-110' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                        className={`p-2.5 rounded-xl transition-all active:scale-90 flex flex-col items-center gap-0.5 ${activeSpeed === 'normal' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-300 scale-105' : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-100'}`}
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-                        <span className="text-[10px] font-bold uppercase">Vẽ lại</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                        <span className="text-[9px] font-bold uppercase">Vẽ lại</span>
                     </button>
 
-                    {/* Nút NHANH (Tên lửa/Mũi tên tới) */}
+                    {/* Nút NHANH */}
                     <button 
                         onClick={() => handleReplay('fast')}
                         title="Vẽ nhanh"
-                        className={`p-4 rounded-2xl transition-all active:scale-90 flex flex-col items-center gap-1 ${activeSpeed === 'fast' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-300 scale-110' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                        className={`p-2.5 rounded-xl transition-all active:scale-90 flex flex-col items-center gap-0.5 ${activeSpeed === 'fast' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-300 scale-105' : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-100'}`}
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
-                        <span className="text-[10px] font-bold uppercase">Nhanh</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+                        <span className="text-[9px] font-bold uppercase">Nhanh</span>
                     </button>
 
                 </div>
