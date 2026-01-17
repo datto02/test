@@ -830,51 +830,45 @@ useEffect(() => {
             setLocalText(validForInput);
             handleChange('text', validForInput.replace(/[a-zA-Z]/g, ''));
         };
-// --- HÀM MỚI: Tải dữ liệu từ URL GitHub (Lazy Loading) ---
-        const handleLoadFromGithub = async (url) => {
-            setProgress(0);
-            setIsLoading(true);     // Bật màn hình chờ
-            setIsMenuOpen(false);   // Đóng menu chọn nhanh
-            
-            try {
-                // 1. Gọi link tải dữ liệu
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`Lỗi tải dữ liệu từ ${url}`);
-                }
+// Thêm tham số type (mặc định là 'kanji')
+const handleLoadFromGithub = async (url, type = 'kanji') => {
+    setProgress(0);
+    setIsLoading(true);     
+    setIsMenuOpen(false);   
+    
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Lỗi tải dữ liệu từ ${url}`);
+        }
 
-                // 2. Đọc dữ liệu dạng TEXT (vì file của bạn là chuỗi ký tự)
-                const rawText = await response.text();
-                
-                // 3. Làm sạch: Xóa dấu ngoặc kép, xuống dòng, khoảng trắng thừa (đề phòng)
-                const cleanText = rawText.replace(/["\n\r\s]/g, '');
+        const rawText = await response.text();
+        const cleanText = rawText.replace(/["\n\r\s,\[\]]/g, '');
 
-                if (!cleanText) {
-                     alert("File dữ liệu rỗng!");
-                     setIsLoading(false);
-                     return;
-                }
+        if (!cleanText) {
+             alert("File dữ liệu rỗng!");
+             setIsLoading(false);
+             return;
+        }
 
-                // 4. Nạp vào web
-                setFilterOptions(prev => ({ ...prev, kanji: true })); // Bật bộ lọc Kanji
-                
-                // Hiệu ứng thanh loading giả lập
-                setProgress(30);
-                setTimeout(() => setProgress(100), 300);
+      
+        setFilterOptions(prev => ({ ...prev, [type]: true })); 
+        
+        setProgress(30);
+        setTimeout(() => setProgress(100), 300);
 
-                setTimeout(() => {
-                    setLocalText(cleanText);              // Hiển thị lên ô nhập liệu
-                    onChange({ ...config, text: cleanText }); // Cập nhật ra trang giấy
-                    setIsLoading(false);                  // Tắt màn hình chờ
-                }, 500);
+        setTimeout(() => {
+            setLocalText(cleanText);              
+            onChange({ ...config, text: cleanText }); 
+            setIsLoading(false);                  
+        }, 500);
 
-            } catch (error) {
-                console.error("Lỗi:", error);
-                alert("Không tải được dữ liệu. Vui lòng kiểm tra lại đường truyền hoặc link GitHub.");
-                setIsLoading(false);
-            }
-        };
+    } catch (error) {
+        console.error("Lỗi:", error);
+        alert("Không tải được dữ liệu. Vui lòng kiểm tra lại đường truyền hoặc link GitHub.");
+        setIsLoading(false);
+    }
+};
         // --- HÀM MỚI: Lấy ngẫu nhiên Kanji từ GitHub ---
         const handleRandomLoadFromGithub = async (level) => {
             // 1. Kiểm tra số lượng
@@ -1282,10 +1276,21 @@ const selectResult = (item) => {
                           <div className="absolute bottom-full left-0 mb-2 z-50 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-4 animate-in fade-in zoom-in-95 duration-200">
                             <div>
                               <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Bảng chữ cái</p>
-                              <div className="grid grid-cols-2 gap-2">
-                                <button onClick={() => handleSmartLoad(Object.keys(dbData.ALPHABETS.hiragana).join(''), 'hiragana')} className="py-2 text-xs font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition">あ Hiragana</button>
-                                <button onClick={() => handleSmartLoad(Object.keys(dbData.ALPHABETS.katakana).join(''), 'katakana')} className="py-2 text-xs font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition">ア Katakana</button>
-                              </div>
+ <div className="grid grid-cols-2 gap-2">
+  <button 
+    onClick={() => handleLoadFromGithub('https://raw.githubusercontent.com/datto02/luyenvietkanji/refs/heads/main/hiragana.json', 'hiragana')} 
+    className="py-2 text-xs font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition"
+  >
+    あ Hiragana
+  </button>
+  
+  <button 
+    onClick={() => handleLoadFromGithub('https://raw.githubusercontent.com/datto02/luyenvietkanji/refs/heads/main/katakana.json', 'katakana')} 
+    className="py-2 text-xs font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition"
+  >
+    ア Katakana
+  </button>
+</div>
                             </div>
     <div>
     <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Bộ thủ</p>
