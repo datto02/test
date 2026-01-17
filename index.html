@@ -193,6 +193,21 @@
       .input-scrollbar::-webkit-scrollbar-thumb:hover {
         background-color: #94a3b8; 
       }
+      /* Hiệu ứng vẽ nét chuẩn KanjiVG */
+.authentic-kanjivg path {
+    fill: none;
+    stroke: #4f46e5; /* Màu Indigo thương hiệu của bạn */
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke-dashoffset 0.6s ease-out; /* Tốc độ vẽ mỗi nét */
+}
+
+/* Ẩn các số thứ tự gốc của KanjiVG để tập trung vào nét vẽ */
+.authentic-kanjivg text {
+    display: none;
+}
+      
     </style>
 <script type="importmap">
 {
@@ -413,7 +428,7 @@ const isJLPT = dbData.KANJI_LEVELS.N5.includes(char) ||
   );
 };
      // 2. Grid Box
-      const GridBox = ({ char, type, config, index, svgData, failed }) => {
+      const GridBox = ({ char, type, config, index, svgData, failed, onKanjiClick }) => {
         const isReference = type === 'reference';
         const showTrace = index < config.traceCount;
         const { gridType, gridOpacity } = config; 
@@ -432,6 +447,7 @@ const isJLPT = dbData.KANJI_LEVELS.N5.includes(char) ||
           <div 
             className="relative w-[16mm] h-[16mm] border-r border-b box-border flex justify-center items-center overflow-hidden bg-transparent"
             style={{ borderColor: gridColor }} 
+            onClick={() => isReference && onKanjiClick(char)}
           >
             
             {/* Grid Lines */}
@@ -480,7 +496,7 @@ const isJLPT = dbData.KANJI_LEVELS.N5.includes(char) ||
       };
 
      // 3. WorkbookRow 
-     const WorkbookRow = ({ char, config, dbData }) => {
+     const WorkbookRow = ({ char, config, dbData, onKanjiClick }) => {
   const { loading, paths, fullSvg, failed } = useKanjiSvg(char);
   const boxes = Array.from({ length: 12 }, (_, i) => i);
   const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
@@ -506,6 +522,7 @@ const isJLPT = dbData.KANJI_LEVELS.N5.includes(char) ||
             config={config}
             svgData={fullSvg}
             failed={failed}
+            onKanjiClick={onKanjiClick}
           />
         ))}
       </div>
@@ -514,7 +531,7 @@ const isJLPT = dbData.KANJI_LEVELS.N5.includes(char) ||
 };
 
       // 4. Page Layout
-      const Page = ({ chars, config, dbData }) => {
+      const Page = ({ chars, config, dbData, onKanjiClick }) => {
       const isSample = !config.text || config.text.trim().length === 0;
         return (
           <div className="a4-page mx-auto relative flex flex-col pt-[15mm] pl-[3mm] bg-white">
@@ -538,6 +555,7 @@ const isJLPT = dbData.KANJI_LEVELS.N5.includes(char) ||
                   char={char}
                   config={config}
                   dbData={dbData}
+                  onKanjiClick={onKanjiClick}
                 />
               ))}
             </div>
@@ -1802,7 +1820,85 @@ const selectResult = (item) => {
           </div>
         );
       };
+const StrokeAnimationModal = ({ kanji, onClose }) => {
+    const [paths, setPaths] = useState([]);
+    const [animating, setAnimating] = useState(false);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        if (!kanji) return;
+        const hex = kanji.codePointAt(0).toString(16).toLowerCase().padStart(5, '0');
+        
+        fetch(`https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}.svg`)
+            .then(res => res.text())
+            .then(svgText => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(svgText, "image/svg+xml");
+                const pathElements = Array.from(doc.querySelectorAll('path[id*="-s"]'));
+                
+                // Chuẩn bị dữ liệu nét vẽ
+                const pathData = pathElements.map(p => {
+                    const length = p.getTotalLength();
+                    return { d: p.getAttribute('d'), length: length, offset: length };
+                });
+                
+                setPaths(pathData);
+                // Bắt đầu vẽ sau khi nạp xong
+                setTimeout(() => runAnimation(pathData), 300);
+            });
+    }, [kanji]);
+
+    const runAnimation = (data) => {
+        setAnimating(true);
+        let currentPaths = data.map(p => ({ ...p, offset: p.length }));
+        setPaths(currentPaths);
+
+        let delay = 0;
+        currentPaths.forEach((_, i) => {
+            setTimeout(() => {
+                setPaths(prev => {
+                    const next = [...prev];
+                    next[i].offset = 0;
+                    return next;
+                });
+            }, delay);
+            delay += 700; // Khoảng cách giữa các nét
+        });
+    };
+
+    if (!kanji) return null;
+
+    return (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm no-print" onClick={onClose}>
+            <div className="bg-white rounded-[2.5rem] p-10 shadow-2xl flex flex-col items-center gap-6 animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">Thứ tự nét chuẩn KanjiVG</h3>
+                
+                <div className="bg-slate-50 rounded-3xl p-4 border border-slate-100">
+                    <svg width="250" height="250" viewBox="0 0 109 109" className="authentic-kanjivg">
+                        {paths.map((p, i) => (
+                            <path 
+                                key={i} 
+                                d={p.d} 
+                                style={{ 
+                                    strokeDasharray: p.length, 
+                                    strokeDashoffset: p.offset 
+                                }} 
+                            />
+                        ))}
+                    </svg>
+                </div>
+
+                <div className="flex gap-4">
+                    <button onClick={() => runAnimation(paths)} className="px-6 py-2.5 bg-indigo-600 text-white rounded-full font-bold text-xs active:scale-95 transition-all">VẼ LẠI</button>
+                    <button onClick={onClose} className="px-6 py-2.5 bg-slate-100 text-slate-600 rounded-full font-bold text-xs active:scale-95">ĐÓNG</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+      
      const App = () => {
+       const [animatingKanji, setAnimatingKanji] = useState(null);
   // --- Các state cũ giữ nguyên ---
   const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
@@ -1896,10 +1992,18 @@ const selectResult = (item) => {
             config={config} 
             
             dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống Page
+            onKanjiClick={(char) => setAnimatingKanji(char)}
           /> 
         ))}
       </div>
-
+{/* Cửa sổ Modal Hoạt họa (Nằm ngoài cùng của App) */}
+            <StrokeAnimationModal 
+                kanji={animatingKanji} 
+                onClose={() => setAnimatingKanji(null)} 
+            />
+        </div>
+    );
+};
       {/* Popup Donate  */}
       {showPostPrintDonate && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
