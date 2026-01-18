@@ -1,6 +1,6 @@
-import { removeAccents, shuffleString, getUniqueChars, getAllowedRegexString } from './utils.js';
-import { levelColors } from './constants.js';
-import { fetchKanjiData } from './api.js';
+import { removeAccents, shuffleString, getUniqueChars, getAllowedRegexString } from './js/utils.js';
+import { levelColors } from './js/constants.js';
+import { fetchKanjiData } from './js/api.js';
 
 const { useState, useEffect, useMemo, useRef } = React;
 
