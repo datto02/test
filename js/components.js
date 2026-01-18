@@ -1,6 +1,9 @@
-import { removeAccents, shuffleString, getUniqueChars, getAllowedRegexString } from './js/utils.js';
-import { levelColors } from './js/constants.js';
-import { fetchKanjiData } from './js/api.js';
+import { 
+  removeAccents, shuffleString, getUniqueChars, getAllowedRegexString,
+  useKanjiSvg, useKanjiReadings 
+} from './utils.js';
+import { levelColors as jlptColors } from './constants.js'; // Đổi tên để tránh trùng lặp
+import { fetchKanjiData } from './api.js';
 
 const { useState, useEffect, useMemo, useRef } = React;
 
