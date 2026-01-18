@@ -3,71 +3,69 @@ return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").
 };
     const { useState, useEffect, useMemo, useRef } = React;
 
- const fetchDataFromGithub = async () => {
-    try {
-        // Tải đồng thời cả 2 file
-        const [dbRes, onkunRes] = await Promise.all([
-            fetch('./data/kanji_db.json'),
-            fetch('./data/onkun.json')
-        ]);
+ // --- FETCH DATA FROM GITHUB ---
+const fetchDataFromGithub = async () => {
+  try {
+    // Tải song song cả 2 file database
+    const [dbResponse, onkunResponse] = await Promise.all([
+      fetch('./data/kanji_db.json'),
+      fetch('./data/onkun.json')
+    ]);
 
-        if (!dbRes.ok || !onkunRes.ok) throw new Error('Không thể tải dữ liệu');
+    let kanjiDb = null;
+    let onkunDb = null;
 
-        const dbData = await dbRes.json();
-        const onkunData = await onkunRes.json();
+    if (dbResponse.ok) kanjiDb = await dbResponse.json();
+    else console.warn("Không tải được kanji_db.json");
 
-        // Trả về một object chứa cả 2 nguồn dữ liệu
-        return { 
-            ...dbData, 
-            ONKUN_DB: onkunData 
-        };
-    } catch (error) {
-        console.error("Lỗi tải dữ liệu:", error);
-        return null;
-    }
+    if (onkunResponse.ok) onkunDb = await onkunResponse.json();
+    else console.warn("Không tải được onkun.json (sẽ dùng API online)");
+
+    // Trả về object chứa cả 2
+    return { ...kanjiDb, ONKUN_DB: onkunDb }; 
+  } catch (error) {
+    console.error("Lỗi tải dữ liệu hệ thống:", error);
+    return null;
+  }
 };
 
     // --- UTILS & DATA FETCHING ---
 
-    // Hàm chuyển chữ sang mã Hex 5 ký tự (ví dụ: '一' -> '04e00')
-const getHex = (char) => {
-    let hex = char.codePointAt(0).toString(16).toLowerCase();
-    while (hex.length < 5) {
-        hex = '0' + hex;
-    }
-    return hex;
-};
+    const getHex = (char) => char.codePointAt(0).toString(16).toLowerCase().padStart(5, '0');
 
     
 
     
-   // --- HÀM CHỈ TẢI DỮ LIỆU TỪ MÁY (OFFLINE) ---
-const fetchKanjiData = async (char) => {
+   const fetchKanjiData = async (char) => {
     const hex = getHex(char);
+    
+    // ƯU TIÊN LINK LOCAL/GITHUB TRƯỚC
+    const sources = [
+      `./data/svg/${hex}.svg`,  // <--- Thêm dòng này lên đầu
+      `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}.svg`,
+      `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}-Kaisho.svg`,
+      `https://cdn.jsdelivr.net/gh/parsimonhi/animCJK@master/svgsKana/${hex}.svg`,
+      `https://cdn.jsdelivr.net/gh/parsimonhi/animCJK@master/svgsJa/${hex}.svg`
+    ];
 
-    // Đường dẫn trỏ thẳng vào thư mục data/svg của bạn
-    const url = `./data/svg/${hex}.svg`;
-
-    console.log(`Đang tìm file offline: ${url}`); // Kiểm tra trong Console
-
-    try {
+    for (const url of sources) {
+      try {
         const res = await fetch(url);
-
-        // Kiểm tra xem file có tồn tại và đúng là SVG không
         if (res.ok) {
-            const text = await res.text();
-            if (text.includes('<svg')) {
-                return { success: true, svg: text, source: url };
-            }
+          const text = await res.text();
+          // Kiểm tra sơ bộ xem có phải SVG hợp lệ không
+          if (text.includes('<svg')) {
+             return { success: true, svg: text, source: url };
+          }
         }
-        console.warn(`Không tìm thấy file: ${url}`);
-    } catch (e) {
-        console.error(`Lỗi hệ thống khi tải file: ${url}`, e);
+      } catch (e) {
+        continue;
+      }
     }
-
-    // Nếu không tìm thấy, trả về lỗi (khung vẽ sẽ trắng)
+    
     return { success: false };
-};
+  };
+
     
     const useKanjiSvg = (char) => {
     const [state, setState] = useState({ 
@@ -121,24 +119,38 @@ const fetchKanjiData = async (char) => {
     };
 
 const useKanjiReadings = (char, active, dbData) => {
-    return useMemo(() => {
-        // Nếu không có dữ liệu hoặc không bật chế độ hiện âm, trả về rỗng
-        if (!char || !active || !dbData || !dbData.ONKUN_DB) {
-            return { on: '', kun: '' };
+  const [readings, setReadings] = useState({ on: '', kun: '' });
+
+  useEffect(() => {
+    if (!char || !active) return;
+
+    // CÁCH 1: Lấy từ dữ liệu nội bộ (data/onkun.json)
+    if (dbData?.ONKUN_DB && dbData.ONKUN_DB[char]) {
+      const info = dbData.ONKUN_DB[char];
+      setReadings({
+        // Dữ liệu của bạn là mảng, cần join lại thành chuỗi
+        on: info.readings_on?.join(', ') || '---', 
+        kun: info.readings_kun?.join(', ') || '---'
+      });
+      return; // Đã có dữ liệu thì dừng, không gọi API nữa
+    }
+
+    // CÁCH 2: Fallback sang API Online (như cũ)
+    fetch(`https://kanjiapi.dev/v1/kanji/${char}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          setReadings({
+            on: data.on_readings?.join(', ') || '---',
+            kun: data.kun_readings?.join(', ') || '---'
+          });
         }
+      })
+      .catch(() => setReadings({ on: '---', kun: '---' }));
+      
+  }, [char, active, dbData]); // Thêm dbData vào dependency
 
-        const entry = dbData.ONKUN_DB[char];
-
-        if (entry) {
-            return {
-                // Lưu ý: Tên field theo đúng file json bạn cung cấp
-                on: entry.readings_on?.join(', ') || '---',
-                kun: entry.readings_kun?.join(', ') || '---'
-            };
-        }
-
-        return { on: '---', kun: '---' };
-    }, [char, active, dbData]);
+  return readings;
 };
 
 // --- COMPONENT POPUP HOẠT HỌA (Đã chỉnh con trỏ chuột) ---
