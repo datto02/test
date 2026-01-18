@@ -384,7 +384,7 @@ const useKanjiReadings = (char, active) => {
 const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) => {
     const [key, setKey] = useState(0); 
     const [strokeNumbers, setStrokeNumbers] = useState([]); 
-    const [speedConfig, setSpeedConfig] = useState({ duration: 3, delay: 0.7 });
+    const [speedConfig, setSpeedConfig] = useState({ duration: 2.5, delay: 0.9 });
     const [activeSpeed, setActiveSpeed] = useState('normal'); 
 
     // Logic khóa cuộn
@@ -409,8 +409,8 @@ const KanjiAnimationModal = ({ char, paths, fullSvg, dbData, isOpen, onClose }) 
     }, [fullSvg]);
 
     const handleReplay = (mode) => {
-        let newConfig = { duration: 3, delay: 0.7 };
-        if (mode === 'slow') newConfig = { duration: 4, delay: 1,5 };     
+        let newConfig = { duration: 2.5, delay: 0.9 };
+        if (mode === 'slow') newConfig = { duration: 4, delay: 1.5 };     
         if (mode === 'fast') newConfig = { duration: 1.5, delay: 0.5 };  
         setSpeedConfig(newConfig);
         setActiveSpeed(mode);
