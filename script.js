@@ -22,31 +22,15 @@ return null;
     
 
     
-    // --- SỬA HÀM NÀY ĐỂ CHỈ LẤY OFFLINE ---
-const fetchKanjiData = async (char) => {
+    const fetchKanjiData = async (char) => {
     const hex = getHex(char);
     
-    // Đường dẫn trỏ thẳng vào thư mục data/svg của bạn
-    // Cấu trúc: thư mục_web/data/svg/xxxxx.svg
-    const url = `./data/svg/${hex}.svg`;
-
-    try {
-        const res = await fetch(url);
-        
-        // Kiểm tra xem file có tồn tại không
-        if (res.ok) {
-            const text = await res.text();
-            console.log(`Đã tải offline thành công: ${char}`); // Báo vào console để bạn biết
-            return { success: true, svg: text, source: url };
-        } else {
-            console.error(`Không tìm thấy file offline cho chữ: ${char} (Mã: ${hex}) tại ${url}`);
-        }
-    } catch (e) {
-        console.error(`Lỗi khi tải file: ${url}`, e);
-    }
-    
-    return { success: false };
-};
+    const sources = [
+        `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}.svg`,
+        `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}-Kaisho.svg`,
+        `https://cdn.jsdelivr.net/gh/parsimonhi/animCJK@master/svgsKana/${hex}.svg`,
+        `https://cdn.jsdelivr.net/gh/parsimonhi/animCJK@master/svgsJa/${hex}.svg`
+    ];
 
     for (const url of sources) {
         try {
