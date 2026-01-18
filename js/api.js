@@ -1,4 +1,4 @@
-import { getHex } from './utils.js';
+import { getHex } from './js/utils.js';
 
 export const fetchDataFromGithub = async () => {
   try {
