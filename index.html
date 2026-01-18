@@ -1050,7 +1050,7 @@ const GridBox = ({ char, type, config, index, svgData, failed, onClick }) => {
         );
     };
 
-      // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
+  // 4. Page Layout (Đã sửa lại đúng chuẩn trang A4)
       const Page = ({ chars, config, dbData }) => {
         // Kiểm tra xem có phải đang ở chế độ bản mẫu (không có text) hay không
         const isSample = !config.text || config.text.trim().length === 0;
@@ -1071,7 +1071,7 @@ const GridBox = ({ char, type, config, index, svgData, failed, onClick }) => {
                         </p>
                         <p className="flex items-center gap-2">
                             <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">2</span>
-                            Ấn vào chữ mẫu đầu tiên để xem họa hoạt cách viết.
+                            Ấn vào chữ mẫu đầu tiên để xem họa hoạt cách viết & tự vẽ tay kiểm tra.
                         </p>
                         <p className="flex items-center gap-2">
                             <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">3</span>
@@ -1109,7 +1109,6 @@ const GridBox = ({ char, type, config, index, svgData, failed, onClick }) => {
           </div>
         );
       };
-
 // 5. Sidebar (Phiên bản: Final)
       const Sidebar = ({ config, onChange, onPrint, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData }) => {
         const scrollRef = useRef(null);
