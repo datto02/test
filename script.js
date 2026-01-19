@@ -216,6 +216,13 @@ React.useEffect(() => {
     }
 
     // Hàm dọn dẹp khi tắt component đột ngột
+    // --- LOGIC TÍNH MÀU VIỀN THEO HƯỚNG VUỐT ---
+const getDynamicBorder = () => {
+    if (dragX > 70) return '#22c55e'; // Màu xanh lá khi vuốt phải đủ xa
+    if (dragX < -70) return '#ef4444'; // Màu đỏ khi vuốt trái đủ xa
+    return 'white'; // Màu trắng mặc định
+};
+const dynamicBorder = getDynamicBorder();
     return () => {
         document.body.style.overflow = 'unset';
         document.body.style.height = 'auto';
@@ -241,12 +248,14 @@ const handleDragEnd = () => {
     if (!isDragging) return;
     setIsDragging(false);
 
-    if (dragX > 80) {
-        handleNext(true); // Vuốt phải -> Đã biết
-    } else if (dragX < -80) {
-        handleNext(false); // Vuốt trái -> Đang học
+    // Nếu vuốt qua 70px (lúc viền đã đổi màu) thì thả tay ra là thẻ tự biến mất
+    if (dragX > 70) {
+        handleNext(true); // Tự biến mất sang phải (Đã biết)
+    } else if (dragX < -70) {
+        handleNext(false); // Tự biến mất sang trái (Đang học)
     }
-    setDragX(0);
+    
+    setDragX(0); // Reset vị trí nếu chưa đủ ngưỡng
 };
     if (!isOpen || queue.length === 0) return null;
 
@@ -350,7 +359,10 @@ const handleDragEnd = () => {
     onTouchEnd={handleDragEnd}
     className={`relative w-64 h-80 cursor-pointer transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
 >
-                                <div className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center border-4 border-white [backface-visibility:hidden] overflow-hidden">
+                                <div 
+    className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center border-4 [backface-visibility:hidden] overflow-hidden"
+    style={{ borderColor: isDragging ? dynamicBorder : 'white' }}
+>
                                     <span className="text-8xl font-['Klee_One'] text-gray-800 leading-none transform -translate-y-5">{currentChar}</span>
                                     {currentIndex === 0 && showHint && (
                                         <p className="absolute bottom-14 text-indigo-400 text-[7px] font-black uppercase tracking-[0.4em] animate-pulse">Chạm để lật</p>
@@ -358,7 +370,10 @@ const handleDragEnd = () => {
                                     <CardControls />
                                 </div>
 
-                                <div className="absolute inset-0 bg-indigo-600 rounded-[2rem] shadow-2xl flex flex-col items-center justify-center p-6 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] border-4 border-white/20 overflow-hidden text-center">
+                                <div 
+    className="absolute inset-0 bg-indigo-600 rounded-[2rem] shadow-2xl flex flex-col items-center justify-center p-6 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] border-4 overflow-hidden text-center"
+    style={{ borderColor: isDragging ? dynamicBorder : 'rgba(255,255,255,0.2)' }}
+>
                                     <div className="flex-1 flex flex-col items-center justify-center w-full transform -translate-y-3">
                                         <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter leading-tight">{info.sound || '---'}</h3>
                                         <p className="text-base opacity-90 font-medium italic leading-snug px-2">{info.meaning || ''}</p>
