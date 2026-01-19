@@ -184,7 +184,6 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         setExitDirection(null);
     };
 
-    // Phím tắt
     React.useEffect(() => {
         const handleKeyDown = (e) => {
             if (!isOpen || isFinished || exitDirection) return;
@@ -206,7 +205,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         if (exitDirection) return;
         setExitDirection(isKnown ? 'right' : 'left');
 
-        // ĐẨY NHANH TỐC ĐỘ: Giảm xuống 150ms để cực nhạy
+        // HIỆU ỨNG SIÊU NHANH (150ms)
         setTimeout(() => {
             if (isKnown) setKnownCount(prev => prev + 1);
             else setUnknownIndices(prev => [...prev, currentIndex]);
@@ -272,7 +271,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                 
                 {!isFinished ? (
                     <>
-                        {/* --- THẺ 3D (Tốc độ duration-150) --- */}
+                        {/* --- THẺ 3D --- */}
                         <div className={`relative transition-all duration-150 ease-out ${
                             exitDirection === 'left' ? '-translate-x-10 -rotate-6 opacity-0' : 
                             exitDirection === 'right' ? 'translate-x-10 rotate-6 opacity-0' : ''
@@ -302,22 +301,22 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                             </div>
                         </div>
 
-                        {/* --- THANH TIẾN ĐỘ: Fix bao trọn số cuối --- */}
+                        {/* --- THANH TIẾN ĐỘ --- */}
                         <div className="w-64 mt-8 mb-6 relative h-6 flex items-center">
                             <div className="w-full h-1 bg-white/10 rounded-full relative">
-                                {/* Khung số tổng cố định ở cuối */}
-                                <div className="absolute right-0 top-1/2 -translate-y-1/2 h-5 min-w-[24px] rounded-md flex items-center justify-center border border-white/5">
+                                {/* Khung số tổng */}
+                                <div className="absolute right-0 top-1/2 -translate-y-1/2 h-5 min-w-[24px] rounded-md flex items-center justify-center border border-white/10">
                                     <span className="text-[9px] font-black text-white/30 uppercase">{queue.length}</span>
                                 </div>
                                 
-                                {/* Nút chạy (Khung trắng cùng kích thước) */}
+                                {/* Nút chạy (Xanh lá tỏa sáng, số màu trắng) */}
                                 <div 
-                                    className="absolute top-1/2 -translate-y-1/2 h-5 min-w-[24px] px-1 bg-white rounded-md flex items-center justify-center shadow-lg transition-all duration-150 ease-out z-10"
+                                    className="absolute top-1/2 -translate-y-1/2 h-5 min-w-[24px] px-1 bg-green-500 rounded-md flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.7)] transition-all duration-150 ease-out z-10"
                                     style={{ 
                                         left: `calc(${(currentIndex / (queue.length - 1 || 1)) * 100}% - ${currentIndex === queue.length - 1 ? '24px' : '0px'})` 
                                     }}
                                 >
-                                    <span className="text-[9px] font-black text-indigo-600 leading-none">{currentIndex + 1}</span>
+                                    <span className="text-[9px] font-black text-white leading-none">{currentIndex + 1}</span>
                                 </div>
                             </div>
                         </div>
