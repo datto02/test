@@ -159,24 +159,16 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
     const [isFlipped, setIsFlipped] = React.useState(false);
     const [unknownIndices, setUnknownIndices] = React.useState([]);
     const [knownCount, setKnownCount] = React.useState(0);
-    const [history, setHistory] = React.useState([]); 
+    const [history, setHistory] = React.useState([]);
     const [isFinished, setIsFinished] = React.useState(false);
     const [exitDirection, setExitDirection] = React.useState(null);
     const [showHint, setShowHint] = React.useState(true);
-    const [dragX, setDragX] = React.useState(0); // Tọa độ di chuyển thực tế
-    const [startX, setStartX] = React.useState(0); // Tọa độ điểm bắt đầu chạm
-    const [isDragging, setIsDragging] = React.useState(false); // Trạng thái đang giữ chuột/tay
-    
-    React.useEffect(() => {
-        if (isOpen && text) {
-            const chars = Array.from(text).filter(c => c.trim());
-            setOriginalQueue(chars);
-            startNewSession(chars);
-            setShowHint(true);
-        }
-    }, [isOpen, text]);
+    const [dragX, setDragX] = React.useState(0); 
+    const [startX, setStartX] = React.useState(0); 
+    const [isDragging, setIsDragging] = React.useState(false);
 
-    const startNewSession = (chars) => {
+    // --- 1. KHỞI TẠO SESSION ---
+    const startNewSession = React.useCallback((chars) => {
         setQueue(chars);
         setCurrentIndex(0);
         setIsFlipped(false);
@@ -185,85 +177,49 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         setHistory([]);
         setIsFinished(false);
         setExitDirection(null);
-    };
+        setDragX(0);
+    }, []);
 
     React.useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (!isOpen || isFinished || exitDirection) return;
-            if (e.code === 'Space') { 
-                e.preventDefault(); 
-                setIsFlipped(prev => !prev);
-                if (currentIndex === 0) setShowHint(false);
-            }
-            else if (e.key === 'ArrowLeft') handleNext(false);
-            else if (e.key === 'ArrowRight') handleNext(true);
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, isFinished, exitDirection, currentIndex, queue]);
-// --- LOGIC KHÓA NỀN TUYỆT ĐỐI ---
-React.useEffect(() => {
-    if (isOpen) {
-        // Khi mở Flashcard: Chặn cuộn trang
-        document.body.style.overflow = 'hidden';
-        document.body.style.height = '100vh';
-        document.body.style.touchAction = 'none'; // Chặn cuộn trên điện thoại
-    } else {
-        // Khi đóng: Trả lời trạng thái bình thường
-        document.body.style.overflow = 'unset';
-        document.body.style.height = 'auto';
-        document.body.style.touchAction = 'auto';
-    }
+        if (isOpen && text) {
+            const chars = Array.from(text).filter(c => c.trim());
+            setOriginalQueue(chars);
+            startNewSession(chars);
+            setShowHint(true);
+        }
+    }, [isOpen, text, startNewSession]);
 
-    // Hàm dọn dẹp khi tắt component đột ngột
-    // --- LOGIC TÍNH MÀU VIỀN THEO HƯỚNG VUỐT ---
-const getDynamicBorder = () => {
-    if (dragX > 70) return '#22c55e'; // Màu xanh lá khi vuốt phải đủ xa
-    if (dragX < -70) return '#ef4444'; // Màu đỏ khi vuốt trái đủ xa
-    return 'white'; // Màu trắng mặc định
-};
-const dynamicBorder = getDynamicBorder();
-    return () => {
-        document.body.style.overflow = 'unset';
-        document.body.style.height = 'auto';
-        document.body.style.touchAction = 'auto';
+    // --- 2. LOGIC TÍNH MÀU VIỀN (ĐÃ FIX: Đưa ra ngoài render body) ---
+    const getDynamicBorder = () => {
+        if (dragX > 70) return '#22c55e'; // Xanh lá khi vuốt phải
+        if (dragX < -70) return '#ef4444'; // Đỏ khi vuốt trái
+        return 'rgba(255,255,255,0.2)'; // Màu mặc định
     };
-}, [isOpen]);
-    // --- LOGIC VUỐT (SWIPE) ---
-const handleDragStart = (e) => {
-    if (exitDirection) return;
-    setIsDragging(true);
-    const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-    setStartX(clientX);
-};
+    const dynamicBorder = getDynamicBorder();
 
-const handleDragMove = (e) => {
-    if (!isDragging || exitDirection) return;
-    const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-    const currentDrag = clientX - startX;
-    setDragX(currentDrag);
-};
+    // --- 3. KHÓA CUỘN TRANG ---
+    React.useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            document.body.style.height = '100vh';
+            document.body.style.touchAction = 'none';
+        } else {
+            document.body.style.overflow = 'unset';
+            document.body.style.height = 'auto';
+            document.body.style.touchAction = 'auto';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+            document.body.style.height = 'auto';
+            document.body.style.touchAction = 'auto';
+        };
+    }, [isOpen]);
 
-const handleDragEnd = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
-
-    // Nếu vuốt qua 70px (lúc viền đã đổi màu) thì thả tay ra là thẻ tự biến mất
-    if (dragX > 70) {
-        handleNext(true); // Tự biến mất sang phải (Đã biết)
-    } else if (dragX < -70) {
-        handleNext(false); // Tự biến mất sang trái (Đang học)
-    }
-    
-    setDragX(0); // Reset vị trí nếu chưa đủ ngưỡng
-};
-    if (!isOpen || queue.length === 0) return null;
-
+    // --- 4. XỬ LÝ CHUYỂN THẺ ---
     const handleNext = (isKnown) => {
         if (exitDirection) return;
         setExitDirection(isKnown ? 'right' : 'left');
 
-        // HIỆU ỨNG SIÊU NHANH (150ms)
         setTimeout(() => {
             if (isKnown) setKnownCount(prev => prev + 1);
             else setUnknownIndices(prev => [...prev, currentIndex]);
@@ -274,22 +230,63 @@ const handleDragEnd = () => {
                 setIsFlipped(false);
                 setCurrentIndex(prev => prev + 1);
                 setExitDirection(null);
+                setDragX(0);
             } else {
                 setIsFinished(true);
             }
-        }, 150); 
+        }, 150);
     };
 
+    // --- 5. LOGIC VUỐT (SWIPE) ---
+    const handleDragStart = (e) => {
+        if (exitDirection || isFinished) return;
+        setIsDragging(true);
+        const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        setStartX(clientX);
+    };
+
+    const handleDragMove = (e) => {
+        if (!isDragging || exitDirection) return;
+        const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        setDragX(clientX - startX);
+    };
+
+    const handleDragEnd = () => {
+        if (!isDragging) return;
+        setIsDragging(false);
+        if (dragX > 70) handleNext(true);
+        else if (dragX < -70) handleNext(false);
+        else setDragX(0);
+    };
+
+    // --- 6. PHÍM TẮT ---
+    React.useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (!isOpen || isFinished || exitDirection) return;
+            if (e.code === 'Space') {
+                e.preventDefault();
+                setIsFlipped(prev => !prev);
+                if (currentIndex === 0) setShowHint(false);
+            }
+            else if (e.key === 'ArrowLeft') handleNext(false);
+            else if (e.key === 'ArrowRight') handleNext(true);
+            else if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, isFinished, exitDirection, currentIndex, queue, onClose]);
+
+    // --- 7. CÁC TIỆN ÍCH KHÁC ---
     const handleBack = (e) => {
         e.stopPropagation();
         if (currentIndex > 0) {
             const lastChoice = history[history.length - 1];
             if (lastChoice === true) setKnownCount(prev => prev - 1);
             else setUnknownIndices(prev => prev.slice(0, -1));
-
             setHistory(prev => prev.slice(0, -1));
             setCurrentIndex(prev => prev - 1);
             setIsFlipped(false);
+            setExitDirection(null);
         }
     };
 
@@ -304,13 +301,15 @@ const handleDragEnd = () => {
 
     const reviewUnknown = () => {
         const unlearnedChars = unknownIndices.map(idx => queue[idx]);
-        if (unlearnedChars.length > 0) {
-            startNewSession(unlearnedChars);
-        }
+        if (unlearnedChars.length > 0) startNewSession(unlearnedChars);
     };
 
+    if (!isOpen || queue.length === 0) return null;
+
     const currentChar = queue[currentIndex];
-    const info = dbData?.KANJI_DB?.[currentChar] || dbData?.ALPHABETS?.hiragana?.[currentChar] || dbData?.ALPHABETS?.katakana?.[currentChar] || {};
+    const info = dbData?.KANJI_DB?.[currentChar] || 
+                 dbData?.ALPHABETS?.hiragana?.[currentChar] || 
+                 dbData?.ALPHABETS?.katakana?.[currentChar] || {};
 
     const CardControls = () => (
         <div className="absolute bottom-5 left-0 right-0 px-6 flex justify-between items-center z-20 pointer-events-auto">
@@ -326,43 +325,34 @@ const handleDragEnd = () => {
     return (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl animate-in fade-in duration-200">
             <div className="w-full max-w-sm flex flex-col items-center">
-                
                 {!isFinished ? (
                     <>
-                        {/* --- THẺ 3D --- */}
-                       <div 
-    className={`relative transition-all duration-200 ease-out ${
-        exitDirection === 'left' ? '-translate-x-10 -rotate-6 opacity-0' : 
-        exitDirection === 'right' ? 'translate-x-10 rotate-6 opacity-0' : ''
-    }`}
-    style={{ 
-        transform: !exitDirection && dragX !== 0 
-            ? `translateX(${dragX}px) rotate(${dragX * 0.05}deg)` 
-            : '',
-        transition: isDragging ? 'none' : 'all 0.2s ease-out'
-    }}
->
-                           <div 
-    onClick={() => {
-        // Chỉ lật nếu người dùng chạm nhẹ (không phải đang kéo)
-        if (Math.abs(dragX) < 5) {
-            setIsFlipped(!isFlipped);
-            if (currentIndex === 0) setShowHint(false);
-        }
-    }}
-    onMouseDown={handleDragStart}
-    onMouseMove={handleDragMove}
-    onMouseUp={handleDragEnd}
-    onMouseLeave={handleDragEnd}
-    onTouchStart={handleDragStart}
-    onTouchMove={handleDragMove}
-    onTouchEnd={handleDragEnd}
-    className={`relative w-64 h-80 cursor-pointer transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
->
+                        <div 
+                            className={`relative transition-all duration-200 ease-out ${
+                                exitDirection === 'left' ? '-translate-x-10 -rotate-6 opacity-0' : 
+                                exitDirection === 'right' ? 'translate-x-10 rotate-6 opacity-0' : ''
+                            }`}
+                            style={{ 
+                                transform: !exitDirection && dragX !== 0 ? `translateX(${dragX}px) rotate(${dragX * 0.05}deg)` : '',
+                                transition: isDragging ? 'none' : 'all 0.2s ease-out'
+                            }}
+                        >
+                            <div 
+                                onClick={() => { if (Math.abs(dragX) < 5) { setIsFlipped(!isFlipped); if (currentIndex === 0) setShowHint(false); } }}
+                                onMouseDown={handleDragStart}
+                                onMouseMove={handleDragMove}
+                                onMouseUp={handleDragEnd}
+                                onMouseLeave={handleDragEnd}
+                                onTouchStart={handleDragStart}
+                                onTouchMove={handleDragMove}
+                                onTouchEnd={handleDragEnd}
+                                className={`relative w-64 h-80 cursor-pointer transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
+                            >
+                                {/* MẶT TRƯỚC */}
                                 <div 
-    className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center border-4 [backface-visibility:hidden] overflow-hidden"
-    style={{ borderColor: isDragging ? dynamicBorder : 'white' }}
->
+                                    className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center border-4 [backface-visibility:hidden] overflow-hidden"
+                                    style={{ borderColor: isDragging ? dynamicBorder : 'white' }}
+                                >
                                     <span className="text-8xl font-['Klee_One'] text-gray-800 leading-none transform -translate-y-5">{currentChar}</span>
                                     {currentIndex === 0 && showHint && (
                                         <p className="absolute bottom-14 text-indigo-400 text-[7px] font-black uppercase tracking-[0.4em] animate-pulse">Chạm để lật</p>
@@ -370,10 +360,11 @@ const handleDragEnd = () => {
                                     <CardControls />
                                 </div>
 
+                                {/* MẶT SAU */}
                                 <div 
-    className="absolute inset-0 bg-indigo-600 rounded-[2rem] shadow-2xl flex flex-col items-center justify-center p-6 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] border-4 overflow-hidden text-center"
-    style={{ borderColor: isDragging ? dynamicBorder : 'rgba(255,255,255,0.2)' }}
->
+                                    className="absolute inset-0 bg-indigo-600 rounded-[2rem] shadow-2xl flex flex-col items-center justify-center p-6 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] border-4 overflow-hidden text-center"
+                                    style={{ borderColor: isDragging ? dynamicBorder : 'rgba(255,255,255,0.2)' }}
+                                >
                                     <div className="flex-1 flex flex-col items-center justify-center w-full transform -translate-y-3">
                                         <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter leading-tight">{info.sound || '---'}</h3>
                                         <p className="text-base opacity-90 font-medium italic leading-snug px-2">{info.meaning || ''}</p>
@@ -383,71 +374,44 @@ const handleDragEnd = () => {
                             </div>
                         </div>
 
-                        {/* --- THANH TIẾN ĐỘ --- */}
+                        {/* PROGRESS BAR */}
                         <div className="w-64 mt-8 mb-6 relative h-6 flex items-center">
                             <div className="w-full h-1 bg-white/10 rounded-full relative">
-                                {/* Khung số tổng */}
                                 <div className="absolute right-0 top-1/2 -translate-y-1/2 h-5 min-w-[24px] rounded-md flex items-center justify-center bg-white">
-                             <span className="text-[9px] font-black text-black uppercase">{queue.length}</span>
+                                    <span className="text-[9px] font-black text-black uppercase">{queue.length}</span>
                                 </div>
-                                
-                                {/* Nút chạy (Xanh lá tỏa sáng, số màu trắng) */}
                                 <div 
-    className="absolute top-1/2 -translate-y-1/2 h-5 min-w-[24px] px-1 bg-sky-400 rounded-md flex items-center justify-center shadow-[0_0_15px_rgba(56,189,248,0.8)] transition-all duration-150 ease-out z-10"
-    style={{ 
-        left: `calc(${(currentIndex / (queue.length - 1 || 1)) * 100}% - ${currentIndex === queue.length - 1 ? '24px' : '0px'})` 
-    }}
->
-    <span className="text-[9px] font-black text-white leading-none">{currentIndex + 1}</span>
-</div>
+                                    className="absolute top-1/2 -translate-y-1/2 h-5 min-w-[24px] px-1 bg-sky-400 rounded-md flex items-center justify-center shadow-[0_0_15px_rgba(56,189,248,0.8)] transition-all duration-150 ease-out z-10"
+                                    style={{ left: `calc(${(currentIndex / (queue.length - 1 || 1)) * 100}% - ${currentIndex === queue.length - 1 ? '24px' : '0px'})` }}
+                                >
+                                    <span className="text-[9px] font-black text-white">{currentIndex + 1}</span>
+                                </div>
                             </div>
                         </div>
 
-                        {/* --- CỤM NÚT --- */}
+                        {/* NÚT ĐIỀU KHIỂN DƯỚI */}
                         <div className="flex gap-3 w-full px-8">
-                            <button 
-                                onClick={() => handleNext(false)}
-                                className="flex-1 py-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 rounded-xl font-black text-[10px] transition-all active:scale-95 flex items-center justify-center gap-2 uppercase"
-                            >
-                                ĐANG HỌC
-                                <span className="bg-red-600 text-white min-w-[20px] px-1.5 h-4.5 rounded-md flex items-center justify-center text-[8px] font-bold shadow-sm">
-                                    {unknownIndices.length}
-                                </span>
+                            <button onClick={() => handleNext(false)} className="flex-1 py-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 rounded-xl font-black text-[10px] transition-all active:scale-95 flex items-center justify-center gap-2 uppercase">
+                                ĐANG HỌC <span className="bg-red-600 text-white min-w-[20px] px-1.5 h-4.5 rounded-md flex items-center justify-center text-[8px] font-bold">{unknownIndices.length}</span>
                             </button>
-                            <button 
-                                onClick={() => handleNext(true)}
-                                className="flex-1 py-2.5 bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white border border-green-500/20 rounded-xl font-black text-[10px] transition-all active:scale-95 flex items-center justify-center gap-2 uppercase"
-                            >
-                                ĐÃ BIẾT
-                                <span className="bg-green-600 text-white min-w-[20px] px-1.5 h-4.5 rounded-md flex items-center justify-center text-[8px] font-bold shadow-sm">
-                                    {knownCount}
-                                </span>
+                            <button onClick={() => handleNext(true)} className="flex-1 py-2.5 bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white border border-green-500/20 rounded-xl font-black text-[10px] transition-all active:scale-95 flex items-center justify-center gap-2 uppercase">
+                                ĐÃ BIẾT <span className="bg-green-600 text-white min-w-[20px] px-1.5 h-4.5 rounded-md flex items-center justify-center text-[8px] font-bold">{knownCount}</span>
                             </button>
                         </div>
 
-                        <button onClick={onClose} className="mt-8 text-white/20 hover:text-red-400 transition-colors text-[8px] font-black uppercase tracking-widest">
-                            Đóng [ESC]
-                        </button>
+                        <button onClick={onClose} className="mt-8 text-white/20 hover:text-red-400 transition-colors text-[8px] font-black uppercase tracking-widest">Đóng [ESC]</button>
                     </>
                 ) : (
-                    /* --- MÀN HÌNH KẾT THÚC --- */
                     <div className="bg-white rounded-[2rem] p-8 w-full max-w-[280px] text-center shadow-2xl animate-in zoom-in-95 border-4 border-indigo-50 font-sans">
                         <div className="text-5xl mb-4">🏁</div>
                         <h3 className="text-lg font-black text-gray-800 mb-1 uppercase">Hoàn thành</h3>
                         <p className="text-gray-400 mb-6 text-[11px] font-medium italic">Bạn đã thuộc {knownCount}/{queue.length} chữ.</p>
-                        
                         <div className="space-y-2">
                             {unknownIndices.length > 0 && (
-                                <button onClick={reviewUnknown} className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-[11px] shadow-lg active:scale-95 transition-all">
-                                    ÔN LẠI {unknownIndices.length} THẺ ĐANG HỌC
-                                </button>
+                                <button onClick={reviewUnknown} className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-[11px] shadow-lg active:scale-95 transition-all">ÔN LẠI {unknownIndices.length} THẺ ĐANG HỌC</button>
                             )}
-                            <button onClick={() => startNewSession(originalQueue)} className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-black text-[11px] hover:bg-gray-200 active:scale-95 transition-all">
-                                HỌC LẠI TỪ ĐẦU
-                            </button>
-                            <button onClick={onClose} className="w-full py-3 text-gray-400 font-bold hover:text-red-500 transition-all text-[11px] uppercase tracking-wide">
-                                THOÁT
-                            </button>
+                            <button onClick={() => startNewSession(originalQueue)} className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-black text-[11px] hover:bg-gray-200 active:scale-95 transition-all">HỌC LẠI TỪ ĐẦU</button>
+                            <button onClick={onClose} className="w-full py-3 text-gray-400 font-bold hover:text-red-500 transition-all text-[11px] uppercase tracking-wide">THOÁT</button>
                         </div>
                     </div>
                 )}
