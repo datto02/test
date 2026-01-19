@@ -2,7 +2,7 @@
       
 /* --- TRACING STYLE --- */
 .kanji-trace {
-font-family: 'Klee One', 'KanjiStrokeOrders', 'UD_Digi_Kyokasho', 'Noto_Serif_JP', serif;
+font-family: 'UD_Digi_Kyokasho', 'Klee One', 'KanjiStrokeOrders', 'Noto_Serif_JP', serif;
 color: #bfbfbf; 
 -webkit-text-stroke: 0px white; 
 paint-order: stroke fill;
