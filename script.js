@@ -157,9 +157,19 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
     const [currentIndex, setCurrentIndex] = React.useState(0);
     const [isFlipped, setIsFlipped] = React.useState(false);
     const [unknownIndices, setUnknownIndices] = React.useState([]);
+    const [knownCount, setKnownCount] = React.useState(0); // Bộ đếm đã thuộc
     const [isFinished, setIsFinished] = React.useState(false);
 
-    // Khởi tạo danh sách học
+    // --- 1. KHỞI TẠO & XÁO TRỘN ---
+    const shuffleArray = (array) => {
+        const newArr = [...array];
+        for (let i = newArr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+        }
+        return newArr;
+    };
+
     React.useEffect(() => {
         if (isOpen && text) {
             const chars = Array.from(text).filter(c => c.trim());
@@ -167,18 +177,41 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
             setCurrentIndex(0);
             setIsFlipped(false);
             setUnknownIndices([]);
+            setKnownCount(0);
             setIsFinished(false);
         }
     }, [isOpen, text]);
-    
+
+    // --- 2. XỬ LÝ PHÍM TẮT ---
+    React.useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (!isOpen || isFinished) return;
+
+            if (e.code === 'Space') {
+                e.preventDefault();
+                setIsFlipped(prev => !prev);
+            } else if (e.key === 'ArrowLeft') {
+                handleNext(false);
+            } else if (e.key === 'ArrowRight') {
+                handleNext(true);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, isFinished, currentIndex]);
+
     if (!isOpen || queue.length === 0) return null;
 
     const currentChar = queue[currentIndex];
     const info = dbData?.KANJI_DB?.[currentChar] || dbData?.ALPHABETS?.hiragana?.[currentChar] || dbData?.ALPHABETS?.katakana?.[currentChar] || {};
     const readings = dbData?.ONKUN_DB?.[currentChar] || {};
 
+    // --- 3. LOGIC ĐIỀU HƯỚNG ---
     const handleNext = (isKnown) => {
-        if (!isKnown) {
+        if (isKnown) {
+            setKnownCount(prev => prev + 1);
+        } else {
             setUnknownIndices(prev => [...prev, currentIndex]);
         }
         
@@ -190,52 +223,80 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         }
     };
 
-    const restartAll = () => {
-        setCurrentIndex(0);
-        setIsFlipped(false);
-        setUnknownIndices([]);
-        setIsFinished(false);
+    const handleBack = () => {
+        if (currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1);
+            setIsFlipped(false);
+            // Lưu ý: Logic này đơn giản hóa việc quay lại, không trừ bộ đếm để tránh phức tạp hóa trạng thái
+        }
     };
 
-    const reviewUnknown = () => {
-        const newQueue = unknownIndices.map(idx => queue[idx]);
-        setQueue(newQueue);
+    const handleShuffle = () => {
+        const shuffled = shuffleArray(queue);
+        setQueue(shuffled);
         setCurrentIndex(0);
+        setIsFlipped(false);
+        setKnownCount(0);
+        setUnknownIndices([]);
+    };
+
+    const restartAll = () => {
+        setCurrentIndex(0);
+        setKnownCount(0);
         setIsFlipped(false);
         setUnknownIndices([]);
         setIsFinished(false);
     };
 
     return (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-            <div className="w-full max-w-sm p-6 flex flex-col items-center">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/90 backdrop-blur-md animate-in fade-in duration-300">
+            <div className="w-full max-w-sm p-6 flex flex-col items-center relative h-full justify-center">
                 
-                {/* Header: Tiến độ */}
+                {/* --- HEADER: BỘ ĐẾM --- */}
                 {!isFinished && (
-                    <div className="w-full flex justify-between items-center mb-8 text-white/60 text-sm font-bold">
-                        <span>THẺ {currentIndex + 1} / {queue.length}</span>
-                        <button onClick={onClose} className="hover:text-white">ĐÓNG [X]</button>
+                    <div className="absolute top-10 w-full px-6 flex justify-between items-center">
+                        {/* Số thẻ chưa biết (Đỏ) */}
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-red-500/20">
+                                {unknownIndices.length}
+                            </div>
+                            <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Chưa thuộc</span>
+                        </div>
+
+                        {/* Số thẻ đã biết (Xanh) */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Đã thuộc</span>
+                            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-green-500/20">
+                                {knownCount}
+                            </div>
+                        </div>
                     </div>
+                )}
+
+                {/* --- NÚT ĐÓNG --- */}
+                {!isFinished && (
+                    <button onClick={onClose} className="absolute top-24 text-white/20 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-[0.2em]">
+                        Dừng học [X]
+                    </button>
                 )}
 
                 {!isFinished ? (
                     <>
-                        {/* Thẻ Flashcard */}
+                        {/* --- THẺ FLASHCARD --- */}
                         <div 
                             onClick={() => setIsFlipped(!isFlipped)}
                             className={`relative w-72 h-96 cursor-pointer transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
                         >
-                            {/* Mặt trước: Chữ Kanji */}
+                            {/* Mặt trước */}
                             <div className="absolute inset-0 bg-white rounded-3xl shadow-2xl flex items-center justify-center border-4 border-indigo-100 [backface-visibility:hidden]">
                                 <span className="text-8xl font-['Klee_One'] text-gray-800">{currentChar}</span>
-                                <p className="absolute bottom-6 text-gray-300 text-xs font-bold uppercase tracking-widest">Chạm để lật</p>
+                                <p className="absolute bottom-6 text-gray-300 text-[10px] font-bold uppercase tracking-[0.3em]">Chạm hoặc Space</p>
                             </div>
 
-                            {/* Mặt sau: Thông tin */}
+                            {/* Mặt sau */}
                             <div className="absolute inset-0 bg-indigo-600 rounded-3xl shadow-2xl flex flex-col items-center justify-center p-6 text-white [backface-visibility:hidden] [transform:rotateY(180deg)]">
                                 <h3 className="text-4xl font-bold mb-2 uppercase">{info.sound || '---'}</h3>
                                 <p className="text-xl opacity-90 mb-6 font-medium">{info.meaning || ''}</p>
-                                
                                 <div className="w-full space-y-3 pt-4 border-t border-white/20">
                                     {readings.readings_on && (
                                         <div>
@@ -253,41 +314,49 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                             </div>
                         </div>
 
-                        {/* Nút điều khiển */}
-                        <div className="flex gap-4 mt-10 w-full">
+                        {/* --- NÚT ĐIỀU HƯỚNG --- */}
+                        <div className="flex gap-4 mt-10 w-full px-4">
                             <button 
                                 onClick={() => handleNext(false)}
-                                className="flex-1 py-4 bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/50 rounded-2xl font-bold transition-all active:scale-95"
+                                className="flex-1 py-4 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/50 rounded-2xl font-bold transition-all active:scale-95 text-xs"
                             >
-                                CHƯA THUỘC
+                                ← CHƯA THUỘC
                             </button>
                             <button 
                                 onClick={() => handleNext(true)}
-                                className="flex-1 py-4 bg-green-500/20 hover:bg-green-500 text-green-500 hover:text-white border border-green-500/50 rounded-2xl font-bold transition-all active:scale-95"
+                                className="flex-1 py-4 bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white border border-green-500/50 rounded-2xl font-bold transition-all active:scale-95 text-xs"
                             >
-                                ĐÃ THUỘC
+                                ĐÃ THUỘC →
+                            </button>
+                        </div>
+
+                        {/* --- NÚT GÓC DƯỚI PHẢI (QUAY LẠI + XÁO TRỘN) --- */}
+                        <div className="absolute bottom-10 right-10 flex gap-3">
+                            <button 
+                                onClick={handleBack}
+                                title="Quay lại thẻ trước"
+                                className="w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-all active:scale-90"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h12a5 5 0 0 1 0 10H7"/></svg>
+                            </button>
+                            <button 
+                                onClick={handleShuffle}
+                                title="Xáo trộn danh sách"
+                                className="w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-all active:scale-90"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
                             </button>
                         </div>
                     </>
                 ) : (
-                    /* Màn hình kết thúc vòng học */
+                    /* --- MÀN HÌNH KẾT THÚC --- */
                     <div className="bg-white rounded-3xl p-8 w-full text-center shadow-2xl animate-in zoom-in-95">
-                        <div className="text-5xl mb-4">🎉</div>
-                        <h3 className="text-2xl font-black text-gray-800 mb-2">HOÀN THÀNH!</h3>
-                        <p className="text-gray-500 mb-6">Bạn đã thuộc <b>{queue.length - unknownIndices.length}</b>/{queue.length} chữ.</p>
-                        
+                        <div className="text-5xl mb-4">✨</div>
+                        <h3 className="text-2xl font-black text-gray-800 mb-2">XUẤT SẮC!</h3>
+                        <p className="text-gray-500 mb-6 text-sm">Bạn đã hoàn thành phiên học.</p>
                         <div className="space-y-3">
-                            {unknownIndices.length > 0 && (
-                                <button onClick={reviewUnknown} className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-100 active:scale-95 transition-all">
-                                    ÔN LẠI {unknownIndices.length} CHỮ CHƯA THUỘC
-                                </button>
-                            )}
-                            <button onClick={restartAll} className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 active:scale-95 transition-all">
-                                HỌC LẠI TỪ ĐẦU
-                            </button>
-                            <button onClick={onClose} className="w-full py-3 text-gray-400 font-bold hover:text-gray-600 transition-all">
-                                THOÁT
-                            </button>
+                            <button onClick={restartAll} className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold active:scale-95 transition-all">HỌC LẠI TỪ ĐẦU</button>
+                            <button onClick={onClose} className="w-full py-3 text-gray-400 font-bold hover:text-gray-600 transition-all">THOÁT</button>
                         </div>
                     </div>
                 )}
