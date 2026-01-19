@@ -159,16 +159,16 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
     const [isFlipped, setIsFlipped] = React.useState(false);
     const [unknownIndices, setUnknownIndices] = React.useState([]);
     const [knownCount, setKnownCount] = React.useState(0);
-    const [history, setHistory] = React.useState([]);
+    const [history, setHistory] = React.useState([]); // Lưu lại lịch sử đúng/sai để quay lại
     const [isFinished, setIsFinished] = React.useState(false);
     const [exitDirection, setExitDirection] = React.useState(null);
     const [showHint, setShowHint] = React.useState(true);
     const [dragX, setDragX] = React.useState(0); 
     const [startX, setStartX] = React.useState(0); 
     const [isDragging, setIsDragging] = React.useState(false);
-    const [btnFeedback, setBtnFeedback] = React.useState(null); // 'right' hoặc 'left'
+    const [btnFeedback, setBtnFeedback] = React.useState(null);
 
-    // --- LOGIC CƠ BẢN ---
+    // --- KHỞI TẠO ---
     const startNewSession = React.useCallback((chars) => {
         setQueue(chars);
         setCurrentIndex(0);
@@ -191,29 +191,17 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         }
     }, [isOpen, text, startNewSession]);
 
-    // Khóa cuộn trang
-    React.useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-            document.body.style.height = '100vh';
-        } else {
-            document.body.style.overflow = 'unset';
-            document.body.style.height = 'auto';
-        }
-        return () => { document.body.style.overflow = 'unset'; };
-    }, [isOpen]);
-
-    // --- LOGIC CHUYỂN THẺ ---
+    // --- LOGIC ĐIỀU HƯỚNG ---
     const handleNext = (isKnown) => {
         if (exitDirection) return;
         
-        // Tạo hiệu ứng màu viền khi bấm nút
         setBtnFeedback(isKnown ? 'right' : 'left');
         setExitDirection(isKnown ? 'right' : 'left');
 
         setTimeout(() => {
             if (isKnown) setKnownCount(prev => prev + 1);
             else setUnknownIndices(prev => [...prev, currentIndex]);
+            
             setHistory(prev => [...prev, isKnown]);
 
             if (currentIndex < queue.length - 1) {
@@ -229,28 +217,38 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
     };
 
     const handleBack = (e) => {
-        e.stopPropagation();
+        if (e) e.stopPropagation(); // Ngăn lật thẻ khi bấm nút
         if (currentIndex > 0) {
-            const lastChoice = history[history.length - 1];
-            if (lastChoice === true) setKnownCount(prev => prev - 1);
+            const lastIsKnown = history[history.length - 1];
+            
+            // Hoàn tác dữ liệu cũ
+            if (lastIsKnown === true) setKnownCount(prev => prev - 1);
             else setUnknownIndices(prev => prev.slice(0, -1));
+
             setHistory(prev => prev.slice(0, -1));
             setCurrentIndex(prev => prev - 1);
             setIsFlipped(false);
             setExitDirection(null);
+            setDragX(0);
+            setBtnFeedback(null);
         }
     };
 
     const handleShuffle = (e) => {
-        e.stopPropagation();
-        const past = queue.slice(0, currentIndex);
-        const remaining = queue.slice(currentIndex);
-        const shuffledRemaining = [...remaining].sort(() => Math.random() - 0.5);
-        setQueue([...past, ...shuffledRemaining]);
+        if (e) e.stopPropagation(); // Ngăn lật thẻ khi bấm nút
+        const current = queue[currentIndex];
+        const remaining = queue.slice(currentIndex + 1);
+        const shuffled = [...remaining].sort(() => Math.random() - 0.5);
+        setQueue([...queue.slice(0, currentIndex), current, ...shuffled]);
         setIsFlipped(false);
     };
 
-    // --- LOGIC VUỐT & CHẠM ---
+    const toggleFlip = () => {
+        setIsFlipped(!isFlipped);
+        if (currentIndex === 0) setShowHint(false);
+    };
+
+    // --- XỬ LÝ VUỐT ---
     const handleDragStart = (e) => {
         if (exitDirection || isFinished) return;
         setIsDragging(true);
@@ -272,38 +270,30 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         else setDragX(0);
     };
 
-    const toggleFlip = (e) => {
-        if (e) e.stopPropagation();
-        setIsFlipped(!isFlipped);
-        if (currentIndex === 0) setShowHint(false);
-    };
-
-    // --- RENDER HELPERS ---
+    // --- GIAO DIỆN ---
     const dynamicBorder = () => {
-        if (dragX > 70 || btnFeedback === 'right') return '#22c55e'; // Xanh
-        if (dragX < -70 || btnFeedback === 'left') return '#ef4444'; // Đỏ
+        if (dragX > 70 || btnFeedback === 'right') return '#22c55e';
+        if (dragX < -70 || btnFeedback === 'left') return '#ef4444';
         return 'white'; 
     };
 
     const CardControls = () => (
-        <div className="absolute bottom-5 left-0 right-0 px-6 flex justify-between items-center z-20 pointer-events-auto">
-            <button onClick={handleBack} title="Quay lại" className="p-2.5 bg-black/5 hover:bg-black/10 rounded-full transition-colors text-gray-400 hover:text-gray-700">
+        <div className="absolute bottom-5 left-0 right-0 px-6 flex justify-between items-center z-20">
+            <button 
+                onClick={handleBack} 
+                className="p-2.5 bg-black/5 hover:bg-black/10 active:scale-90 rounded-full transition-all text-gray-400 hover:text-gray-700"
+                title="Quay lại"
+            >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M9 14 4 9l5-5"/><path d="M4 9h12a5 5 0 0 1 0 10H7"/></svg>
             </button>
-            <button onClick={handleShuffle} title="Trộn thẻ còn lại" className="p-2.5 bg-black/5 hover:bg-black/10 rounded-full transition-colors text-gray-400 hover:text-gray-700">
+            <button 
+                onClick={handleShuffle} 
+                className="p-2.5 bg-black/5 hover:bg-black/10 active:scale-90 rounded-full transition-all text-gray-400 hover:text-gray-700"
+                title="Trộn thẻ còn lại"
+            >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
             </button>
         </div>
-    );
-
-    const MobileFlipBtn = () => (
-        <button 
-            onClick={toggleFlip}
-            className="md:hidden absolute top-4 right-4 z-30 p-2 bg-black/5 rounded-lg text-black/20 flex flex-col items-center"
-        >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
-            <span className="text-[7px] font-black uppercase mt-0.5">Lật</span>
-        </button>
     );
 
     if (!isOpen || queue.length === 0) return null;
@@ -316,7 +306,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
             <div className="w-full max-w-sm flex flex-col items-center">
                 {!isFinished ? (
                     <>
-                        {/* THẺ FLASHCARD */}
+                        {/* KHUNG THẺ 3D */}
                         <div 
                             className={`relative transition-all duration-200 ease-out ${
                                 exitDirection === 'left' ? '-translate-x-10 -rotate-6 opacity-0' : 
@@ -328,7 +318,10 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                             }}
                         >
                             <div 
-                                onClick={() => { if (window.innerWidth >= 768) toggleFlip(); }}
+                                onClick={(e) => {
+                                    // Chỉ lật nếu không phải đang kéo (drag)
+                                    if (Math.abs(dragX) < 5) toggleFlip();
+                                }}
                                 onMouseDown={handleDragStart}
                                 onMouseMove={handleDragMove}
                                 onMouseUp={handleDragEnd}
@@ -338,39 +331,38 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                                 onTouchEnd={handleDragEnd}
                                 className={`relative w-64 h-80 cursor-pointer transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
                             >
-                                {/* MẶT TRƯỚC */}
+                                {/* MẶT TRƯỚC (KANJI) */}
                                 <div 
                                     className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center border-4 [backface-visibility:hidden] overflow-hidden"
                                     style={{ borderColor: dynamicBorder() }}
                                 >
-                                    <MobileFlipBtn />
-                                    <span className="text-8xl font-['Klee_One'] text-gray-800 leading-none transform -translate-y-5">{currentChar}</span>
+                                    <span className="text-8xl font-['Klee_One'] text-gray-800 transform -translate-y-5">{currentChar}</span>
                                     {currentIndex === 0 && showHint && (
-                                        <p className="absolute bottom-14 text-indigo-400 text-[7px] font-black uppercase tracking-[0.4em] animate-pulse">Lật để xem nghĩa</p>
+                                        <p className="absolute bottom-14 text-indigo-400 text-[7px] font-black uppercase tracking-[0.4em] animate-pulse">Chạm để lật</p>
                                     )}
+                                    {/* NÚT ĐIỀU KHIỂN CHỈ CÓ Ở MẶT TRƯỚC */}
                                     <CardControls />
                                 </div>
 
-                                {/* MẶT SAU */}
+                                {/* MẶT SAU (NGHĨA) */}
                                 <div 
                                     className="absolute inset-0 bg-indigo-600 rounded-[2rem] shadow-2xl flex flex-col items-center justify-center p-6 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] border-4 overflow-hidden text-center"
                                     style={{ borderColor: dynamicBorder() }}
                                 >
-                                    <MobileFlipBtn />
                                     <div className="flex-1 flex flex-col items-center justify-center w-full transform -translate-y-3">
                                         <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter leading-tight">{info.sound || '---'}</h3>
                                         <p className="text-base opacity-90 font-medium italic leading-snug px-2">{info.meaning || ''}</p>
                                     </div>
-                                    <CardControls />
+                                    {/* Không có nút CardControls ở mặt sau theo yêu cầu */}
                                 </div>
                             </div>
                         </div>
 
-                        {/* THANH TIẾN ĐỘ & SỐ TỔNG */}
+                        {/* THANH TIẾN ĐỘ */}
                         <div className="w-64 mt-8 mb-6 relative h-6 flex items-center">
                             <div className="w-full h-1 bg-white/10 rounded-full relative">
-                                <div className="absolute right-0 top-1/2 -translate-y-1/2 h-5 min-w-[24px] rounded-md flex items-center justify-center bg-white shadow-sm">
-                                    <span className="text-[9px] font-black text-black uppercase">{queue.length}</span>
+                                <div className="absolute right-0 top-1/2 -translate-y-1/2 h-5 min-w-[24px] rounded-md flex items-center justify-center bg-white">
+                                    <span className="text-[9px] font-black text-black">{queue.length}</span>
                                 </div>
                                 <div 
                                     className="absolute top-1/2 -translate-y-1/2 h-5 min-w-[24px] px-1 bg-sky-400 rounded-md flex items-center justify-center shadow-[0_0_15px_rgba(56,189,248,0.8)] transition-all duration-150 ease-out z-10"
@@ -381,14 +373,14 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                             </div>
                         </div>
 
-                        {/* CỤM NÚT (Có số đã biết/chưa biết) */}
+                        {/* NÚT CHỨC NĂNG DƯỚI */}
                         <div className="flex gap-3 w-full px-8">
                             <button 
                                 onClick={() => handleNext(false)}
                                 className="flex-1 py-3 bg-red-500/10 active:bg-red-500 text-red-500 active:text-white border border-red-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase"
                             >
                                 ĐANG HỌC
-                                <span className="bg-red-600 text-white min-w-[18px] h-4 px-1 rounded flex items-center justify-center text-[8px]">
+                                <span className="bg-red-600 text-white min-w-[18px] h-4 rounded flex items-center justify-center text-[8px]">
                                     {unknownIndices.length}
                                 </span>
                             </button>
@@ -397,34 +389,32 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                                 className="flex-1 py-3 bg-green-500/10 active:bg-green-500 text-green-500 active:text-white border border-green-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase"
                             >
                                 ĐÃ BIẾT
-                                <span className="bg-green-600 text-white min-w-[18px] h-4 px-1 rounded flex items-center justify-center text-[8px]">
+                                <span className="bg-green-600 text-white min-w-[18px] h-4 rounded flex items-center justify-center text-[8px]">
                                     {knownCount}
                                 </span>
                             </button>
                         </div>
 
-                        <button onClick={onClose} className="mt-10 text-white/20 active:text-red-400 transition-colors text-[10px] font-black uppercase tracking-widest px-4 py-2">
-                            Đóng Flashcard
+                        <button onClick={onClose} className="mt-8 text-white/20 hover:text-red-400 transition-colors text-[9px] font-black uppercase tracking-widest">
+                            Đóng [ESC]
                         </button>
                     </>
                 ) : (
-                    /* MÀN HÌNH KẾT THÚC */
+                    /* KẾT THÚC */
                     <div className="bg-white rounded-[2rem] p-8 w-full max-w-[280px] text-center shadow-2xl border-4 border-indigo-50">
                         <div className="text-5xl mb-4 animate-bounce">🎉</div>
                         <h3 className="text-lg font-black text-gray-800 mb-1 uppercase">Hoàn thành</h3>
-                        <p className="text-gray-400 mb-6 text-[11px] font-medium italic">Bạn đã thuộc {knownCount}/{queue.length} chữ.</p>
+                        <p className="text-gray-400 mb-6 text-[11px] font-medium italic">Bạn đã học được {knownCount}/{queue.length} chữ.</p>
                         <div className="space-y-2">
                             {unknownIndices.length > 0 && (
-                                <button onClick={() => startNewSession(unknownIndices.map(idx => queue[idx]))} className="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-black text-[11px] shadow-lg active:scale-95 transition-all">
+                                <button onClick={() => startNewSession(unknownIndices.map(idx => queue[idx]))} className="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-black text-[11px] shadow-lg active:scale-95">
                                     ÔN LẠI {unknownIndices.length} THẺ ĐANG HỌC
                                 </button>
                             )}
-                            <button onClick={() => startNewSession(originalQueue)} className="w-full py-3.5 bg-gray-100 text-gray-700 rounded-xl font-black text-[11px] active:scale-95 transition-all">
+                            <button onClick={() => startNewSession(originalQueue)} className="w-full py-3.5 bg-gray-100 text-gray-700 rounded-xl font-black text-[11px] active:scale-95">
                                 HỌC LẠI TỪ ĐẦU
                             </button>
-                            <button onClick={onClose} className="w-full py-3.5 text-gray-400 font-bold text-[11px] uppercase tracking-widest">
-                                THOÁT
-                            </button>
+                            <button onClick={onClose} className="w-full py-3.5 text-gray-400 font-bold text-[11px] uppercase tracking-widest">THOÁT</button>
                         </div>
                     </div>
                 )}
