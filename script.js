@@ -206,7 +206,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         if (exitDirection) return;
         setExitDirection(isKnown ? 'right' : 'left');
 
-        // GIẢM THỜI GIAN CHỜ XUỐNG 200ms ĐỂ NHANH HƠN
+        // ĐẨY NHANH TỐC ĐỘ: Giảm xuống 150ms để cực nhạy
         setTimeout(() => {
             if (isKnown) setKnownCount(prev => prev + 1);
             else setUnknownIndices(prev => [...prev, currentIndex]);
@@ -220,7 +220,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
             } else {
                 setIsFinished(true);
             }
-        }, 200); 
+        }, 150); 
     };
 
     const handleBack = (e) => {
@@ -272,10 +272,10 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                 
                 {!isFinished ? (
                     <>
-                        {/* --- THẺ 3D (Tăng tốc độ duration-200) --- */}
-                        <div className={`relative transition-all duration-200 ease-out ${
-                            exitDirection === 'left' ? '-translate-x-12 -rotate-6 opacity-0' : 
-                            exitDirection === 'right' ? 'translate-x-12 rotate-6 opacity-0' : ''
+                        {/* --- THẺ 3D (Tốc độ duration-150) --- */}
+                        <div className={`relative transition-all duration-150 ease-out ${
+                            exitDirection === 'left' ? '-translate-x-10 -rotate-6 opacity-0' : 
+                            exitDirection === 'right' ? 'translate-x-10 rotate-6 opacity-0' : ''
                         }`}>
                             <div 
                                 onClick={() => {
@@ -284,7 +284,6 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                                 }}
                                 className={`relative w-64 h-80 cursor-pointer transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
                             >
-                                {/* MẶT TRƯỚC: Kanji dịch lên trên -translate-y-5 */}
                                 <div className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center border-4 border-white [backface-visibility:hidden] overflow-hidden">
                                     <span className="text-8xl font-['Klee_One'] text-gray-800 leading-none transform -translate-y-5">{currentChar}</span>
                                     {currentIndex === 0 && showHint && (
@@ -293,7 +292,6 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                                     <CardControls />
                                 </div>
 
-                                {/* MẶT SAU: Thông tin cũng dịch lên chút để cân đối */}
                                 <div className="absolute inset-0 bg-indigo-600 rounded-[2rem] shadow-2xl flex flex-col items-center justify-center p-6 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] border-4 border-white/20 overflow-hidden text-center">
                                     <div className="flex-1 flex flex-col items-center justify-center w-full transform -translate-y-3">
                                         <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter leading-tight">{info.sound || '---'}</h3>
@@ -304,21 +302,22 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                             </div>
                         </div>
 
-                        {/* --- THANH TIẾN ĐỘ: Fix đè khớp số cuối --- */}
+                        {/* --- THANH TIẾN ĐỘ: Fix bao trọn số cuối --- */}
                         <div className="w-64 mt-8 mb-6 relative h-6 flex items-center">
                             <div className="w-full h-1 bg-white/10 rounded-full relative">
-                                {/* Con số tổng ở cuối thanh */}
-                                <span className="absolute right-0 top-1/2 -translate-y-1/2 text-[8px] font-black text-white/30 uppercase z-0 pr-1">
-                                    {queue.length}
-                                </span>
-                                {/* Thumb di chuyển */}
+                                {/* Khung số tổng cố định ở cuối */}
+                                <div className="absolute right-0 top-1/2 -translate-y-1/2 h-5 min-w-[24px] rounded-md flex items-center justify-center border border-white/5">
+                                    <span className="text-[9px] font-black text-white/30 uppercase">{queue.length}</span>
+                                </div>
+                                
+                                {/* Nút chạy (Khung trắng cùng kích thước) */}
                                 <div 
-                                    className="absolute top-1/2 -translate-y-1/2 h-5 min-w-[22px] px-1.5 bg-indigo-500 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(99,102,241,0.6)] transition-all duration-200 ease-out z-10"
+                                    className="absolute top-1/2 -translate-y-1/2 h-5 min-w-[24px] px-1 bg-white rounded-md flex items-center justify-center shadow-lg transition-all duration-150 ease-out z-10"
                                     style={{ 
-                                        left: `calc(${(currentIndex / (queue.length - 1 || 1)) * 100}% - ${currentIndex === queue.length - 1 ? '22px' : '11px'})` 
+                                        left: `calc(${(currentIndex / (queue.length - 1 || 1)) * 100}% - ${currentIndex === queue.length - 1 ? '24px' : '0px'})` 
                                     }}
                                 >
-                                    <span className="text-[9px] font-black text-white leading-none">{currentIndex + 1}</span>
+                                    <span className="text-[9px] font-black text-indigo-600 leading-none">{currentIndex + 1}</span>
                                 </div>
                             </div>
                         </div>
