@@ -198,7 +198,27 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, isFinished, exitDirection, currentIndex, queue]);
+// --- LOGIC KHÓA NỀN TUYỆT ĐỐI ---
+React.useEffect(() => {
+    if (isOpen) {
+        // Khi mở Flashcard: Chặn cuộn trang
+        document.body.style.overflow = 'hidden';
+        document.body.style.height = '100vh';
+        document.body.style.touchAction = 'none'; // Chặn cuộn trên điện thoại
+    } else {
+        // Khi đóng: Trả lời trạng thái bình thường
+        document.body.style.overflow = 'unset';
+        document.body.style.height = 'auto';
+        document.body.style.touchAction = 'auto';
+    }
 
+    // Hàm dọn dẹp khi tắt component đột ngột
+    return () => {
+        document.body.style.overflow = 'unset';
+        document.body.style.height = 'auto';
+        document.body.style.touchAction = 'auto';
+    };
+}, [isOpen]);
     if (!isOpen || queue.length === 0) return null;
 
     const handleNext = (isKnown) => {
