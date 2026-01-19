@@ -166,8 +166,9 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
     const [dragX, setDragX] = React.useState(0); 
     const [startX, setStartX] = React.useState(0); 
     const [isDragging, setIsDragging] = React.useState(false);
+    const [touchStartTime, setTouchStartTime] = React.useState(0);
 
-    // --- 1. KHỞI TẠO SESSION ---
+    // Khởi tạo session
     const startNewSession = React.useCallback((chars) => {
         setQueue(chars);
         setCurrentIndex(0);
@@ -189,41 +190,24 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         }
     }, [isOpen, text, startNewSession]);
 
-    // --- 2. LOGIC TÍNH MÀU VIỀN (ĐÃ FIX: Đưa ra ngoài render body) ---
-    const getDynamicBorder = () => {
-        if (dragX > 70) return '#22c55e'; // Xanh lá khi vuốt phải
-        if (dragX < -70) return '#ef4444'; // Đỏ khi vuốt trái
-        return 'rgba(255,255,255,0.2)'; // Màu mặc định
-    };
-    const dynamicBorder = getDynamicBorder();
-
-    // --- 3. KHÓA CUỘN TRANG ---
+    // Khóa cuộn trang
     React.useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
             document.body.style.height = '100vh';
-            document.body.style.touchAction = 'none';
         } else {
             document.body.style.overflow = 'unset';
             document.body.style.height = 'auto';
-            document.body.style.touchAction = 'auto';
         }
-        return () => {
-            document.body.style.overflow = 'unset';
-            document.body.style.height = 'auto';
-            document.body.style.touchAction = 'auto';
-        };
+        return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
 
-    // --- 4. XỬ LÝ CHUYỂN THẺ ---
     const handleNext = (isKnown) => {
         if (exitDirection) return;
         setExitDirection(isKnown ? 'right' : 'left');
-
         setTimeout(() => {
             if (isKnown) setKnownCount(prev => prev + 1);
             else setUnknownIndices(prev => [...prev, currentIndex]);
-
             setHistory(prev => [...prev, isKnown]);
 
             if (currentIndex < queue.length - 1) {
@@ -237,10 +221,11 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         }, 150);
     };
 
-    // --- 5. LOGIC VUỐT (SWIPE) ---
+    // --- LOGIC VUỐT & CHẠM (Cải tiến cho Mobile) ---
     const handleDragStart = (e) => {
         if (exitDirection || isFinished) return;
         setIsDragging(true);
+        setTouchStartTime(Date.now());
         const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
         setStartX(clientX);
     };
@@ -251,79 +236,37 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         setDragX(clientX - startX);
     };
 
-    const handleDragEnd = () => {
+    const handleDragEnd = (e) => {
         if (!isDragging) return;
         setIsDragging(false);
+        
+        const dragDuration = Date.now() - touchStartTime;
+        const dragDistance = Math.abs(dragX);
+
+        // Nếu di chuyển rất ít (<10px) và thời gian ngắn (<250ms) -> Coi như là CHẠM để lật
+        if (dragDistance < 10 && dragDuration < 250) {
+            setIsFlipped(!isFlipped);
+            if (currentIndex === 0) setShowHint(false);
+            setDragX(0);
+            return;
+        }
+
         if (dragX > 70) handleNext(true);
         else if (dragX < -70) handleNext(false);
         else setDragX(0);
     };
-
-    // --- 6. PHÍM TẮT ---
-    React.useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (!isOpen || isFinished || exitDirection) return;
-            if (e.code === 'Space') {
-                e.preventDefault();
-                setIsFlipped(prev => !prev);
-                if (currentIndex === 0) setShowHint(false);
-            }
-            else if (e.key === 'ArrowLeft') handleNext(false);
-            else if (e.key === 'ArrowRight') handleNext(true);
-            else if (e.key === 'Escape') onClose();
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, isFinished, exitDirection, currentIndex, queue, onClose]);
-
-    // --- 7. CÁC TIỆN ÍCH KHÁC ---
-    const handleBack = (e) => {
-        e.stopPropagation();
-        if (currentIndex > 0) {
-            const lastChoice = history[history.length - 1];
-            if (lastChoice === true) setKnownCount(prev => prev - 1);
-            else setUnknownIndices(prev => prev.slice(0, -1));
-            setHistory(prev => prev.slice(0, -1));
-            setCurrentIndex(prev => prev - 1);
-            setIsFlipped(false);
-            setExitDirection(null);
-        }
-    };
-
-    const handleShuffle = (e) => {
-        e.stopPropagation();
-        const past = queue.slice(0, currentIndex);
-        const remaining = queue.slice(currentIndex);
-        const shuffledRemaining = [...remaining].sort(() => Math.random() - 0.5);
-        setQueue([...past, ...shuffledRemaining]);
-        setIsFlipped(false);
-    };
-
-    const reviewUnknown = () => {
-        const unlearnedChars = unknownIndices.map(idx => queue[idx]);
-        if (unlearnedChars.length > 0) startNewSession(unlearnedChars);
-    };
-
-    if (!isOpen || queue.length === 0) return null;
 
     const currentChar = queue[currentIndex];
     const info = dbData?.KANJI_DB?.[currentChar] || 
                  dbData?.ALPHABETS?.hiragana?.[currentChar] || 
                  dbData?.ALPHABETS?.katakana?.[currentChar] || {};
 
-    const CardControls = () => (
-        <div className="absolute bottom-5 left-0 right-0 px-6 flex justify-between items-center z-20 pointer-events-auto">
-            <button onClick={handleBack} title="Quay lại" className="p-2.5 bg-black/5 hover:bg-black/10 rounded-full transition-colors text-gray-400 hover:text-gray-700">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M9 14 4 9l5-5"/><path d="M4 9h12a5 5 0 0 1 0 10H7"/></svg>
-            </button>
-            <button onClick={handleShuffle} title="Trộn thẻ còn lại" className="p-2.5 bg-black/5 hover:bg-black/10 rounded-full transition-colors text-gray-400 hover:text-gray-700">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
-            </button>
-        </div>
-    );
+    const dynamicBorder = dragX > 70 ? '#22c55e' : dragX < -70 ? '#ef4444' : 'rgba(255,255,255,0.2)';
+
+    if (!isOpen || queue.length === 0) return null;
 
     return (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl animate-in fade-in duration-200 select-none">
             <div className="w-full max-w-sm flex flex-col items-center">
                 {!isFinished ? (
                     <>
@@ -338,7 +281,6 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                             }}
                         >
                             <div 
-                                onClick={() => { if (Math.abs(dragX) < 5) { setIsFlipped(!isFlipped); if (currentIndex === 0) setShowHint(false); } }}
                                 onMouseDown={handleDragStart}
                                 onMouseMove={handleDragMove}
                                 onMouseUp={handleDragEnd}
@@ -348,70 +290,75 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                                 onTouchEnd={handleDragEnd}
                                 className={`relative w-64 h-80 cursor-pointer transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
                             >
-                                {/* MẶT TRƯỚC */}
+                                {/* MẶT TRƯỚC: Kanji */}
                                 <div 
-                                    className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center border-4 [backface-visibility:hidden] overflow-hidden"
+                                    className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center border-4 [backface-visibility:hidden] overflow-hidden select-none"
                                     style={{ borderColor: isDragging ? dynamicBorder : 'white' }}
                                 >
-                                    <span className="text-8xl font-['Klee_One'] text-gray-800 leading-none transform -translate-y-5">{currentChar}</span>
+                                    <span className="text-8xl font-['Klee_One'] text-gray-800 leading-none transform -translate-y-5 pointer-events-none">{currentChar}</span>
                                     {currentIndex === 0 && showHint && (
-                                        <p className="absolute bottom-14 text-indigo-400 text-[7px] font-black uppercase tracking-[0.4em] animate-pulse">Chạm để lật</p>
+                                        <p className="absolute bottom-14 text-indigo-400 text-[9px] font-black uppercase tracking-[0.4em] animate-pulse">Chạm để lật</p>
                                     )}
-                                    <CardControls />
                                 </div>
 
-                                {/* MẶT SAU */}
+                                {/* MẶT SAU: Nghĩa */}
                                 <div 
-                                    className="absolute inset-0 bg-indigo-600 rounded-[2rem] shadow-2xl flex flex-col items-center justify-center p-6 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] border-4 overflow-hidden text-center"
+                                    className="absolute inset-0 bg-indigo-600 rounded-[2rem] shadow-2xl flex flex-col items-center justify-center p-6 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] border-4 overflow-hidden text-center select-none"
                                     style={{ borderColor: isDragging ? dynamicBorder : 'rgba(255,255,255,0.2)' }}
                                 >
-                                    <div className="flex-1 flex flex-col items-center justify-center w-full transform -translate-y-3">
-                                        <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter leading-tight">{info.sound || '---'}</h3>
-                                        <p className="text-base opacity-90 font-medium italic leading-snug px-2">{info.meaning || ''}</p>
-                                    </div>
-                                    <CardControls />
+                                    <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter leading-tight pointer-events-none">{info.sound || '---'}</h3>
+                                    <p className="text-base opacity-90 font-medium italic leading-snug px-2 pointer-events-none">{info.meaning || ''}</p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* PROGRESS BAR */}
-                        <div className="w-64 mt-8 mb-6 relative h-6 flex items-center">
-                            <div className="w-full h-1 bg-white/10 rounded-full relative">
-                                <div className="absolute right-0 top-1/2 -translate-y-1/2 h-5 min-w-[24px] rounded-md flex items-center justify-center bg-white">
-                                    <span className="text-[9px] font-black text-black uppercase">{queue.length}</span>
-                                </div>
-                                <div 
-                                    className="absolute top-1/2 -translate-y-1/2 h-5 min-w-[24px] px-1 bg-sky-400 rounded-md flex items-center justify-center shadow-[0_0_15px_rgba(56,189,248,0.8)] transition-all duration-150 ease-out z-10"
-                                    style={{ left: `calc(${(currentIndex / (queue.length - 1 || 1)) * 100}% - ${currentIndex === queue.length - 1 ? '24px' : '0px'})` }}
-                                >
-                                    <span className="text-[9px] font-black text-white">{currentIndex + 1}</span>
-                                </div>
+                        {/* THANH TIẾN ĐỘ */}
+                        <div className="w-64 mt-10 mb-8 relative h-1 bg-white/10 rounded-full">
+                            <div 
+                                className="absolute top-1/2 -translate-y-1/2 h-5 min-w-[24px] px-1 bg-sky-400 rounded-md flex items-center justify-center shadow-lg transition-all duration-150 ease-out"
+                                style={{ left: `calc(${(currentIndex / (queue.length - 1 || 1)) * 100}% - ${currentIndex === queue.length - 1 ? '24px' : '0px'})` }}
+                            >
+                                <span className="text-[9px] font-black text-white">{currentIndex + 1}</span>
                             </div>
                         </div>
 
-                        {/* NÚT ĐIỀU KHIỂN DƯỚI */}
-                        <div className="flex gap-3 w-full px-8">
-                            <button onClick={() => handleNext(false)} className="flex-1 py-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 rounded-xl font-black text-[10px] transition-all active:scale-95 flex items-center justify-center gap-2 uppercase">
-                                ĐANG HỌC <span className="bg-red-600 text-white min-w-[20px] px-1.5 h-4.5 rounded-md flex items-center justify-center text-[8px] font-bold">{unknownIndices.length}</span>
+                        {/* NÚT ĐANG HỌC / ĐÃ BIẾT (Sửa lỗi dính sáng trên Mobile) */}
+                        <div className="flex gap-4 w-full px-10">
+                            <button 
+                                onClick={() => handleNext(false)} 
+                                className="flex-1 py-3 bg-red-500/10 active:bg-red-500 text-red-500 active:text-white border border-red-500/20 rounded-xl font-black text-[11px] transition-all transform active:scale-95 flex items-center justify-center gap-2 uppercase md:hover:bg-red-500 md:hover:text-white"
+                            >
+                                CHƯA BIẾT
                             </button>
-                            <button onClick={() => handleNext(true)} className="flex-1 py-2.5 bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white border border-green-500/20 rounded-xl font-black text-[10px] transition-all active:scale-95 flex items-center justify-center gap-2 uppercase">
-                                ĐÃ BIẾT <span className="bg-green-600 text-white min-w-[20px] px-1.5 h-4.5 rounded-md flex items-center justify-center text-[8px] font-bold">{knownCount}</span>
+                            <button 
+                                onClick={() => handleNext(true)} 
+                                className="flex-1 py-3 bg-green-500/10 active:bg-green-500 text-green-500 active:text-white border border-green-500/20 rounded-xl font-black text-[11px] transition-all transform active:scale-95 flex items-center justify-center gap-2 uppercase md:hover:bg-green-500 md:hover:text-white"
+                            >
+                                ĐÃ BIẾT
                             </button>
                         </div>
 
-                        <button onClick={onClose} className="mt-8 text-white/20 hover:text-red-400 transition-colors text-[8px] font-black uppercase tracking-widest">Đóng [ESC]</button>
+                        {/* NÚT ĐÓNG (Tăng kích thước) */}
+                        <button 
+                            onClick={onClose} 
+                            className="mt-12 py-3 px-8 text-white/40 active:text-red-400 transition-colors text-xs font-bold uppercase tracking-[0.2em] border border-white/10 rounded-full active:bg-white/5"
+                        >
+                            Đóng [ESC]
+                        </button>
                     </>
                 ) : (
-                    <div className="bg-white rounded-[2rem] p-8 w-full max-w-[280px] text-center shadow-2xl animate-in zoom-in-95 border-4 border-indigo-50 font-sans">
-                        <div className="text-5xl mb-4">🏁</div>
-                        <h3 className="text-lg font-black text-gray-800 mb-1 uppercase">Hoàn thành</h3>
-                        <p className="text-gray-400 mb-6 text-[11px] font-medium italic">Bạn đã thuộc {knownCount}/{queue.length} chữ.</p>
-                        <div className="space-y-2">
+                    /* MÀN HÌNH HOÀN THÀNH */
+                    <div className="bg-white rounded-[2rem] p-8 w-full max-w-[300px] text-center shadow-2xl border-4 border-indigo-50">
+                        <div className="text-6xl mb-4 animate-bounce">🎉</div>
+                        <h3 className="text-xl font-black text-gray-800 mb-1 uppercase">Tuyệt vời!</h3>
+                        <p className="text-gray-400 mb-8 text-xs font-medium">Bạn đã hoàn thành {knownCount}/{queue.length} thẻ.</p>
+                        
+                        <div className="space-y-3">
                             {unknownIndices.length > 0 && (
-                                <button onClick={reviewUnknown} className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-[11px] shadow-lg active:scale-95 transition-all">ÔN LẠI {unknownIndices.length} THẺ ĐANG HỌC</button>
+                                <button onClick={() => startNewSession(unknownIndices.map(idx => queue[idx]))} className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs shadow-xl active:scale-95 transition-all">HỌC TIẾP THẺ CHƯA THUỘC</button>
                             )}
-                            <button onClick={() => startNewSession(originalQueue)} className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-black text-[11px] hover:bg-gray-200 active:scale-95 transition-all">HỌC LẠI TỪ ĐẦU</button>
-                            <button onClick={onClose} className="w-full py-3 text-gray-400 font-bold hover:text-red-500 transition-all text-[11px] uppercase tracking-wide">THOÁT</button>
+                            <button onClick={() => startNewSession(originalQueue)} className="w-full py-4 bg-gray-100 text-gray-700 rounded-2xl font-black text-xs active:scale-95 transition-all">HỌC LẠI TỪ ĐẦU</button>
+                            <button onClick={onClose} className="w-full py-4 text-gray-400 font-bold text-xs uppercase tracking-widest active:text-red-500">THOÁT</button>
                         </div>
                     </div>
                 )}
