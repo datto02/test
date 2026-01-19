@@ -439,7 +439,7 @@ return (
                 fontSize: `${config.fontSize}pt`,
                 transform: `translateY(${config.verticalOffset}px)`,
                 color: `rgba(0, 0, 0, ${config.traceOpacity})`,
-                fontFamily: config.fontFamily
+                //fontFamily: config.fontFamily
             }}
             >
             {char}
