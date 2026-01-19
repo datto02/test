@@ -1829,7 +1829,7 @@ const [isMenuOpen, setIsMenuOpen] = useState(false);
 const [config, setConfig] = useState({ 
     text: '', fontSize: 35, traceCount: 9, verticalOffset: -3, 
     traceOpacity: 0.15, guideScale: 1.02, guideX: 0, guideY: 0.5, 
-    gridOpacity: 0.8, gridType: 'cross', fontFamily: "'Klee One', cursive", 
+    fontFamily: "'UD Digi Kyokasho', 'UD Digi Kyokasho N-B', 'UD デジタル 教科書体 N-B', 'Klee One', cursive", 
     showOnKun: false 
 });
 
