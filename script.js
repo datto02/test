@@ -363,7 +363,7 @@ exitDirection === 'right' ? 'translate-x-16 rotate-3' : ''
                             }`}
                             style={{ 
                                transform: !exitDirection && dragX !== 0 ? `translateX(${dragX}px) rotate(${dragX * 0.02}deg)` : '',
-                              transition: isDragging ? 'none' : 'all 0.25s ease-out'
+                              transition: isDragging ? 'none' : 'all 0.25s ease-out',
                                 willChange: 'transform'
                             }}
                         >
