@@ -213,6 +213,40 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         };
     }, [isOpen]);
 
+    // --- THÊM TÍNH NĂNG PHÍM TẮT ---
+React.useEffect(() => {
+    const handleKeyDown = (e) => {
+        // Chỉ hoạt động khi Modal đang mở và chưa kết thúc
+        if (!isOpen || isFinished) return;
+
+        switch (e.key) {
+            case ' ': // Phím Cách
+            case 'ArrowUp': // Phím Lên
+            case 'ArrowDown': // Phím Xuống
+                e.preventDefault(); // Ngăn trang bị cuộn khi nhấn phím
+                toggleFlip();
+                break;
+            case 'ArrowLeft': // Phím Sang trái
+                e.preventDefault();
+                handleNext(false); // Đánh dấu: Đang học
+                break;
+            case 'ArrowRight': // Phím Sang phải
+                e.preventDefault();
+                handleNext(true); // Đánh dấu: Đã biết
+                break;
+            default:
+                break;
+        }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup: Xóa sự kiện khi đóng Modal hoặc thoát Component
+    return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+    };
+}, [isOpen, isFinished, toggleFlip, handleNext]);
+
    const handleNext = (isKnown) => {
     if (exitDirection || isFinished) return;
 
