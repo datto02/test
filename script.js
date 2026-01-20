@@ -152,6 +152,26 @@ const useKanjiReadings = (char, active, dbData) => {
 
   return readings;
 };
+
+const shuffleArray = (array) => {
+    const newArr = [...array];
+    for (let i = newArr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+    }
+    return newArr;
+};
+// --- 1. Đặt hàm này ở BÊN NGOÀI component FlashcardModal (hoặc trên cùng file) ---
+const shuffleArray = (array) => {
+    const newArr = [...array];
+    for (let i = newArr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+    }
+    return newArr;
+};
+
+// --- 2. Component chính ---
 const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
     const [originalQueue, setOriginalQueue] = React.useState([]);
     const [queue, setQueue] = React.useState([]);
@@ -168,9 +188,15 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
     const [isDragging, setIsDragging] = React.useState(false);
     const [btnFeedback, setBtnFeedback] = React.useState(null);
 
-    // --- KHỞI TẠO SESSION ---
-    const startNewSession = React.useCallback((chars) => {
-        setQueue(chars);
+    // --- MỚI: State lưu trạng thái Bật/Tắt trộn ---
+    const [isShuffleOn, setIsShuffleOn] = React.useState(false);
+
+    // --- KHỞI TẠO SESSION (Đã sửa để hỗ trợ trộn) ---
+    const startNewSession = React.useCallback((chars, enableShuffle = false) => {
+        // Nếu enableShuffle = true thì trộn, không thì giữ nguyên
+        const finalQueue = enableShuffle ? shuffleArray(chars) : [...chars];
+        
+        setQueue(finalQueue);
         setCurrentIndex(0);
         setIsFlipped(false);
         setUnknownIndices([]);
@@ -186,10 +212,11 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         if (isOpen && text) {
             const chars = Array.from(text).filter(c => c.trim());
             setOriginalQueue(chars);
-            startNewSession(chars);
+            // Khi mở, dùng trạng thái shuffle hiện tại để quyết định trộn hay không
+            startNewSession(chars, isShuffleOn);
             setShowHint(true);
         }
-    }, [isOpen, text, startNewSession]);
+    }, [isOpen, text, startNewSession]); // Bỏ isShuffleOn khỏi dependency để tránh reset khi toggle
 
     // --- KHÓA CUỘN NỀN ---
     React.useEffect(() => {
@@ -276,8 +303,13 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, isFinished, toggleFlip, handleNext, onClose]);
 
+    // --- NÚT BACK (Đã sửa lỗi focus) ---
     const handleBack = (e) => {
-        if (e) { e.preventDefault(); e.stopPropagation(); e.currentTarget.blur(); }
+        if (e) { 
+            e.preventDefault(); 
+            e.stopPropagation(); 
+            e.currentTarget.blur(); // MỚI: Bỏ focus ngay lập tức
+        }
         if (currentIndex > 0 && history.length > 0) {
             const lastIsKnown = history[history.length - 1];
             if (lastIsKnown === true) {
@@ -294,20 +326,35 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         }
     };
 
-    const handleShuffle = (e) => {
-        if (e) { e.preventDefault(); e.stopPropagation(); e.currentTarget.blur(); }
-        const passedPart = queue.slice(0, currentIndex);
-        const poolToShuffle = queue.slice(currentIndex);
-        if (poolToShuffle.length <= 1) return;
-        const shuffledPool = [...poolToShuffle];
-        for (let i = shuffledPool.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
+    // --- NÚT TRỘN (Đã sửa thành Toggle Bật/Tắt & Fix lỗi Focus) ---
+    const handleToggleShuffle = (e) => {
+        if (e) { 
+            e.preventDefault(); 
+            e.stopPropagation();
+            e.currentTarget.blur(); // MỚI: Bỏ focus ngay lập tức
         }
-        setQueue([...passedPart, ...shuffledPool]);
-        setIsFlipped(false);
-        setBtnFeedback('shuffle');
-        setTimeout(() => setBtnFeedback(null), 400);
+
+        setIsShuffleOn(prev => {
+            const newState = !prev; // Đảo trạng thái
+            
+            setQueue(currentQueue => {
+                const passedPart = currentQueue.slice(0, currentIndex);
+                const remainingPart = currentQueue.slice(currentIndex);
+
+                if (newState) {
+                    // Nếu BẬT: Trộn phần còn lại
+                    const shuffledRemaining = shuffleArray(remainingPart);
+                    return [...passedPart, ...shuffledRemaining];
+                } else {
+                    // Nếu TẮT: Giữ nguyên hiện tại
+                    return currentQueue;
+                }
+            });
+
+            setBtnFeedback('shuffle');
+            setTimeout(() => setBtnFeedback(null), 400);
+            return newState;
+        });
     };
 
     const handleDragStart = (e) => {
@@ -358,13 +405,12 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                     <>
                         <div 
                             className={`relative transition-all duration-300 ease-in-out ${
-                             exitDirection === 'left' ? '-translate-x-16 -rotate-3' : 
-exitDirection === 'right' ? 'translate-x-16 rotate-3' : ''
+                                exitDirection === 'left' ? '-translate-x-16 -rotate-3' : 
+                                exitDirection === 'right' ? 'translate-x-16 rotate-3' : ''
                             }`}
                             style={{ 
                                transform: !exitDirection && dragX !== 0 ? `translateX(${dragX}px) rotate(${dragX * 0.02}deg)` : '',
-                              transition: isDragging ? 'none' : 'all 0.25s ease-out',
-                                willChange: 'transform'
+                               transition: isDragging ? 'none' : 'all 0.25s ease-out'
                             }}
                         >
                             <div 
@@ -376,7 +422,7 @@ exitDirection === 'right' ? 'translate-x-16 rotate-3' : ''
                                 onTouchStart={handleDragStart}
                                 onTouchMove={handleDragMove}
                                 onTouchEnd={handleDragEnd}
-                                className={`relative w-64 h-80 cursor-pointer transition-all duration-500 [transform-style:preserve-3d] will-change-transform ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
+                                className={`relative w-64 h-80 cursor-pointer transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
                             >
                                 <div 
                                     className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center border-4 [backface-visibility:hidden] overflow-hidden"
@@ -389,14 +435,22 @@ exitDirection === 'right' ? 'translate-x-16 rotate-3' : ''
                                     <div className={`absolute bottom-5 left-0 right-0 px-6 items-center z-50 ${isFlipped ? 'hidden sm:flex' : 'flex'} justify-between`}>
                                         <button 
                                             onClick={handleBack} 
-                                            className={`p-2.5 bg-black/5 hover:bg-black/10 active:scale-90 rounded-full transition-all flex items-center justify-center ${currentIndex === 0 ? 'opacity-10 cursor-not-allowed' : 'text-gray-400 hover:text-gray-700'}`}
+                                            // MỚI: Thêm focus:outline-none
+                                            className={`p-2.5 bg-black/5 hover:bg-black/10 active:scale-90 rounded-full transition-all flex items-center justify-center focus:outline-none ${currentIndex === 0 ? 'opacity-10 cursor-not-allowed' : 'text-gray-400 hover:text-gray-700'}`}
                                             disabled={currentIndex === 0}
                                         >
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="pointer-events-none"><path d="M9 14 4 9l5-5"/><path d="M4 9h12a5 5 0 0 1 0 10H7"/></svg>
                                         </button>
+                                        
+                                        {/* NÚT SHUFFLE ĐÃ SỬA GIAO DIỆN & LOGIC */}
                                         <button 
-                                            onClick={handleShuffle} 
-                                            className={`p-2.5 bg-black/5 hover:bg-black/10 active:scale-90 rounded-full transition-all flex items-center justify-center text-gray-400 hover:text-gray-700 ${btnFeedback === 'shuffle' ? 'bg-indigo-100 text-indigo-600' : ''}`}
+                                            onClick={handleToggleShuffle} 
+                                            className={`p-2.5 rounded-full transition-all flex items-center justify-center focus:outline-none ${
+                                                isShuffleOn 
+                                                    ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200' 
+                                                    : 'bg-black/5 hover:bg-black/10 text-gray-400 hover:text-gray-700'
+                                            }`}
+                                            title={isShuffleOn ? "Tắt trộn ngẫu nhiên" : "Bật trộn ngẫu nhiên"}
                                         >
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`pointer-events-none ${btnFeedback === 'shuffle' ? 'animate-[spin_0.4s_linear_infinite]' : ''}`}><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
                                         </button>
@@ -433,18 +487,18 @@ exitDirection === 'right' ? 'translate-x-16 rotate-3' : ''
 
                         {/* NÚT ĐIỀU HƯỚNG */}
                         <div className="flex gap-3 w-full px-8">
-                            <button onClick={() => handleNext(false)} className="flex-1 py-3 bg-red-500/10 hover:bg-red-500/20 hover:text-red-600 active:bg-red-500 text-red-500 active:text-white border border-red-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase">
+                            <button onClick={() => handleNext(false)} className="flex-1 py-3 bg-red-500/10 hover:bg-red-500/20 hover:text-red-600 active:bg-red-500 text-red-500 active:text-white border border-red-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase focus:outline-none">
                                 ĐANG HỌC <span className="bg-red-600 text-white min-w-[28px] h-6 px-2 rounded-md flex items-center justify-center text-[10px] font-bold shadow-sm">{unknownIndices.length}</span>
                             </button>
-                            <button onClick={() => handleNext(true)} className="flex-1 py-3 bg-green-500/10 hover:bg-green-500/20 hover:text-green-600 active:bg-green-500 text-green-500 active:text-white border border-green-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase">
+                            <button onClick={() => handleNext(true)} className="flex-1 py-3 bg-green-500/10 hover:bg-green-500/20 hover:text-green-600 active:bg-green-500 text-green-500 active:text-white border border-green-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase focus:outline-none">
                                 ĐÃ BIẾT <span className="bg-green-600 text-white min-w-[28px] h-6 px-2 rounded-md flex items-center justify-center text-[10px] font-bold shadow-sm">{knownCount}</span>
                             </button>
                         </div>
 
-                        {/* NÚT ĐÓNG ĐÃ TỐI ƯU CHO ĐIỆN THOẠI */}
+                        {/* NÚT ĐÓNG */}
                         <button 
                             onClick={onClose} 
-                            className="mt-8 text-white/40 hover:text-red-500 transition-all text-[13px] sm:text-[11px] font-black uppercase tracking-[0.2em] py-2 px-4 active:scale-95"
+                            className="mt-8 text-white/40 hover:text-red-500 transition-all text-[13px] sm:text-[11px] font-black uppercase tracking-[0.2em] py-2 px-4 active:scale-95 focus:outline-none"
                         >
                             Đóng thẻ
                         </button>
@@ -456,20 +510,27 @@ exitDirection === 'right' ? 'translate-x-16 rotate-3' : ''
                         <p className="text-gray-400 mb-6 text-[11px] font-medium italic">Bạn đã học được {knownCount}/{queue.length} chữ.</p>
                         <div className="space-y-2">
                             {unknownIndices.length > 0 && (
-                                <button onClick={() => startNewSession(unknownIndices.map(idx => queue[idx]))} className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-[11px] shadow-lg active:scale-95 transition-colors">ÔN LẠI {unknownIndices.length} THẺ ĐANG HỌC</button>
+                                <button 
+                                    // MỚI: Truyền isShuffleOn vào để biết có cần trộn khi ôn lại không
+                                    onClick={() => startNewSession(unknownIndices.map(idx => queue[idx]), isShuffleOn)} 
+                                    className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-[11px] shadow-lg active:scale-95 transition-colors focus:outline-none"
+                                >
+                                    ÔN LẠI {unknownIndices.length} THẺ ĐANG HỌC {isShuffleOn ? '(NGẪU NHIÊN)' : ''}
+                                </button>
                             )}
                            <button 
-    onClick={() => startNewSession(originalQueue)} 
-    className="w-full py-3.5 bg-blue-50 border-2 border-blue-100 text-blue-500 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-700 rounded-xl font-black text-[11px] transition-all active:scale-95"
->
-    HỌC LẠI TỪ ĐẦU
-</button>
+                            // MỚI: Truyền isShuffleOn vào
+                            onClick={() => startNewSession(originalQueue, isShuffleOn)} 
+                            className="w-full py-3.5 bg-blue-50 border-2 border-blue-100 text-blue-500 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-700 rounded-xl font-black text-[11px] transition-all active:scale-95 focus:outline-none"
+                        >
+                            HỌC LẠI TỪ ĐẦU {isShuffleOn ? '(NGẪU NHIÊN)' : ''}
+                        </button>
                           <button 
-    onClick={onClose} 
-    className="w-full py-3.5 bg-white border-2 border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-600 font-black text-[11px] uppercase tracking-widest rounded-xl transition-all active:scale-95"
->
-    THOÁT
-</button>
+                            onClick={onClose} 
+                            className="w-full py-3.5 bg-white border-2 border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-600 font-black text-[11px] uppercase tracking-widest rounded-xl transition-all active:scale-95 focus:outline-none"
+                        >
+                            THOÁT
+                        </button>
                         </div>
                     </div>
                 )}
