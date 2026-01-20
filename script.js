@@ -213,12 +213,13 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         };
     }, [isOpen]);
 
-// --- XỬ LÝ PHÍM TẮT (ĐÃ FIX LỖI ĐƠ) ---
+// --- XỬ LÝ PHÍM TẮT ---
 React.useEffect(() => {
     const handleKeyDown = (e) => {
+        // 1. Chỉ chạy khi Modal mở và chưa kết thúc
         if (!isOpen || isFinished) return;
 
-        // Nếu người dùng đang gõ vào ô tìm kiếm hoặc textarea thì không chạy phím tắt
+        // 2. CHẶN PHÍM TẮT khi đang gõ vào ô tìm kiếm hoặc textarea
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
         switch (e.key) {
@@ -230,7 +231,7 @@ React.useEffect(() => {
                 break;
             case 'ArrowLeft':
                 e.preventDefault();
-                handleNext(false); // Đang học
+                handleNext(false); // Chưa biết
                 break;
             case 'ArrowRight':
                 e.preventDefault();
@@ -242,45 +243,47 @@ React.useEffect(() => {
     };
 
     window.addEventListener('keydown', handleKeyDown);
+    
+    // Cleanup: Xóa sự kiện cũ trước khi nạp sự kiện mới
     return () => window.removeEventListener('keydown', handleKeyDown);
-}, [isOpen, isFinished, toggleFlip, handleNext]); // <--- ĐÂY LÀ DÒNG QUAN TRỌNG NHẤT
+}, [isOpen, isFinished, toggleFlip, handleNext]); // PHẢI CÓ toggleFlip và handleNext ở đây
+    
 
    
 const handleNext = React.useCallback((isKnown) => {
-    // Thêm kiểm tra queue.length để tránh lỗi thẻ trắng
+    // Chặn nếu đang bay hoặc đã kết thúc
     if (exitDirection || isFinished || queue.length === 0) return;
 
-    // 1. Reset lật thẻ ngay lập tức để không lộ mặt sau thẻ sau
+    // 1. Reset lật thẻ ngay lập tức
     setIsFlipped(false);
 
-    // 2. Cập nhật thống kê ngay (sử dụng currentIndex hiện tại)
-    if (isKnown) setKnownCount(prev => prev + 1);
-    else setUnknownIndices(prev => [...prev, currentIndex]);
+    // 2. Cập nhật dữ liệu ngay lập tức
+    if (isKnown) {
+        setKnownCount(prev => prev + 1);
+    } else {
+        // Lưu index hiện tại vào danh sách chưa biết
+        setUnknownIndices(prev => [...prev, currentIndex]);
+    }
     setHistory(prev => [...prev, isKnown]);
 
-    // Hiệu ứng bay
+    // 3. Kích hoạt hiệu ứng bay
     setBtnFeedback(isKnown ? 'right' : 'left');
     setExitDirection(isKnown ? 'right' : 'left');
 
     setTimeout(() => {
-        // --- DÙNG FUNCTIONAL UPDATE ĐỂ FIX LỖI KẾT THÚC SỚM VÀ THẺ TRẮNG ---
         setCurrentIndex((prevIndex) => {
-            const isLastCard = prevIndex >= queue.length - 1;
-
-            if (!isLastCard) {
-                // Nếu chưa phải thẻ cuối: Chuyển sang thẻ tiếp theo
+            if (prevIndex < queue.length - 1) {
                 setExitDirection(null);
                 setDragX(0);
                 setBtnFeedback(null);
                 return prevIndex + 1;
             } else {
-                // Nếu là thẻ cuối: Dừng lại và hiện màn hình kết thúc
                 setIsFinished(true);
-                return prevIndex; // Giữ nguyên index, không tăng thêm để tránh thẻ trắng
+                return prevIndex;
             }
         });
     }, 200);
-}, [exitDirection, isFinished, currentIndex, queue.length]);
+}, [currentIndex, queue, exitDirection, isFinished]); // ĐÂY LÀ DÒNG QUAN TRỌNG
     
     // --- QUAY LẠI THẺ TRƯỚC (ĐÃ GỘP VÀ FIX) ---
     const handleBack = (e) => {
@@ -333,11 +336,11 @@ const handleNext = React.useCallback((isKnown) => {
         setTimeout(() => setBtnFeedback(null), 500);
     };
 
-   const toggleFlip = React.useCallback(() => {
+const toggleFlip = React.useCallback(() => {
     setIsFlipped(prev => !prev);
     if (currentIndex === 0) setShowHint(false);
-}, [currentIndex]); // Quan trọng: Thêm currentIndex vào đây
-
+}, [currentIndex]);
+    
     // --- XỬ LÝ VUỐT (SWIPE) ---
     const handleDragStart = (e) => {
         if (exitDirection || isFinished) return;
