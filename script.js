@@ -246,33 +246,38 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         }
     };
 
-    // --- SỬA LỖI: TRỘN CÁC THẺ CÒN LẠI ---
-    const handleShuffle = (e) => {
-        if (e) {
-            e.preventDefault();
-            e.stopPropagation(); // Chặn tuyệt đối lật thẻ
-        }
-        
-        // Trộn từ vị trí currentIndex + 1 đến hết queue
-        const nextIndex = currentIndex + 1;
-        if (nextIndex >= queue.length) return; 
+   // --- FIX: XỬ LÝ TRỘN THẺ HIỆN TẠI VÀ CÁC THẺ CÒN LẠI ---
+const handleShuffle = (e) => {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation(); // Chặn lật thẻ khi bấm nút
+    }
 
-        const currentPart = queue.slice(0, nextIndex);
-        const remainingPart = queue.slice(nextIndex);
-        
-        // Thuật toán xáo trộn Fisher-Yates
-        const shuffled = [...remainingPart];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        
-        setQueue([...currentPart, ...shuffled]);
-        
-        // Hiệu ứng phản hồi visual
-        setBtnFeedback('shuffle');
-        setTimeout(() => setBtnFeedback(null), 500);
-    };
+    // 1. Lấy danh sách các thẻ đã học xong (nằm trước currentIndex)
+    const passedPart = queue.slice(0, currentIndex);
+    
+    // 2. Lấy danh sách thẻ bao gồm thẻ HIỆN TẠI và các thẻ CHƯA HỌC
+    const poolToShuffle = queue.slice(currentIndex);
+
+    if (poolToShuffle.length <= 1) return; // Không đủ thẻ để trộn
+
+    // 3. Thuật toán trộn Fisher-Yates cho poolToShuffle
+    const shuffledPool = [...poolToShuffle];
+    for (let i = shuffledPool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
+    }
+
+    // 4. Cập nhật lại Queue: Giữ nguyên phần đã qua + Phần mới đã trộn
+    setQueue([...passedPart, ...shuffledPool]);
+
+    // 5. Quan trọng: Reset mặt thẻ về mặt chữ (tránh việc thẻ mới hiện ra ở mặt nghĩa)
+    setIsFlipped(false);
+
+    // 6. Hiệu ứng phản hồi
+    setBtnFeedback('shuffle');
+    setTimeout(() => setBtnFeedback(null), 500);
+};
 
     const toggleFlip = () => {
         setIsFlipped(!isFlipped);
