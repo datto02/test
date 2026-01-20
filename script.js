@@ -841,7 +841,7 @@ return (
                     </p>
                     <p className="flex items-center gap-2">
                         <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">4</span>
-                        Tạo nhanh FLASHCARD trong 5 giây (ở phần "tiện ích".
+                        Tạo nhanh FLASHCARD trong 5 giây trong phần "tiện ích".
                     </p>
                 </div>
             </div>
