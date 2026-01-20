@@ -1723,7 +1723,7 @@ else setFilterOptions(p => ({...p, katakana: true}));
     ref={searchInputRef}
     type="text" 
     value={searchTerm} 
-    className="w-full pl-10 pr-10 py-2.5 border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-indigo-50 text-indigo-900 placeholder-indigo-400 font-bold font-sans" 
+    className="w-full pl-10 pr-10 py-2.5 border border-indigo-200 rounded-lg text-[16px] focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-indigo-50 text-indigo-900 placeholder-indigo-400 font-bold font-sans" 
     placeholder="Tìm Kanji theo âm Hán Việt" 
     onChange={(e) => handleSearchRealtime(e.target.value)} 
     onKeyDown={(e) => {
@@ -2009,7 +2009,7 @@ className={`py-2 text-[11px] font-black border rounded-md transition-all duratio
                                         }}
                                         onKeyDown={(e) => { if(e.key==='Enter' && randomCount>50) setRandomCount(50) }}
                                         onBlur={() => { if(randomCount>50) setRandomCount(50) }}
-                                        className="w-14 h-7 text-xs text-center font-bold bg-white border border-gray-300 text-gray-700 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors"
+                                        className="w-14 h-7 text-[16px] text-center font-bold bg-white border border-gray-300 text-gray-700 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors"
                                     />
                                     <span className="text-[10px] font-bold text-gray-500">chữ</span>
                                 </div>
