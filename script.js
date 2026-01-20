@@ -182,77 +182,81 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         setBtnFeedback(null);
     }, []);
 
-// --- FIX: KHÓA CUỘN NỀN TRIỆT ĐỂ ---
-React.useEffect(() => {
-    if (isOpen) {
-        // Khóa cuộn trên cả html và body
-        const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-        document.documentElement.style.overflow = 'hidden';
-        document.body.style.overflow = 'hidden';
-        document.body.style.paddingRight = `${scrollBarWidth}px`; // Tránh giật màn hình trên PC
-        document.body.style.touchAction = 'none'; 
-    } else {
-        document.documentElement.style.overflow = '';
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
-        document.body.style.touchAction = '';
-    }
-
-    return () => {
-        document.documentElement.style.overflow = '';
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
-        document.body.style.touchAction = '';
-    };
-}, [isOpen]);
-  const handleNext = (isKnown) => {
-    if (exitDirection || isFinished) return;
-
-    // Cập nhật dữ liệu NGAY LẬP TỨC để handleBack có thể lấy dữ liệu
-    if (isKnown) setKnownCount(prev => prev + 1);
-    else setUnknownIndices(prev => [...prev, currentIndex]);
-    setHistory(prev => [...prev, isKnown]);
-
-    setBtnFeedback(isKnown ? 'right' : 'left');
-    setExitDirection(isKnown ? 'right' : 'left');
-
-    setTimeout(() => {
-        if (currentIndex < queue.length - 1) {
-            setIsFlipped(false);
-            setCurrentIndex(prev => prev + 1);
-            setExitDirection(null);
-            setDragX(0);
-            setBtnFeedback(null);
-        } else {
-            setIsFinished(true);
+    React.useEffect(() => {
+        if (isOpen && text) {
+            const chars = Array.from(text).filter(c => c.trim());
+            setOriginalQueue(chars);
+            startNewSession(chars);
+            setShowHint(true);
         }
-    }, 200);
-};
+    }, [isOpen, text, startNewSession]);
 
+    // --- KHÓA CUỘN NỀN ---
+    React.useEffect(() => {
+        if (isOpen) {
+            const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+            document.documentElement.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden';
+            document.body.style.paddingRight = `${scrollBarWidth}px`;
+            document.body.style.touchAction = 'none'; 
+        } else {
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            document.body.style.touchAction = '';
+        }
+        return () => {
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            document.body.style.touchAction = '';
+        };
+    }, [isOpen]);
 
+    // --- CHUYỂN THẺ TIẾP THEO ---
+    const handleNext = (isKnown) => {
+        if (exitDirection || isFinished) return;
 
-    // --- SỬA LỖI: QUAY LẠI THẺ TRƯỚC ---
+        // Cập nhật thống kê ngay lập tức
+        if (isKnown) setKnownCount(prev => prev + 1);
+        else setUnknownIndices(prev => [...prev, currentIndex]);
+        setHistory(prev => [...prev, isKnown]);
+
+        setBtnFeedback(isKnown ? 'right' : 'left');
+        setExitDirection(isKnown ? 'right' : 'left');
+
+        setTimeout(() => {
+            if (currentIndex < queue.length - 1) {
+                setIsFlipped(false);
+                setCurrentIndex(prev => prev + 1);
+                setExitDirection(null);
+                setDragX(0);
+                setBtnFeedback(null);
+            } else {
+                setIsFinished(true);
+            }
+        }, 200);
+    };
+
+    // --- QUAY LẠI THẺ TRƯỚC (ĐÃ GỘP VÀ FIX) ---
     const handleBack = (e) => {
         if (e) {
             e.preventDefault();
-            e.stopPropagation(); // Chặn tuyệt đối lật thẻ
+            e.stopPropagation();
         }
         
         if (currentIndex > 0 && history.length > 0) {
             const lastIsKnown = history[history.length - 1];
             
-            // 1. Hoàn tác số lượng đã biết/chưa biết
             if (lastIsKnown === true) {
                 setKnownCount(prev => Math.max(0, prev - 1));
             } else {
                 setUnknownIndices(prev => prev.slice(0, -1));
             }
 
-            // 2. Cập nhật chỉ số và lịch sử
             setHistory(prev => prev.slice(0, -1));
             setCurrentIndex(prev => prev - 1);
             
-            // 3. Reset trạng thái hiển thị
             setIsFlipped(false);
             setExitDirection(null);
             setDragX(0);
@@ -260,33 +264,35 @@ React.useEffect(() => {
         }
     };
 
-const handleShuffle = (e) => {
-    if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
+    // --- TRỘN THẺ (BAO GỒM THẺ HIỆN TẠI) ---
+    const handleShuffle = (e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
-    // Lấy phần đã học xong (passed) và phần còn lại (bao gồm cả thẻ hiện tại)
-    const passedPart = queue.slice(0, currentIndex);
-    const poolToShuffle = queue.slice(currentIndex);
+        const passedPart = queue.slice(0, currentIndex);
+        const poolToShuffle = queue.slice(currentIndex);
 
-    if (poolToShuffle.length <= 1) return;
+        if (poolToShuffle.length <= 1) return;
 
-    // Trộn poolToShuffle
-    const shuffledPool = [...poolToShuffle];
-    for (let i = shuffledPool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
-    }
+        const shuffledPool = [...poolToShuffle];
+        for (let i = shuffledPool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
+        }
 
-    setQueue([...passedPart, ...shuffledPool]);
+        setQueue([...passedPart, ...shuffledPool]);
+        setIsFlipped(false);
 
-    // Reset về mặt chữ vì thẻ hiện tại đã bị thay đổi thành chữ khác
-    setIsFlipped(false);
+        setBtnFeedback('shuffle');
+        setTimeout(() => setBtnFeedback(null), 500);
+    };
 
-    setBtnFeedback('shuffle');
-    setTimeout(() => setBtnFeedback(null), 500);
-};
+    const toggleFlip = () => {
+        setIsFlipped(!isFlipped);
+        if (currentIndex === 0) setShowHint(false);
+    };
 
     // --- XỬ LÝ VUỐT (SWIPE) ---
     const handleDragStart = (e) => {
@@ -323,10 +329,10 @@ const handleShuffle = (e) => {
 
     return (
         <div 
-        className="fixed inset-0 z-[300] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl animate-in fade-in duration-200 select-none touch-none"
-        style={{ touchAction: 'none' }} // Thêm dòng này để chắc chắn khóa vuốt nền trên Mobile
-        onClick={(e) => e.stopPropagation()} 
-    >
+            className="fixed inset-0 z-[300] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl animate-in fade-in duration-200 select-none touch-none"
+            style={{ touchAction: 'none' }}
+            onClick={(e) => e.stopPropagation()} 
+        >
             <div className="w-full max-w-sm flex flex-col items-center">
                 {!isFinished ? (
                     <>
@@ -351,23 +357,18 @@ const handleShuffle = (e) => {
                                 onTouchEnd={handleDragEnd}
                                 className={`relative w-64 h-80 cursor-pointer transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
                             >
-                                {/* MẶT TRƯỚC */}
                                 <div 
                                     className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center border-4 [backface-visibility:hidden] overflow-hidden"
                                     style={{ borderColor: dynamicBorder() }}
                                 >
                                     <span className="text-8xl font-['Klee_One'] text-gray-800 transform -translate-y-5">{currentChar}</span>
-                                    
                                     {currentIndex === 0 && showHint && (
                                         <p className="absolute bottom-14 text-indigo-400 text-[7px] font-black uppercase tracking-[0.4em] animate-pulse">Chạm để lật</p>
                                     )}
-
-                                    {/* CARD CONTROLS - INLINED TO PREVENT RE-MOUNT ISSUES */}
                                     <div className="absolute bottom-5 left-0 right-0 px-6 flex justify-between items-center z-50">
                                         <button 
                                             onClick={handleBack} 
                                             className={`p-2.5 bg-black/5 hover:bg-black/10 active:scale-90 rounded-full transition-all flex items-center justify-center ${currentIndex === 0 ? 'opacity-10 cursor-not-allowed' : 'text-gray-400 hover:text-gray-700'}`}
-                                            title="Quay lại thẻ trước"
                                             disabled={currentIndex === 0}
                                         >
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="pointer-events-none"><path d="M9 14 4 9l5-5"/><path d="M4 9h12a5 5 0 0 1 0 10H7"/></svg>
@@ -375,14 +376,11 @@ const handleShuffle = (e) => {
                                         <button 
                                             onClick={handleShuffle} 
                                             className={`p-2.5 bg-black/5 hover:bg-black/10 active:scale-90 rounded-full transition-all flex items-center justify-center text-gray-400 hover:text-gray-700 ${btnFeedback === 'shuffle' ? 'bg-indigo-100 text-indigo-600' : ''}`}
-                                            title="Trộn các thẻ còn lại"
                                         >
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`pointer-events-none ${btnFeedback === 'shuffle' ? 'animate-spin' : ''}`}><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
                                         </button>
                                     </div>
                                 </div>
-
-                                {/* MẶT SAU */}
                                 <div 
                                     className="absolute inset-0 bg-indigo-600 rounded-[2rem] shadow-2xl flex flex-col items-center justify-center p-6 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] border-4 overflow-hidden text-center"
                                     style={{ borderColor: dynamicBorder() }}
@@ -395,7 +393,6 @@ const handleShuffle = (e) => {
                             </div>
                         </div>
 
-                        {/* THANH TIẾN ĐỘ */}
                         <div className="w-64 mt-8 mb-6 relative h-6 flex items-center">
                             <div className="w-full h-1 bg-white/10 rounded-full relative">
                                 <div className="absolute right-0 top-1/2 -translate-y-1/2 h-5 min-w-[24px] rounded-md flex items-center justify-center bg-white">
@@ -411,23 +408,11 @@ const handleShuffle = (e) => {
                         </div>
 
                         <div className="flex gap-3 w-full px-8">
-                            <button 
-                                onClick={() => handleNext(false)}
-                                className="flex-1 py-3 bg-red-500/10 active:bg-red-500 text-red-500 active:text-white border border-red-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase"
-                            >
-                                ĐANG HỌC
-                                <span className="bg-red-600 text-white min-w-[18px] h-4 rounded flex items-center justify-center text-[8px]">
-                                    {unknownIndices.length}
-                                </span>
+                            <button onClick={() => handleNext(false)} className="flex-1 py-3 bg-red-500/10 active:bg-red-500 text-red-500 active:text-white border border-red-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase">
+                                ĐANG HỌC <span className="bg-red-600 text-white min-w-[18px] h-4 rounded flex items-center justify-center text-[8px]">{unknownIndices.length}</span>
                             </button>
-                            <button 
-                                onClick={() => handleNext(true)}
-                                className="flex-1 py-3 bg-green-500/10 active:bg-green-500 text-green-500 active:text-white border border-green-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase"
-                            >
-                                ĐÃ BIẾT
-                                <span className="bg-green-600 text-white min-w-[18px] h-4 rounded flex items-center justify-center text-[8px]">
-                                    {knownCount}
-                                </span>
+                            <button onClick={() => handleNext(true)} className="flex-1 py-3 bg-green-500/10 active:bg-green-500 text-green-500 active:text-white border border-green-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase">
+                                ĐÃ BIẾT <span className="bg-green-600 text-white min-w-[18px] h-4 rounded flex items-center justify-center text-[8px]">{knownCount}</span>
                             </button>
                         </div>
 
@@ -442,13 +427,9 @@ const handleShuffle = (e) => {
                         <p className="text-gray-400 mb-6 text-[11px] font-medium italic">Bạn đã học được {knownCount}/{queue.length} chữ.</p>
                         <div className="space-y-2">
                             {unknownIndices.length > 0 && (
-                                <button onClick={() => startNewSession(unknownIndices.map(idx => queue[idx]))} className="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-black text-[11px] shadow-lg active:scale-95">
-                                    ÔN LẠI {unknownIndices.length} THẺ ĐANG HỌC
-                                </button>
+                                <button onClick={() => startNewSession(unknownIndices.map(idx => queue[idx]))} className="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-black text-[11px] shadow-lg active:scale-95">ÔN LẠI {unknownIndices.length} THẺ ĐANG HỌC</button>
                             )}
-                            <button onClick={() => startNewSession(originalQueue)} className="w-full py-3.5 bg-gray-100 text-gray-700 rounded-xl font-black text-[11px] active:scale-95">
-                                HỌC LẠI TỪ ĐẦU
-                            </button>
+                            <button onClick={() => startNewSession(originalQueue)} className="w-full py-3.5 bg-gray-100 text-gray-700 rounded-xl font-black text-[11px] active:scale-95">HỌC LẠI TỪ ĐẦU</button>
                             <button onClick={onClose} className="w-full py-3.5 text-gray-400 font-bold text-[11px] uppercase tracking-widest">THOÁT</button>
                         </div>
                     </div>
