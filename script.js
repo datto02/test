@@ -182,14 +182,25 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         setBtnFeedback(null);
     }, []);
 
-    React.useEffect(() => {
-        if (isOpen && text) {
-            const chars = Array.from(text).filter(c => c.trim());
-            setOriginalQueue(chars);
-            startNewSession(chars);
-            setShowHint(true);
-        }
-    }, [isOpen, text, startNewSession]);
+  // --- FIX: KHÓA CUỘN NỀN KHI MỞ MODAL ---
+React.useEffect(() => {
+    if (isOpen) {
+        // Khóa cuộn trên PC
+        document.body.style.overflow = 'hidden';
+        // Khóa các hành vi vuốt mặc định trên Mobile (như kéo để tải lại trang)
+        document.body.style.touchAction = 'none'; 
+    } else {
+        // Mở lại khi đóng
+        document.body.style.overflow = 'unset';
+        document.body.style.touchAction = 'auto';
+    }
+
+    // Cleanup: Đảm bảo nền được mở lại nếu Component bị gỡ bỏ đột ngột
+    return () => {
+        document.body.style.overflow = 'unset';
+        document.body.style.touchAction = 'auto';
+    };
+}, [isOpen]);
 
     // --- XỬ LÝ CHUYỂN THẺ TIẾP THEO ---
     const handleNext = (isKnown) => {
@@ -318,7 +329,11 @@ const handleShuffle = (e) => {
     const info = dbData?.KANJI_DB?.[currentChar] || dbData?.ALPHABETS?.hiragana?.[currentChar] || dbData?.ALPHABETS?.katakana?.[currentChar] || {};
 
     return (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl animate-in fade-in duration-200 select-none">
+        <div 
+        className="fixed inset-0 z-[300] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl animate-in fade-in duration-200 select-none touch-none"
+        style={{ touchAction: 'none' }} // Thêm dòng này để chắc chắn khóa vuốt nền trên Mobile
+        onClick={(e) => e.stopPropagation()} 
+    >
             <div className="w-full max-w-sm flex flex-col items-center">
                 {!isFinished ? (
                     <>
