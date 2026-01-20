@@ -213,26 +213,28 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         };
     }, [isOpen]);
 
-    // --- THÊM TÍNH NĂNG PHÍM TẮT ---
+// --- XỬ LÝ PHÍM TẮT (ĐÃ FIX LỖI ĐƠ) ---
 React.useEffect(() => {
     const handleKeyDown = (e) => {
-        // Chỉ hoạt động khi Modal đang mở và chưa kết thúc
         if (!isOpen || isFinished) return;
+
+        // Nếu người dùng đang gõ vào ô tìm kiếm hoặc textarea thì không chạy phím tắt
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
         switch (e.key) {
             case ' ': // Phím Cách
-            case 'ArrowUp': // Phím Lên
-            case 'ArrowDown': // Phím Xuống
-                e.preventDefault(); // Ngăn trang bị cuộn khi nhấn phím
+            case 'ArrowUp':
+            case 'ArrowDown':
+                e.preventDefault();
                 toggleFlip();
                 break;
-            case 'ArrowLeft': // Phím Sang trái
+            case 'ArrowLeft':
                 e.preventDefault();
-                handleNext(false); // Đánh dấu: Đang học
+                handleNext(false); // Đang học
                 break;
-            case 'ArrowRight': // Phím Sang phải
+            case 'ArrowRight':
                 e.preventDefault();
-                handleNext(true); // Đánh dấu: Đã biết
+                handleNext(true); // Đã biết
                 break;
             default:
                 break;
@@ -240,20 +242,16 @@ React.useEffect(() => {
     };
 
     window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+}, [isOpen, isFinished, toggleFlip, handleNext]); // <--- ĐÂY LÀ DÒNG QUAN TRỌNG NHẤT
 
-    // Cleanup: Xóa sự kiện khi đóng Modal hoặc thoát Component
-    return () => {
-        window.removeEventListener('keydown', handleKeyDown);
-    };
-}, [isOpen, isFinished, toggleFlip, handleNext]);
+   
 
-   const handleNext = (isKnown) => {
+  const handleNext = React.useCallback((isKnown) => {
     if (exitDirection || isFinished) return;
 
-    // 1. Lật thẻ về mặt trước NGAY LẬP TỨC
     setIsFlipped(false);
 
-    // 2. Cập nhật dữ liệu
     if (isKnown) setKnownCount(prev => prev + 1);
     else setUnknownIndices(prev => [...prev, currentIndex]);
     setHistory(prev => [...prev, isKnown]);
@@ -263,7 +261,6 @@ React.useEffect(() => {
 
     setTimeout(() => {
         if (currentIndex < queue.length - 1) {
-            // 3. Chỉ thay đổi chữ sau khi thẻ đã bay đi
             setCurrentIndex(prev => prev + 1);
             setExitDirection(null);
             setDragX(0);
@@ -271,8 +268,9 @@ React.useEffect(() => {
         } else {
             setIsFinished(true);
         }
-    }, 200); // Bạn có thể tăng lên 250ms nếu muốn trễ hơn chút để chắc chắn không lộ
-};
+    }, 200);
+}, [currentIndex, queue, exitDirection, isFinished]); 
+    
     // --- QUAY LẠI THẺ TRƯỚC (ĐÃ GỘP VÀ FIX) ---
     const handleBack = (e) => {
         if (e) {
@@ -324,10 +322,10 @@ React.useEffect(() => {
         setTimeout(() => setBtnFeedback(null), 500);
     };
 
-    const toggleFlip = () => {
-        setIsFlipped(!isFlipped);
-        if (currentIndex === 0) setShowHint(false);
-    };
+   const toggleFlip = React.useCallback(() => {
+    setIsFlipped(prev => !prev);
+    if (currentIndex === 0) setShowHint(false);
+}, [currentIndex]); // Quan trọng: Thêm currentIndex vào đây
 
     // --- XỬ LÝ VUỐT (SWIPE) ---
     const handleDragStart = (e) => {
