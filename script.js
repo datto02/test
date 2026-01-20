@@ -152,6 +152,109 @@ const useKanjiReadings = (char, active, dbData) => {
 
   return readings;
 };
+import React from 'react';
+
+// --- COMPONENT CON: HIỂN THỊ 1 THẺ ---
+// isTop: Là thẻ nằm trên cùng (thẻ đang học)
+// isNext: Là thẻ nằm dưới (chờ xuất hiện)
+const CardItem = ({ 
+    char, 
+    info, 
+    isTop, 
+    isNext,
+    isFlipped, 
+    dragX, 
+    exitDirection, 
+    handlers, 
+    onFlip, 
+    btnFeedback 
+}) => {
+    // 1. TÍNH TOÁN VISUAL CHO THẺ TRÊN CÙNG
+    const rotateDeg = dragX ? dragX * 0.05 : 0;
+    
+    // Logic mờ dần: Vuốt càng xa càng mờ. (300px là mốc mờ tịt)
+    let opacity = 1;
+    if (isTop && !exitDirection && dragX !== 0) {
+        opacity = Math.max(0, 1 - Math.abs(dragX) / 300); 
+    }
+    // Nếu đang bay ra ngoài (bấm nút hoặc vuốt xong) thì mờ dần theo animation
+    if (isTop && exitDirection) {
+        opacity = 0; 
+    }
+
+    // Logic đổi màu viền
+    const getBorderColor = () => {
+        if (!isTop) return 'white'; // Thẻ dưới luôn viền trắng
+        if (dragX > 50 || btnFeedback === 'right' || exitDirection === 'right') return '#22c55e'; // Xanh
+        if (dragX < -50 || btnFeedback === 'left' || exitDirection === 'left') return '#ef4444'; // Đỏ
+        return 'white';
+    };
+
+    // Style transform cho thẻ trên
+    const topCardStyle = {
+        transform: exitDirection 
+            ? `translateX(${exitDirection === 'right' ? 200 : -200}px) rotate(${exitDirection === 'right' ? 20 : -20}deg)` // Bay đi khi xong
+            : `translateX(${dragX}px) rotate(${rotateDeg}deg)`, // Di chuyển theo ngón tay
+        opacity: opacity,
+        zIndex: 10,
+        transition: isTop && dragX !== 0 ? 'none' : 'all 0.3s ease-out', // Không delay khi đang vuốt tay
+        cursor: 'grab'
+    };
+
+    // Style cho thẻ dưới (Nằm im, hơi nhỏ hơn 1 chút)
+    const nextCardStyle = {
+        transform: 'scale(0.95)',
+        zIndex: 5,
+        opacity: 1, // Thẻ dưới luôn hiện rõ visual, chỉ ẩn chữ
+        filter: 'brightness(0.95)', // Hơi tối hơn chút để tạo chiều sâu
+        pointerEvents: 'none' // Không cho tương tác thẻ dưới
+    };
+
+    return (
+        <div 
+            className="absolute inset-0 w-full h-full perspective-1000"
+            style={isTop ? topCardStyle : nextCardStyle}
+            {...(isTop ? handlers : {})} // Chỉ gắn sự kiện vuốt cho thẻ trên
+        >
+            <div 
+                className={`relative w-full h-full transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
+                onClick={() => { if (isTop && Math.abs(dragX) < 5) onFlip(); }}
+            >
+                {/* MẶT TRƯỚC */}
+                <div 
+                    className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center border-4 [backface-visibility:hidden] overflow-hidden"
+                    style={{ borderColor: getBorderColor(), transition: 'border-color 0.2s' }}
+                >
+                    {/* QUAN TRỌNG: Thẻ dưới (isNext) sẽ ẩn chữ (opacity-0), thẻ trên hiện bình thường */}
+                    <span className={`text-8xl font-['Klee_One'] text-gray-800 transform -translate-y-5 transition-opacity duration-200 ${isNext ? 'opacity-0' : 'opacity-100'}`}>
+                        {char}
+                    </span>
+                    
+                    {/* Hint chỉ hiện ở thẻ trên cùng, bài 1 */}
+                    {isTop && !isNext && info?.isFirst && !isFlipped && (
+                        <p className="absolute bottom-14 text-indigo-400 text-[7px] font-black uppercase tracking-[0.4em] animate-pulse">Chạm để lật</p>
+                    )}
+                </div>
+
+                {/* MẶT SAU (Chỉ render nội dung nếu là thẻ trên) */}
+                <div 
+                    className="absolute inset-0 bg-indigo-600 rounded-[2rem] shadow-2xl flex flex-col items-center justify-center p-6 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] border-4 overflow-hidden text-center"
+                    style={{ borderColor: getBorderColor() }}
+                >
+                    {!isNext && (
+                        <div className="flex-1 flex flex-col items-center justify-center w-full transform -translate-y-3">
+                            <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter leading-tight">{info?.sound || '---'}</h3>
+                            <p className="text-base opacity-90 font-medium italic leading-snug px-2">{info?.meaning || ''}</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+// --- COMPONENT CHÍNH ---
 const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
     const [originalQueue, setOriginalQueue] = React.useState([]);
     const [queue, setQueue] = React.useState([]);
@@ -162,16 +265,13 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
     const [history, setHistory] = React.useState([]); 
     const [isFinished, setIsFinished] = React.useState(false);
     const [exitDirection, setExitDirection] = React.useState(null);
-    const [showHint, setShowHint] = React.useState(true);
     const [dragX, setDragX] = React.useState(0); 
     const [startX, setStartX] = React.useState(0); 
     const [isDragging, setIsDragging] = React.useState(false);
     const [btnFeedback, setBtnFeedback] = React.useState(null);
-
-    // --- STATE & HÀM TRỘN ---
     const [isShuffleOn, setIsShuffleOn] = React.useState(false);
 
-    // Hàm trộn mảng (Fisher-Yates)
+    // Hàm trộn mảng
     const shuffleArray = React.useCallback((array) => {
         const newArr = [...array];
         for (let i = newArr.length - 1; i > 0; i--) {
@@ -181,7 +281,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         return newArr;
     }, []);
 
-    // --- KHỞI TẠO SESSION ---
+    // Khởi tạo Session
     const startNewSession = React.useCallback((chars) => {
         setQueue(chars);
         setCurrentIndex(0);
@@ -195,61 +295,33 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         setBtnFeedback(null);
     }, []);
 
-    // Khởi tạo khi mở Modal
     React.useEffect(() => {
         if (isOpen && text) {
             const chars = Array.from(text).filter(c => c.trim());
             setOriginalQueue(chars);
-            // Nếu đang bật shuffle thì trộn ngay đầu vào
             const queueToLoad = isShuffleOn ? shuffleArray(chars) : chars;
             startNewSession(queueToLoad);
-            setShowHint(true);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, text, startNewSession]); 
 
-    // --- KHÓA CUỘN NỀN ---
-    React.useEffect(() => {
-        if (isOpen) {
-            const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-            document.documentElement.style.overflow = 'hidden';
-            document.body.style.overflow = 'hidden';
-            document.body.style.paddingRight = `${scrollBarWidth}px`;
-            document.body.style.touchAction = 'none'; 
-        } else {
-            document.documentElement.style.overflow = '';
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
-            document.body.style.touchAction = '';
-        }
-        return () => {
-            document.documentElement.style.overflow = '';
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
-            document.body.style.touchAction = '';
-        };
-    }, [isOpen]);
-
-    // --- CÁC HÀM XỬ LÝ LOGIC ---
-    const toggleFlip = React.useCallback(() => {
-        setIsFlipped(prev => !prev);
-        if (currentIndex === 0) setShowHint(false);
-    }, [currentIndex]);
-
+    // Logic xử lý Next
     const handleNext = React.useCallback((isKnown) => {
         if (exitDirection || isFinished || queue.length === 0) return;
         setIsFlipped(false);
-        if (isKnown) {
-            setKnownCount(prev => prev + 1);
-        } else {
-            setUnknownIndices(prev => [...prev, currentIndex]);
-        }
+        
+        if (isKnown) setKnownCount(prev => prev + 1);
+        else setUnknownIndices(prev => [...prev, currentIndex]);
+        
         setHistory(prev => [...prev, isKnown]);
         setBtnFeedback(isKnown ? 'right' : 'left');
         setExitDirection(isKnown ? 'right' : 'left');
+
+        // Thời gian chờ animation bay đi trước khi load thẻ mới
         setTimeout(() => {
             setCurrentIndex((prevIndex) => {
                 if (prevIndex < queue.length - 1) {
+                    // Reset trạng thái cho thẻ mới
                     setExitDirection(null);
                     setDragX(0);
                     setBtnFeedback(null);
@@ -259,10 +331,10 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                     return prevIndex;
                 }
             });
-        }, 150);
+        }, 300); // 300ms khớp với transition css
     }, [currentIndex, queue, exitDirection, isFinished]);
 
-    // --- XỬ LÝ PHÍM TẮT ---
+    // Xử lý Input (Phím tắt)
     React.useEffect(() => {
         const handleKeyDown = (e) => {
             if (!isOpen || isFinished) return;
@@ -272,7 +344,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                 case 'ArrowUp':
                 case 'ArrowDown':
                     e.preventDefault();
-                    toggleFlip();
+                    setIsFlipped(p => !p);
                     break;
                 case 'ArrowLeft':
                     e.preventDefault();
@@ -285,23 +357,20 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                 case 'Escape':
                     onClose();
                     break;
-                default:
-                    break;
+                default: break;
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, isFinished, toggleFlip, handleNext, onClose]);
+    }, [isOpen, isFinished, handleNext, onClose]);
 
+    // Xử lý Back
     const handleBack = (e) => {
         if (e) { e.preventDefault(); e.stopPropagation(); e.currentTarget.blur(); }
         if (currentIndex > 0 && history.length > 0) {
             const lastIsKnown = history[history.length - 1];
-            if (lastIsKnown === true) {
-                setKnownCount(prev => Math.max(0, prev - 1));
-            } else {
-                setUnknownIndices(prev => prev.slice(0, -1));
-            }
+            if (lastIsKnown === true) setKnownCount(prev => Math.max(0, prev - 1));
+            else setUnknownIndices(prev => prev.slice(0, -1));
             setHistory(prev => prev.slice(0, -1));
             setCurrentIndex(prev => prev - 1);
             setIsFlipped(false);
@@ -311,33 +380,24 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         }
     };
 
-    // [QUAN TRỌNG] HÀM XỬ LÝ NÚT TRỘN (BẬT/TẮT)
+    // Xử lý Trộn
     const handleToggleShuffle = (e) => {
         if (e) { e.preventDefault(); e.stopPropagation(); e.currentTarget.blur(); }
-
         const nextState = !isShuffleOn;
         setIsShuffleOn(nextState);
         setBtnFeedback('shuffle');
         setTimeout(() => setBtnFeedback(null), 400);
 
-        // Chia mảng hiện tại thành 2 phần: Đã qua (passed) và Còn lại (remaining - bao gồm cả thẻ hiện tại)
         const passedPart = queue.slice(0, currentIndex);
         const remainingPart = queue.slice(currentIndex);
-
         if (remainingPart.length === 0) return;
 
         let newRemainingPart;
-
         if (nextState) {
-            // TRƯỜNG HỢP BẬT: Trộn ngay lập tức phần còn lại
             newRemainingPart = shuffleArray(remainingPart);
         } else {
-            // TRƯỜNG HỢP TẮT: Khôi phục thứ tự gốc của phần còn lại
-            // Logic: Duyệt qua originalQueue, nhặt ra những phần tử có mặt trong remainingPart
-            // Sử dụng bộ đếm (counts) để xử lý trường hợp có các ký tự trùng nhau
             const counts = {};
             remainingPart.forEach(c => { counts[c] = (counts[c] || 0) + 1; });
-            
             newRemainingPart = [];
             for (const char of originalQueue) {
                 if (counts[char] > 0) {
@@ -346,26 +406,22 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                 }
             }
         }
-
-        // Cập nhật queue mới: Giữ nguyên phần đã qua + Phần còn lại đã xử lý
         setQueue([...passedPart, ...newRemainingPart]);
-        // Reset lật thẻ vì nội dung thẻ hiện tại có thể đã thay đổi
         setIsFlipped(false);
     };
 
+    // Drag handlers
     const handleDragStart = (e) => {
         if (exitDirection || isFinished) return;
         setIsDragging(true);
         const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
         setStartX(clientX);
     };
-
     const handleDragMove = (e) => {
         if (!isDragging || exitDirection) return;
         const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
         setDragX(clientX - startX);
     };
-
     const handleDragEnd = () => {
         if (!isDragging) return;
         setIsDragging(false);
@@ -374,19 +430,17 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         else setDragX(0);
     };
 
-    const dynamicBorder = () => {
-        if (dragX > 70 || btnFeedback === 'right') return '#22c55e';
-        if (dragX < -70 || btnFeedback === 'left') return '#ef4444';
-        return 'white'; 
-    };
-
     if (!isOpen || queue.length === 0) return null;
 
-    const currentChar = queue[currentIndex] || ''; 
-    if (!currentChar && !isFinished && isOpen) {
-        setIsFinished(true);
-    }
-    const info = dbData?.KANJI_DB?.[currentChar] || dbData?.ALPHABETS?.hiragana?.[currentChar] || dbData?.ALPHABETS?.katakana?.[currentChar] || {};
+    const currentChar = queue[currentIndex];
+    const nextChar = queue[currentIndex + 1]; // Lấy thẻ tiếp theo để hiển thị bên dưới
+
+    // Helper lấy info
+    const getInfo = (char) => dbData?.KANJI_DB?.[char] || dbData?.ALPHABETS?.hiragana?.[char] || dbData?.ALPHABETS?.katakana?.[char] || {};
+    
+    const currentInfo = getInfo(currentChar);
+    // Thêm cờ isFirst để hiện hint
+    if (currentIndex === 0) currentInfo.isFirst = true;
 
     const progressRatio = currentIndex / (queue.length - 1 || 1);
 
@@ -399,138 +453,110 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
             <div className="w-full max-w-sm flex flex-col items-center">
                 {!isFinished ? (
                     <>
-                        <div 
-                            className={`relative transition-all duration-300 ease-in-out ${
-                             exitDirection === 'left' ? '-translate-x-16 -rotate-3' : 
-                             exitDirection === 'right' ? 'translate-x-16 rotate-3' : ''
-                            }`}
-                            style={{ 
-                               transform: !exitDirection && dragX !== 0 ? `translateX(${dragX}px) rotate(${dragX * 0.02}deg)` : '',
-                              transition: isDragging ? 'none' : 'all 0.25s ease-out'
-                            }}
-                        >
-                            <div 
-                                onClick={() => { if (Math.abs(dragX) < 5) toggleFlip(); }}
-                                onMouseDown={handleDragStart}
-                                onMouseMove={handleDragMove}
-                                onMouseUp={handleDragEnd}
-                                onMouseLeave={handleDragEnd}
-                                onTouchStart={handleDragStart}
-                                onTouchMove={handleDragMove}
-                                onTouchEnd={handleDragEnd}
-                                className={`relative w-64 h-80 cursor-pointer transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
-                            >
-                                <div 
-                                    className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center border-4 [backface-visibility:hidden] overflow-hidden"
-                                    style={{ borderColor: dynamicBorder() }}
+                        {/* CONTAINER CHỨA THẺ - Relative để xếp chồng absolute */}
+                        <div className="relative w-64 h-80 mb-6">
+                            
+                            {/* 1. THẺ DƯỚI (NEXT CARD) */}
+                            {nextChar && (
+                                <CardItem 
+                                    char={nextChar}
+                                    info={{}} // Không cần info vì chưa hiện
+                                    isTop={false}
+                                    isNext={true}
+                                    isFlipped={false}
+                                    dragX={0} // Thẻ dưới đứng im
+                                    exitDirection={null}
+                                    handlers={{}}
+                                    onFlip={() => {}}
+                                    btnFeedback={null}
+                                />
+                            )}
+
+                            {/* 2. THẺ TRÊN CÙNG (CURRENT CARD) */}
+                            <CardItem 
+                                char={currentChar}
+                                info={currentInfo}
+                                isTop={true}
+                                isNext={false}
+                                isFlipped={isFlipped}
+                                dragX={dragX}
+                                exitDirection={exitDirection}
+                                btnFeedback={btnFeedback}
+                                onFlip={() => setIsFlipped(prev => !prev)}
+                                handlers={{
+                                    onMouseDown: handleDragStart,
+                                    onMouseMove: handleDragMove,
+                                    onMouseUp: handleDragEnd,
+                                    onMouseLeave: handleDragEnd,
+                                    onTouchStart: handleDragStart,
+                                    onTouchMove: handleDragMove,
+                                    onTouchEnd: handleDragEnd
+                                }}
+                            />
+
+                            {/* Nút Back & Shuffle đặt đè lên góc dưới của container thẻ (tùy chỉnh vị trí nếu cần) */}
+                            <div className={`absolute -bottom-16 left-0 right-0 flex justify-between px-6 transition-opacity duration-200 ${isFlipped ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                                <button 
+                                    onClick={handleBack} 
+                                    className={`p-2.5 bg-white/10 hover:bg-white/20 rounded-full transition-all text-gray-400 hover:text-white ${currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                    disabled={currentIndex === 0}
                                 >
-                                    <span className="text-8xl font-['Klee_One'] text-gray-800 transform -translate-y-5">{currentChar}</span>
-                                    {currentIndex === 0 && showHint && (
-                                        <p className="absolute bottom-14 text-indigo-400 text-[7px] font-black uppercase tracking-[0.4em] animate-pulse">Chạm để lật</p>
-                                    )}
-                                    <div className={`absolute bottom-5 left-0 right-0 px-6 items-center z-50 ${isFlipped ? 'hidden sm:flex' : 'flex'} justify-between`}>
-                                        <button 
-                                            onClick={handleBack} 
-                                            className={`p-2.5 bg-black/5 hover:bg-black/10 active:scale-90 rounded-full transition-all flex items-center justify-center ${currentIndex === 0 ? 'opacity-10 cursor-not-allowed' : 'text-gray-400 hover:text-gray-700'}`}
-                                            disabled={currentIndex === 0}
-                                        >
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="pointer-events-none"><path d="M9 14 4 9l5-5"/><path d="M4 9h12a5 5 0 0 1 0 10H7"/></svg>
-                                        </button>
-                                        
-                                        {/* Nút Toggle Trộn thẻ */}
-                                        <button 
-                                            onClick={handleToggleShuffle} 
-                                            className={`p-2.5 bg-black/5 hover:bg-black/10 active:scale-90 rounded-full transition-all flex items-center justify-center ${isShuffleOn ? 'bg-indigo-100 text-indigo-600' : 'text-gray-400 hover:text-gray-700'}`}
-                                        >
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`pointer-events-none ${btnFeedback === 'shuffle' ? 'animate-[spin_0.4s_linear_infinite]' : ''}`}><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div 
-                                    className="absolute inset-0 bg-indigo-600 rounded-[2rem] shadow-2xl flex flex-col items-center justify-center p-6 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] border-4 overflow-hidden text-center"
-                                    style={{ borderColor: dynamicBorder() }}
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M9 14 4 9l5-5"/><path d="M4 9h12a5 5 0 0 1 0 10H7"/></svg>
+                                </button>
+                                <button 
+                                    onClick={handleToggleShuffle} 
+                                    className={`p-2.5 bg-white/10 hover:bg-white/20 rounded-full transition-all ${isShuffleOn ? 'text-indigo-400' : 'text-gray-400 hover:text-white'}`}
                                 >
-                                    <div className="flex-1 flex flex-col items-center justify-center w-full transform -translate-y-3">
-                                        <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter leading-tight">{info.sound || '---'}</h3>
-                                        <p className="text-base opacity-90 font-medium italic leading-snug px-2">{info.meaning || ''}</p>
-                                    </div>
-                                </div>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`${btnFeedback === 'shuffle' ? 'animate-spin' : ''}`}><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
+                                </button>
                             </div>
                         </div>
 
+                        {/* KHOẢNG TRỐNG ĐỂ BÙ CHO BUTTONS BỊ ĐẨY XUỐNG */}
+                        <div className="h-10"></div>
+
                         {/* THANH TIẾN TRÌNH */}
-                        <div className="w-64 mt-8 mb-6 relative h-6 flex items-center">
-                            {/* Thanh nền (Màu xám mờ) */}
+                        <div className="w-64 mb-6 relative h-6 flex items-center">
                             <div className="w-full h-1 bg-white/10 rounded-full relative overflow-hidden">
-                                {/* [MỚI] Thanh đã đi qua (Tô màu xanh) */}
-                                <div 
-                                    className="absolute top-0 left-0 h-full bg-sky-400 transition-all duration-300 ease-out"
-                                    style={{ width: `${progressRatio * 100}%` }}
-                                />
+                                <div className="absolute top-0 left-0 h-full bg-sky-400 transition-all duration-300 ease-out" style={{ width: `${progressRatio * 100}%` }} />
                             </div>
-
-                            {/* [HỘP SỐ] Tổng số thẻ (Bên phải) */}
-                            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-full h-1 pointer-events-none">
-                                <div className="absolute right-0 top-1/2 -translate-y-1/2 h-7 w-9 rounded-md flex items-center justify-center bg-white shadow-sm z-0">
-                                    <span className="text-[10px] font-black text-black leading-none">{queue.length}</span>
-                                </div>
+                            <div className="absolute right-0 top-1/2 -translate-y-1/2 h-7 w-9 rounded-md flex items-center justify-center bg-white shadow-sm z-0">
+                                <span className="text-[10px] font-black text-black leading-none">{queue.length}</span>
                             </div>
-
-                            {/* [HỘP SỐ] Thẻ hiện tại (Cục trượt màu xanh) */}
-                            <div className="absolute top-1/2 -translate-y-1/2 w-full h-1 pointer-events-none">
-                                <div 
-                                    className="absolute top-1/2 -translate-y-1/2 h-7 w-9 bg-sky-400 rounded-md flex items-center justify-center shadow-[0_0_15px_rgba(56,189,248,0.8)] transition-all duration-300 ease-out z-10"
-                                    style={{ 
-                                        left: `calc(${progressRatio * 100}% - ${progressRatio * 36}px)` 
-                                    }}
-                                >
-                                    <span className="text-[10px] font-black text-white leading-none">{currentIndex + 1}</span>
-                                </div>
+                            <div className="absolute top-1/2 -translate-y-1/2 h-7 w-9 bg-sky-400 rounded-md flex items-center justify-center shadow-[0_0_15px_rgba(56,189,248,0.8)] transition-all duration-300 ease-out z-10" style={{ left: `calc(${progressRatio * 100}% - ${progressRatio * 36}px)` }}>
+                                <span className="text-[10px] font-black text-white leading-none">{currentIndex + 1}</span>
                             </div>
                         </div>
 
                         {/* NÚT ĐIỀU HƯỚNG */}
                         <div className="flex gap-3 w-full px-8">
-                            <button onClick={() => handleNext(false)} className="flex-1 py-3 bg-red-500/10 hover:bg-red-500/20 hover:text-red-600 active:bg-red-500 text-red-500 active:text-white border border-red-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase">
-                                ĐANG HỌC <span className="bg-red-600 text-white min-w-[28px] h-6 px-2 rounded-md flex items-center justify-center text-[10px] font-bold shadow-sm">{unknownIndices.length}</span>
+                            <button onClick={() => handleNext(false)} className="flex-1 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl font-black text-[10px] uppercase transition-all active:scale-95 flex justify-center items-center gap-2">
+                                ĐANG HỌC <span className="bg-red-600 text-white px-2 h-5 rounded flex items-center">{unknownIndices.length}</span>
                             </button>
-                            <button onClick={() => handleNext(true)} className="flex-1 py-3 bg-green-500/10 hover:bg-green-500/20 hover:text-green-600 active:bg-green-500 text-green-500 active:text-white border border-green-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase">
-                                ĐÃ BIẾT <span className="bg-green-600 text-white min-w-[28px] h-6 px-2 rounded-md flex items-center justify-center text-[10px] font-bold shadow-sm">{knownCount}</span>
+                            <button onClick={() => handleNext(true)} className="flex-1 py-3 bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/20 rounded-xl font-black text-[10px] uppercase transition-all active:scale-95 flex justify-center items-center gap-2">
+                                ĐÃ BIẾT <span className="bg-green-600 text-white px-2 h-5 rounded flex items-center">{knownCount}</span>
                             </button>
                         </div>
 
                         {/* NÚT ĐÓNG */}
-                        <button 
-                            onClick={onClose} 
-                            className="mt-8 text-white/40 hover:text-red-500 transition-all text-[13px] sm:text-[11px] font-black uppercase tracking-[0.2em] py-2 px-4 active:scale-95"
-                        >
-                            Đóng thẻ
-                        </button>
+                        <button onClick={onClose} className="mt-8 text-white/40 hover:text-red-500 transition-all text-[11px] font-black uppercase tracking-[0.2em]">Đóng thẻ</button>
                     </>
                 ) : (
+                    // MÀN HÌNH HOÀN THÀNH (GIỮ NGUYÊN)
                     <div className="bg-white rounded-[2rem] p-8 w-full max-w-[280px] text-center shadow-2xl border-4 border-indigo-50 animate-in zoom-in-95">
                         <div className="text-5xl mb-4 animate-bounce">🎉</div>
                         <h3 className="text-lg font-black text-gray-800 mb-1 uppercase">Hoàn thành</h3>
                         <p className="text-gray-400 mb-6 text-[11px] font-medium italic">Bạn đã học được {knownCount}/{queue.length} chữ.</p>
                         <div className="space-y-2">
                             {unknownIndices.length > 0 && (
-                                <button 
-                                    onClick={() => startNewSession(isShuffleOn ? shuffleArray(unknownIndices.map(idx => queue[idx])) : unknownIndices.map(idx => queue[idx]))} 
-                                    className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-[11px] shadow-lg active:scale-95 transition-colors"
-                                >
+                                <button onClick={() => startNewSession(isShuffleOn ? shuffleArray(unknownIndices.map(idx => queue[idx])) : unknownIndices.map(idx => queue[idx]))} className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-[11px] shadow-lg active:scale-95 transition-colors">
                                     ÔN LẠI {unknownIndices.length} THẺ ĐANG HỌC
                                 </button>
                             )}
-                            <button 
-                                onClick={() => startNewSession(isShuffleOn ? shuffleArray(originalQueue) : originalQueue)} 
-                                className="w-full py-3.5 bg-blue-50 border-2 border-blue-100 text-blue-500 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-700 rounded-xl font-black text-[11px] transition-all active:scale-95"
-                            >
+                            <button onClick={() => startNewSession(isShuffleOn ? shuffleArray(originalQueue) : originalQueue)} className="w-full py-3.5 bg-blue-50 border-2 border-blue-100 text-blue-500 hover:bg-blue-100 hover:border-blue-300 rounded-xl font-black text-[11px] transition-all active:scale-95">
                                 HỌC LẠI TỪ ĐẦU
                             </button>
-                            <button 
-                                onClick={onClose} 
-                                className="w-full py-3.5 bg-white border-2 border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-600 font-black text-[11px] uppercase tracking-widest rounded-xl transition-all active:scale-95"
-                            >
+                            <button onClick={onClose} className="w-full py-3.5 bg-white border-2 border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-600 font-black text-[11px] uppercase tracking-widest rounded-xl transition-all active:scale-95">
                                 THOÁT
                             </button>
                         </div>
