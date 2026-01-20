@@ -242,7 +242,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                     return prevIndex;
                 }
             });
-        }, 250); 
+        }, 150);
     }, [currentIndex, queue, exitDirection, isFinished]);
 
     // --- XỬ LÝ PHÍM TẮT ---
@@ -358,12 +358,12 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                     <>
                         <div 
                             className={`relative transition-all duration-300 ease-in-out ${
-                                exitDirection === 'left' ? '-translate-x-[120%] -rotate-6' : 
-                                exitDirection === 'right' ? 'translate-x-[120%] rotate-6' : ''
+                               exitDirection === 'left' ? '-translate-x-16 -rotate-3 opacity-0' : 
+exitDirection === 'right' ? 'translate-x-16 rotate-3 opacity-0' : ''
                             }`}
                             style={{ 
                                transform: !exitDirection && dragX !== 0 ? `translateX(${dragX}px) rotate(${dragX * 0.02}deg)` : '',
-                               transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)'
+                              transition: isDragging ? 'none' : 'all 0.25s ease-out'
                             }}
                         >
                             <div 
