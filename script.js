@@ -182,51 +182,78 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         setBtnFeedback(null);
     }, []);
 
-  // --- FIX: KHÓA CUỘN NỀN KHI MỞ MODAL ---
+// --- FIX: KHÓA CUỘN NỀN TRIỆT ĐỂ ---
 React.useEffect(() => {
     if (isOpen) {
-        // Khóa cuộn trên PC
+        // Khóa cuộn trên cả html và body
+        const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+        document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
-        // Khóa các hành vi vuốt mặc định trên Mobile (như kéo để tải lại trang)
+        document.body.style.paddingRight = `${scrollBarWidth}px`; // Tránh giật màn hình trên PC
         document.body.style.touchAction = 'none'; 
     } else {
-        // Mở lại khi đóng
-        document.body.style.overflow = 'unset';
-        document.body.style.touchAction = 'auto';
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        document.body.style.touchAction = '';
     }
 
-    // Cleanup: Đảm bảo nền được mở lại nếu Component bị gỡ bỏ đột ngột
     return () => {
-        document.body.style.overflow = 'unset';
-        document.body.style.touchAction = 'auto';
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        document.body.style.touchAction = '';
     };
 }, [isOpen]);
+  const handleNext = (isKnown) => {
+    if (exitDirection || isFinished) return;
 
-    // --- XỬ LÝ CHUYỂN THẺ TIẾP THEO ---
-    const handleNext = (isKnown) => {
-        if (exitDirection || isFinished) return;
+    // Cập nhật dữ liệu NGAY LẬP TỨC để handleBack có thể lấy dữ liệu
+    if (isKnown) setKnownCount(prev => prev + 1);
+    else setUnknownIndices(prev => [...prev, currentIndex]);
+    setHistory(prev => [...prev, isKnown]);
+
+    setBtnFeedback(isKnown ? 'right' : 'left');
+    setExitDirection(isKnown ? 'right' : 'left');
+
+    setTimeout(() => {
+        if (currentIndex < queue.length - 1) {
+            setIsFlipped(false);
+            setCurrentIndex(prev => prev + 1);
+            setExitDirection(null);
+            setDragX(0);
+            setBtnFeedback(null);
+        } else {
+            setIsFinished(true);
+        }
+    }, 200);
+};
+
+const handleBack = (e) => {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    // Kiểm tra lịch sử để hồi lại dữ liệu
+    if (currentIndex > 0 && history.length > 0) {
+        const lastIsKnown = history[history.length - 1];
         
-        setBtnFeedback(isKnown ? 'right' : 'left');
-        setExitDirection(isKnown ? 'right' : 'left');
+        if (lastIsKnown === true) {
+            setKnownCount(prev => Math.max(0, prev - 1));
+        } else {
+            setUnknownIndices(prev => prev.slice(0, -1));
+        }
 
-        setTimeout(() => {
-            // Cập nhật thống kê và lịch sử
-            if (isKnown) setKnownCount(prev => prev + 1);
-            else setUnknownIndices(prev => [...prev, currentIndex]);
-            
-            setHistory(prev => [...prev, isKnown]);
-
-            if (currentIndex < queue.length - 1) {
-                setIsFlipped(false);
-                setCurrentIndex(prev => prev + 1);
-                setExitDirection(null);
-                setDragX(0);
-                setBtnFeedback(null);
-            } else {
-                setIsFinished(true);
-            }
-        }, 200);
-    };
+        setHistory(prev => prev.slice(0, -1));
+        setCurrentIndex(prev => prev - 1);
+        
+        setIsFlipped(false);
+        setExitDirection(null);
+        setDragX(0);
+        setBtnFeedback(null);
+    }
+};
 
     // --- SỬA LỖI: QUAY LẠI THẺ TRƯỚC ---
     const handleBack = (e) => {
@@ -257,43 +284,33 @@ React.useEffect(() => {
         }
     };
 
-   // --- FIX: XỬ LÝ TRỘN THẺ HIỆN TẠI VÀ CÁC THẺ CÒN LẠI ---
 const handleShuffle = (e) => {
     if (e) {
         e.preventDefault();
-        e.stopPropagation(); // Chặn lật thẻ khi bấm nút
+        e.stopPropagation();
     }
 
-    // 1. Lấy danh sách các thẻ đã học xong (nằm trước currentIndex)
+    // Lấy phần đã học xong (passed) và phần còn lại (bao gồm cả thẻ hiện tại)
     const passedPart = queue.slice(0, currentIndex);
-    
-    // 2. Lấy danh sách thẻ bao gồm thẻ HIỆN TẠI và các thẻ CHƯA HỌC
     const poolToShuffle = queue.slice(currentIndex);
 
-    if (poolToShuffle.length <= 1) return; // Không đủ thẻ để trộn
+    if (poolToShuffle.length <= 1) return;
 
-    // 3. Thuật toán trộn Fisher-Yates cho poolToShuffle
+    // Trộn poolToShuffle
     const shuffledPool = [...poolToShuffle];
     for (let i = shuffledPool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
     }
 
-    // 4. Cập nhật lại Queue: Giữ nguyên phần đã qua + Phần mới đã trộn
     setQueue([...passedPart, ...shuffledPool]);
 
-    // 5. Quan trọng: Reset mặt thẻ về mặt chữ (tránh việc thẻ mới hiện ra ở mặt nghĩa)
+    // Reset về mặt chữ vì thẻ hiện tại đã bị thay đổi thành chữ khác
     setIsFlipped(false);
 
-    // 6. Hiệu ứng phản hồi
     setBtnFeedback('shuffle');
     setTimeout(() => setBtnFeedback(null), 500);
 };
-
-    const toggleFlip = () => {
-        setIsFlipped(!isFlipped);
-        if (currentIndex === 0) setShowHint(false);
-    };
 
     // --- XỬ LÝ VUỐT (SWIPE) ---
     const handleDragStart = (e) => {
