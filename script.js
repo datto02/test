@@ -193,7 +193,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
         if (isFinished && isOpen) {
             triggerConfetti();
         }
-    }, [isFinished, isOpen, triggerConfetti]);
+    }, [isFinished, triggerConfetti]);
 
 
     // Hàm trộn mảng (Fisher-Yates)
