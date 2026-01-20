@@ -227,6 +227,12 @@ transition: color 0.2s ease;
 [transform-style="preserve-3d"] {
     perspective: 1000px;
 }
+/* Ngăn iPhone tự động zoom khi nhập liệu */
+@media screen and (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
 
 /* Hiệu ứng hover cho thumb tiến độ */
 .progress-thumb-animate {
