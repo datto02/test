@@ -152,7 +152,7 @@ const useKanjiReadings = (char, active, dbData) => {
 
   return readings;
 };
-import React from 'react';
+
 
 // --- COMPONENT CON: HIỂN THỊ 1 THẺ ---
 // isTop: Là thẻ nằm trên cùng (thẻ đang học)
