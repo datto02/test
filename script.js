@@ -152,107 +152,6 @@ const useKanjiReadings = (char, active, dbData) => {
 
   return readings;
 };
-
-
-
-// --- COMPONENT CON: CARD ITEM (ĐÃ SỬA THEO YÊU CẦU) ---
-const CardItem = ({ 
-    char, 
-    info, 
-    isTop, 
-    isNext,
-    isFlipped, 
-    dragX, 
-    exitDirection, 
-    handlers, 
-    onFlip, 
-    btnFeedback 
-}) => {
-    // 1. Logic xoay nhẹ khi vuốt
-    const rotateDeg = dragX ? dragX * 0.05 : 0;
-    
-    // 2. Logic Opacity (Độ mờ)
-    let opacity = 1;
-    
-    // Nếu là thẻ trên cùng và đang vuốt -> Mờ dần theo khoảng cách
-    if (isTop && !exitDirection && dragX !== 0) {
-        opacity = Math.max(0, 1 - Math.abs(dragX) / 150); 
-    }
-
-    // [YÊU CẦU 1]: Nếu đã có hướng bay (thả tay ra/bấm nút) -> BIẾN MẤT LUÔN
-    if (isTop && exitDirection) {
-        opacity = 0; 
-    }
-
-    // Logic đổi màu viền
-    const getBorderColor = () => {
-        if (!isTop) return 'white'; 
-        if (dragX > 50 || btnFeedback === 'right' || exitDirection === 'right') return '#22c55e'; // Xanh
-        if (dragX < -50 || btnFeedback === 'left' || exitDirection === 'left') return '#ef4444'; // Đỏ
-        return 'white';
-    };
-
-    // Style cho thẻ trên cùng
-    const topCardStyle = {
-        transform: `translateX(${dragX}px) rotate(${rotateDeg}deg)`, // Chỉ di chuyển, không bay xa thêm
-        opacity: opacity, // Áp dụng độ mờ
-        zIndex: 10,
-        transition: isTop && dragX !== 0 ? 'none' : 'opacity 0.15s ease-out', // Fade out nhanh
-        cursor: 'grab'
-    };
-
-    // Style cho thẻ dưới (Nằm im)
-    const nextCardStyle = {
-        transform: 'scale(0.95)',
-        zIndex: 5,
-        opacity: 1, 
-        filter: 'brightness(0.95)', 
-        pointerEvents: 'none' 
-    };
-
-    return (
-        <div 
-            className="absolute inset-0 w-full h-full perspective-1000"
-            style={isTop ? topCardStyle : nextCardStyle}
-            {...(isTop ? handlers : {})} 
-        >
-            <div 
-                className={`relative w-full h-full transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
-                onClick={() => { if (isTop && Math.abs(dragX) < 5) onFlip(); }}
-            >
-                {/* MẶT TRƯỚC */}
-                <div 
-                    className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center border-4 [backface-visibility:hidden] overflow-hidden"
-                    style={{ borderColor: getBorderColor(), transition: 'border-color 0.2s' }}
-                >
-                    {/* [YÊU CẦU 2]: Thẻ dưới (isNext) ẩn chữ, khi lên top (isTop) tự hiện */}
-                    <span className={`text-8xl font-['Klee_One'] text-gray-800 transform -translate-y-5 transition-opacity duration-200 ${isNext ? 'opacity-0' : 'opacity-100'}`}>
-                        {char}
-                    </span>
-                    
-                    {/* Hint chỉ hiện ở thẻ trên cùng, bài 1 */}
-                    {isTop && !isNext && info?.isFirst && !isFlipped && (
-                        <p className="absolute bottom-14 text-indigo-400 text-[7px] font-black uppercase tracking-[0.4em] animate-pulse">Chạm để lật</p>
-                    )}
-                </div>
-
-                {/* MẶT SAU */}
-                <div 
-                    className="absolute inset-0 bg-indigo-600 rounded-[2rem] shadow-2xl flex flex-col items-center justify-center p-6 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] border-4 overflow-hidden text-center"
-                    style={{ borderColor: getBorderColor() }}
-                >
-                    {!isNext && (
-                        <div className="flex-1 flex flex-col items-center justify-center w-full transform -translate-y-3">
-                            <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter leading-tight">{info?.sound || '---'}</h3>
-                            <p className="text-base opacity-90 font-medium italic leading-snug px-2">{info?.meaning || ''}</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
-
 const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
     const [originalQueue, setOriginalQueue] = React.useState([]);
     const [queue, setQueue] = React.useState([]);
@@ -501,13 +400,10 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                 {!isFinished ? (
                     <>
                         <div 
-                            // === ĐÂY LÀ PHẦN SỬA ĐỔI DUY NHẤT ===
-                            // Áp dụng hiệu ứng bay hẳn ra ngoài (swipe) thay vì chỉ nhích nhẹ
                             className={`relative transition-all duration-300 ease-in-out ${
-                                exitDirection === 'left' ? '-translate-x-[150%] -rotate-12 opacity-0' : 
-                                exitDirection === 'right' ? 'translate-x-[150%] rotate-12 opacity-0' : ''
+                             exitDirection === 'left' ? '-translate-x-16 -rotate-3' : 
+                             exitDirection === 'right' ? 'translate-x-16 rotate-3' : ''
                             }`}
-                            // ====================================
                             style={{ 
                                transform: !exitDirection && dragX !== 0 ? `translateX(${dragX}px) rotate(${dragX * 0.02}deg)` : '',
                               transition: isDragging ? 'none' : 'all 0.25s ease-out'
@@ -613,7 +509,23 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                     </>
                 ) : (
                     <div className="bg-white rounded-[2rem] p-8 w-full max-w-[280px] text-center shadow-2xl border-4 border-indigo-50 animate-in zoom-in-95">
-                        <div className="text-5xl mb-4 animate-bounce">🎉</div>
+                        
+                        {/* --- [MỚI] THANH TỈ LỆ % --- */}
+                        <div className="w-full flex items-center gap-3 mb-5">
+                            {/* Thanh Bar: Nền đỏ (Đang học), Lớp phủ xanh (Đã thuộc) */}
+                            <div className="flex-1 h-4 bg-red-500 rounded-full overflow-hidden relative shadow-inner">
+                                <div 
+                                    className="h-full bg-green-500 transition-all duration-1000 ease-out"
+                                    style={{ width: `${Math.round((knownCount / queue.length) * 100)}%` }}
+                                />
+                            </div>
+                            {/* Số % */}
+                            <span className="text-sm font-black text-gray-600 min-w-[2.5rem] text-right">
+                                {Math.round((knownCount / queue.length) * 100)}%
+                            </span>
+                        </div>
+                        {/* --------------------------- */}
+
                         <h3 className="text-lg font-black text-gray-800 mb-1 uppercase">Hoàn thành</h3>
                         <p className="text-gray-400 mb-6 text-[11px] font-medium italic">Bạn đã học được {knownCount}/{queue.length} chữ.</p>
                         <div className="space-y-2">
