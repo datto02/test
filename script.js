@@ -242,7 +242,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                     return prevIndex;
                 }
             });
-        }, 150); 
+        }, 250); 
     }, [currentIndex, queue, exitDirection, isFinished]);
 
     // --- XỬ LÝ PHÍM TẮT ---
@@ -357,10 +357,9 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                 {!isFinished ? (
                     <>
                         <div 
-                            key={currentIndex}
-                            className={`relative transition-all duration-200 ease-out ${
-                                exitDirection === 'left' ? '-translate-x-10 -rotate-6 opacity-0' : 
-                                exitDirection === 'right' ? 'translate-x-10 rotate-6 opacity-0' : ''
+                            className={`relative transition-all duration-300 ease-in-out ${
+                                exitDirection === 'left' ? '-translate-x-[150%] -rotate-12' : 
+                                exitDirection === 'right' ? 'translate-x-[150%] rotate-12' : ''
                             }`}
                             style={{ 
                                 transform: !exitDirection && dragX !== 0 ? `translateX(${dragX}px) rotate(${dragX * 0.05}deg)` : '',
