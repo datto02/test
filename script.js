@@ -2,40 +2,38 @@ const removeAccents = (str) => {
 return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
 };
     const { useState, useEffect, useMemo, useRef } = React;
-// --- CẤU HÌNH SRS ---
-const SRS_STEPS = [1, 3, 5, 7]; // Chu kỳ ngày: 1 -> 3 -> 5 -> 7
-
-// Hàm tính thời gian 5:00 sáng của N ngày sau
-const getNext5AM = (daysToAdd) => {
-    const date = new Date();
-    date.setDate(date.getDate() + daysToAdd); // Cộng thêm số ngày
-    date.setHours(5, 0, 0, 0); // Đặt về 5 giờ 00 phút 00 giây sáng
-    return date.getTime();
+// Cấu hình khoảng cách ngày cho các cấp độ (Again, Hard, Good, Easy)
+const SRS_INTERVALS = {
+  0: 0,    // Again: Học lại ngay
+  1: 2,    // Hard: 2 ngày sau
+  2: 4,    // Good: 4 ngày sau
+  3: 7     // Easy: 7 ngày sau
 };
 
-const calculateSRS = (currentData, isKnown) => {
-    let { step = -1 } = currentData || {};
+const calculateSRS = (currentData, quality) => {
+  // quality: 0 (Again), 1 (Hard), 2 (Good), 3 (Easy)
+  let { level = 0, interval = 0, easeFactor = 2.5 } = currentData || {};
 
-    if (!isKnown) {
-        // Nếu "Đang học": Giữ nguyên step, KHÔNG lưu thời gian tương lai (vì phải học ngay)
-        // Trả về false để App biết không cần xóa hay cập nhật ngày xa
-        return { isFinished: false, reset: true };
-    } else {
-        // Nếu "Đã biết": Tăng bước
-        const nextStep = step + 1;
+  if (quality === 0) {
+    interval = 0;
+    level = 0;
+  } else {
+    // Thuật toán SM-2 đơn giản hóa
+    if (level === 0) interval = 1;
+    else if (level === 1) interval = SRS_INTERVALS[quality];
+    else interval = Math.round(interval * easeFactor * (quality / 2));
+    
+    level += 1;
+    // Điều chỉnh độ dễ (Ease Factor)
+    easeFactor = easeFactor + (0.1 - (3 - quality) * (0.08 + (3 - quality) * 0.02));
+  }
 
-        // Nếu vượt quá bước cuối (7 ngày) -> Tốt nghiệp
-        if (nextStep >= SRS_STEPS.length) {
-            return { isFinished: true };
-        }
-
-        // Tính ngày ôn tiếp theo (5h sáng)
-        return {
-            step: nextStep,
-            nextReview: getNext5AM(SRS_STEPS[nextStep]),
-            isFinished: false
-        };
-    }
+  return {
+    level,
+    interval,
+    nextReview: Date.now() + interval * 24 * 60 * 60 * 1000,
+    easeFactor: Math.max(1.3, easeFactor)
+  };
 };
  // --- FETCH DATA FROM GITHUB --- 
 const fetchDataFromGithub = async () => {
@@ -296,41 +294,29 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
     }, [currentIndex]);
 
     const handleNext = React.useCallback((isKnown) => {
-        if (exitDirection || isFinished) return;
-
-        if (!isKnown) {
-            // NẾU BẤM "ĐANG HỌC": Đẩy xuống cuối hàng đợi
-            setBtnFeedback('left');
-            setExitDirection('left');
-            
-            setTimeout(() => {
-                const currentChar = queue[currentIndex];
-                const newQueue = [...queue];
-                newQueue.push(currentChar); // Thêm vào cuối để học lại
-                
-                setQueue(newQueue);
-                setCurrentIndex(prev => prev + 1);
-                setIsFlipped(false);
-                setExitDirection(null);
-                setBtnFeedback(null);
-            }, 150);
-        } else {
-            // NẾU BẤM "ĐÃ BIẾT": Chuyển sang chữ tiếp theo
+        if (exitDirection || isFinished || queue.length === 0) return;
+        setIsFlipped(false);
+        if (isKnown) {
             setKnownCount(prev => prev + 1);
-            setBtnFeedback('right');
-            setExitDirection('right');
-
-            setTimeout(() => {
-                if (currentIndex < queue.length - 1) {
-                    setCurrentIndex(prev => prev + 1);
-                    setIsFlipped(false);
+        } else {
+            setUnknownIndices(prev => [...prev, currentIndex]);
+        }
+        setHistory(prev => [...prev, isKnown]);
+        setBtnFeedback(isKnown ? 'right' : 'left');
+        setExitDirection(isKnown ? 'right' : 'left');
+        setTimeout(() => {
+            setCurrentIndex((prevIndex) => {
+                if (prevIndex < queue.length - 1) {
                     setExitDirection(null);
+                    setDragX(0);
                     setBtnFeedback(null);
+                    return prevIndex + 1;
                 } else {
                     setIsFinished(true);
+                    return prevIndex;
                 }
-            }, 150);
-        }
+            });
+        }, 150);
     }, [currentIndex, queue, exitDirection, isFinished]);
 
     // --- XỬ LÝ PHÍM TẮT ---
@@ -560,33 +546,44 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
                             </div>
                         </div>
 
-                       {/* NÚT ĐIỀU HƯỚNG SRS */}
-                        <div className="flex gap-3 w-full px-8">
-                            {/* Nút ĐANG HỌC: Lặp lại trong phiên này */}
-                            <button 
-                                onClick={() => { 
-                                    // Không gọi onSrsUpdate để không lưu vào DB, chỉ lặp lại trong queue
-                                    handleNext(false); 
-                                }} 
-                                className="flex-1 py-3 bg-red-500/10 hover:bg-red-500/20 hover:text-red-600 active:bg-red-500 text-red-500 active:text-white border border-red-500/20 rounded-xl font-black text-[10px] transition-all flex flex-col items-center justify-center uppercase"
-                            >
-                                ĐANG HỌC
-                                <span className="text-[7px] opacity-70">Lặp lại ngay</span>
-                            </button>
+                        {/* NÚT ĐIỀU HƯỚNG */}
+                       <div className="grid grid-cols-2 gap-3 w-full px-8 mt-2">
+    {/* Nút 0: Quên - Coi như chưa biết, sẽ hiện lại sớm nhất */}
+    <button 
+        onClick={() => { onSrsUpdate(currentChar, 0); handleNext(false); }} 
+        className="flex flex-col items-center justify-center py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-xl transition-all active:scale-95"
+    >
+        <span className="text-red-600 font-black text-[11px]">QUÊN</span>
+        <span className="text-red-400 text-[8px] font-bold italic">HỌC LẠI</span>
+    </button>
 
-                            {/* Nút ĐÃ BIẾT: Lưu vào SRS, hẹn 5h sáng hôm sau */}
-                            <button 
-                                onClick={() => { 
-                                    onSrsUpdate(currentChar, true); // Lưu vào SRS
-                                    handleNext(true); // Chuyển thẻ
-                                }} 
-                                className="flex-1 py-3 bg-green-500/10 hover:bg-green-500/20 hover:text-green-600 active:bg-green-500 text-green-500 active:text-white border border-green-500/20 rounded-xl font-black text-[10px] transition-all flex flex-col items-center justify-center uppercase"
-                            >
-                                ĐÃ BIẾT
-                                <span className="text-[7px] opacity-70">Qua cấp tiếp theo</span>
-                            </button>
-                        </div>
+    {/* Nút 1: Khó - Nhớ nhưng vất vả */}
+    <button 
+        onClick={() => { onSrsUpdate(currentChar, 1); handleNext(true); }} 
+        className="flex flex-col items-center justify-center py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded-xl transition-all active:scale-95"
+    >
+        <span className="text-orange-600 font-black text-[11px]">KHÓ</span>
+        <span className="text-orange-400 text-[8px] font-bold italic">2 NGÀY SAU</span>
+    </button>
 
+    {/* Nút 2: Tốt - Nhớ bình thường */}
+    <button 
+        onClick={() => { onSrsUpdate(currentChar, 2); handleNext(true); }} 
+        className="flex flex-col items-center justify-center py-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 rounded-xl transition-all active:scale-95"
+    >
+        <span className="text-green-600 font-black text-[11px]">TỐT</span>
+        <span className="text-green-400 text-[8px] font-bold italic">4 NGÀY SAU</span>
+    </button>
+
+    {/* Nút 3: Dễ - Nhớ tức thì */}
+    <button 
+        onClick={() => { onSrsUpdate(currentChar, 3); handleNext(true); }} 
+        className="flex flex-col items-center justify-center py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-xl transition-all active:scale-95"
+    >
+        <span className="text-blue-600 font-black text-[11px]">DỄ</span>
+        <span className="text-blue-400 text-[8px] font-bold italic">7 NGÀY SAU</span>
+    </button>
+</div>
                         {/* NÚT ĐÓNG */}
                         <button 
                             onClick={onClose} 
@@ -1047,41 +1044,27 @@ return (
     };
 
 // 5. Sidebar (Phiên bản: Final)
-    const Sidebar = ({ config, onChange, onPrint, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, srsData }) => {
-    const scrollRef = useRef(null);
+    const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen }) => {
+    const dueChars = useMemo(() => {
+    const now = Date.now();
+    // Lọc ra danh sách các chữ cái đã đến hạn ôn tập
+    return Object.keys(srsData || {}).filter(char => {
+        return srsData[char].nextReview <= now;
+    });
+}, [srsData]);
+
+const handleLoadDueCards = () => {
+    if (dueChars.length === 0) return;
+    const dueText = dueChars.join('');
+    // Điền các chữ cần ôn vào ô nhập liệu
+    onChange({ ...config, text: dueText });
+};
+        const scrollRef = useRef(null);
     const [searchResults, setSearchResults] = useState([]);
     const [activeIndex, setActiveIndex] = useState(0); 
     const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
     const [isDocsModalOpen, setIsDocsModalOpen] = useState(false);
-// Lọc ra các chữ cần ôn (thời gian hiện tại >= thời gian ôn)
-    const dueChars = useMemo(() => {
-        const now = Date.now();
-        return Object.keys(srsData || {}).filter(char => {
-            return srsData[char].nextReview <= now;
-        });
-    }, [srsData]);
-
-   // --- LOGIC MỚI: Xóa cũ, nạp mới, mở ngay ---
-
-    const handleReviewNow = () => {
-
-        if (dueChars.length === 0) return;
-
-        
-
-        // 1. Thay thế hoàn toàn nội dung cũ bằng chữ cần ôn
-
-        const textToReview = dueChars.join('');
-
-        onChange({ ...config, text: textToReview });
-
-
-
-        // 2. Mở ngay Flashcard (delay nhẹ để state kịp cập nhật)
-
-        setTimeout(() => setIsFlashcardOpen(true), 100);
-
-    };
+    
     // --- CHẶN TUYỆT ĐỐI CTRL + P (KHÔNG CÓ GÌ XẢY RA) ---
     useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1778,63 +1761,27 @@ LÀM SẠCH
             
             {/* --- FOOTER CHỨC NĂNG --- */}
 {dueChars.length > 0 && (
-                <div className="mb-2 animate-in slide-in-from-top duration-500">
-                    <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-4 shadow-sm">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center animate-bounce shadow-md">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m12 8 4 4-4 4"/><path d="M8 12h7"/><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12s4.48 10 10 10 10-4.48 10-10z"/></svg>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest">Hệ thống nhắc nhở</p>
-                                <p className="text-sm font-black text-orange-700">CẦN ÔN {dueChars.length} CHỮ!</p>
-                            </div>
-                        </div>
-                        
-                        <button 
-                            onClick={handleReviewNow}
-                            className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-black rounded-xl transition-all shadow-lg shadow-orange-200 active:scale-95 uppercase"
-                        >
-                            Bắt đầu ôn tập ngay
-                        </button>
-                    </div>
+    <div className="mb-6 animate-in slide-in-from-top duration-500">
+        <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-4 shadow-sm">
+            <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center animate-bounce shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m12 8 4 4-4 4"/><path d="M8 12h7"/><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12s4.48 10 10 10 10-4.48 10-10z"/></svg>
                 </div>
-            )}
-{/* --- GIAO DIỆN THÔNG BÁO SRS (MỚI) --- */}
-            {dueChars.length > 0 && (
-                <div className="mb-4 animate-in slide-in-from-top duration-500">
-                    <div className="bg-orange-50 border-l-4 border-orange-500 rounded-r-xl p-4 shadow-sm relative overflow-hidden">
-                        
-                        {/* Trang trí nền mờ */}
-                        <div className="absolute -right-2 -top-2 text-orange-100 opacity-50 pointer-events-none">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
-                        </div>
-
-                        <div className="flex justify-between items-start mb-3 relative z-10">
-                            <div>
-                                <h3 className="text-xs font-black text-orange-800 uppercase tracking-wide mb-0.5">
-                                    NHẮC NHỞ HỌC TẬP
-                                </h3>
-                                <p className="text-[11px] font-medium text-orange-600">
-                                    Hôm nay cần ôn <span className="font-black text-lg text-orange-600">{dueChars.length}</span> chữ.
-                                </p>
-                            </div>
-                            {/* Icon chuông rung */}
-                            <div className="bg-white p-2 rounded-full shadow-sm text-orange-500 animate-bounce">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-                            </div>
-                        </div>
-
-                        <button 
-                            onClick={handleReviewNow}
-                            className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-black rounded-lg shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
-                        >
-                            <span>BẮT ĐẦU ÔN TẬP NGAY</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                        </button>
-                    </div>
+                <div>
+                    <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest">Hệ thống nhắc nhở</p>
+                    <p className="text-sm font-black text-orange-700">CẦN ÔN {dueChars.length} CHỮ!</p>
                 </div>
-            )}
-            {/* --- HẾT GIAO DIỆN THÔNG BÁO --- */}
+            </div>
+            
+            <button 
+                onClick={handleLoadDueCards}
+                className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-black rounded-xl transition-all shadow-lg shadow-orange-200 active:scale-95 uppercase"
+            >
+                Bắt đầu ôn tập ngay
+            </button>
+        </div>
+    </div>
+)}
             <div className="flex flex-col gap-3 w-full">
                 
                 {/* HÀNG 3 NÚT */}
@@ -2401,6 +2348,19 @@ const [showMobilePreview, setShowMobilePreview] = useState(false);
 const [isConfigOpen, setIsConfigOpen] = React.useState(false);
 const [isMenuOpen, setIsMenuOpen] = useState(false);
 const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
+        const [srsData, setSrsData] = useState(() => {
+    // Tự động lấy dữ liệu cũ từ máy người dùng khi mở web
+    const saved = localStorage.getItem('phadao_srs_data');
+    return saved ? JSON.parse(saved) : {};
+});
+
+// Hàm để lưu kết quả học tập
+const updateSRSProgress = (char, quality) => {
+    const newProgress = calculateSRS(srsData[char], quality);
+    const newData = { ...srsData, [char]: newProgress };
+    setSrsData(newData);
+    localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
+};
 
 // State cấu hình mặc định
 const [config, setConfig] = useState({ 
@@ -2417,28 +2377,6 @@ const [showPostPrintDonate, setShowPostPrintDonate] = useState(false);
 const [dbData, setDbData] = useState(null);
 const [isDbLoaded, setIsDbLoaded] = useState(false);
 
-
-    // 2. Hàm cập nhật tiến độ
-    const updateSRSProgress = (char, isKnown) => {
-        // Tính toán trạng thái mới
-        const result = calculateSRS(srsData[char], isKnown);
-        let newData = { ...srsData };
-
-        if (result.isFinished) {
-            // Nếu tốt nghiệp -> Xóa khỏi danh sách
-            delete newData[char];
-        } else if (result.reset) {
-            // Nếu bấm "Đang học" -> Không làm gì cả (hoặc có thể lưu trạng thái failed nếu muốn)
-            // Ở đây ta giữ nguyên logic là chữ "Đang học" sẽ được xử lý trong phiên Flashcard
-            return; 
-        } else {
-            // Nếu lên cấp -> Lưu ngày ôn tiếp theo
-            newData[char] = result;
-        }
-
-        setSrsData(newData);
-        localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
-    };
 // 1. Dùng useEffect để tải dữ liệu ngay khi mở web
 useEffect(() => {
     fetchDataFromGithub().then(data => {
@@ -2504,7 +2442,6 @@ return (
         
         dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống Sidebar
             srsData={srsData}
-           
     />
     </div>
 
@@ -2545,7 +2482,7 @@ return (
     onClose={() => setIsFlashcardOpen(false)} 
     text={config.text} 
     dbData={dbData} 
-        onSrsUpdate={updateSRSProgress}
+    onSrsUpdate={updateSRSProgress}
 />
     </div>
 );
