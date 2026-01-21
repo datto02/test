@@ -1048,7 +1048,7 @@ return (
     };
 
 // 5. Sidebar (Phiên bản: Final)
-    const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen }) => {
+    const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList }) => {
    // --- BƯỚC 2: TÌM TRONG COMPONENT SIDEBAR -> SỬA BIẾN dueChars ---
 
 const dueChars = useMemo(() => {
@@ -1776,7 +1776,7 @@ LÀM SẠCH
                 />
             </div>
             
-            {/* --- FOOTER CHỨC NĂNG --- */}
+           {/* THAY THẾ ĐOẠN HIỂN THỊ CŨ BẰNG ĐOẠN NÀY */}
 {dueChars.length > 0 && (
     <div className="mb-6 animate-in slide-in-from-top duration-500">
         <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-4 shadow-sm">
@@ -1790,12 +1790,24 @@ LÀM SẠCH
                 </div>
             </div>
             
-            <button 
-                onClick={handleLoadDueCards}
-                className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-black rounded-xl transition-all shadow-lg shadow-orange-200 active:scale-95 uppercase"
-            >
-                Bắt đầu ôn tập ngay
-            </button>
+            {/* HAI NÚT CHIA ĐÔI */}
+            <div className="flex gap-2">
+                {/* Nút 1: Ôn tập ngay (Màu đậm) */}
+                <button 
+                    onClick={handleLoadDueCards}
+                    className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black rounded-xl transition-all shadow-md shadow-orange-200 active:scale-95 uppercase"
+                >
+                    Ôn ngay
+                </button>
+
+                {/* Nút 2: Xem danh sách (Màu nhạt) */}
+                <button 
+                    onClick={onOpenReviewList}
+                    className="flex-1 py-2.5 bg-orange-100 hover:bg-orange-200 text-orange-600 text-[10px] font-black rounded-xl transition-all border border-orange-200 active:scale-95 uppercase"
+                >
+                    Xem DS
+                </button>
+            </div>
         </div>
     </div>
 )}
@@ -2358,6 +2370,137 @@ TÀI LIỆU HỌC TẬP
         </div>
     );
     };
+// --- COMPONENT MỚI: BẢNG DANH SÁCH ÔN TẬP ---
+const ReviewListModal = ({ isOpen, onClose, srsData }) => {
+    // 1. Logic khóa cuộn nền khi mở modal
+    React.useEffect(() => {
+        if (isOpen) document.body.style.overflow = 'hidden';
+        else document.body.style.overflow = 'unset';
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [isOpen]);
+
+    // 2. Logic gom nhóm dữ liệu theo ngày
+    const groupedData = React.useMemo(() => {
+        const groups = { today: [] }; // 'today' chứa cả quá hạn và hôm nay
+        const now = Date.now();
+
+        Object.entries(srsData || {}).forEach(([char, data]) => {
+            // Bỏ qua chữ đã hoàn thành hoặc chưa học
+            if (data.isDone || !data.nextReview) return;
+
+            if (data.nextReview <= now) {
+                // Nếu đến hạn hoặc quá hạn -> Nhét vào nhóm "Cần ôn ngay"
+                groups.today.push(char);
+            } else {
+                // Nếu chưa đến hạn -> Tính xem là ngày nào
+                const dateObj = new Date(data.nextReview);
+                // Tạo key dạng "23/01"
+                const dateKey = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
+                
+                if (!groups[dateKey]) groups[dateKey] = [];
+                groups[dateKey].push(char);
+            }
+        });
+        return groups;
+    }, [srsData, isOpen]);
+
+    if (!isOpen) return null;
+
+    // Lấy danh sách các ngày tương lai và sắp xếp tăng dần
+    const futureDates = Object.keys(groupedData).filter(k => k !== 'today').sort((a, b) => {
+        const [d1, m1] = a.split('/').map(Number);
+        const [d2, m2] = b.split('/').map(Number);
+        // So sánh tháng trước, ngày sau (giả sử cùng năm cho đơn giản, hoặc logic date chuẩn)
+        return m1 === m2 ? d1 - d2 : m1 - m2;
+    });
+
+    return (
+        <div 
+            className="fixed inset-0 z-[400] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+            onClick={onClose}
+        >
+            <div 
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200 overflow-hidden"
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2">
+                        📅 LỊCH TRÌNH ÔN TẬP
+                    </h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+
+                {/* Body (Scrollable) */}
+                <div className="p-4 overflow-y-auto custom-scrollbar space-y-4">
+                    
+                    {/* 1. Phần ÔN TẬP NGAY (Luôn xếp đầu) */}
+                    <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-black text-orange-600 uppercase">Cần ôn ngay</span>
+                            <span className="bg-orange-200 text-orange-700 text-[10px] font-bold px-1.5 rounded">
+                                {groupedData.today.length} chữ
+                            </span>
+                        </div>
+                        {groupedData.today.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                                {groupedData.today.map((char, i) => (
+                                    <span key={i} className="inline-block bg-white text-gray-800 border border-orange-200 rounded px-1.5 py-0.5 text-lg font-['Klee_One'] min-w-[32px] text-center shadow-sm">
+                                        {char}
+                                    </span>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-[11px] text-gray-400 italic">Không có bài tập tồn đọng. Giỏi lắm! 🎉</p>
+                        )}
+                    </div>
+
+                    {/* 2. Phần TƯƠNG LAI */}
+                    {futureDates.length > 0 && (
+                        <div className="space-y-3">
+                             <div className="flex items-center gap-2 mt-2">
+                                <span className="h-[1px] flex-1 bg-gray-100"></span>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase">Sắp tới</span>
+                                <span className="h-[1px] flex-1 bg-gray-100"></span>
+                            </div>
+                            
+                            {futureDates.map(date => (
+                                <div key={date} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                            Ngày {date} (5:00 sáng)
+                                        </span>
+                                        <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 rounded">
+                                            {groupedData[date].length} chữ
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1">
+                                        {groupedData[date].map((char, i) => (
+                                            <span key={i} className="inline-block bg-white text-gray-500 border border-gray-200 rounded px-1.5 py-0.5 text-base font-['Klee_One'] min-w-[28px] text-center opacity-70">
+                                                {char}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    
+                    {futureDates.length === 0 && groupedData.today.length === 0 && (
+                        <div className="text-center py-8 text-gray-400">
+                             <p className="text-4xl mb-2">🍃</p>
+                             <p className="text-xs">Chưa có lịch trình ôn tập nào.</p>
+                        </div>
+                    )}
+
+                </div>
+            </div>
+        </div>
+    );
+};
     const App = () => {
 // --- Các state cũ giữ nguyên ---
 const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
@@ -2365,6 +2508,7 @@ const [showMobilePreview, setShowMobilePreview] = useState(false);
 const [isConfigOpen, setIsConfigOpen] = React.useState(false);
 const [isMenuOpen, setIsMenuOpen] = useState(false);
 const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
+        const [isReviewListOpen, setIsReviewListOpen] = useState(false);
         const [srsData, setSrsData] = useState(() => {
     // Tự động lấy dữ liệu cũ từ máy người dùng khi mở web
     const saved = localStorage.getItem('phadao_srs_data');
@@ -2459,6 +2603,7 @@ return (
         
         dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống Sidebar
             srsData={srsData}
+                onOpenReviewList={() => setIsReviewListOpen(true)}
     />
     </div>
 
@@ -2501,6 +2646,12 @@ return (
     dbData={dbData} 
     onSrsUpdate={updateSRSProgress}
 />
+        {/* 3. RENDER MODAL MỚI TẠI ĐÂY */}
+            <ReviewListModal 
+                isOpen={isReviewListOpen}
+                onClose={() => setIsReviewListOpen(false)}
+                srsData={srsData}
+            />
     </div>
 );
 };
