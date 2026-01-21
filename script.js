@@ -2,7 +2,39 @@ const removeAccents = (str) => {
 return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
 };
     const { useState, useEffect, useMemo, useRef } = React;
+// Cấu hình khoảng cách ngày cho các cấp độ (Again, Hard, Good, Easy)
+const SRS_INTERVALS = {
+  0: 0,    // Again: Học lại ngay
+  1: 2,    // Hard: 2 ngày sau
+  2: 4,    // Good: 4 ngày sau
+  3: 7     // Easy: 7 ngày sau
+};
 
+const calculateSRS = (currentData, quality) => {
+  // quality: 0 (Again), 1 (Hard), 2 (Good), 3 (Easy)
+  let { level = 0, interval = 0, easeFactor = 2.5 } = currentData || {};
+
+  if (quality === 0) {
+    interval = 0;
+    level = 0;
+  } else {
+    // Thuật toán SM-2 đơn giản hóa
+    if (level === 0) interval = 1;
+    else if (level === 1) interval = SRS_INTERVALS[quality];
+    else interval = Math.round(interval * easeFactor * (quality / 2));
+    
+    level += 1;
+    // Điều chỉnh độ dễ (Ease Factor)
+    easeFactor = easeFactor + (0.1 - (3 - quality) * (0.08 + (3 - quality) * 0.02));
+  }
+
+  return {
+    level,
+    interval,
+    nextReview: Date.now() + interval * 24 * 60 * 60 * 1000,
+    easeFactor: Math.max(1.3, easeFactor)
+  };
+};
  // --- FETCH DATA FROM GITHUB --- 
 const fetchDataFromGithub = async () => {
   try { 
@@ -152,7 +184,7 @@ const useKanjiReadings = (char, active, dbData) => {
 
   return readings;
 };
-const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
+const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
     const [originalQueue, setOriginalQueue] = React.useState([]);
     const [queue, setQueue] = React.useState([]);
     const [currentIndex, setCurrentIndex] = React.useState(0);
@@ -515,15 +547,43 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData }) => {
                         </div>
 
                         {/* NÚT ĐIỀU HƯỚNG */}
-                        <div className="flex gap-3 w-full px-8">
-                            <button onClick={() => handleNext(false)} className="flex-1 py-3 bg-red-500/10 hover:bg-red-500/20 hover:text-red-600 active:bg-red-500 text-red-500 active:text-white border border-red-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase">
-                                ĐANG HỌC <span className="bg-red-600 text-white min-w-[28px] h-6 px-2 rounded-md flex items-center justify-center text-[10px] font-bold shadow-sm">{unknownIndices.length}</span>
-                            </button>
-                            <button onClick={() => handleNext(true)} className="flex-1 py-3 bg-green-500/10 hover:bg-green-500/20 hover:text-green-600 active:bg-green-500 text-green-500 active:text-white border border-green-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase">
-                                ĐÃ BIẾT <span className="bg-green-600 text-white min-w-[28px] h-6 px-2 rounded-md flex items-center justify-center text-[10px] font-bold shadow-sm">{knownCount}</span>
-                            </button>
-                        </div>
+                       <div className="grid grid-cols-2 gap-3 w-full px-8 mt-2">
+    {/* Nút 0: Quên - Coi như chưa biết, sẽ hiện lại sớm nhất */}
+    <button 
+        onClick={() => { onSrsUpdate(currentChar, 0); handleNext(false); }} 
+        className="flex flex-col items-center justify-center py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-xl transition-all active:scale-95"
+    >
+        <span className="text-red-600 font-black text-[11px]">QUÊN</span>
+        <span className="text-red-400 text-[8px] font-bold italic">HỌC LẠI</span>
+    </button>
 
+    {/* Nút 1: Khó - Nhớ nhưng vất vả */}
+    <button 
+        onClick={() => { onSrsUpdate(currentChar, 1); handleNext(true); }} 
+        className="flex flex-col items-center justify-center py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded-xl transition-all active:scale-95"
+    >
+        <span className="text-orange-600 font-black text-[11px]">KHÓ</span>
+        <span className="text-orange-400 text-[8px] font-bold italic">2 NGÀY SAU</span>
+    </button>
+
+    {/* Nút 2: Tốt - Nhớ bình thường */}
+    <button 
+        onClick={() => { onSrsUpdate(currentChar, 2); handleNext(true); }} 
+        className="flex flex-col items-center justify-center py-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 rounded-xl transition-all active:scale-95"
+    >
+        <span className="text-green-600 font-black text-[11px]">TỐT</span>
+        <span className="text-green-400 text-[8px] font-bold italic">4 NGÀY SAU</span>
+    </button>
+
+    {/* Nút 3: Dễ - Nhớ tức thì */}
+    <button 
+        onClick={() => { onSrsUpdate(currentChar, 3); handleNext(true); }} 
+        className="flex flex-col items-center justify-center py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-xl transition-all active:scale-95"
+    >
+        <span className="text-blue-600 font-black text-[11px]">DỄ</span>
+        <span className="text-blue-400 text-[8px] font-bold italic">7 NGÀY SAU</span>
+    </button>
+</div>
                         {/* NÚT ĐÓNG */}
                         <button 
                             onClick={onClose} 
@@ -984,13 +1044,27 @@ return (
     };
 
 // 5. Sidebar (Phiên bản: Final)
-    const Sidebar = ({ config, onChange, onPrint, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen }) => {
-    const scrollRef = useRef(null);
+    const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen }) => {
+    const dueChars = useMemo(() => {
+    const now = Date.now();
+    // Lọc ra danh sách các chữ cái đã đến hạn ôn tập
+    return Object.keys(srsData || {}).filter(char => {
+        return srsData[char].nextReview <= now;
+    });
+}, [srsData]);
+
+const handleLoadDueCards = () => {
+    if (dueChars.length === 0) return;
+    const dueText = dueChars.join('');
+    // Điền các chữ cần ôn vào ô nhập liệu
+    onChange({ ...config, text: dueText });
+};
+        const scrollRef = useRef(null);
     const [searchResults, setSearchResults] = useState([]);
     const [activeIndex, setActiveIndex] = useState(0); 
     const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
     const [isDocsModalOpen, setIsDocsModalOpen] = useState(false);
-
+    
     // --- CHẶN TUYỆT ĐỐI CTRL + P (KHÔNG CÓ GÌ XẢY RA) ---
     useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1686,6 +1760,28 @@ LÀM SẠCH
             </div>
             
             {/* --- FOOTER CHỨC NĂNG --- */}
+{dueChars.length > 0 && (
+    <div className="mb-6 animate-in slide-in-from-top duration-500">
+        <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-4 shadow-sm">
+            <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center animate-bounce shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m12 8 4 4-4 4"/><path d="M8 12h7"/><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12s4.48 10 10 10 10-4.48 10-10z"/></svg>
+                </div>
+                <div>
+                    <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest">Hệ thống nhắc nhở</p>
+                    <p className="text-sm font-black text-orange-700">CẦN ÔN {dueChars.length} CHỮ!</p>
+                </div>
+            </div>
+            
+            <button 
+                onClick={handleLoadDueCards}
+                className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-black rounded-xl transition-all shadow-lg shadow-orange-200 active:scale-95 uppercase"
+            >
+                Bắt đầu ôn tập ngay
+            </button>
+        </div>
+    </div>
+)}
             <div className="flex flex-col gap-3 w-full">
                 
                 {/* HÀNG 3 NÚT */}
@@ -2252,6 +2348,19 @@ const [showMobilePreview, setShowMobilePreview] = useState(false);
 const [isConfigOpen, setIsConfigOpen] = React.useState(false);
 const [isMenuOpen, setIsMenuOpen] = useState(false);
 const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
+        const [srsData, setSrsData] = useState(() => {
+    // Tự động lấy dữ liệu cũ từ máy người dùng khi mở web
+    const saved = localStorage.getItem('phadao_srs_data');
+    return saved ? JSON.parse(saved) : {};
+});
+
+// Hàm để lưu kết quả học tập
+const updateSRSProgress = (char, quality) => {
+    const newProgress = calculateSRS(srsData[char], quality);
+    const newData = { ...srsData, [char]: newProgress };
+    setSrsData(newData);
+    localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
+};
 
 // State cấu hình mặc định
 const [config, setConfig] = useState({ 
@@ -2332,6 +2441,7 @@ return (
         setIsFlashcardOpen={setIsFlashcardOpen}
         
         dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống Sidebar
+            srsData={srsData}
     />
     </div>
 
@@ -2372,6 +2482,7 @@ return (
     onClose={() => setIsFlashcardOpen(false)} 
     text={config.text} 
     dbData={dbData} 
+    onSrsUpdate={updateSRSProgress}
 />
     </div>
 );
