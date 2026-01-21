@@ -187,7 +187,10 @@ const useKanjiReadings = (char, active, dbData) => {
 
   return readings;
 };
-const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
+// --- BƯỚC 4: COPY ĐÈ ĐOẠN NÀY VÀO FLASHCARD MODAL ---
+// Chỉ thêm onSrsUpdate để lưu dữ liệu, giao diện giữ nguyên tuyệt đối
+
+const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => { // <--- Đã thêm onSrsUpdate vào đây
     const [originalQueue, setOriginalQueue] = React.useState([]);
     const [queue, setQueue] = React.useState([]);
     const [currentIndex, setCurrentIndex] = React.useState(0);
@@ -336,10 +339,14 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
                     break;
                 case 'ArrowLeft':
                     e.preventDefault();
+                    // SỬA: Gọi onSrsUpdate(0) khi bấm phím
+                    if(onSrsUpdate) onSrsUpdate(queue[currentIndex], 0);
                     handleNext(false); 
                     break;
                 case 'ArrowRight':
                     e.preventDefault();
+                    // SỬA: Gọi onSrsUpdate(1) khi bấm phím
+                    if(onSrsUpdate) onSrsUpdate(queue[currentIndex], 1);
                     handleNext(true); 
                     break;
                 case 'Escape':
@@ -351,7 +358,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, isFinished, toggleFlip, handleNext, onClose]);
+    }, [isOpen, isFinished, toggleFlip, handleNext, onClose, onSrsUpdate, queue, currentIndex]);
 
     const handleBack = (e) => {
         if (e) { e.preventDefault(); e.stopPropagation(); e.currentTarget.blur(); }
@@ -429,8 +436,16 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
     const handleDragEnd = () => {
         if (!isDragging) return;
         setIsDragging(false);
-        if (dragX > 70) handleNext(true);
-        else if (dragX < -70) handleNext(false);
+        if (dragX > 70) {
+             // SỬA: Kéo sang phải = Đã biết (1)
+             if(onSrsUpdate) onSrsUpdate(queue[currentIndex], 1);
+             handleNext(true);
+        }
+        else if (dragX < -70) {
+             // SỬA: Kéo sang trái = Đang học (0)
+             if(onSrsUpdate) onSrsUpdate(queue[currentIndex], 0);
+             handleNext(false);
+        }
         else setDragX(0);
     };
 
@@ -549,29 +564,30 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
                             </div>
                         </div>
 
-                      {/* --- BƯỚC 4: GIAO DIỆN 2 NÚT TRONG FLASHCARD MODAL --- */}
+                        {/* NÚT ĐIỀU HƯỚNG */}
+                        <div className="flex gap-3 w-full px-8">
+                            <button 
+                                onClick={() => {
+                                    // SỬA: Gửi tín hiệu 0 (Đang học)
+                                    if(onSrsUpdate) onSrsUpdate(currentChar, 0);
+                                    handleNext(false);
+                                }} 
+                                className="flex-1 py-3 bg-red-500/10 hover:bg-red-500/20 hover:text-red-600 active:bg-red-500 text-red-500 active:text-white border border-red-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase"
+                            >
+                                ĐANG HỌC <span className="bg-red-600 text-white min-w-[28px] h-6 px-2 rounded-md flex items-center justify-center text-[10px] font-bold shadow-sm">{unknownIndices.length}</span>
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    // SỬA: Gửi tín hiệu 1 (Đã biết)
+                                    if(onSrsUpdate) onSrsUpdate(currentChar, 1);
+                                    handleNext(true);
+                                }} 
+                                className="flex-1 py-3 bg-green-500/10 hover:bg-green-500/20 hover:text-green-600 active:bg-green-500 text-green-500 active:text-white border border-green-500/20 rounded-xl font-black text-[10px] transition-all flex items-center justify-center gap-2 uppercase"
+                            >
+                                ĐÃ BIẾT <span className="bg-green-600 text-white min-w-[28px] h-6 px-2 rounded-md flex items-center justify-center text-[10px] font-bold shadow-sm">{knownCount}</span>
+                            </button>
+                        </div>
 
-<div className="grid grid-cols-2 gap-4 w-full px-6 mt-6">
-    {/* Nút 1: ĐANG HỌC - Giữ lại trong danh sách */}
-    <button 
-        onClick={() => { onSrsUpdate(currentChar, 0); handleNext(false); }} 
-        className="flex flex-col items-center justify-center py-4 bg-red-50 hover:bg-red-100 border-2 border-red-200 text-red-600 rounded-2xl transition-all active:scale-95 group shadow-sm"
-    >
-        <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">🤔</span>
-        <span className="font-black text-sm uppercase tracking-wide">ĐANG HỌC</span>
-        <span className="text-[10px] font-medium opacity-70 italic mt-1">Sẽ hỏi lại ngay</span>
-    </button>
-
-    {/* Nút 2: ĐÃ BIẾT - Hẹn ngày sau (5h sáng) */}
-    <button 
-        onClick={() => { onSrsUpdate(currentChar, 1); handleNext(true); }} 
-        className="flex flex-col items-center justify-center py-4 bg-green-50 hover:bg-green-100 border-2 border-green-200 text-green-600 rounded-2xl transition-all active:scale-95 group shadow-sm"
-    >
-        <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">😎</span>
-        <span className="font-black text-sm uppercase tracking-wide">ĐÃ BIẾT</span>
-        <span className="text-[10px] font-medium opacity-70 italic mt-1">Hẹn gặp lại sau</span>
-    </button>
-</div>
                         {/* NÚT ĐÓNG */}
                         <button 
                             onClick={onClose} 
