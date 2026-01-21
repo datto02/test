@@ -1061,16 +1061,26 @@ return (
         });
     }, [srsData]);
 
-    // Hàm xử lý nút "ÔN TẬP NGAY"
+   // --- LOGIC MỚI: Xóa cũ, nạp mới, mở ngay ---
+
     const handleReviewNow = () => {
+
         if (dueChars.length === 0) return;
+
         
-        // 1. Ghi đè chữ cần ôn vào ô nhập liệu (Xóa dữ liệu cũ)
+
+        // 1. Thay thế hoàn toàn nội dung cũ bằng chữ cần ôn
+
         const textToReview = dueChars.join('');
+
         onChange({ ...config, text: textToReview });
 
-        // 2. Mở ngay Flashcard
+
+
+        // 2. Mở ngay Flashcard (delay nhẹ để state kịp cập nhật)
+
         setTimeout(() => setIsFlashcardOpen(true), 100);
+
     };
     // --- CHẶN TUYỆT ĐỐI CTRL + P (KHÔNG CÓ GÌ XẢY RA) ---
     useEffect(() => {
@@ -1789,6 +1799,42 @@ LÀM SẠCH
                     </div>
                 </div>
             )}
+{/* --- GIAO DIỆN THÔNG BÁO SRS (MỚI) --- */}
+            {dueChars.length > 0 && (
+                <div className="mb-4 animate-in slide-in-from-top duration-500">
+                    <div className="bg-orange-50 border-l-4 border-orange-500 rounded-r-xl p-4 shadow-sm relative overflow-hidden">
+                        
+                        {/* Trang trí nền mờ */}
+                        <div className="absolute -right-2 -top-2 text-orange-100 opacity-50 pointer-events-none">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
+                        </div>
+
+                        <div className="flex justify-between items-start mb-3 relative z-10">
+                            <div>
+                                <h3 className="text-xs font-black text-orange-800 uppercase tracking-wide mb-0.5">
+                                    NHẮC NHỞ HỌC TẬP
+                                </h3>
+                                <p className="text-[11px] font-medium text-orange-600">
+                                    Hôm nay cần ôn <span className="font-black text-lg text-orange-600">{dueChars.length}</span> chữ.
+                                </p>
+                            </div>
+                            {/* Icon chuông rung */}
+                            <div className="bg-white p-2 rounded-full shadow-sm text-orange-500 animate-bounce">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                            </div>
+                        </div>
+
+                        <button 
+                            onClick={handleReviewNow}
+                            className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-black rounded-lg shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+                        >
+                            <span>BẮT ĐẦU ÔN TẬP NGAY</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+            )}
+            {/* --- HẾT GIAO DIỆN THÔNG BÁO --- */}
             <div className="flex flex-col gap-3 w-full">
                 
                 {/* HÀNG 3 NÚT */}
@@ -2370,11 +2416,7 @@ const [showPostPrintDonate, setShowPostPrintDonate] = useState(false);
 // --- PHẦN MỚI: State chứa dữ liệu tải về ---
 const [dbData, setDbData] = useState(null);
 const [isDbLoaded, setIsDbLoaded] = useState(false);
-// 1. Khai báo kho lưu trữ SRS
-    const [srsData, setSrsData] = useState(() => {
-        const saved = localStorage.getItem('phadao_srs_data');
-        return saved ? JSON.parse(saved) : {};
-    });
+
 
     // 2. Hàm cập nhật tiến độ
     const updateSRSProgress = (char, isKnown) => {
@@ -2461,7 +2503,8 @@ return (
         setIsFlashcardOpen={setIsFlashcardOpen}
         
         dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống Sidebar
-            onSrsUpdate={updateSRSProgress}
+            srsData={srsData}
+           
     />
     </div>
 
@@ -2502,6 +2545,7 @@ return (
     onClose={() => setIsFlashcardOpen(false)} 
     text={config.text} 
     dbData={dbData} 
+        onSrsUpdate={updateSRSProgress}
 />
     </div>
 );
