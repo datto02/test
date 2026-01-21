@@ -6,29 +6,26 @@ return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").
 const SRS_STEPS = [1, 3, 5, 7]; 
 
 const calculateSRS = (currentData, isKnown) => {
-    // Nếu chưa từng học, khởi tạo step -1 (để lần đầu 'Biết' sẽ lên Step 0)
     let { step = -1 } = currentData || {};
+    // Lấy mốc thời gian hiện tại
+    const now = Date.now();
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
     if (!isKnown) {
-        // Nếu "Đang học": Giữ nguyên step hiện tại, để ngày mai hiện lại ôn tiếp
-        // (Không tăng step cho đến khi bấm 'Đã biết')
         return {
             step: step,
-            nextReview: Date.now() + 1 * 24 * 60 * 60 * 1000, // Nhắc lại vào ngày mai
+            nextReview: now + ONE_DAY_MS, // Ôn lại vào ngày mai
             isFinished: false
         };
     } else {
-        // Nếu "Đã biết": Tiến lên bước tiếp theo trong chu kỳ
         const nextStep = step + 1;
-
         if (nextStep >= SRS_STEPS.length) {
-            // Đã hoàn thành hết 4 lần (1,3,5,7)
             return { isFinished: true };
         }
-
         return {
             step: nextStep,
-            nextReview: Date.now() + SRS_STEPS[nextStep] * 24 * 60 * 60 * 1000,
+            // Hẹn ngày tiếp theo dựa trên chu kỳ 1, 3, 5, 7
+            nextReview: now + (SRS_STEPS[nextStep] * ONE_DAY_MS),
             isFinished: false
         };
     }
