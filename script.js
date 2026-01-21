@@ -6,26 +6,33 @@ return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").
 const SRS_STEPS = [1, 3, 5, 7]; 
 
 const calculateSRS = (currentData, isKnown) => {
+    // Nếu chưa từng có dữ liệu, mặc định là step -1
     let { step = -1 } = currentData || {};
-    // Lấy mốc thời gian hiện tại
-    const now = Date.now();
-    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
     if (!isKnown) {
+        // --- LOGIC MỚI CHO "ĐANG HỌC" ---
+        // Giữ nguyên step hiện tại hoặc reset về -1 (tùy bạn chọn, ở đây tôi giữ nguyên)
+        // Đặt nextReview = 0 để hệ thống luôn báo "Cần ôn tập" ngay lập tức
         return {
-            step: step,
-            nextReview: now + ONE_DAY_MS, // Ôn lại vào ngày mai
+            step: step, 
+            nextReview: 0, 
             isFinished: false
         };
     } else {
+        // --- LOGIC CHO "ĐÃ BIẾT" ---
+        // Mỗi lần bấm "Đã biết", tiến lên 1 bước trong chu kỳ [1, 3, 5, 7]
         const nextStep = step + 1;
+
         if (nextStep >= SRS_STEPS.length) {
+            // Đã hoàn thành hết chu kỳ 7 ngày -> Loại khỏi danh sách
             return { isFinished: true };
         }
+
+        // Tính toán thời gian dựa trên mảng [1, 3, 5, 7]
+        const delayDays = SRS_STEPS[nextStep];
         return {
             step: nextStep,
-            // Hẹn ngày tiếp theo dựa trên chu kỳ 1, 3, 5, 7
-            nextReview: now + (SRS_STEPS[nextStep] * ONE_DAY_MS),
+            nextReview: Date.now() + delayDays * 24 * 60 * 60 * 1000,
             isFinished: false
         };
     }
@@ -1751,25 +1758,23 @@ LÀM SẠCH
             </div>
             
             {/* --- FOOTER CHỨC NĂNG --- */}
+// Trong Sidebar.js (Phần hiển thị thông báo ôn tập)
 {dueChars.length > 0 && (
-    <div className="mb-6 animate-in slide-in-from-top duration-500">
-        <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-4 shadow-sm">
+    <div className="mb-6 animate-in slide-in-from-top">
+        <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-4">
             <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center animate-bounce shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m12 8 4 4-4 4"/><path d="M8 12h7"/><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12s4.48 10 10 10 10-4.48 10-10z"/></svg>
+                <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center animate-pulse">
+                    <svg ... />
                 </div>
                 <div>
-                    <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest">Hệ thống nhắc nhở</p>
-                    <p className="text-sm font-black text-orange-700">CẦN ÔN {dueChars.length} CHỮ!</p>
+                    <p className="text-[10px] font-black text-orange-400 uppercase">Cần học cho thuộc</p>
+                    <p className="text-sm font-black text-orange-700">
+                        {/* Phân biệt chữ đang nợ và chữ đến hạn */}
+                        BẠN CÓ {dueChars.length} CHỮ CHƯA THUỘC!
+                    </p>
                 </div>
             </div>
-            
-            <button 
-                onClick={handleLoadDueCards}
-                className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-black rounded-xl transition-all shadow-lg shadow-orange-200 active:scale-95 uppercase"
-            >
-                Bắt đầu ôn tập ngay
-            </button>
+            ...
         </div>
     </div>
 )}
