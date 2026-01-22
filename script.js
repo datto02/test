@@ -267,7 +267,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
 
     return (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-pointer" onClick={onClose}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200 overflow-hidden relative transition-all cursor-default" onClick={e => e.stopPropagation()}>
+            <div className={`bg-white rounded-2xl shadow-2xl w-full flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200 overflow-hidden relative transition-all cursor-default ${isConfirmOpen ? 'max-w-[300px]' : 'max-w-md'}`} onClick={e => e.stopPropagation()}>
                 
                 {isHelpOpen ? (
                     // === GIAO DIỆN HƯỚNG DẪN (SRS GUIDE) - NỘI DUNG MỚI ===
@@ -406,7 +406,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                 ) : (
                     // === GIAO DIỆN 2: CẢNH BÁO XÓA ===
                     <div 
-                        className="p-5 text-center animate-in fade-in zoom-in-95 duration-200 flex flex-col items-center justify-center min-h-[300px] cursor-pointer"
+                        className="p-8 text-center animate-in fade-in zoom-in-95 duration-200 flex flex-col items-center justify-center min-h-[300px] cursor-pointer"
                         onClick={(e) => {
                             e.stopPropagation(); 
                             setIsConfirmOpen(false); 
