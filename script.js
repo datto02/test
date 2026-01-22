@@ -219,12 +219,9 @@ const useKanjiReadings = (char, active, dbData) => {
 
   return readings;
 };
-// --- BƯỚC 4: COPY ĐÈ ĐOẠN NÀY VÀO FLASHCARD MODAL ---
-// Chỉ thêm onSrsUpdate để lưu dữ liệu, giao diện giữ nguyên tuyệt đối
-// --- BƯỚC 2: COMPONENT BẢNG DANH SÁCH ÔN TẬP ---
-// --- BƯỚC 2: COMPONENT BẢNG DANH SÁCH ÔN TẬP (ĐÃ CẬP NHẬT TÍNH NĂNG XÓA) ---
+// --- BƯỚC 2: COMPONENT BẢNG DANH SÁCH ÔN TẬP (LOGIC HIỂN THỊ MỚI) ---
 const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
-    // State bật tắt bảng cảnh báo xóa
+    // State bật tắt chế độ xác nhận xóa
     const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
 
     // Logic khóa cuộn nền
@@ -234,7 +231,12 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
         return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
 
-    // Logic gom nhóm dữ liệu theo ngày (GIỮ NGUYÊN)
+    // Reset về giao diện list khi đóng modal
+    React.useEffect(() => {
+        if (!isOpen) setIsConfirmOpen(false);
+    }, [isOpen]);
+
+    // Logic gom nhóm dữ liệu (GIỮ NGUYÊN)
     const groupedData = React.useMemo(() => {
         const groups = { today: [] }; 
         const now = Date.now();
@@ -254,7 +256,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
 
     if (!isOpen) return null;
 
-    // Sắp xếp ngày tương lai tăng dần
+    // Sắp xếp ngày tương lai
     const futureDates = Object.keys(groupedData).filter(k => k !== 'today').sort((a, b) => {
         const [d1, m1] = a.split('/').map(Number);
         const [d2, m2] = b.split('/').map(Number);
@@ -263,118 +265,119 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
 
     return (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={onClose}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh] min-h-[450px] animate-in zoom-in-95 duration-200 overflow-hidden relative" onClick={e => e.stopPropagation()}>
+            {/* SỬA: Bỏ min-h-[450px]. 
+               Modal sẽ tự co giãn theo nội dung bên trong.
+            */}
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200 overflow-hidden relative transition-all" onClick={e => e.stopPropagation()}>
                 
-                {/* Header */}
-                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                    <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2">📅 LỊCH TRÌNH ÔN TẬP</h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
-                </div>
-
-                {/* Body: Danh sách cuộn */}
-                <div className="p-4 overflow-y-auto custom-scrollbar flex-1">
-                    <div className="space-y-4">
-                        {/* Phần CẦN ÔN NGAY */}
-                        <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-black text-orange-600 uppercase">Cần ôn ngay</span>
-                                <span className="bg-orange-200 text-orange-700 text-[10px] font-bold px-1.5 rounded">{groupedData.today.length} chữ</span>
-                            </div>
-                            {groupedData.today.length > 0 ? (
-                                <div className="flex flex-wrap gap-1">
-                                    {groupedData.today.map((char, i) => (
-                                        <span key={i} className="inline-block bg-white text-gray-800 border border-orange-200 rounded px-1.5 py-0.5 text-lg font-['Klee_One'] min-w-[32px] text-center shadow-sm">{char}</span>
-                                    ))}
-                                </div>
-                            ) : (<p className="text-[11px] text-gray-400 italic">Không có Kanji tồn đọng. Giỏi lắm! 🎉</p>)}
+                {/* === TRƯỜNG HỢP 1: ĐANG Ở CHẾ ĐỘ XEM DANH SÁCH (Mặc định) === */}
+                {!isConfirmOpen ? (
+                    <>
+                        {/* Header */}
+                        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2">📅 LỊCH TRÌNH ÔN TẬP</h3>
+                            <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
                         </div>
 
-                        {/* Phần TƯƠNG LAI */}
-                        {futureDates.length > 0 && (
-                            <div className="space-y-3">
-                                 <div className="flex items-center gap-2 mt-2">
-                                    <span className="h-[1px] flex-1 bg-gray-100"></span>
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase">Sắp tới</span>
-                                    <span className="h-[1px] flex-1 bg-gray-100"></span>
-                                </div>
-                                {futureDates.map(date => (
-                                    <div key={date} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                                Ngày {date}
-                                            </span>
-                                            <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 rounded">{groupedData[date].length} chữ</span>
-                                        </div>
+                        {/* Body List */}
+                        <div className="p-4 overflow-y-auto custom-scrollbar flex-1">
+                            <div className="space-y-4">
+                                {/* Cần ôn ngay */}
+                                <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-xs font-black text-orange-600 uppercase">Cần ôn ngay</span>
+                                        <span className="bg-orange-200 text-orange-700 text-[10px] font-bold px-1.5 rounded">{groupedData.today.length} chữ</span>
+                                    </div>
+                                    {groupedData.today.length > 0 ? (
                                         <div className="flex flex-wrap gap-1">
-                                            {groupedData[date].map((char, i) => (
-                                                <span key={i} className="inline-block bg-white text-gray-500 border border-gray-200 rounded px-1.5 py-0.5 text-base font-['Klee_One'] min-w-[28px] text-center opacity-70">{char}</span>
+                                            {groupedData.today.map((char, i) => (
+                                                <span key={i} className="inline-block bg-white text-gray-800 border border-orange-200 rounded px-1.5 py-0.5 text-lg font-['Klee_One'] min-w-[32px] text-center shadow-sm">{char}</span>
                                             ))}
                                         </div>
+                                    ) : (<p className="text-[11px] text-gray-400 italic">Không có Kanji tồn đọng. Giỏi lắm! 🎉</p>)}
+                                </div>
+
+                                {/* Tương lai */}
+                                {futureDates.length > 0 && (
+                                    <div className="space-y-3">
+                                         <div className="flex items-center gap-2 mt-2">
+                                            <span className="h-[1px] flex-1 bg-gray-100"></span>
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase">Sắp tới</span>
+                                            <span className="h-[1px] flex-1 bg-gray-100"></span>
+                                        </div>
+                                        {futureDates.map(date => (
+                                            <div key={date} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
+                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                        Ngày {date}
+                                                    </span>
+                                                    <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 rounded">{groupedData[date].length} chữ</span>
+                                                </div>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {groupedData[date].map((char, i) => (
+                                                        <span key={i} className="inline-block bg-white text-gray-500 border border-gray-200 rounded px-1.5 py-0.5 text-base font-['Klee_One'] min-w-[28px] text-center opacity-70">{char}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                )}
                             </div>
-                        )}
-                    </div>
 
-                    {/* --- NÚT XÓA DANH SÁCH (Ở CUỐI CÙNG) --- */}
-                    <div className="mt-8 pt-6 border-t border-dashed border-gray-200 text-center pb-2">
-                        <button 
-    onClick={() => {
-        // --- LOGIC MỚI Ở ĐÂY ---
-        // Kiểm tra nếu không có dữ liệu hoặc dữ liệu rỗng
-        if (!srsData || Object.keys(srsData).length === 0) {
-            alert("Danh sách trống"); // Hiện thông báo
-            return; // Dừng lại, không mở bảng xác nhận
-        }
-        // Nếu có dữ liệu thì mới mở bảng xác nhận
-        setIsConfirmOpen(true);
-    }}
-    className="text-red-400 hover:text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 mx-auto"
->
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-    XÓA TOÀN BỘ TIẾN ĐỘ
-</button>
-                        <p className="text-[9px] text-gray-400 mt-1">Hành động này sẽ xóa mọi dữ liệu về SRS</p>
-                    </div>
-                </div>
-
-                {/* --- BẢNG CẢNH BÁO (MODAL CHỒNG MODAL) --- */}
-                {isConfirmOpen && (
-                    <div className="absolute inset-0 z-[500] bg-white/80 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
-                        <div className="w-full max-w-xs bg-white rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.1)] border border-gray-200 p-6 text-center transform scale-100 animate-in zoom-in-95 duration-200">
-                            <div className="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                            </div>
-                            <h3 className="text-lg font-black text-gray-800 mb-2">CẢNH BÁO!</h3>
-                            <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-                                Bạn có chắc chắn muốn xóa toàn bộ lịch sử học tập? 
-                                <br/><span className="text-red-500 font-bold text-xs">Dữ liệu sẽ không thể khôi phục!</span>
-                            </p>
-                            
-                            <div className="flex flex-col gap-3">
-                                {/* Nút QUAY LẠI - Nổi bật (Màu xanh) */}
-                                <button 
-                                    onClick={() => setIsConfirmOpen(false)}
-                                    className="w-full py-3 bg-green-500 hover:bg-green-600 text-white font-black rounded-xl shadow-lg shadow-green-200 transition-all active:scale-95 uppercase tracking-wide text-sm"
-                                >
-                                    KHÔNG XÓA NỮA
-                                </button>
-
-                                {/* Nút XÓA - Kém nổi bật (Màu xám/đỏ nhạt) */}
+                            {/* Nút Xóa */}
+                            <div className="mt-8 pt-6 border-t border-dashed border-gray-200 text-center pb-2">
                                 <button 
                                     onClick={() => {
-                                        onResetSRS(); // Gọi hàm xóa từ App
-                                        setIsConfirmOpen(false); // Đóng cảnh báo
-                                        onClose(); // Đóng luôn bảng ReviewList
+                                        if (!srsData || Object.keys(srsData).length === 0) {
+                                            alert("Danh sách trống");
+                                            return;
+                                        }
+                                        setIsConfirmOpen(true); // CHUYỂN SANG GIAO DIỆN CẢNH BÁO
                                     }}
-                                    className="w-full py-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 font-bold rounded-xl transition-all text-xs"
+                                    className="text-red-400 hover:text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 mx-auto"
                                 >
-                                    Vẫn xóa dữ liệu
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                    XÓA TOÀN BỘ TIẾN ĐỘ
                                 </button>
+                                <p className="text-[9px] text-gray-400 mt-1">Hành động này sẽ xóa mọi dữ liệu về SRS</p>
                             </div>
+                        </div>
+                    </>
+                ) : (
+                    /* === TRƯỜNG HỢP 2: ĐANG Ở CHẾ ĐỘ CẢNH BÁO (HIỆN THAY THẾ LIST) === */
+                    <div className="p-8 text-center animate-in fade-in zoom-in-95 duration-200 flex flex-col items-center justify-center min-h-[300px]">
+                        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-5 animate-bounce">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </div>
+                        <h3 className="text-xl font-black text-gray-800 mb-2 uppercase">Cảnh báo quan trọng</h3>
+                        <p className="text-sm text-gray-500 mb-8 leading-relaxed max-w-[260px]">
+                            Toàn bộ lịch sử học tập sẽ bị xóa vĩnh viễn.<br/>
+                            <span className="text-red-500 font-bold">Bạn sẽ không thể khôi phục lại!</span>
+                        </p>
+                        
+                        <div className="flex flex-col gap-3 w-full max-w-[260px]">
+                            {/* Nút Quay Lại (Màu xanh - Ưu tiên) */}
+                            <button 
+                                onClick={() => setIsConfirmOpen(false)} // Quay về giao diện List
+                                className="w-full py-3.5 bg-green-500 hover:bg-green-600 text-white font-black rounded-xl shadow-lg shadow-green-200 transition-all active:scale-95 uppercase text-xs tracking-wider"
+                            >
+                                Quay lại (An toàn)
+                            </button>
+
+                            {/* Nút Xóa thật (Màu đỏ nhạt) */}
+                            <button 
+                                onClick={() => {
+                                    onResetSRS(); // Xóa dữ liệu
+                                    setIsConfirmOpen(false); 
+                                    onClose(); // Đóng modal
+                                }}
+                                className="w-full py-3 text-red-400 hover:text-red-600 hover:bg-red-50 font-bold rounded-xl transition-all text-xs"
+                            >
+                                Vẫn xóa dữ liệu
+                            </button>
                         </div>
                     </div>
                 )}
