@@ -1306,7 +1306,8 @@ try {
         const url = `./data/${fileName}`;
 
         setIsLoading(true);
-        setIsUtilsOpen(false); // Đóng menu Tiện ích
+         // Đóng menu Tiện ích
+        setIsMenuOpen(false)
         
         try {
             // 3. Tải file về
@@ -1765,6 +1766,73 @@ className={`py-2 text-[11px] font-black border rounded-md transition-all duratio
 {level}
 </button>
 ))}
+    
+    
+                        {/* Lấy ngẫu nhiên */}
+
+                        <div>
+
+                            <div className="flex justify-between items-center mb-2">
+
+                                <p className="text-[10px] font-bold text-gray-400 uppercase">Lấy ngẫu nhiên</p>
+
+                                {/* CỤM INPUT MÀU CAM */}
+
+                                <div className="flex items-center gap-1.5">
+
+                                    <input 
+
+                                        type="number" 
+
+                                        min="0" 
+
+                                        max="50"
+
+                                        value={randomCount}
+
+                                        onChange={(e) => {
+
+                                            const val = e.target.value;
+
+                                            if (val === '') setRandomCount('');
+
+                                            else setRandomCount(parseInt(val));
+
+                                        }}
+
+                                        onKeyDown={(e) => { if(e.key==='Enter' && randomCount>50) setRandomCount(50) }}
+
+                                        onBlur={() => { if(randomCount>50) setRandomCount(50) }}
+
+                                        className="w-14 h-7 text-[16px] text-center font-bold bg-white border border-gray-300 text-gray-700 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors"
+
+                                    />
+
+                                    <span className="text-[10px] font-bold text-gray-500">chữ</span>
+
+                                </div>
+
+                            </div>
+
+                            <div className="grid grid-cols-5 gap-1.5">
+
+                                {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
+
+<button 
+
+key={level} 
+
+onClick={() => handleRandomLoadFromGithub(level)} 
+
+className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 ${levelColors[level]}`}
+
+>
+
+{level}
+
+</button>
+
+))}
                             </div>
                         </div>
                         </div>
@@ -1788,40 +1856,7 @@ className={`py-2 text-[11px] font-black border rounded-md transition-all duratio
                                 Xáo trộn danh sách hiện tại
                             </button>
                         </div>
-
-                        {/* Lấy ngẫu nhiên */}
-                        <div>
-                            <div className="flex justify-between items-center mb-2">
-                                <p className="text-[10px] font-bold text-gray-400 uppercase">Lấy ngẫu nhiên</p>
-                                {/* CỤM INPUT MÀU CAM */}
-                                <div className="flex items-center gap-1.5">
-                                    <input 
-                                        type="number" 
-                                        min="0" 
-                                        max="50"
-                                        value={randomCount}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            if (val === '') setRandomCount('');
-                                            else setRandomCount(parseInt(val));
-                                        }}
-                                        onKeyDown={(e) => { if(e.key==='Enter' && randomCount>50) setRandomCount(50) }}
-                                        onBlur={() => { if(randomCount>50) setRandomCount(50) }}
-                                        className="w-14 h-7 text-[16px] text-center font-bold bg-white border border-gray-300 text-gray-700 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors"
-                                    />
-                                    <span className="text-[10px] font-bold text-gray-500">chữ</span>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-5 gap-1.5">
-                                {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
-<button 
-key={level} 
-onClick={() => handleRandomLoadFromGithub(level)} 
-className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 ${levelColors[level]}`}
->
-{level}
-</button>
-))}
+//lấy ngẫu nhiên cũ
                             </div>
                         </div>
 <div className="pt-4 border-t border-gray-100">
