@@ -316,8 +316,8 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                     <>
                         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                             <div className="flex items-baseline gap-3">
-                                <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2">📅 LỊCH TRÌNH ÔN TẬP</h3>
-                                <button onClick={() => setIsHelpOpen(true)} className="text-[10px] font-bold text-blue-500 hover:text-blue-700 underline decoration-blue-300 hover:decoration-blue-700 underline-offset-2 transition-all">
+                                <h3 className="text-lg font-bold text-gray-800 uppercase flex items-center gap-2">📅 LỊCH TRÌNH ÔN TẬP</h3>
+                                <button onClick={() => setIsHelpOpen(true)} className="text-[14px] font-bold text-blue-500 hover:text-blue-700 underline decoration-blue-300 hover:decoration-blue-700 underline-offset-2 transition-all">
                                     xem hướng dẫn
                                 </button>
                             </div>
@@ -330,8 +330,8 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                             <div className="space-y-4">
                                 <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-xs font-black text-orange-600 uppercase">Cần ôn ngay</span>
-                                        <span className="bg-orange-200 text-orange-700 text-[10px] font-bold px-1.5 rounded">{groupedData.today.length} chữ</span>
+                                        <span className="text-sm font-black text-orange-600 uppercase">Cần ôn ngay</span>
+                                        <span className="bg-orange-200 text-orange-700 text-[14px] font-bold px-1.5 rounded">{groupedData.today.length} chữ</span>
                                     </div>
                                     {groupedData.today.length > 0 ? (
                                         <div className="flex flex-wrap gap-1">
@@ -339,14 +339,14 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                                                 <span key={i} className="inline-block bg-white text-gray-800 border border-orange-200 rounded px-1.5 py-0.5 text-lg font-['Klee_One'] min-w-[32px] text-center shadow-sm">{char}</span>
                                             ))}
                                         </div>
-                                    ) : (<p className="text-[11px] text-gray-400 italic">Không có Kanji tồn đọng. Giỏi lắm! 🎉</p>)}
+                                    ) : (<p className="text-[15px] text-gray-400 italic">Không có Kanji tồn đọng. Giỏi lắm! 🎉</p>)}
                                 </div>
 
                                 {futureDates.length > 0 && (
                                     <div className="space-y-3">
                                          <div className="flex items-center gap-2 mt-2">
                                             <span className="h-[1px] flex-1 bg-gray-100"></span>
-                                            <span className="text-[10px] font-bold text-gray-400 uppercase">Sắp tới</span>
+                                            <span className="text-sm font-bold text-gray-400 uppercase">Sắp tới</span>
                                             <span className="h-[1px] flex-1 bg-gray-100"></span>
                                         </div>
                                         {futureDates.map(date => (
