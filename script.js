@@ -1716,6 +1716,10 @@ LÀM SẠCH
                 <div className="flex flex-row gap-4 w-full h-12">
                     
                     {/* 1. MENU CHỌN NHANH (Quick Select) */}
+<div className="relative flex-1" ref={quickMenuRef}> 
+                    <button onClick={() => toggleMenu('quick')} className={`w-full h-full px-1 border rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-[0.98] ${isMenuOpen ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}`}>
+                        <span className="font-bold text-xs whitespace-nowrap">Chọn nhanh</span>
+                    </button>
                     {isMenuOpen && (
                         <div className="absolute bottom-full left-0 mb-2 z-50 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-4 animate-in fade-in zoom-in-95 duration-200">
                             
@@ -1791,8 +1795,13 @@ LÀM SẠCH
                             </div>
                         </div>
                     )}
+                </div>
 
                    {/* 2. MENU TIỆN ÍCH (Utilities) */}
+<div className="relative flex-1" ref={utilsMenuRef}> 
+                    <button onClick={() => toggleMenu('utils')} className={`w-full h-full px-1 border rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-[0.98] ${isUtilsOpen ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}`}>
+                        <span className="font-bold text-xs whitespace-nowrap">Tiện ích</span>
+                    </button>
                     {isUtilsOpen && (
                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-5 animate-in fade-in zoom-in-95 duration-200">
                             
@@ -1855,6 +1864,7 @@ LÀM SẠCH
 
                         </div>
                     )}
+ </div>
                     {/* 3. TÙY CHỈNH */}
                     <div className="relative flex-1" ref={configMenuRef}> 
                     <button onClick={() => toggleMenu('config')} className={`w-full h-full px-1 border rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-[0.98] ${isConfigOpen ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}`}>
