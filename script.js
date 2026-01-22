@@ -1980,7 +1980,7 @@ LÀM SẠCH
                                         <path d="M12 18h.01"></path>
                                         <path d="M16 18h.01"></path>
                                     </svg>
-                                    <span className="text-xs font-bold uppercase tracking-wide">ÔN TẬP THÔNG MINH</span>
+                                    <span className="text-xs font-bold uppercase tracking-wide">LỊCH TRÌNH ÔN TẬP</span>
                                 </button>
                             </div>
 
@@ -2441,7 +2441,7 @@ const [config, setConfig] = useState({
     text: '', fontSize: 33, traceCount: 9, verticalOffset: -3, 
     traceOpacity: 0.15, guideScale: 1.02, guideX: 0, guideY: 0.5, 
     gridOpacity: 0.8, gridType: 'cross', 
-    fontFamily: "'UD Digi Kyokasho N-R', 'UD Digi Kyokasho', 'UD デジタル 教科書体 N-R', 'UD デジタル 教科書体', 'Klee One', cursive",
+    fontFamily: "'Klee One', 'UD Digi Kyokasho N-R', 'UD Digi Kyokasho', 'UD デジタル 教科書体 N-R', 'UD デジタル 教科書体', cursive",
     showOnKun: false 
 });
 
