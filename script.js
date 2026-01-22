@@ -1720,119 +1720,52 @@ LÀM SẠCH
                     <button onClick={() => toggleMenu('quick')} className={`w-full h-full px-1 border rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-[0.98] ${isMenuOpen ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}`}>
                         <span className="font-bold text-xs whitespace-nowrap">Chọn nhanh</span>
                     </button>
-                    {isMenuOpen && (
+
+                   {isMenuOpen && (
                         <div className="absolute bottom-full left-0 mb-2 z-50 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-4 animate-in fade-in zoom-in-95 duration-200">
-                        <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Bảng chữ cái</p>
-<div className="grid grid-cols-2 gap-2">
-<button 
-onClick={() => handleLoadFromGithub('./data/hiragana.json', 'hiragana')} 
-className="py-2 text-xs font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition"
->
-あ Hiragana
-</button>
-
-<button 
-onClick={() => handleLoadFromGithub('./data/katakana.json', 'katakana')} 
-className="py-2 text-xs font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition"
->
-ア Katakana
-</button>
-</div>
-                        </div>
-<div>
-<p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Bộ thủ</p>
-<button 
-onClick={() => handleLoadFromGithub('./data/bothu.json')} 
-className="w-full py-2 text-xs font-black border bg-gray-100 text-gray-500 border-gray-200 uppercase transition-all duration-200 hover:bg-gray-500 hover:text-white hover:border-gray-500 rounded"
->
-Bộ thủ cơ bản
-</button>
-</div>
-                        <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Lấy tất cả Kanji</p>
-                            <div className="grid grid-cols-5 gap-1.5">
-{['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
-<button 
-key={level} 
-onClick={() => {
-    // Tạo link: kanjin5.json, kanjin4.json...
-    const fileName = `kanji${level.toLowerCase()}.json`; 
-    const url = `./data/${fileName}`;
-    handleLoadFromGithub(url);
-}} 
-className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 active:scale-95 ${levelColors[level]}`}
->
-{level}
-</button>
-))}
-    
-    
-                        {/* Lấy ngẫu nhiên */}
-
-                        <div>
-
-                            <div className="flex justify-between items-center mb-2">
-
-                                <p className="text-[10px] font-bold text-gray-400 uppercase">Lấy ngẫu nhiên</p>
-
-                                {/* CỤM INPUT MÀU CAM */}
-
-                                <div className="flex items-center gap-1.5">
-
-                                    <input 
-
-                                        type="number" 
-
-                                        min="0" 
-
-                                        max="50"
-
-                                        value={randomCount}
-
-                                        onChange={(e) => {
-
-                                            const val = e.target.value;
-
-                                            if (val === '') setRandomCount('');
-
-                                            else setRandomCount(parseInt(val));
-
-                                        }}
-
-                                        onKeyDown={(e) => { if(e.key==='Enter' && randomCount>50) setRandomCount(50) }}
-
-                                        onBlur={() => { if(randomCount>50) setRandomCount(50) }}
-
-                                        className="w-14 h-7 text-[16px] text-center font-bold bg-white border border-gray-300 text-gray-700 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors"
-
-                                    />
-
-                                    <span className="text-[10px] font-bold text-gray-500">chữ</span>
-
+                            {/* 1. Bảng chữ cái */}
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Bảng chữ cái</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button onClick={() => handleLoadFromGithub('./data/hiragana.json', 'hiragana')} className="py-2 text-xs font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition">あ Hiragana</button>
+                                    <button onClick={() => handleLoadFromGithub('./data/katakana.json', 'katakana')} className="py-2 text-xs font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition">ア Katakana</button>
                                 </div>
-
                             </div>
 
-                            <div className="grid grid-cols-5 gap-1.5">
+                            {/* 2. Bộ thủ */}
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Bộ thủ</p>
+                                <button onClick={() => handleLoadFromGithub('./data/bothu.json')} className="w-full py-2 text-xs font-black border bg-gray-100 text-gray-500 border-gray-200 uppercase transition-all duration-200 hover:bg-gray-500 hover:text-white hover:border-gray-500 rounded">Bộ thủ cơ bản</button>
+                            </div>
 
-                                {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
+                            {/* 3. Lấy tất cả Kanji */}
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Lấy tất cả Kanji</p>
+                                <div className="grid grid-cols-5 gap-1.5">
+                                    {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
+                                        <button key={level} onClick={() => { const fileName = `kanji${level.toLowerCase()}.json`; const url = `./data/${fileName}`; handleLoadFromGithub(url); }} className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 active:scale-95 ${levelColors[level]}`}>{level}</button>
+                                    ))}
+                                </div>
+                            </div>
 
-<button 
-
-key={level} 
-
-onClick={() => handleRandomLoadFromGithub(level)} 
-
-className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 ${levelColors[level]}`}
-
->
-
-{level}
-
-</button>
-
-))}
+                            {/* 4. Lấy ngẫu nhiên (ĐÃ CHUYỂN VỀ ĐÂY) */}
+                            <div>
+                                <div className="flex justify-between items-center mb-2 mt-1">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase">Lấy ngẫu nhiên</p>
+                                    {/* Input số lượng */}
+                                    <div className="flex items-center gap-1.5">
+                                        <input type="number" min="0" max="50" value={randomCount} onChange={(e) => { const val = e.target.value; if (val === '') setRandomCount(''); else setRandomCount(parseInt(val)); }} onKeyDown={(e) => { if (e.key === 'Enter' && randomCount > 50) setRandomCount(50) }} onBlur={() => { if (randomCount > 50) setRandomCount(50) }} className="w-10 h-6 text-[14px] text-center font-bold bg-gray-50 border border-gray-200 text-gray-700 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors" />
+                                        <span className="text-[9px] font-bold text-gray-400">chữ</span>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-5 gap-1.5">
+                                    {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
+                                        <button key={`rand-${level}`} onClick={() => handleRandomLoadFromGithub(level)} className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 active:scale-95 ${levelColors[level]}`}>{level}</button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
  </div>
   </div>
                             </div>
