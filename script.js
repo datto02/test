@@ -2,32 +2,15 @@ const removeAccents = (str) => {
 return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
 };
     const { useState, useEffect, useMemo, useRef } = React;
-// --- BƯỚC 1: LOGIC TÍNH TOÁN NGÀY (THAY THẾ SRS_INTERVALS & calculateSRS CŨ) ---
-
-// --- BƯỚC 1: LOGIC SRS THÔNG MINH (ANKI STYLE - 2 NÚT) ---
 
 const calculateSRS = (currentData, quality) => {
-  // quality: 0 (Đang học/Quên), 1 (Đã biết)
-  
-  // Mặc định: level (số ngày khoảng cách), easeFactor (hệ số IQ - mặc định 2.5)
   let { level = 0, easeFactor = 2.5, nextReview } = currentData || {};
   const now = Date.now();
-
-  // --- 1. CƠ CHẾ CHẶN HỌC SỚM (Anti-Early Review) ---
-  // Nếu thẻ đã có lịch hẹn (nextReview > 0) VÀ chưa đến giờ (nextReview > now)
   if (nextReview && nextReview > now) {
-      // Nếu bấm "Đã biết" (1) -> Return nguyên trạng thái cũ (Không cho học vượt)
       if (quality === 1) return currentData;
-      
-      // Nếu bấm "Đang học" (0) -> Vẫn chạy xuống dưới để Reset & Phạt (Chưa đến hạn mà đã quên)
   }
 
-  // --- 2. XỬ LÝ NÚT BẤM ---
-
   if (quality === 0) {
-    // === BẤM NÚT "ĐANG HỌC" (ĐỎ) ===
-    
-    // PHẠT: Giảm hệ số IQ (tối thiểu là 1.3, không giảm sâu hơn)
     easeFactor = Math.max(1.3, easeFactor - 0.2);
     
     return {
@@ -426,7 +409,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                             </p>
                             
                             <div className="flex flex-col gap-3 w-full max-w-[260px]">
-                                <button onClick={() => setIsConfirmOpen(false)} className="w-full py-3.5 bg-green-500 hover:bg-green-600 text-white font-black rounded-xl shadow-lg shadow-green-200 transition-all active:scale-95 uppercase text-xs tracking-wider">KHÔNG XÓA NỮA</button>
+                                <button onClick={() => setIsConfirmOpen(false)} className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-lg shadow-green-200 transition-all active:scale-95 uppercase text-xs tracking-wider">KHÔNG XÓA NỮA</button>
                                 <button onClick={() => { onResetSRS(); setIsConfirmOpen(false); onClose(); }} className="w-full py-3 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 font-bold rounded-xl transition-all text-xs">Vẫn xóa dữ liệu</button>
                             </div>
                         </div>
