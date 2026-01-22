@@ -294,7 +294,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                             </div>
                             
                             {/* 3. Lưu ý dữ liệu */}
-                            <div className="bg-yellow-50 p-3 rounded-xl border border-yellow-100 text-[11px]">
+                            <div className="bg-yellow-50 p-3 rounded-xl border border-yellow-100 text-lg">
                                 <h4 className="font-bold text-yellow-700 mb-1 flex items-center gap-1">
                                     ⚠️ 3. LƯU Ý QUAN TRỌNG VỀ DỮ LIỆU
                                 </h4>
