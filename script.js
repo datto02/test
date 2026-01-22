@@ -222,7 +222,11 @@ const useKanjiReadings = (char, active, dbData) => {
 // --- BƯỚC 4: COPY ĐÈ ĐOẠN NÀY VÀO FLASHCARD MODAL ---
 // Chỉ thêm onSrsUpdate để lưu dữ liệu, giao diện giữ nguyên tuyệt đối
 // --- BƯỚC 2: COMPONENT BẢNG DANH SÁCH ÔN TẬP ---
-const ReviewListModal = ({ isOpen, onClose, srsData }) => {
+// --- BƯỚC 2: COMPONENT BẢNG DANH SÁCH ÔN TẬP (ĐÃ CẬP NHẬT TÍNH NĂNG XÓA) ---
+const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
+    // State bật tắt bảng cảnh báo xóa
+    const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
+
     // Logic khóa cuộn nền
     React.useEffect(() => {
         if (isOpen) document.body.style.overflow = 'hidden';
@@ -230,23 +234,17 @@ const ReviewListModal = ({ isOpen, onClose, srsData }) => {
         return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
 
-    // Logic gom nhóm dữ liệu theo ngày
+    // Logic gom nhóm dữ liệu theo ngày (GIỮ NGUYÊN)
     const groupedData = React.useMemo(() => {
-        const groups = { today: [] }; // 'today' chứa: Quá hạn + Hôm nay + Đang học dở (0)
+        const groups = { today: [] }; 
         const now = Date.now();
-
         Object.entries(srsData || {}).forEach(([char, data]) => {
-            // Logic lọc: nextReview = 0 HOẶC nextReview <= now
-            // Lưu ý: data.isDone không còn dùng trong logic mới nhưng giữ để tương thích nếu có dữ liệu cũ
             if ((!data.nextReview && data.nextReview !== 0) || (data.isDone === true)) return;
-
             if (data.nextReview === 0 || data.nextReview <= now) {
                 groups.today.push(char);
             } else {
-                // Nhóm ngày tương lai
                 const dateObj = new Date(data.nextReview);
                 const dateKey = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
-                
                 if (!groups[dateKey]) groups[dateKey] = [];
                 groups[dateKey].push(char);
             }
@@ -265,7 +263,8 @@ const ReviewListModal = ({ isOpen, onClose, srsData }) => {
 
     return (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={onClose}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200 overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200 overflow-hidden relative" onClick={e => e.stopPropagation()}>
+                
                 {/* Header */}
                 <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                     <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2">📅 LỊCH TRÌNH ÔN TẬP</h3>
@@ -273,49 +272,103 @@ const ReviewListModal = ({ isOpen, onClose, srsData }) => {
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
                 </div>
-                {/* Body */}
-                <div className="p-4 overflow-y-auto custom-scrollbar space-y-4">
-                    {/* Phần CẦN ÔN NGAY */}
-                    <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-black text-orange-600 uppercase">Cần ôn ngay</span>
-                            <span className="bg-orange-200 text-orange-700 text-[10px] font-bold px-1.5 rounded">{groupedData.today.length} chữ</span>
+
+                {/* Body: Danh sách cuộn */}
+                <div className="p-4 overflow-y-auto custom-scrollbar flex-1">
+                    <div className="space-y-4">
+                        {/* Phần CẦN ÔN NGAY */}
+                        <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-black text-orange-600 uppercase">Cần ôn ngay</span>
+                                <span className="bg-orange-200 text-orange-700 text-[10px] font-bold px-1.5 rounded">{groupedData.today.length} chữ</span>
+                            </div>
+                            {groupedData.today.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                    {groupedData.today.map((char, i) => (
+                                        <span key={i} className="inline-block bg-white text-gray-800 border border-orange-200 rounded px-1.5 py-0.5 text-lg font-['Klee_One'] min-w-[32px] text-center shadow-sm">{char}</span>
+                                    ))}
+                                </div>
+                            ) : (<p className="text-[11px] text-gray-400 italic">Không có bài tập tồn đọng. Giỏi lắm! 🎉</p>)}
                         </div>
-                        {groupedData.today.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                                {groupedData.today.map((char, i) => (
-                                    <span key={i} className="inline-block bg-white text-gray-800 border border-orange-200 rounded px-1.5 py-0.5 text-lg font-['Klee_One'] min-w-[32px] text-center shadow-sm">{char}</span>
+
+                        {/* Phần TƯƠNG LAI */}
+                        {futureDates.length > 0 && (
+                            <div className="space-y-3">
+                                 <div className="flex items-center gap-2 mt-2">
+                                    <span className="h-[1px] flex-1 bg-gray-100"></span>
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase">Sắp tới</span>
+                                    <span className="h-[1px] flex-1 bg-gray-100"></span>
+                                </div>
+                                {futureDates.map(date => (
+                                    <div key={date} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                Ngày {date}
+                                            </span>
+                                            <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 rounded">{groupedData[date].length} chữ</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-1">
+                                            {groupedData[date].map((char, i) => (
+                                                <span key={i} className="inline-block bg-white text-gray-500 border border-gray-200 rounded px-1.5 py-0.5 text-base font-['Klee_One'] min-w-[28px] text-center opacity-70">{char}</span>
+                                            ))}
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
-                        ) : (<p className="text-[11px] text-gray-400 italic">Không có bài tập tồn đọng. Giỏi lắm! 🎉</p>)}
+                        )}
                     </div>
-                    {/* Phần TƯƠNG LAI */}
-                    {futureDates.length > 0 && (
-                        <div className="space-y-3">
-                             <div className="flex items-center gap-2 mt-2">
-                                <span className="h-[1px] flex-1 bg-gray-100"></span>
-                                <span className="text-[10px] font-bold text-gray-400 uppercase">Sắp tới</span>
-                                <span className="h-[1px] flex-1 bg-gray-100"></span>
-                            </div>
-                            {futureDates.map(date => (
-                                <div key={date} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                            Ngày {date} (5:00 sáng)
-                                        </span>
-                                        <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 rounded">{groupedData[date].length} chữ</span>
-                                    </div>
-                                    <div className="flex flex-wrap gap-1">
-                                        {groupedData[date].map((char, i) => (
-                                            <span key={i} className="inline-block bg-white text-gray-500 border border-gray-200 rounded px-1.5 py-0.5 text-base font-['Klee_One'] min-w-[28px] text-center opacity-70">{char}</span>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+
+                    {/* --- NÚT XÓA DANH SÁCH (Ở CUỐI CÙNG) --- */}
+                    <div className="mt-8 pt-6 border-t border-dashed border-gray-200 text-center pb-2">
+                        <button 
+                            onClick={() => setIsConfirmOpen(true)}
+                            className="text-red-400 hover:text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 mx-auto"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            XÓA TOÀN BỘ TIẾN ĐỘ
+                        </button>
+                        <p className="text-[9px] text-gray-400 mt-1">Hành động này sẽ reset mọi dữ liệu về SRS</p>
+                    </div>
                 </div>
+
+                {/* --- BẢNG CẢNH BÁO (MODAL CHỒNG MODAL) --- */}
+                {isConfirmOpen && (
+                    <div className="absolute inset-0 z-[500] bg-white/80 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
+                        <div className="w-full max-w-xs bg-white rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.1)] border border-gray-200 p-6 text-center transform scale-100 animate-in zoom-in-95 duration-200">
+                            <div className="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            </div>
+                            <h3 className="text-lg font-black text-gray-800 mb-2">CẢNH BÁO!</h3>
+                            <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                                Bạn có chắc chắn muốn xóa toàn bộ lịch sử học tập? 
+                                <br/><span className="text-red-500 font-bold text-xs">Dữ liệu sẽ không thể khôi phục!</span>
+                            </p>
+                            
+                            <div className="flex flex-col gap-3">
+                                {/* Nút QUAY LẠI - Nổi bật (Màu xanh) */}
+                                <button 
+                                    onClick={() => setIsConfirmOpen(false)}
+                                    className="w-full py-3 bg-green-500 hover:bg-green-600 text-white font-black rounded-xl shadow-lg shadow-green-200 transition-all active:scale-95 uppercase tracking-wide text-sm"
+                                >
+                                    Quay lại (An toàn)
+                                </button>
+
+                                {/* Nút XÓA - Kém nổi bật (Màu xám/đỏ nhạt) */}
+                                <button 
+                                    onClick={() => {
+                                        onResetSRS(); // Gọi hàm xóa từ App
+                                        setIsConfirmOpen(false); // Đóng cảnh báo
+                                        onClose(); // Đóng luôn bảng ReviewList
+                                    }}
+                                    className="w-full py-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 font-bold rounded-xl transition-all text-xs"
+                                >
+                                    Vẫn xóa dữ liệu
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -901,7 +954,7 @@ return (
     };
 
 // 5. Sidebar (Phiên bản: Final)
-    const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList }) => {
+    const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, onResetSRS }) => {
    // --- BƯỚC 2: TÌM TRONG COMPONENT SIDEBAR -> SỬA BIẾN dueChars ---
 
 // 1. Logic bộ lọc mới
@@ -2230,7 +2283,10 @@ const updateSRSProgress = (char, quality) => {
     setSrsData(newData);
     localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
 };
-
+const handleResetAllSRS = () => {
+    setSrsData({}); // Xóa sạch state
+    localStorage.removeItem('phadao_srs_data'); // Xóa sạch trong bộ nhớ máy
+};
 // State cấu hình mặc định
 const [config, setConfig] = useState({ 
     text: '', fontSize: 33, traceCount: 9, verticalOffset: -3, 
@@ -2311,7 +2367,8 @@ return (
         
         dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống Sidebar
             srsData={srsData}
-                onOpenReviewList={() => setIsReviewListOpen(true)}
+         onOpenReviewList={() => setIsReviewListOpen(true)}
+        onResetSRS={handleResetAllSRS}
     />
     </div>
 
@@ -2359,6 +2416,7 @@ return (
                 isOpen={isReviewListOpen}
                 onClose={() => setIsReviewListOpen(false)}
                 srsData={srsData}
+                onResetSRS={onResetSRS}
             />
         </div>
 );
