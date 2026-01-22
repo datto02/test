@@ -263,7 +263,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
 
     return (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={onClose}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200 overflow-hidden relative" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh] min-h-[450px] animate-in zoom-in-95 duration-200 overflow-hidden relative" onClick={e => e.stopPropagation()}>
                 
                 {/* Header */}
                 <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
