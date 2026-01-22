@@ -437,7 +437,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
     );
 };
 // --- BƯỚC 4: FLASHCARD MODAL (ĐÃ GẮN SỰ KIỆN LƯU DỮ LIỆU) ---
-const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => { 
+const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, onSrsRestore }) => { 
     const [originalQueue, setOriginalQueue] = React.useState([]);
     const [queue, setQueue] = React.useState([]);
     const [currentIndex, setCurrentIndex] = React.useState(0);
@@ -467,8 +467,75 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
     
     // --- Các hàm xử lý UI ---
     const toggleFlip = React.useCallback(() => { setIsFlipped(prev => !prev); if (currentIndex === 0) setShowHint(false); }, [currentIndex]);
-    const handleNext = React.useCallback((isKnown) => { if (exitDirection || isFinished || queue.length === 0) return; setIsFlipped(false); if (isKnown) { setKnownCount(prev => prev + 1); } else { setUnknownIndices(prev => [...prev, currentIndex]); } setHistory(prev => [...prev, isKnown]); setBtnFeedback(isKnown ? 'right' : 'left'); setExitDirection(isKnown ? 'right' : 'left'); setTimeout(() => { setCurrentIndex((prevIndex) => { if (prevIndex < queue.length - 1) { setExitDirection(null); setDragX(0); setBtnFeedback(null); return prevIndex + 1; } else { setIsFinished(true); return prevIndex; } }); }, 150); }, [currentIndex, queue, exitDirection, isFinished]);
-    const handleBack = (e) => { if (e) { e.preventDefault(); e.stopPropagation(); e.currentTarget.blur(); } if (currentIndex > 0 && history.length > 0) { const lastIsKnown = history[history.length - 1]; if (lastIsKnown === true) { setKnownCount(prev => Math.max(0, prev - 1)); } else { setUnknownIndices(prev => prev.slice(0, -1)); } setHistory(prev => prev.slice(0, -1)); setCurrentIndex(prev => prev - 1); setIsFlipped(false); setExitDirection(null); setDragX(0); setBtnFeedback(null); } };
+    const handleNext = React.useCallback((isKnown) => { 
+        if (exitDirection || isFinished || queue.length === 0) return; 
+        
+        // 1. Lấy chữ hiện tại
+        const currentChar = queue[currentIndex];
+
+        // 2. CHỤP LẠI DỮ LIỆU CŨ (SNAPSHOT) TRƯỚC KHI BỊ THAY ĐỔI
+        // Nếu chưa có dữ liệu thì lưu object rỗng
+        const snapshot = (srsData && srsData[currentChar]) ? { ...srsData[currentChar] } : {};
+
+        setIsFlipped(false); 
+
+        // Logic đếm số lượng (Giữ nguyên)
+        if (isKnown) { 
+            setKnownCount(prev => prev + 1); 
+        } else { 
+            setUnknownIndices(prev => [...prev, currentIndex]); 
+        } 
+
+        // 3. LƯU VÀO HISTORY (Lưu cả trạng thái đúng/sai VÀ bản chụp dữ liệu cũ)
+        setHistory(prev => [...prev, { isKnown, char: currentChar, snapshot }]); 
+
+        // Gọi hàm cập nhật dữ liệu mới (Giữ nguyên)
+        setBtnFeedback(isKnown ? 'right' : 'left'); 
+        setExitDirection(isKnown ? 'right' : 'left'); 
+        
+        setTimeout(() => { 
+            setCurrentIndex((prevIndex) => { 
+                if (prevIndex < queue.length - 1) { 
+                    setExitDirection(null); 
+                    setDragX(0); 
+                    setBtnFeedback(null); 
+                    return prevIndex + 1; 
+                } else { 
+                    setIsFinished(true); 
+                    return prevIndex; 
+                } 
+            }); 
+        }, 150); 
+    }, [currentIndex, queue, exitDirection, isFinished, srsData]);
+    const handleBack = (e) => { 
+        if (e) { e.preventDefault(); e.stopPropagation(); e.currentTarget.blur(); } 
+        
+        if (currentIndex > 0 && history.length > 0) { 
+            // 1. Lấy phần tử lịch sử cuối cùng (Bây giờ nó là object chứa snapshot)
+            const lastItem = history[history.length - 1]; 
+            
+            // 2. Tính toán lại UI (Dựa vào lastItem.isKnown thay vì lastIsKnown)
+            if (lastItem.isKnown === true) { 
+                setKnownCount(prev => Math.max(0, prev - 1)); 
+            } else { 
+                setUnknownIndices(prev => prev.slice(0, -1)); 
+            } 
+
+            // 3. KHÔI PHỤC DỮ LIỆU SRS VỀ TRẠNG THÁI CŨ
+            // Nếu lúc nãy có lưu snapshot, giờ ta đè nó lại vào hệ thống
+            if (onSrsRestore && lastItem.char) {
+                onSrsRestore(lastItem.char, lastItem.snapshot);
+            }
+
+            // 4. Cập nhật lại các state UI khác (Giữ nguyên)
+            setHistory(prev => prev.slice(0, -1)); 
+            setCurrentIndex(prev => prev - 1); 
+            setIsFlipped(false); 
+            setExitDirection(null); 
+            setDragX(0); 
+            setBtnFeedback(null); 
+        } 
+    };
     const handleToggleShuffle = (e) => { if (e) { e.preventDefault(); e.stopPropagation(); e.currentTarget.blur(); } const nextState = !isShuffleOn; setIsShuffleOn(nextState); setBtnFeedback('shuffle'); setTimeout(() => setBtnFeedback(null), 400); const passedPart = queue.slice(0, currentIndex); const remainingPart = queue.slice(currentIndex); if (remainingPart.length === 0) return; let newRemainingPart; if (nextState) { newRemainingPart = shuffleArray(remainingPart); } else { const counts = {}; remainingPart.forEach(c => { counts[c] = (counts[c] || 0) + 1; }); newRemainingPart = []; for (const char of originalQueue) { if (counts[char] > 0) { newRemainingPart.push(char); counts[char]--; } } } setQueue([...passedPart, ...newRemainingPart]); setIsFlipped(false); };
     
     // --- Các hàm Drag ---
@@ -2509,6 +2576,13 @@ return (
     text={config.text} 
     dbData={dbData} 
     onSrsUpdate={updateSRSProgress}
+    srsData={srsData} 
+    onSrsRestore={(char, oldData) => {
+        // Hàm này sẽ đè dữ liệu cũ (snapshot) lên dữ liệu hiện tại
+        const newData = { ...srsData, [char]: oldData };
+        setSrsData(newData);
+        localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
+    }}
 />
        {/* 3. RENDER MODAL MỚI */}
             <ReviewListModal 
