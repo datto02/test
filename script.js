@@ -219,10 +219,12 @@ const useKanjiReadings = (char, active, dbData) => {
 
   return readings;
 };
-// --- BƯỚC 2: COMPONENT BẢNG DANH SÁCH ÔN TẬP (LOGIC HIỂN THỊ MỚI) ---
+// --- BƯỚC 2: COMPONENT BẢNG DANH SÁCH ÔN TẬP (CẬP NHẬT: THÊM HƯỚNG DẪN SRS) ---
 const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
     // State bật tắt chế độ xác nhận xóa
     const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
+    // State bật tắt chế độ xem hướng dẫn (MỚI)
+    const [isHelpOpen, setIsHelpOpen] = React.useState(false);
 
     // Logic khóa cuộn nền
     React.useEffect(() => {
@@ -231,9 +233,12 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
         return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
 
-    // Reset về giao diện list khi đóng modal
+    // Reset về giao diện list mặc định khi đóng modal
     React.useEffect(() => {
-        if (!isOpen) setIsConfirmOpen(false);
+        if (!isOpen) {
+            setIsConfirmOpen(false);
+            setIsHelpOpen(false);
+        }
     }, [isOpen]);
 
     // Logic gom nhóm dữ liệu (GIỮ NGUYÊN)
@@ -264,18 +269,86 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
     });
 
     return (
-        <div className="fixed inset-0 z-[400] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={onClose}>
-            {/* SỬA: Bỏ min-h-[450px]. 
-               Modal sẽ tự co giãn theo nội dung bên trong.
-            */}
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200 overflow-hidden relative transition-all" onClick={e => e.stopPropagation()}>
+        <div 
+            className="fixed inset-0 z-[400] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-pointer" 
+            onClick={onClose}
+        >
+            <div 
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200 overflow-hidden relative transition-all cursor-default" 
+                onClick={e => e.stopPropagation()}
+            >
                 
-                {/* === TRƯỜNG HỢP 1: ĐANG Ở CHẾ ĐỘ XEM DANH SÁCH (Mặc định) === */}
-                {!isConfirmOpen ? (
+                {/* --- LOGIC ĐIỀU HƯỚNG GIAO DIỆN --- */}
+                
+                {isHelpOpen ? (
+                    // === GIAO DIỆN 3: BẢNG HƯỚNG DẪN (SRS GUIDE) ===
+                    <div className="flex flex-col h-full">
+                         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-indigo-50">
+                            <h3 className="text-sm font-black text-indigo-700 uppercase flex items-center gap-2">
+                                🎓 CÁCH ÔN TẬP HIỆU QUẢ
+                            </h3>
+                            <button onClick={() => setIsHelpOpen(false)} className="text-indigo-400 hover:text-indigo-600 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        </div>
+                        
+                        <div className="p-6 overflow-y-auto custom-scrollbar text-sm text-gray-600 space-y-6">
+                            <div className="text-center">
+                                <p className="mb-2 italic text-gray-500">Hệ thống sử dụng phương pháp</p>
+                                <p className="font-bold text-indigo-600 text-lg uppercase">Lặp lại ngắt quãng (SRS)</p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex gap-4 items-start bg-red-50 p-3 rounded-xl border border-red-100">
+                                    <div className="w-10 h-10 bg-red-500 text-white rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">
+                                        Nút ĐỎ
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-red-700 text-xs uppercase mb-1">ĐANG HỌC (Quên)</p>
+                                        <p className="text-xs leading-relaxed">Bấm khi bạn <b>chưa thuộc</b> hoặc <b>quên</b> mặt chữ. Hệ thống sẽ bắt bạn học lại chữ này ngay lập tức cho đến khi nhớ.</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 items-start bg-green-50 p-3 rounded-xl border border-green-100">
+                                    <div className="w-10 h-10 bg-green-500 text-white rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">
+                                        Nút XANH
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-green-700 text-xs uppercase mb-1">ĐÃ BIẾT (Nhớ)</p>
+                                        <p className="text-xs leading-relaxed">Bấm khi bạn <b>đã nhớ</b>. Chữ sẽ ẩn đi và xuất hiện lại sau thời gian dài hơn (1 ngày, 3 ngày, 7 ngày...) để ghim sâu vào trí nhớ dài hạn.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-gray-100 p-3 rounded-lg text-center text-[11px] text-gray-500 italic">
+                                "Mục tiêu là ôn tập ngay trước khi bạn sắp quên, giúp tiết kiệm thời gian học nhất."
+                            </div>
+
+                            <button 
+                                onClick={() => setIsHelpOpen(false)} 
+                                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 text-xs uppercase"
+                            >
+                                Đã hiểu, quay lại danh sách
+                            </button>
+                        </div>
+                    </div>
+
+                ) : !isConfirmOpen ? (
+                    // === GIAO DIỆN 1: DANH SÁCH ÔN TẬP (Mặc định) ===
                     <>
                         {/* Header */}
                         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                            <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2">📅 LỊCH TRÌNH ÔN TẬP</h3>
+                            <div className="flex items-baseline gap-3">
+                                <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2">📅 LỊCH TRÌNH</h3>
+                                {/* NÚT MỞ HƯỚNG DẪN (MỚI THÊM) */}
+                                <button 
+                                    onClick={() => setIsHelpOpen(true)}
+                                    className="text-[10px] font-bold text-blue-500 hover:text-blue-700 underline decoration-blue-300 hover:decoration-blue-700 underline-offset-2 transition-all"
+                                >
+                                    xem hướng dẫn
+                                </button>
+                            </div>
+
                             <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
@@ -335,9 +408,9 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                                             alert("Danh sách trống");
                                             return;
                                         }
-                                        setIsConfirmOpen(true); // CHUYỂN SANG GIAO DIỆN CẢNH BÁO
+                                        setIsConfirmOpen(true); // Chuyển sang Cảnh báo
                                     }}
-                                    className="text-red-700 hover:text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 mx-auto"
+                                    className="text-red-400 hover:text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 mx-auto"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                                     XÓA TOÀN BỘ TIẾN ĐỘ
@@ -347,37 +420,45 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                         </div>
                     </>
                 ) : (
-                    /* === TRƯỜNG HỢP 2: ĐANG Ở CHẾ ĐỘ CẢNH BÁO (HIỆN THAY THẾ LIST) === */
-                    <div className="p-8 text-center animate-in fade-in zoom-in-95 duration-200 flex flex-col items-center justify-center min-h-[300px]">
-                        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-5 animate-bounce">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                        </div>
-                        <h3 className="text-xl font-black text-gray-800 mb-2 uppercase">Cảnh báo quan trọng</h3>
-                        <p className="text-sm text-gray-500 mb-8 leading-relaxed max-w-[260px]">
-                            Lịch sử học tập sẽ bị xóa vĩnh viễn.<br/>
-                            <span className="text-red-500 font-bold">Không thể khôi phục lại!</span>
-                        </p>
-                        
-                        <div className="flex flex-col gap-3 w-full max-w-[260px]">
-                            {/* Nút Quay Lại (Màu xanh - Ưu tiên) */}
-                            <button 
-                                onClick={() => setIsConfirmOpen(false)} // Quay về giao diện List
-                                className="w-full py-3.5 bg-green-500 hover:bg-green-600 text-white font-black rounded-xl shadow-lg shadow-green-200 transition-all active:scale-95 uppercase text-xs tracking-wider"
-                            >
-                                KHÔNG XÓA NỮA
-                            </button>
-
-                            {/* Nút Xóa thật (Màu đỏ nhạt) */}
-                            <button 
-                                onClick={() => {
-                                    onResetSRS(); // Xóa dữ liệu
-                                    setIsConfirmOpen(false); 
-                                    onClose(); // Đóng modal
-                                }}
-                                className="w-full py-3 text-red-400 hover:text-red-700 hover:bg-red-50 font-bold rounded-xl transition-all text-xs"
-                            >
-                                Vẫn xóa dữ liệu
-                            </button>
+                    // === GIAO DIỆN 2: CẢNH BÁO XÓA ===
+                    <div 
+                        className="p-8 text-center animate-in fade-in zoom-in-95 duration-200 flex flex-col items-center justify-center min-h-[300px] cursor-pointer"
+                        onClick={(e) => {
+                            e.stopPropagation(); 
+                            setIsConfirmOpen(false); 
+                        }}
+                    >
+                        <div 
+                            className="w-full h-full flex flex-col items-center justify-center cursor-default" 
+                            onClick={(e) => e.stopPropagation()} 
+                        >
+                            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-5 animate-bounce">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            </div>
+                            <h3 className="text-xl font-black text-gray-800 mb-2 uppercase">Cảnh báo quan trọng</h3>
+                            <p className="text-sm text-gray-500 mb-8 leading-relaxed max-w-[260px]">
+                                lịch sử học tập sẽ bị xóa vĩnh viễn.<br/>
+                                <span className="text-red-500 font-bold">Không thể khôi phục lại!</span>
+                            </p>
+                            
+                            <div className="flex flex-col gap-3 w-full max-w-[260px]">
+                                <button 
+                                    onClick={() => setIsConfirmOpen(false)} 
+                                    className="w-full py-3.5 bg-green-500 hover:bg-green-600 text-white font-black rounded-xl shadow-lg shadow-green-200 transition-all active:scale-95 uppercase text-xs tracking-wider"
+                                >
+                                    KHÔNG XÓA NỮA
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        onResetSRS(); 
+                                        setIsConfirmOpen(false); 
+                                        onClose(); 
+                                    }}
+                                    className="w-full py-3 text-red-400 hover:text-red-700 hover:bg-red-50 font-bold rounded-xl transition-all text-xs"
+                                >
+                                    Vẫn xóa dữ liệu
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
