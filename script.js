@@ -1779,7 +1779,7 @@ LÀM SẠCH
 
                             {/* Lấy ngẫu nhiên (Đã chuyển xuống đây) */}
                             <div>
-                                <div className="flex justify-between items-center mb-2 mt-1">
+                                <div className="flex justify-start items-center gap-2 mb-2 mt-1">
                                     <p className="text-[10px] font-bold text-gray-400 uppercase">Lấy ngẫu nhiên</p>
                                     {/* Input số lượng */}
                                     <div className="flex items-center gap-1.5">
