@@ -2442,7 +2442,7 @@ return (
                 isOpen={isReviewListOpen}
                 onClose={() => setIsReviewListOpen(false)}
                 srsData={srsData}
-                onResetSRS={onResetSRS}
+                onResetSRS={handleResetAllSRS}
             />
         </div>
 );
