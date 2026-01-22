@@ -337,7 +337,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                                         }
                                         setIsConfirmOpen(true); // CHUYỂN SANG GIAO DIỆN CẢNH BÁO
                                     }}
-                                    className="text-red-400 hover:text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 mx-auto"
+                                    className="text-red-700 hover:text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 mx-auto"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                                     XÓA TOÀN BỘ TIẾN ĐỘ
@@ -354,8 +354,8 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                         </div>
                         <h3 className="text-xl font-black text-gray-800 mb-2 uppercase">Cảnh báo quan trọng</h3>
                         <p className="text-sm text-gray-500 mb-8 leading-relaxed max-w-[260px]">
-                            Toàn bộ lịch sử học tập sẽ bị xóa vĩnh viễn.<br/>
-                            <span className="text-red-500 font-bold">Bạn sẽ không thể khôi phục lại!</span>
+                            Lịch sử học tập sẽ bị xóa vĩnh viễn.<br/>
+                            <span className="text-red-500 font-bold">Không thể khôi phục lại!</span>
                         </p>
                         
                         <div className="flex flex-col gap-3 w-full max-w-[260px]">
@@ -364,7 +364,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                                 onClick={() => setIsConfirmOpen(false)} // Quay về giao diện List
                                 className="w-full py-3.5 bg-green-500 hover:bg-green-600 text-white font-black rounded-xl shadow-lg shadow-green-200 transition-all active:scale-95 uppercase text-xs tracking-wider"
                             >
-                                Quay lại (An toàn)
+                                KHÔNG XÓA NỮA
                             </button>
 
                             {/* Nút Xóa thật (Màu đỏ nhạt) */}
@@ -374,7 +374,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                                     setIsConfirmOpen(false); 
                                     onClose(); // Đóng modal
                                 }}
-                                className="w-full py-3 text-red-400 hover:text-red-600 hover:bg-red-50 font-bold rounded-xl transition-all text-xs"
+                                className="w-full py-3 text-red-400 hover:text-red-700 hover:bg-red-50 font-bold rounded-xl transition-all text-xs"
                             >
                                 Vẫn xóa dữ liệu
                             </button>
