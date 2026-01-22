@@ -1797,7 +1797,7 @@ LÀM SẠCH
                                             onBlur={() => { if (randomCount > 50) setRandomCount(50) }} 
                                             className="w-10 h-6 text-[14px] text-center font-bold bg-gray-50 border border-gray-200 text-gray-700 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors" 
                                         />
-                                        <span className="text-[9px] font-bold text-gray-400">chữ</span>
+                                        <span className="text-[9px] font-bold text-gray-400 uppercase">chữ</span>
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-5 gap-1.5">
