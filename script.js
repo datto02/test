@@ -916,21 +916,21 @@ return (
                     HƯỚNG DẪN
                 </h2>
                 <div className="text-sm text-gray-500 font-medium space-y-1.5 font-sans">
-                    <p className="flex items-center gap-2">
+                   <p className="flex items-center gap-2">
                         <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">1</span>
-                        Nhập dữ liệu để tạo file luyện viết.
+                        <span><span className="font-bold">Nhập dữ liệu</span> để tạo file luyện viết.</span>
                     </p>
                     <p className="flex items-center gap-2">
                         <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">2</span>
-                        Ấn vào chữ mẫu đầu tiên để xem họa hoạt cách viết.
+                        <span>Ấn vào <span className="font-bold">chữ mẫu đầu tiên</span> để xem họa hoạt cách viết.</span>
                     </p>
                     <p className="flex items-center gap-2">
                         <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">3</span>
-                        Tạo nhanh FLASHCARD trong phần "tiện ích".
+                        <span>Tạo nhanh <span className="font-bold">FLASHCARD</span> trong phần "tiện ích".</span>
                     </p>
                     <p className="flex items-center gap-2">
                         <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">4</span>
-                        Chế độ ôn tập thông minh (lặp lại ngắt quãng) được tích hợp vào Flashcard.
+                        <span>Chế độ <span className="font-bold">ôn tập thông minh</span> (lặp lại ngắt quãng) được tích hợp vào Flashcard.</span>
                     </p>
                 </div>
             </div>
