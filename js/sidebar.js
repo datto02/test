@@ -964,25 +964,22 @@ LÀM SẠCH
         <input type="range" min="0.1" max="1" step="0.1" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.gridOpacity} onChange={(e) => handleChange('gridOpacity', parseFloat(e.target.value))} />
     </div>
 
-    {/* MỤC 5: NÚT GẠT ON/KUN (LUÔN BẬT/TẮT ĐƯỢC) */}
+{/* MỤC 5: CHẾ ĐỘ HIỂN THỊ 3 chế độ */}
 <div className="pt-2 border-t border-gray-100">
-<div className="space-y-1">
-    {/* Đã bỏ hasJLPT ? 'cursor-pointer' : 'cursor-not-allowed opacity-50' */}
-    <label className="flex items-center justify-between group cursor-pointer">
-        <span className="text-[11px] font-bold text-gray-600">Hiện âm On/Kun</span>
-        <div className="relative inline-block w-9 h-5">
-            <input 
-                type="checkbox" 
-                className="peer opacity-0 w-0 h-0" 
-                checked={config.showOnKun} // Chỉ phụ thuộc vào config
-                onChange={() => handleChange('showOnKun', !config.showOnKun)} // Luôn cho phép bấm
-            />
-            {/* Màu sắc luôn sáng rõ để người dùng biết là bấm được */}
-            <span className="absolute inset-0 rounded-full transition-all duration-300 bg-gray-200 peer-checked:bg-indigo-600"></span>
-            <span className={`absolute left-1 bottom-1 w-3 h-3 rounded-full bg-white transition-all duration-300 ${config.showOnKun ? 'translate-x-4' : ''}`}></span>
-        </div>
-    </label>
-</div>
+    <div className="space-y-1">
+        <label className="flex items-center justify-between group">
+            <span className="text-[11px] font-bold text-gray-600">Chế độ hiển thị</span>
+            <select
+                value={config.displayMode}
+                onChange={(e) => handleChange('displayMode', e.target.value)}
+                className="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+            >
+                <option value="strokes">Nét viết (Mặc định)</option>
+                <option value="readings">Âm On/Kun</option>
+                <option value="vocab">Từ vựng đi kèm</option>
+            </select>
+        </label>
+    </div>
 </div>
 
 {/* NÚT ĐẶT LẠI MẶC ĐỊNH - Đã thu gọn */}
