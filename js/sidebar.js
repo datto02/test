@@ -965,9 +965,8 @@ LÀM SẠCH
     </div>
 
 {/* MỤC 5: CHẾ ĐỘ HIỂN THỊ (RADIO BUTTONS - GỌN GÀNG) */}
-<div className="pt-1"> {/* Đã xóa border-t và giảm padding để gọn hơn */}
+<div className="pt-0"> {/* Đã xóa border-t và giảm padding để gọn hơn */}
     <div className="space-y-2">
-        <span className="text-[11px] font-bold text-gray-600">Chế độ hiển thị</span>
         
         {/* Hàng chứa 3 nút Radio */}
         <div className="flex items-center justify-between px-1">
