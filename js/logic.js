@@ -20,7 +20,6 @@ const calculateSRS = (currentData, quality) => {
     };
 
   } else {
-    // === BẤM NÚT "ĐÃ BIẾT" (XANH) ===
 
     let newInterval;
 
