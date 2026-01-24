@@ -28,7 +28,7 @@ const [config, setConfig] = useState({
     traceOpacity: 0.15, guideScale: 1.02, guideX: 0, guideY: 0.5, 
     gridOpacity: 0.8, gridType: 'cross', 
     fontFamily: "'Klee One', 'UD Digi Kyokasho N-R', 'UD Digi Kyokasho', 'UD デジタル 教科書体 N-R', 'UD デジタル 教科書体', cursive",
-    showOnKun: false 
+    displayMode: 'strokes'
 });
 
 const [showPostPrintDonate, setShowPostPrintDonate] = useState(false);
