@@ -964,24 +964,59 @@ LÀM SẠCH
         <input type="range" min="0.1" max="1" step="0.1" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.gridOpacity} onChange={(e) => handleChange('gridOpacity', parseFloat(e.target.value))} />
     </div>
 
-{/* MỤC 5: CHẾ ĐỘ HIỂN THỊ 3 chế độ */}
-<div className="pt-2 border-t border-gray-100">
-    <div className="space-y-1">
-        <label className="flex items-center justify-between group">
-            <span className="text-[11px] font-bold text-gray-600">Hiển thị</span>
-            <select
-                value={config.displayMode}
-                onChange={(e) => handleChange('displayMode', e.target.value)}
-                className="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-            >
-                <option value="strokes">Nét viết (Mặc định)</option>
-                <option value="readings">Âm On/Kun</option>
-                <option value="vocab">Từ vựng đi kèm</option>
-            </select>
-        </label>
+{/* MỤC 5: CHẾ ĐỘ HIỂN THỊ (RADIO BUTTONS - GỌN GÀNG) */}
+<div className="pt-1"> {/* Đã xóa border-t và giảm padding để gọn hơn */}
+    <div className="space-y-2">
+        <span className="text-[11px] font-bold text-gray-600">Chế độ hiển thị</span>
+        
+        {/* Hàng chứa 3 nút Radio */}
+        <div className="flex items-center justify-between px-1">
+            
+            {/* 1. Nét viết */}
+            <label className="flex items-center gap-1.5 cursor-pointer group select-none">
+                <input 
+                    type="radio" 
+                    name="display_mode" 
+                    checked={config.displayMode === 'strokes'}
+                    onChange={() => handleChange('displayMode', 'strokes')}
+                    className="w-3.5 h-3.5 accent-indigo-600 cursor-pointer"
+                />
+                <span className={`text-[10px] font-bold transition-colors ${config.displayMode === 'strokes' ? 'text-indigo-700' : 'text-gray-500 group-hover:text-indigo-600'}`}>
+                    Nét viết
+                </span>
+            </label>
+
+            {/* 2. On/Kun */}
+            <label className="flex items-center gap-1.5 cursor-pointer group select-none">
+                <input 
+                    type="radio" 
+                    name="display_mode" 
+                    checked={config.displayMode === 'readings'}
+                    onChange={() => handleChange('displayMode', 'readings')}
+                    className="w-3.5 h-3.5 accent-indigo-600 cursor-pointer"
+                />
+                <span className={`text-[10px] font-bold transition-colors ${config.displayMode === 'readings' ? 'text-indigo-700' : 'text-gray-500 group-hover:text-indigo-600'}`}>
+                    On/Kun
+                </span>
+            </label>
+
+            {/* 3. Từ vựng */}
+            <label className="flex items-center gap-1.5 cursor-pointer group select-none">
+                <input 
+                    type="radio" 
+                    name="display_mode" 
+                    checked={config.displayMode === 'vocab'}
+                    onChange={() => handleChange('displayMode', 'vocab')}
+                    className="w-3.5 h-3.5 accent-indigo-600 cursor-pointer"
+                />
+                <span className={`text-[10px] font-bold transition-colors ${config.displayMode === 'vocab' ? 'text-indigo-700' : 'text-gray-500 group-hover:text-indigo-600'}`}>
+                    Từ vựng
+                </span>
+            </label>
+
+        </div>
     </div>
 </div>
-
 {/* NÚT ĐẶT LẠI MẶC ĐỊNH - Đã thu gọn */}
 <div className="pt-0"> {/* Giảm padding top từ pt-1 về pt-0 */}
 <button 
