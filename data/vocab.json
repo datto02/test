@@ -1,10 +1,55 @@
 {
-  "本": [
-    { "word": "日本", "reading": "に*ほん*", "meaning": "Nhật Bản" },
-    { "word": "本棚", "reading": "*ほん*だな", "meaning": "Giá sách" }
+  "一": [
+    { "word": "一", "reading": "*いち*", "meaning": "số 1" },
+    { "word": "一人", "reading": "*ひと*り", "meaning": "Một người" },
+    { "word": "一つ", "reading": "*ひと*つ", "meaning": "Một cái" }
   ],
-  "日": [
-    { "word": "日曜日", "reading": "*にち*よう*び*", "meaning": "Chủ nhật" },
-    { "word": "毎日", "reading": "まい*にち*", "meaning": "Mỗi ngày" }
-  ]
+  
+  "右": [
+    { "word": "右", "reading": "*みぎ*", "meaning": "Bên phải" },
+    { "word": "左右", "reading": "さ*ゆう*", "meaning": "Trái phải" }
+  ],
+
+  "雨": [
+    { "word": "雨", "reading": "*あめ*", "meaning": "Mưa" },
+    { "word": "大雨", "reading": "おお*あめ*", "meaning": "Mưa lớn" }
+  ],
+
+  "円": [
+    { "word": "百円", "reading": "ひゃく*えん*", "meaning": "100 Yên" },
+    { "word": "円高", "reading": "*えん*だか", "meaning": "Yên tăng giá" }
+  ],
+
+  "王": [
+    { "word": "王様", "reading": "*おう*さま", "meaning": "Đức vua" },
+    { "word": "国王", "reading": "こく*おう*", "meaning": "Quốc vương" }
+  ],
+
+  "音": [
+    { "word": "音", "reading": "*おと*", "meaning": "Âm thanh" },
+    { "word": "音楽", "reading": "*おん*がく", "meaning": "Âm nhạc" }
+  ],
+
+  "下": [
+    { "word": "下", "reading": "*した*", "meaning": "Phía dưới" },
+    { "word": "地下", "reading": "ち*か*", "meaning": "Tầng hầm" },
+    { "word": "下げる", "reading": "*さ*げる", "meaning": "Hạ xuống" }
+  ],
+
+  "火": [
+    { "word": "ひ", "reading": "*ひ*", "meaning": "Lửa" },
+    { "word": "花火", "reading": "はな*び*", "meaning": "Pháo hoa" },
+    { "word": "火曜日", "reading": "*か*ようび", "meaning": "Thứ Ba" }
+  ],
+
+  "花": [
+    { "word": "はな", "reading": "*はな*", "meaning": "Hoa" },
+    { "word": "花びん", "reading": "*か*びん", "meaning": "Bình hoa" },
+    { "word": "花見", "reading": "*はな*み", "meaning": "Ngắm hoa" }
+  ],
+
+  "貝": [
+    { "word": "貝", "reading": "*かい*", "meaning": "Sò, ốc" },
+    { "word": "貝殻", "reading": "*かい*がら", "meaning": "Vỏ sò" }
+  ]  
 }
