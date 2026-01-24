@@ -239,7 +239,7 @@ const HeaderSection = ({ char, paths, loading, failed, config, dbData }) => {
                                             {/* 1. In đậm Kanji: Dùng font-black và màu xanh indigo */}
                                             {v.word.split('').map((c, idx) => 
                                                 c === char 
-                                                ? <span key={idx} className="font-black text-indigo-700">{c}</span> 
+                                                ? <span key={idx} className="font-black text-black">{c}</span> 
                                                 : c
                                             )}
                                             
@@ -249,7 +249,7 @@ const HeaderSection = ({ char, paths, loading, failed, config, dbData }) => {
                                                 v.reading.split('*').map((part, idx) => 
                                                     // Phần lẻ (giữa 2 dấu sao) sẽ in đậm và đổi màu
                                                     idx % 2 === 1 
-                                                    ? <span key={idx} className="font-black text-indigo-700">{part}</span> 
+                                                    ? <span key={idx} className="font-black text-black">{part}</span> 
                                                     : part
                                                 )
                                             ) : (
@@ -258,7 +258,7 @@ const HeaderSection = ({ char, paths, loading, failed, config, dbData }) => {
                                             {') '}
                                             
                                             {/* 3. Nghĩa tiếng Việt */}
-                                            <span className="font-sans font-normal text-gray-600">{v.meaning}</span>
+                                            <span className="font-sans font-normal text-black">{v.meaning}</span>
                                             
                                             {/* Dấu chấm phẩy ngăn cách */}
                                             {i < vocabs.length - 1 ? '; ' : '.'}
