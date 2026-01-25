@@ -234,7 +234,7 @@ const HeaderSection = ({ char, paths, loading, failed, config, dbData }) => {
                                     {/* 1. In đậm Kanji */}
                                     {v.word.split('').map((c, idx) => 
                                         c === char 
-                                        ? <span key={idx} className="font-black text-black">{c}</span> 
+                                        ? <span key={idx} className="text-black">{c}</span> 
                                         : c
                                     )}
                                     
