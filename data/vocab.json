@@ -2183,8 +2183,7 @@
   ],
   "景": [
     { "word": "景色", "reading": "*け*しき", "meaning": "Phong cảnh" },
-    { "word": "景気", "reading": "*けい*き", "meaning": "Tình hình kinh tế" },
-    { "word": "風景", "reading": "ふう*けい*", "meaning": "Phong cảnh" }
+    { "word": "景気", "reading": "*けい*き", "meaning": "Tình hình kinh tế" }
   ],
   "芸": [
     { "word": "芸術", "reading": "*げい*じゅつ", "meaning": "Nghệ thuật" },
@@ -2206,8 +2205,7 @@
   ],
   "建": [
     { "word": "建物", "reading": "*たて*もの", "meaning": "Tòa nhà" },
-    { "word": "建てる", "reading": "*た*てる", "meaning": "Xây dựng" },
-    { "word": "建設", "reading": "*けん*せつ", "meaning": "Kiến thiết/Xây dựng" }
+    { "word": "建てる", "reading": "*た*てる", "meaning": "Xây dựng" }
   ],
   "験": [
     { "word": "試験", "reading": "し*けん*", "meaning": "Kỳ thi" },
@@ -2244,8 +2242,7 @@
   ],
   "差": [
     { "word": "交差点", "reading": "こう*さ*てん", "meaning": "Ngã tư" },
-    { "word": "差別", "reading": "*さ*べつ", "meaning": "Phân biệt" },
-    { "word": "差す", "reading": "*さ*す", "meaning": "Giương (ô)/Chiếu (sáng)" }
+    { "word": "差別", "reading": "*さ*べつ", "meaning": "Phân biệt đối xử" }
   ],
   "最": [
     { "word": "最近", "reading": "*さい*きん", "meaning": "Gần đây" },
@@ -2290,8 +2287,7 @@
   ],
   "参": [
     { "word": "参加", "reading": "*さん*か", "meaning": "Tham gia" },
-    { "word": "参る", "reading": "*まい*る", "meaning": "Đi/Đến (khiêm nhường)" },
-    { "word": "参考", "reading": "*さん*こう", "meaning": "Tham khảo" }
+    { "word": "参る", "reading": "*まい*る", "meaning": "Đi/Đến (khiêm nhường)" }
   ],
   "散": [
     { "word": "散歩", "reading": "*さん*ぽ", "meaning": "Tản bộ" },
@@ -2300,11 +2296,10 @@
   ],
   "産": [
     { "word": "生産", "reading": "せい*さん*", "meaning": "Sản xuất" },
-    { "word": "お土産", "reading": "おみ*やげ*", "meaning": "Quà đặc sản" },
-    { "word": "産業", "reading": "*さん*ぎょう", "meaning": "Công nghiệp" }
+    { "word": "お土産", "reading": "おみ*やげ*", "meaning": "Quà đặc sản" }
   ],
   "残": [
-    { "word": "残る", "reading": "*のこ*る", "meaning": "Còn lại (tự động từ)" },
+    { "word": "残る", "reading": "*のこ*る", "meaning": "Còn lại" },
     { "word": "残念", "reading": "*ざん*ねん", "meaning": "Đáng tiếc" },
     { "word": "残業", "reading": "*ざん*ぎょう", "meaning": "Làm thêm giờ" }
   ],
@@ -2341,7 +2336,7 @@
   ],
   "鹿": [
     { "word": "鹿", "reading": "*しか*", "meaning": "Con hươu" },
-    { "word": "鹿児島", "reading": "*か*ごしま", "meaning": "Kagoshima" }
+    { "word": "鹿児島県", "reading": "*か*ごしまけん", "meaning": "Tỉnh Kagoshima" }
   ],
   "失": [
     { "word": "失礼", "reading": "*しつ*れい", "meaning": "Thất lễ" },
@@ -2360,7 +2355,6 @@
   ],
   "周": [
     { "word": "周り", "reading": "*まわ*り", "meaning": "Xung quanh" },
-    { "word": "一周", "reading": "いっ*しゅう*", "meaning": "Một vòng" },
     { "word": "周辺", "reading": "*しゅう*へん", "meaning": "Vùng xung quanh" }
   ],
   "祝": [
@@ -2402,7 +2396,7 @@
   "笑": [
     { "word": "笑う", "reading": "*わら*う", "meaning": "Cười" },
     { "word": "笑顔", "reading": "*え*がお", "meaning": "Khuôn mặt cười" },
-    { "word": "微笑む", "reading": "*ほほえ*む", "meaning": "Mỉm cười" }
+    { "word": "微笑む", "reading": "ほほ*え*む", "meaning": "Mỉm cười" }
   ],
   "城": [
     { "word": "城", "reading": "*しろ*", "meaning": "Lâu đài" },
@@ -2419,12 +2413,11 @@
   ],
   "成": [
     { "word": "成功", "reading": "*せい*こう", "meaning": "Thành công" },
-    { "word": "成人", "reading": "*せい*じん", "meaning": "Người trưởng thành" },
-    { "word": "成長", "reading": "*せい*ちょう", "meaning": "Trưởng thành" }
+    { "word": "成人", "reading": "*せい*じん", "meaning": "Người trưởng thành" }
   ],
   "清": [
-    { "word": "清潔", "reading": "*せい*けつ", "meaning": "Thanh khiết/Sạch sẽ" },
-    { "word": "清い", "reading": "*きよ*い", "meaning": "Trong sạch" }
+    { "word": "清潔", "reading": "*せい*けつ", "meaning": "Sạch sẽ" },
+    { "word": "清い", "reading": "*きよ*い", "meaning": "Trong sạch, thuần khiết" }
   ],
   "静": [
     { "word": "静か", "reading": "*しず*か", "meaning": "Yên tĩnh" },
@@ -2453,8 +2446,7 @@
   ],
   "説": [
     { "word": "説明", "reading": "*せつ*めい", "meaning": "Thuyết minh" },
-    { "word": "小説", "reading": "しょう*せつ*", "meaning": "Tiểu thuyết" },
-    { "word": "伝説", "reading": "でん*せつ*", "meaning": "Truyền thuyết" }
+    { "word": "小説", "reading": "しょう*せつ*", "meaning": "Tiểu thuyết" }
   ],
   "戦": [
     { "word": "戦争", "reading": "*せん*そう", "meaning": "Chiến tranh" },
@@ -2471,7 +2463,6 @@
     { "word": "選挙", "reading": "*せん*きょ", "meaning": "Bầu cử" }
   ],
   "然": [
-    { "word": "全然", "reading": "*ぜん*ぜん", "meaning": "Hoàn toàn (không)" },
     { "word": "自然", "reading": "し*ぜん*", "meaning": "Tự nhiên" },
     { "word": "当然", "reading": "とう*ぜん*", "meaning": "Đương nhiên" }
   ],
@@ -2483,7 +2474,6 @@
     { "word": "巣", "reading": "*す*", "meaning": "Tổ (chim)" }
   ],
   "争": [
-    { "word": "戦争", "reading": "せん*そう*", "meaning": "Chiến tranh" },
     { "word": "争う", "reading": "*あらそ*う", "meaning": "Tranh giành" },
     { "word": "競争", "reading": "きょう*そう*", "meaning": "Cạnh tranh" }
   ],
@@ -2498,8 +2488,7 @@
     { "word": "束ねる", "reading": "*たば*ねる", "meaning": "Buộc thành bó" }
   ],
   "続": [
-    { "word": "続く", "reading": "*つづ*く", "meaning": "Tiếp tục (tự động từ)" },
-    { "word": "続ける", "reading": "*つづ*ける", "meaning": "Tiếp tục (tha động từ)" },
+    { "word": "続く", "reading": "*つづ*く", "meaning": "Tiếp tục" },
     { "word": "連続", "reading": "れん*ぞく*", "meaning": "Liên tục" }
   ],
   "卒": [
@@ -2517,8 +2506,7 @@
   ],
   "隊": [
     { "word": "軍隊", "reading": "ぐん*たい*", "meaning": "Quân đội" },
-    { "word": "自衛隊", "reading": "じえい*たい*", "meaning": "Lực lượng phòng vệ" },
-    { "word": "隊長", "reading": "*たい*ちょう", "meaning": "Đội trưởng" }
+    { "word": "自衛隊", "reading": "じえい*たい*", "meaning": "Lực lượng phòng vệ" }
   ],
   "達": [
     { "word": "友達", "reading": "とも*だち*", "meaning": "Bạn bè" },
@@ -2556,8 +2544,7 @@
   ],
   "的": [
     { "word": "目的", "reading": "もく*てき*", "meaning": "Mục đích" },
-    { "word": "具体的", "reading": "ぐたい*てき*", "meaning": "Cụ thể" },
-    { "word": "的", "reading": "*まと*", "meaning": "Cái đích" }
+    { "word": "具体的", "reading": "ぐたい*てき*", "meaning": "Cụ thể" }
   ],
   "典": [
     { "word": "辞典", "reading": "じ*てん*", "meaning": "Từ điển" },
@@ -2566,8 +2553,7 @@
   ],
   "伝": [
     { "word": "手伝う", "reading": "て*つだ*う", "meaning": "Giúp đỡ" },
-    { "word": "伝える", "reading": "*つた*える", "meaning": "Truyền đạt" },
-    { "word": "伝説", "reading": "*でん*せつ", "meaning": "Truyền thuyết" }
+    { "word": "伝える", "reading": "*つた*える", "meaning": "Truyền đạt" }
   ],
   "徒": [
     { "word": "生徒", "reading": "せい*と*", "meaning": "Học sinh" },
@@ -2590,15 +2576,15 @@
   ],
   "特": [
     { "word": "特別", "reading": "*とく*べつ", "meaning": "Đặc biệt" },
-    { "word": "特急", "reading": "*とッ*きゅう", "meaning": "Tàu tốc hành" },
+    { "word": "特急", "reading": "*とっ*きゅう", "meaning": "Tàu tốc hành" },
     { "word": "特徴", "reading": "*とく*ちょう", "meaning": "Đặc trưng" }
   ],
   "栃": [
     { "word": "栃木県", "reading": "*とち*ぎけん", "meaning": "Tỉnh Tochigi" }
   ],
   "奈": [
-    { "word": "奈良", "reading": "*なら*", "meaning": "Nara" },
-    { "word": "神奈川", "reading": "か*な*がわ", "meaning": "Kanagawa" }
+    { "word": "奈良県", "reading": "*なら*けん", "meaning": "Tỉnh Nara" },
+    { "word": "神奈川県", "reading": "か*な*がわけん", "meaning": "Tỉnh Kanagawa" }
   ],
   "縄": [
     { "word": "沖縄", "reading": "おき*なわ*", "meaning": "Okinawa" },
@@ -2606,7 +2592,7 @@
   ],
   "熱": [
     { "word": "熱い", "reading": "*あつ*い", "meaning": "Nóng (cảm giác)" },
-    { "word": "熱", "reading": "*ねつ*", "meaning": "Cơn sốt/Nhiệt" },
+    { "word": "熱", "reading": "*ねつ*", "meaning": "Cơn sốt" },
     { "word": "熱心", "reading": "*ねっ*しん", "meaning": "Nhiệt tình" }
   ],
   "念": [
@@ -2620,8 +2606,7 @@
   ],
   "梅": [
     { "word": "梅", "reading": "*うめ*", "meaning": "Cây mận/Mơ" },
-    { "word": "梅雨", "reading": "*つゆ*", "meaning": "Mùa mưa" },
-    { "word": "梅干し", "reading": "*うめ*ぼし", "meaning": "O mai (Mơ muối)" }
+    { "word": "梅雨", "reading": "*つゆ*", "meaning": "Mùa mưa" }
   ],
   "博": [
     { "word": "博物館", "reading": "*はく*ぶつかん", "meaning": "Viện bảo tàng" },
@@ -2647,12 +2632,10 @@
   ],
   "標": [
     { "word": "目標", "reading": "もく*ひょう*", "meaning": "Mục tiêu" },
-    { "word": "標準", "reading": "*ひょう*じゅん", "meaning": "Tiêu chuẩn" },
-    { "word": "標識", "reading": "*ひょう*しき", "meaning": "Biển báo" }
+    { "word": "標準", "reading": "*ひょう*じゅん", "meaning": "Tiêu chuẩn" }
   ],
   "票": [
-    { "word": "投票", "reading": "とう*ひょう*", "meaning": "Bỏ phiếu" },
-    { "word": "伝票", "reading": "でん*ぴょう*", "meaning": "Hóa đơn" }
+    { "word": "投票", "reading": "とう*ひょう*", "meaning": "Bỏ phiếu" }
   ],
   "不": [
     { "word": "不便", "reading": "*ふ*べん", "meaning": "Bất tiện" },
@@ -2676,8 +2659,7 @@
   ],
   "府": [
     { "word": "政府", "reading": "せい*ふ*", "meaning": "Chính phủ" },
-    { "word": "大阪府", "reading": "おおさか*ふ*", "meaning": "Phủ Osaka" },
-    { "word": "京都府", "reading": "きょうと*ふ*", "meaning": "Phủ Kyoto" }
+    { "word": "大阪府", "reading": "おおさか*ふ*", "meaning": "Phủ Osaka" }
   ],
   "阜": [
     { "word": "岐阜県", "reading": "ぎ*ふ*けん", "meaning": "Tỉnh Gifu" }
@@ -2702,13 +2684,11 @@
   ],
   "辺": [
     { "word": "辺り", "reading": "*あた*り", "meaning": "Vùng lân cận" },
-    { "word": "海辺", "reading": "うみ*べ*", "meaning": "Bãi biển" },
     { "word": "周辺", "reading": "しゅう*へん*", "meaning": "Vùng xung quanh" }
   ],
   "便": [
     { "word": "便利", "reading": "*べん*り", "meaning": "Tiện lợi" },
-    { "word": "郵便局", "reading": "ゆう*びん*きょく", "meaning": "Bưu điện" },
-    { "word": "航空便", "reading": "こうくう*びん*", "meaning": "Thư gửi đường hàng không" }
+    { "word": "郵便局", "reading": "ゆう*びん*きょく", "meaning": "Bưu điện" }
   ],
   "包": [
     { "word": "包む", "reading": "*つつ*む", "meaning": "Gói/Bao bọc" },
@@ -2717,13 +2697,11 @@
   ],
   "法": [
     { "word": "方法", "reading": "*ほう*ほう", "meaning": "Phương pháp" },
-    { "word": "法律", "reading": "*ほう*りつ", "meaning": "Pháp luật" },
-    { "word": "文法", "reading": "ぶん*ぽう*", "meaning": "Ngữ pháp" }
+    { "word": "法律", "reading": "*ほう*りつ", "meaning": "Pháp luật" }
   ],
   "望": [
     { "word": "希望", "reading": "き*ぼう*", "meaning": "Hy vọng" },
-    { "word": "望む", "reading": "*のぞ*む", "meaning": "Nguyện vọng/Mong ước" },
-    { "word": "失望", "reading": "しつ*ぼう*", "meaning": "Thất vọng" }
+    { "word": "望む", "reading": "*のぞ*む", "meaning": "Nguyện vọng/Mong ước" }
   ],
   "牧": [
     { "word": "牧場", "reading": "*ぼく*じょう", "meaning": "Trang trại chăn nuôi" },
@@ -2736,8 +2714,7 @@
   ],
   "満": [
     { "word": "満員", "reading": "*まん*いん", "meaning": "Đầy người" },
-    { "word": "満足", "reading": "*まん*ぞく", "meaning": "Thỏa mãn" },
-    { "word": "満ちる", "reading": "*み*ちる", "meaning": "Đầy/Tròn (trăng)" }
+    { "word": "満足", "reading": "*まん*ぞく", "meaning": "Thỏa mãn" }
   ],
   "未": [
     { "word": "未来", "reading": "*み*らい", "meaning": "Tương lai" },
@@ -2770,8 +2747,7 @@
   ],
   "養": [
     { "word": "栄養", "reading": "えい*よう*", "meaning": "Dinh dưỡng" },
-    { "word": "養う", "reading": "*やしな*う", "meaning": "Nuôi dưỡng" },
-    { "word": "休養", "reading": "きゅう*よう*", "meaning": "Nghỉ ngơi/An dưỡng" }
+    { "word": "養う", "reading": "*やしな*う", "meaning": "Nuôi dưỡng" }
   ],
   "浴": [
     { "word": "浴びる", "reading": "*あ*びる", "meaning": "Tắm (vòi sen)" },
@@ -2794,7 +2770,6 @@
   ],
   "料": [
     { "word": "料理", "reading": "*りょう*り", "meaning": "Món ăn" },
-    { "word": "料金", "reading": "*りょう*きん", "meaning": "Chi phí/Giá cước" },
     { "word": "無料", "reading": "む*りょう*", "meaning": "Miễn phí" }
   ],
   "良": [
@@ -2843,8 +2818,7 @@
   ],
   "老": [
     { "word": "老人", "reading": "*ろう*じん", "meaning": "Người già" },
-    { "word": "老いる", "reading": "*お*いる", "meaning": "Già đi" },
-    { "word": "敬老の日", "reading": "けい*ろう*のひ", "meaning": "Ngày kính lão" }
+    { "word": "老いる", "reading": "*お*いる", "meaning": "Già đi" }
   ],
   "録": [
     { "word": "記録", "reading": "き*ろく*", "meaning": "Kỷ lục/Ghi chép" },
