@@ -871,7 +871,24 @@ LÀM SẠCH
                                     Xáo trộn danh sách hiện tại
                                 </button>
                             </div>
-
+{/* NÚT HỌC NGAY (GAME) */}
+<div className="pt-0">
+    <div className="flex items-center gap-2 mb-2">
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">HỌC TẬP</p>
+        <span className="flex-1 border-b border-gray-50"></span>
+    </div>
+    <button 
+        onClick={() => {
+            if (!config.text) return alert("Vui lòng nhập chữ để học!");
+            setIsLearnGameOpen(true); // <--- Gọi hàm mở Modal ở đây
+            setIsUtilsOpen(false);
+        }}
+        className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 mb-2"
+    >
+        <span className="text-lg">🎮</span>
+        <span className="text-xs font-black tracking-wide uppercase">HỌC (GAME)</span>
+    </button>
+</div>
                             {/* Tạo Flashcard */}
                             <div className="pt-0">
                                 <div className="flex items-center gap-2 mb-2">
