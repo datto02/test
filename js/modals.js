@@ -1,4 +1,4 @@
-// --- SỬA LẠI: REVIEW LIST MODAL (Xem thêm: Xám nhạt, góc trái, chìm nền) ---
+// --- SỬA LẠI: REVIEW LIST MODAL (Rõ hàng 3, nút Xem thêm nằm dưới, căn giữa) ---
 const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
     const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
     const [isHelpOpen, setIsHelpOpen] = React.useState(false);
@@ -82,14 +82,20 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
         return m1 === m2 ? d1 - d2 : m1 - m2;
     });
 
-    // === COMPONENT CON: RENDER LIST (ĐÃ CHỈNH STYLE NÚT XEM THÊM) ===
+    // === COMPONENT CON: RENDER LIST (ĐÃ SỬA LOGIC HIỂN THỊ) ===
     const RenderListSection = ({ title, count, items, bgColor, borderColor, sectionKey, isToday }) => {
         const LIMIT = 33; 
+        // Kiểm tra xem có cần thu gọn không
         const shouldCollapse = !isToday && items.length > LIMIT;
         const isExpanded = expandedSections[sectionKey];
 
+        // Logic quan trọng: Nếu cần thu gọn và chưa bấm mở, chỉ lấy LIMIT phần tử đầu tiên.
+        // Ngược lại thì lấy toàn bộ.
+        const displayedItems = (shouldCollapse && !isExpanded) ? items.slice(0, LIMIT) : items;
+
         return (
             <div className={`${bgColor} rounded-xl p-3 border ${borderColor} relative transition-all`}>
+                {/* Header */}
                 <div className="flex items-center justify-between mb-2">
                     {isToday ? (
                         <span className="text-sm font-black text-orange-600 uppercase">{title}</span>
@@ -102,21 +108,22 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                     <span className={`${isToday ? 'bg-orange-200 text-orange-700' : 'bg-gray-200 text-gray-600'} text-[10px] font-bold px-1.5 rounded`}>{count} chữ</span>
                 </div>
 
+                {/* Danh sách Kanji */}
                 {items.length > 0 ? (
-                    <div className={`relative ${shouldCollapse && !isExpanded ? 'max-h-[120px] overflow-hidden' : ''}`}>
+                    <div>
+                        {/* Hiển thị danh sách đã được cắt gọn (hoặc full) */}
                         <div className="flex flex-wrap gap-1">
-                            {items.map((char, i) => (
+                            {displayedItems.map((char, i) => (
                                 <span key={i} className={`inline-block bg-white border ${isToday ? 'border-orange-200 text-gray-800' : 'border-gray-200 text-gray-500'} rounded px-1.5 py-0.5 text-base font-['Klee_One'] min-w-[28px] text-center shadow-sm ${!isToday && 'opacity-70'}`}>{char}</span>
                             ))}
                         </div>
                         
-                        {/* --- PHẦN SỬA ĐỔI: Lớp phủ mờ + Nút Chìm --- */}
+                        {/* Nút "Xem thêm" - Nằm DƯỚI danh sách, căn giữa, màu xám nhạt */}
                         {shouldCollapse && !isExpanded && (
                             <div 
-                                className="absolute inset-x-0 bottom-0 h-16 flex items-end justify-start pl-3 pb-1 bg-gradient-to-t from-gray-50 via-gray-50/95 to-transparent cursor-pointer rounded-b-xl"
+                                className="flex justify-center mt-3 pt-2 border-t border-dashed border-gray-200 cursor-pointer hover:bg-gray-100/50 rounded-b-lg transition-colors"
                                 onClick={() => toggleExpand(sectionKey)}
                             >
-                                {/* Nút dạng text đơn giản, màu xám nhạt */}
                                 <button className="text-[10px] font-bold text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
                                     Xem thêm {items.length - LIMIT} chữ...
                                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -128,9 +135,9 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                     <p className="text-[12px] text-gray-400 italic">Không có Kanji cần ôn. Giỏi quá! 🎉</p>
                 )}
                 
-                {/* Nút thu gọn (Cũng làm chìm cho đồng bộ) */}
+                {/* Nút "Thu gọn" - Nằm dưới cùng khi đã mở full */}
                 {shouldCollapse && isExpanded && (
-                     <div className="flex justify-center mt-2 pt-2 border-t border-dashed border-gray-200">
+                     <div className="flex justify-center mt-3 pt-2 border-t border-dashed border-gray-200">
                         <button 
                             onClick={() => toggleExpand(sectionKey)}
                             className="text-[10px] font-bold text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors"
