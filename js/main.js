@@ -7,6 +7,7 @@ const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
         const [isReviewListOpen, setIsReviewListOpen] = useState(false);
         const [srsData, setSrsData] = useState(() => {
     const saved = localStorage.getItem('phadao_srs_data');
+           const [isLearnGameOpen, setIsLearnGameOpen] = useState(false);
             
     return saved ? JSON.parse(saved) : {};
 });
