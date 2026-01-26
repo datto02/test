@@ -1237,16 +1237,15 @@ return (
         </div>
     );
     };
-// --- COMPONENT MỚI: TRÒ CHƠI HỌC TẬP (DARK BLUE THEME + FULL FEATURES) ---
-// --- COMPONENT MỚI: TRÒ CHƠI HỌC TẬP (FIX TIẾN ĐỘ THEO SỐ CHỮ + DARK BLUE) ---
+// --- COMPONENT MỚI: TRÒ CHƠI HỌC TẬP (FINAL: NO HEADERS + SHORT BUTTONS + COMPACT) ---
 const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) => {
     const [queue, setQueue] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [gameState, setGameState] = useState('loading'); 
     
-    // State Tiến độ mới
-    const [totalKanji, setTotalKanji] = useState(0);      // Tổng số chữ cần học (VD: 10)
-    const [finishedCount, setFinishedCount] = useState(0); // Số chữ đã xong 3 vòng (VD: 0 -> 10)
+    // State Tiến độ
+    const [totalKanji, setTotalKanji] = useState(0);      
+    const [finishedCount, setFinishedCount] = useState(0); 
 
     // State xử lý lỗi & phạt
     const [wrongItem, setWrongItem] = useState(null); 
@@ -1280,24 +1279,23 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
     useEffect(() => {
         if (isOpen && text && dbData) {
             let validChars = Array.from(new Set(text.split('').filter(c => dbData.KANJI_DB && dbData.KANJI_DB[c])));
-            validChars = shuffleArray(validChars); // Trộn chữ ngay từ đầu
+            validChars = shuffleArray(validChars); 
 
             if (validChars.length === 0) { alert("Chưa có dữ liệu Kanji để học!"); onClose(); return; }
 
-            // Cập nhật tổng số chữ để hiển thị tiến độ (VD: 10)
             setTotalKanji(validChars.length);
-            setFinishedCount(0); // Reset về 0
+            setFinishedCount(0); 
 
             let newQueue = [];
             const CHUNK_SIZE = 6; 
 
             for (let i = 0; i < validChars.length; i += CHUNK_SIZE) {
                 const chunk = validChars.slice(i, i + CHUNK_SIZE);
-                // VÒNG 1: Trắc nghiệm Âm Hán
+                // VÒNG 1
                 chunk.forEach(char => newQueue.push({ type: 'quiz_sound', char }));
-                // VÒNG 2: Ghép thẻ
+                // VÒNG 2
                 if (chunk.length >= 2) newQueue.push({ type: 'match', chars: chunk });
-                // VÒNG 3: Trắc nghiệm Ý nghĩa (Đây là vòng chốt hạ để tính điểm)
+                // VÒNG 3
                 chunk.forEach(char => newQueue.push({ type: 'quiz_meaning', char }));
             }
 
@@ -1313,7 +1311,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
     // Hàm Restart
     const handleRestart = () => {
         setQueue([]);
-        setFinishedCount(0); // Reset điểm
+        setFinishedCount(0); 
         setTimeout(() => {
             let validChars = Array.from(new Set(text.split('').filter(c => dbData.KANJI_DB && dbData.KANJI_DB[c])));
             validChars = shuffleArray(validChars);
@@ -1389,8 +1387,6 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
 
     const handleAnswer = (isCorrect, itemData) => {
         if (isCorrect) {
-            // LOGIC CỘNG ĐIỂM MỚI: 
-            // Chỉ khi trả lời đúng ở bài test cuối cùng (quiz_meaning) -> Chữ đó mới được tính là xong.
             if (itemData.quizType === 'quiz_meaning') {
                 setFinishedCount(prev => prev + 1);
             }
@@ -1459,19 +1455,17 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
 
     if (!isOpen) return null;
 
-    // Tính toán % tiến độ dựa trên số chữ đã hoàn thành
     const progressPercent = totalKanji > 0 ? (finishedCount / totalKanji) * 100 : 0;
 
     return (
         <div className="fixed inset-0 z-[500] flex items-center justify-center bg-slate-900/95 backdrop-blur-md p-4 animate-in fade-in select-none">
-            <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden min-h-[450px] flex flex-col relative">
+            <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden min-h-[420px] flex flex-col relative">
                 
-                {/* Header (FIX: HIỂN THỊ TIẾN ĐỘ THEO SỐ CHỮ: VD 2/10) */}
+                {/* Header */}
                 <div className="px-4 py-3 flex items-center gap-3 border-b border-gray-100 bg-white">
                     <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div className="h-full bg-blue-600 transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }}></div>
                     </div>
-                    {/* Hiển thị số chữ đã hoàn thành / Tổng số chữ */}
                     <div className="text-[10px] font-black text-blue-900 bg-blue-50 px-2 py-0.5 rounded-md">
                         {finishedCount}/{totalKanji}
                     </div>
@@ -1480,16 +1474,14 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
 
                 <div className="flex-1 flex flex-col p-4 items-center justify-center bg-white">
                     
-                    {/* 1. QUIZ */}
+                    {/* 1. QUIZ (ĐÃ XÓA TIÊU ĐỀ + THU GỌN) */}
                     {(gameState === 'quiz_sound' || gameState === 'quiz_meaning') && currentQuizData && (
                         <div className="w-full flex flex-col items-center animate-in zoom-in-95">
-                            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-3">
-                                {gameState === 'quiz_sound' ? 'Chọn Âm Hán Việt đúng' : 'Chọn Ý nghĩa & Âm Hán'}
-                            </span>
                             
+                            {/* Kanji */}
                             <div className="text-[80px] leading-none font-['Klee_One'] text-slate-800 mb-2 drop-shadow-sm">{currentQuizData.targetChar}</div>
                             
-                            {/* GỢI Ý: CHỈ HIỆN Ở BÀI TEST ÂM HÁN (VÒNG 1) */}
+                            {/* Gợi ý nghĩa (Chỉ hiện ở vòng 1) */}
                             {gameState === 'quiz_sound' ? (
                                 <p className="text-xs font-medium text-slate-500 italic mb-6 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
                                     {currentQuizData.targetInfo.meaning}
@@ -1498,6 +1490,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                                 <div className="h-8 mb-4"></div>
                             )}
                             
+                            {/* Grid nút đáp án */}
                             <div className="grid grid-cols-2 gap-2 w-full">
                                 {currentQuizData.options.map((opt, i) => (
                                     <button 
@@ -1515,11 +1508,10 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                     {/* 2. PENALTY */}
                     {gameState === 'penalty' && wrongItem && (
                         <div className="w-full flex flex-col items-center animate-in slide-in-from-right">
-                            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 text-2xl animate-bounce border border-blue-100 shadow-sm">
+                            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-2 text-2xl animate-bounce border border-blue-100 shadow-sm">
                                 ✍️
                             </div>
-                            <h3 className="text-lg font-black text-slate-800 mb-0.5">Chưa chính xác!</h3>
-                            <p className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-wide">Hãy viết lại để ghi nhớ</p>
+                            <h3 className="text-lg font-black text-slate-800 mb-4">Viết lại để ghi nhớ</h3>
                             
                             <div className="text-6xl font-['Klee_One'] text-slate-800 mb-1">{wrongItem.targetChar}</div>
                             
@@ -1531,10 +1523,12 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                         </div>
                     )}
 
-                    {/* 3. MATCHING */}
+                    {/* 3. MATCHING (ĐÃ XÓA TIÊU ĐỀ) */}
                     {gameState === 'match' && (
                         <div className="w-full h-full flex flex-col">
-                            <span className="text-[10px] font-bold text-center text-blue-400 uppercase tracking-widest mb-4 block">Ghép cặp Kanji - Âm Hán</span>
+                            {/* Khoảng trống đệm phía trên để cân đối */}
+                            <div className="h-4"></div>
+                            
                             <div className="grid grid-cols-3 gap-2 flex-1 content-center">
                                 {matchCards.map((card) => {
                                     const isMatched = matchedIds.includes(card.id);
@@ -1561,35 +1555,37 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                         </div>
                     )}
 
-                    {/* 4. FINISHED */}
+                    {/* 4. FINISHED (NÚT NGẮN HƠN) */}
                     {gameState === 'finished' && (
                         <div className="text-center animate-in zoom-in w-full flex flex-col items-center">
                             <div className="text-6xl mb-3 animate-bounce">🎉</div>
                             <h2 className="text-xl font-black text-slate-800 mb-1">XUẤT SẮC!</h2>
                             <p className="text-slate-400 mb-6 text-xs font-medium">Bạn đã hoàn thành phiên học.</p>
                             
-                            <div className="w-full space-y-2">
-                                {/* NÚT FLASHCARD */}
+                            {/* Container căn giữa các nút ngắn */}
+                            <div className="flex flex-col items-center gap-2 w-full">
+                                
+                                {/* NÚT FLASHCARD (Ngắn lại: w-64) */}
                                 <button 
                                     onClick={onSwitchToFlashcard} 
-                                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wide text-xs"
+                                    className="w-64 py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wide text-xs"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                                    CHUYỂN SANG FLASHCARD
+                                    FLASHCARD
                                 </button>
 
-                                {/* NÚT HỌC LẠI */}
+                                {/* NÚT HỌC LẠI (Ngắn lại: w-64) */}
                                 <button 
                                     onClick={handleRestart} 
-                                    className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl active:scale-95 transition-all uppercase tracking-wide text-[10px]"
+                                    className="w-64 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl active:scale-95 transition-all uppercase tracking-wide text-[10px]"
                                 >
                                     Học lại từ đầu
                                 </button>
 
-                                {/* NÚT THOÁT */}
+                                {/* NÚT THOÁT (Ngắn lại: w-64) */}
                                 <button 
                                     onClick={onClose} 
-                                    className="w-full py-2 text-slate-400 hover:text-red-500 font-bold text-[10px] uppercase tracking-widest transition-colors mt-1"
+                                    className="w-64 py-2 text-slate-400 hover:text-red-500 font-bold text-[10px] uppercase tracking-widest transition-colors"
                                 >
                                     Thoát
                                 </button>
