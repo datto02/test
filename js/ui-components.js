@@ -338,6 +338,106 @@ return (
     </div>
 );
 };
+// --- COMPONENT MỚI: DÒNG TỪ VỰNG (VOCAB ROW) ---
+const VocabRow = ({ word, config, dbData }) => {
+    // 1. Cấu hình
+    const BOXES_PER_ROW = 12;
+    const cleanWord = word.trim(); // Xóa khoảng trắng thừa
+    const wordLen = cleanWord.length;
+
+    if (wordLen === 0) return null;
+
+    // 2. Tính toán lặp lại (quan trọng)
+    // Ví dụ: Từ 5 chữ. 12 / 5 = 2 lần. Tổng ô điền = 10. Dư 2 ô cuối bỏ trống.
+    const repetitions = Math.floor(BOXES_PER_ROW / wordLen);
+    const totalFilledBoxes = repetitions * wordLen;
+
+    // 3. Xử lý thông tin Header (Âm Hán, Nghĩa...)
+    const getHeaderInfo = () => {
+        if (!dbData) return { sino: '', reading: '', meaning: '' };
+
+        // A. Lấy Âm Hán Việt (Ghép từ từng chữ Kanji)
+        const sino = cleanWord.split('').map(char => {
+            const k = dbData.KANJI_DB?.[char];
+            return k?.sound || ''; 
+        }).filter(s => s).join(' '); 
+
+        // B. Lấy Cách đọc & Nghĩa (Tìm trong VOCAB_DB)
+        let reading = '';
+        let meaning = '';
+        
+        // Tìm trong từ điển (dựa vào chữ cái đầu tiên để tra cứu nhanh)
+        const firstChar = cleanWord[0];
+        if (dbData.VOCAB_DB && dbData.VOCAB_DB[firstChar]) {
+            const vocabEntry = dbData.VOCAB_DB[firstChar].find(v => v.word === cleanWord);
+            if (vocabEntry) {
+                reading = vocabEntry.reading.replace(/\*/g, ''); 
+                meaning = vocabEntry.meaning;
+            }
+        }
+        return { sino, reading, meaning };
+    };
+
+    const info = getHeaderInfo();
+    const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
+
+    return (
+        <div className="flex flex-col w-full px-[8mm]">
+            {/* --- HEADER TỪ VỰNG --- */}
+            <div className="flex items-baseline gap-2 px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent w-[184mm]">
+                {/* 1. Từ vựng gốc */}
+                <span className="font-['Klee_One'] text-lg font-bold leading-none text-black">{cleanWord}</span>
+                
+                {/* 2. (Âm Hán) */}
+                {info.sino && (
+                    <span className="text-[11px] font-bold text-gray-500 uppercase leading-none tracking-wide">
+                        ({info.sino})
+                    </span>
+                )}
+
+                {/* 3. Cách đọc Hiragana */}
+                {info.reading && (
+                    <span className="text-[13px] font-medium text-black leading-none ml-2">
+                        {info.reading}
+                    </span>
+                )}
+
+                {/* 4. Nghĩa tiếng Việt */}
+                {info.meaning && (
+                    <span className="text-[12px] font-normal text-gray-600 italic leading-none ml-2 truncate">
+                        {info.meaning}
+                    </span>
+                )}
+            </div>
+
+            {/* --- LƯỚI Ô VUÔNG --- */}
+            <div className="flex border-l border-t w-fit" style={{ borderColor: gridBorderColor }}>
+                {Array.from({ length: BOXES_PER_ROW }).map((_, i) => {
+                    // Logic: Chỉ điền chữ vào các ô nằm trong phạm vi lặp lại
+                    let charToShow = '';
+                    if (i < totalFilledBoxes) {
+                        const charIndex = i % wordLen;
+                        charToShow = cleanWord[charIndex];
+                    }
+
+                    return (
+                        <GridBox
+                            key={i}
+                            index={i}
+                            char={charToShow} // Nếu rỗng -> GridBox chỉ hiện khung, không hiện chữ
+                            type="trace"      // Luôn là nét mờ (trace), không có mẫu reference
+                            config={{...config, traceCount: 12}} // Force hiện nét mờ
+                            svgData={null}
+                            failed={false}
+                            showTrace={!!charToShow} // Chỉ hiện nét mờ nếu có chữ
+                            onClick={undefined} 
+                        />
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
 
    const WorkbookRow = ({ char, config, dbData }) => {
     const { loading, paths, fullSvg, failed } = useKanjiSvg(char);
@@ -384,7 +484,9 @@ return (
         </div>
     );
 };
-    const Page = ({ chars, config, dbData }) => {
+  // 4. Page Layout (Đã cập nhật: Dùng dấu 。 để kích hoạt chế độ Từ vựng)
+const Page = ({ chars, config, dbData }) => {
+    
 // 1. Hàm Xuất dữ liệu (Tải file về máy)
     const handlePageExport = () => {
         const data = localStorage.getItem('phadao_srs_data');
@@ -431,67 +533,89 @@ return (
         reader.readAsText(file);
         e.target.value = ''; // Reset để chọn lại file cũ vẫn nhận
     };
+
+    // --- LOGIC MỚI: TÍNH TOÁN DANH SÁCH HIỂN THỊ ---
+    const pages = React.useMemo(() => {
+        const rawText = config.text || "";
         
-    // Kiểm tra xem có phải đang ở chế độ bản mẫu (không có text) hay không
+        // 1. KIỂM TRA: Có dấu chấm Nhật (。) không?
+        const isVocabMode = rawText.includes('。');
+
+        let items = [];
+
+        if (isVocabMode) {
+            // === CHẾ ĐỘ TỪ VỰNG ===
+            // Cắt chuỗi dựa trên dấu chấm 。
+            items = rawText.split('。').filter(w => w.trim().length > 0);
+        } else {
+            // === CHẾ ĐỘ KANJI THƯỜNG ===
+            // Xóa dấu xuống dòng để chữ liền mạch, sau đó tách từng ký tự
+            const cleanText = rawText.replace(/\n/g, ''); 
+            items = Array.from(cleanText).filter(c => c.trim().length > 0);
+        }
+
+        // Nếu rỗng thì trả về mảng rỗng (để hiện bản mẫu)
+        if (items.length === 0) {
+             // Demo nếu chưa nhập gì
+             return isVocabMode ? { chunks: [["日本語", "先生"]], isVocabMode } : { chunks: [[]], isVocabMode }; 
+        }
+
+        // Phân trang (10 dòng mỗi trang)
+        const chunks = [];
+        const ROWS_PER_PAGE = 10;
+        for (let i = 0; i < items.length; i += ROWS_PER_PAGE) { 
+            chunks.push(items.slice(i, i + ROWS_PER_PAGE)); 
+        }
+        
+        return { chunks, isVocabMode };
+
+    }, [config.text]);
+
     const isSample = !config.text || config.text.trim().length === 0;
 
     return (
         <div className="a4-page mx-auto relative flex flex-col pt-[15mm] pl-[3mm] bg-white">
         
-        {/* --- PHẦN TIÊU ĐỀ BẢN MẪU (CHỈ HIỆN KHI TRỐNG) --- */}
+        {/* --- Header Bản Mẫu (Giữ nguyên logic cũ) --- */}
         {isSample && (
-            <div className="w-full max-w-[210mm] mb-6 text-left pl-[8mm]">
-                <h2 className="text-xl font-black text-gray-600 uppercase mb-3 font-sans tracking-wide">
-                    HƯỚNG DẪN
-                </h2>
+           <div className="w-full max-w-[210mm] mb-6 text-left pl-[8mm]">
+                <h2 className="text-xl font-black text-gray-600 uppercase mb-3 font-sans tracking-wide">HƯỚNG DẪN</h2>
                 <div className="text-sm text-gray-500 font-medium space-y-1.5 font-sans">
-                   <p className="flex items-center gap-2">
-                        <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">1</span>
-                        <span><span className="font-bold">Nhập dữ liệu</span> để tạo file luyện viết.</span>
-                    </p>
-                    <p className="flex items-center gap-2">
-                        <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">2</span>
-                        <span>Ấn vào <span className="font-bold">chữ mẫu đầu tiên</span> để xem họa hoạt cách viết.</span>
-                    </p>
-                    <p className="flex items-center gap-2">
-                        <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">3</span>
-                        <span>Tạo nhanh <span className="font-bold">Flashcard</span> trong phần "tiện ích".</span>
-                    </p>
-                    <p className="flex items-center gap-2">
-                        <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">4</span>
-                        <span>Chế độ <span className="font-bold">ÔN TẬP THÔNG MINH</span> (lặp lại ngắt quãng) được tích hợp vào Flashcard.</span>
-                    </p>
+                   <p>1. Nhập liệu bình thường: Chế độ <b>Từng chữ (Kanji)</b>.</p>
+                   <p>2. Dùng dấu chấm Nhật <b>(。)</b> để ngăn cách: Chế độ <b>Từ vựng/Viết câu</b>.</p>
                 </div>
             </div>
         )}
 
-        {/* DANH SÁCH CÁC DÒNG */}
+        {/* --- DANH SÁCH CÁC DÒNG (LOGIC MỚI) --- */}
         <div className="flex flex-col gap-[4mm]">
-            {chars.map((char, index) => (
-            <WorkbookRow
-                key={`${index}-${char}`}
-                char={char}
-                config={config}
-                dbData={dbData}
-            />
+            {pages.chunks.length > 0 && pages.chunks[0] && pages.chunks[0].map((item, index) => (
+                pages.isVocabMode ? (
+                    // Nếu là chế độ Từ vựng -> Dùng VocabRow
+                    <VocabRow 
+                        key={`vocab-${index}`}
+                        word={item}
+                        config={config}
+                        dbData={dbData}
+                    />
+                ) : (
+                    // Nếu là chế độ thường -> Dùng WorkbookRow (Cũ)
+                    <WorkbookRow
+                        key={`kanji-${index}`}
+                        char={item}
+                        config={config}
+                        dbData={dbData}
+                    />
+                )
             ))}
         </div>
 
-        {/* Branding Footer */}
+        {/* --- Footer (Giữ nguyên) --- */}
         <div className="absolute bottom-[5mm] left-[12.5mm] text-gray-600 text-xs font-sans">
-            {/* Dòng 1 */}
-            <div className="text-[10px]">
-                © Bản quyền thuộc <span className="font-bold text-gray-700">Phá Đảo Tiếng Nhật</span> 
-                <span> (<span className="font-bold italic text-gray-700">phadaotiengnhat.com</span>)</span>
-            </div>
-            
-            {/* Dòng 2 */}
-            <div className="text-[10px] mt-0.5">
-                Tài liệu miễn phí - Nghiêm cấm mọi hành vi mua bán thương mại
-            </div>
+             <div className="text-[10px]">© Bản quyền thuộc <span className="font-bold text-gray-700">Phá Đảo Tiếng Nhật</span> (<span className="font-bold italic text-gray-700">phadaotiengnhat.com</span>)</div>
+             <div className="text-[10px] mt-0.5">Tài liệu miễn phí - Nghiêm cấm mọi hành vi mua bán thương mại</div>
         </div>
         </div>
     );
-    };
-  
+};
   
