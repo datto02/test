@@ -1237,7 +1237,7 @@ return (
         </div>
     );
     };
-// --- COMPONENT MỚI: TRÒ CHƠI HỌC TẬP (Quiz + Match + Penalty) ---
+// --- COMPONENT MỚI: TRÒ CHƠI HỌC TẬP (ĐÃ CẬP NHẬT: THÊM NGHĨA + KHÓA CUỘN + THẺ NHỎ) ---
 const LearnGameModal = ({ isOpen, onClose, text, dbData }) => {
     const [queue, setQueue] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -1249,6 +1249,13 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData }) => {
     const [selectedCardId, setSelectedCardId] = useState(null);
     const [matchedIds, setMatchedIds] = useState([]);
 
+    // Khóa cuộn trang khi mở game
+    useEffect(() => {
+        if (isOpen) document.body.style.overflow = 'hidden';
+        else document.body.style.overflow = 'unset';
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [isOpen]);
+
     useEffect(() => {
         if (isOpen && text && dbData) {
             const validChars = Array.from(new Set(text.split('').filter(c => dbData.KANJI_DB && dbData.KANJI_DB[c])));
@@ -1259,6 +1266,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData }) => {
             for (let i = 0; i < validChars.length; i += CHUNK_SIZE) {
                 const chunk = validChars.slice(i, i + CHUNK_SIZE);
                 chunk.forEach(char => newQueue.push({ type: 'quiz', char }));
+                // Chỉ ghép thẻ nếu có từ 2 chữ trở lên
                 if (chunk.length >= 2) newQueue.push({ type: 'match', chars: chunk });
             }
             setQueue(newQueue); setCurrentIndex(0); setGameState(newQueue[0].type); setPenaltyInput(''); setMatchedIds([]);
@@ -1333,15 +1341,28 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData }) => {
     return (
         <div className="fixed inset-0 z-[500] flex items-center justify-center bg-gray-900/95 backdrop-blur-md p-4 animate-in fade-in select-none">
             <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden min-h-[500px] flex flex-col relative">
+                
+                {/* Header */}
                 <div className="p-4 flex items-center gap-3 border-b border-gray-100">
                     <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${((currentIndex) / queue.length) * 100}%` }}></div></div>
                     <button onClick={onClose} className="text-gray-400 hover:text-red-500">✕</button>
                 </div>
+
                 <div className="flex-1 flex flex-col p-6 items-center justify-center">
+                    
+                    {/* 1. QUIZ (TRẮC NGHIỆM) */}
                     {gameState === 'quiz' && currentQuizData && (
                         <div className="w-full flex flex-col items-center animate-in zoom-in-95">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Âm Hán Việt là gì?</span>
-                            <div className="text-[120px] leading-none font-['Klee_One'] text-gray-800 mb-8">{currentQuizData.targetChar}</div>
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Âm Hán Việt là gì?</span>
+                            
+                            {/* Kanji lớn */}
+                            <div className="text-[100px] leading-none font-['Klee_One'] text-gray-800 mb-2">{currentQuizData.targetChar}</div>
+                            
+                            {/* --- MỚI: NGHĨA TIẾNG VIỆT (GỢI Ý) --- */}
+                            <p className="text-lg text-gray-500 font-medium italic mb-8 bg-gray-50 px-4 py-1 rounded-full">
+                                {currentQuizData.targetInfo.meaning}
+                            </p>
+
                             <div className="grid grid-cols-2 gap-3 w-full">
                                 {currentQuizData.options.map((opt, i) => (
                                     <button key={i} onClick={() => handleAnswer(opt.correct, currentQuizData)} className="py-4 bg-gray-50 hover:bg-indigo-50 border-2 border-gray-100 hover:border-indigo-200 rounded-2xl font-bold text-gray-700 text-lg active:scale-95 transition-all">{opt.label}</button>
@@ -1349,31 +1370,53 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData }) => {
                             </div>
                         </div>
                     )}
+
+                    {/* 2. PENALTY (PHẠT NHẬP TAY) */}
                     {gameState === 'penalty' && wrongItem && (
                         <div className="w-full flex flex-col items-center animate-in slide-in-from-right">
                             <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-4 text-2xl animate-bounce">⚠️</div>
                             <h3 className="text-xl font-bold text-gray-800 mb-1">Sai rồi!</h3>
-                            <p className="text-sm text-gray-500 mb-6">Nhập lại âm Hán Việt để ghi nhớ:</p>
-                            <div className="text-6xl font-['Klee_One'] text-gray-800 mb-2">{wrongItem.targetChar}</div>
-                            <p className="text-indigo-600 font-black text-xl mb-6 uppercase tracking-widest">{wrongItem.targetInfo.sound}</p>
+                            <p className="text-sm text-gray-500 mb-4">Nhập lại âm Hán Việt để ghi nhớ:</p>
+                            
+                            <div className="text-6xl font-['Klee_One'] text-gray-800 mb-1">{wrongItem.targetChar}</div>
+                            
+                            {/* Âm Hán Việt đúng */}
+                            <p className="text-indigo-600 font-black text-2xl uppercase tracking-widest mb-1">{wrongItem.targetInfo.sound}</p>
+                            
+                            {/* --- MỚI: NGHĨA TIẾNG VIỆT DƯỚI ÂM HÁN --- */}
+                            <p className="text-sm text-gray-400 font-medium italic mb-6">({wrongItem.targetInfo.meaning})</p>
+
                             <input type="text" autoFocus value={penaltyInput} onChange={(e) => setPenaltyInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && checkPenalty()} placeholder="Nhập vào đây..." className={`w-full p-4 text-center text-lg font-bold border-2 rounded-xl outline-none transition-all ${penaltyFeedback === 'incorrect' ? 'border-red-500 bg-red-50' : penaltyFeedback === 'correct' ? 'border-green-500 bg-green-50' : 'border-gray-200'}`} />
                             <button onClick={checkPenalty} className="w-full mt-4 py-3 bg-gray-900 hover:bg-black text-white font-bold rounded-xl active:scale-95">KIỂM TRA</button>
                         </div>
                     )}
+
+                    {/* 3. MATCHING GAME (GHÉP THẺ - NHỎ GỌN) */}
                     {gameState === 'match' && (
                         <div className="w-full h-full flex flex-col">
-                            <span className="text-xs font-bold text-center text-gray-400 uppercase tracking-widest mb-4">Ghép cặp Kanji - Âm Hán</span>
-                            <div className="grid grid-cols-2 gap-3 flex-1 content-center">
+                            <span className="text-xs font-bold text-center text-gray-400 uppercase tracking-widest mb-4 block">Ghép cặp Kanji - Âm Hán</span>
+                            <div className="grid grid-cols-3 gap-2 flex-1 content-center">
                                 {matchCards.map((card) => {
                                     const isMatched = matchedIds.includes(card.id);
                                     const isSelected = selectedCardId === card.id;
                                     return (
-                                        <button key={card.id} onClick={() => handleCardClick(card)} disabled={isMatched} className={`h-24 rounded-xl border-2 font-bold text-xl flex items-center justify-center transition-all duration-300 ${isMatched ? 'opacity-0 scale-50' : isSelected ? 'bg-indigo-600 border-indigo-600 text-white scale-105 shadow-lg' : 'bg-white border-gray-200 text-gray-700'} ${card.type === 'kanji' ? "font-['Klee_One'] text-3xl" : "uppercase text-sm"}`}>{card.content}</button>
+                                        <button 
+                                            key={card.id} 
+                                            onClick={() => handleCardClick(card)} 
+                                            disabled={isMatched} 
+                                            className={`h-20 rounded-xl border-2 font-bold flex items-center justify-center transition-all duration-300 p-1 
+                                                ${isMatched ? 'opacity-0 scale-50 pointer-events-none' : isSelected ? 'bg-indigo-600 border-indigo-600 text-white scale-105 shadow-lg' : 'bg-white border-gray-200 text-gray-700 active:scale-95'} 
+                                                ${card.type === 'kanji' ? "font-['Klee_One'] text-2xl" : "uppercase text-[10px] sm:text-xs leading-tight break-words"}`}
+                                        >
+                                            {card.content}
+                                        </button>
                                     );
                                 })}
                             </div>
                         </div>
                     )}
+
+                    {/* 4. FINISHED */}
                     {gameState === 'finished' && (
                         <div className="text-center animate-in zoom-in">
                             <div className="text-6xl mb-4">🏆</div>
