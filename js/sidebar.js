@@ -180,7 +180,7 @@ return () => document.removeEventListener("mousedown", handleClickOutside);
         return arr.join('');
     };
 
-    // --- HÀM TRỢ GIÚP: REGEX ---
+    // --- HÀM TRỢ GIÚP: REGEX (ĐÃ SỬA: Thêm dấu chấm Nhật) ---
     const getAllowedRegexString = (options, allowLatin = false) => {
         let ranges = "\\s"; 
         if (allowLatin) ranges += "a-zA-Z"; // Latinh luôn được phép ở input
@@ -188,6 +188,10 @@ return () => document.removeEventListener("mousedown", handleClickOutside);
         if (options.hiragana) ranges += "\\u3040-\\u309F";
         if (options.katakana) ranges += "\\u30A0-\\u30FF";
         if (options.kanji)    ranges += "\\u4E00-\\u9FAF\\u3400-\\u4DBF\\u2E80-\\u2FDF\\uF900-\\uFAFF"; 
+        
+        // --- THÊM DÒNG NÀY: Cho phép dấu chấm Nhật ---
+        ranges += "\\u3002"; 
+
         return ranges;
     };
     // --- HÀM TRỢ GIÚP: XÓA TRÙNG LẶP ---
