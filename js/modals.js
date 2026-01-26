@@ -1,57 +1,3 @@
-const FutureDateItem = ({ date, items }) => {
-    const [isExpanded, setIsExpanded] = React.useState(false);
-    const containerRef = React.useRef(null);
-    const [needsExpand, setNeedsExpand] = React.useState(false);
-
-    // Kiểm tra chiều cao thực tế để quyết định có hiện nút "Xem thêm" không
-    React.useLayoutEffect(() => {
-        if (containerRef.current) {
-            // 1 hàng ~ 30-34px. 3 hàng + gap ~ 108px.
-            if (containerRef.current.scrollHeight > 108) {
-                setNeedsExpand(true);
-            }
-        }
-    }, [items]);
-
-    return (
-        <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 flex flex-col">
-            {/* Header của thẻ ngày */}
-            <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    Ngày {date}
-                </span>
-                <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 rounded">{items.length} chữ</span>
-            </div>
-
-            {/* Danh sách Kanji */}
-            <div 
-                ref={containerRef}
-                className={`flex flex-wrap gap-1 transition-all duration-300 ease-in-out ${isExpanded ? '' : 'max-h-[108px] overflow-hidden'}`}
-            >
-                {items.map((char, i) => (
-                    <span key={i} className="inline-block bg-white text-gray-500 border border-gray-200 rounded px-1.5 py-0.5 text-base font-['Klee_One'] min-w-[28px] text-center opacity-70">{char}</span>
-                ))}
-            </div>
-
-            {/* Nút Xem thêm / Thu gọn (Chỉ hiện khi danh sách dài quá 3 hàng) */}
-            {(needsExpand || isExpanded) && (
-                <div className="mt-2 pt-2 border-t border-dashed border-gray-200 text-center">
-                    <button 
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setIsExpanded(!isExpanded);
-                        }}
-                        className="text-[11px] font-bold text-blue-500 hover:text-blue-700 hover:bg-blue-50 px-3 py-1 rounded transition-colors"
-                    >
-                        {isExpanded ? "Thu gọn" : `Xem thêm... (${items.length} chữ)`}
-                    </button>
-                </div>
-            )}
-        </div>
-    );
-};
-
 const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
     const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
     const [isHelpOpen, setIsHelpOpen] = React.useState(false);
@@ -113,7 +59,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
         }
     }, [isOpen]);
 
-    
+   
     const groupedData = React.useMemo(() => {
         const groups = { today: [] }; 
         const now = Date.now();
@@ -137,14 +83,14 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
         const [d1, m1] = a.split('/').map(Number);
         const [d2, m2] = b.split('/').map(Number);
         return m1 === m2 ? d1 - d2 : m1 - m2;
-    });
+    }).slice(0, 5);;
 
     return (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-pointer" onClick={onClose}>
             <div className={`bg-white rounded-2xl shadow-2xl w-full flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200 overflow-hidden relative transition-all cursor-default ${isConfirmOpen ? 'max-w-[300px]' : 'max-w-md'}`} onClick={e => e.stopPropagation()}>
                 
                 {isHelpOpen ? (
-                    // === GIAO DIỆN HƯỚNG DẪN (SRS GUIDE) ===
+                    // === GIAO DIỆN HƯỚNG DẪN (SRS GUIDE) - NỘI DUNG MỚI ===
                     
                     <>
                          <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-indigo-50">
@@ -170,19 +116,19 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
 
                             {/* 2. Cơ chế hoạt động */}
                             <div className="bg-indigo-50 p-3 rounded-xl border border-indigo-100 text-sm">
-                                <h4 className="font-bold text-indigo-700 mb-1 flex items-center gap-2">
-                                    <span className="text-lg">⚙️</span> 2. CƠ CHẾ HOẠT ĐỘNG
-                                </h4>
-                                <div className="text-indigo-900 leading-relaxed">
-                                    <p className="mb-2">
-                                        Hệ thống tự động tính toán <b>mức độ ghi nhớ</b> của bạn đối với từng Kanji (dựa trên quá trình và kết quả học Flashcard). Từ đó đưa ra <b>lịch trình ôn tập phù hợp</b> riêng cho từng chữ.
-                                    </p>
-                                    <p className="flex gap-1 items-start mt-2 font-medium">
-                                        <span>🔔</span>
-                                        <span><b>Nhắc nhở:</b> Thông báo sẽ tự động xuất hiện trên giao diện web khi đến hạn ôn tập (vào lúc 5 giờ sáng).</span>
-                                    </p>
-                                </div>
-                            </div>
+    <h4 className="font-bold text-indigo-700 mb-1 flex items-center gap-2">
+        <span className="text-lg">⚙️</span> 2. CƠ CHẾ HOẠT ĐỘNG
+    </h4>
+    <div className="text-indigo-900 leading-relaxed">
+        <p className="mb-2">
+            Hệ thống tự động tính toán <b>mức độ ghi nhớ</b> của bạn đối với từng Kanji (dựa trên quá trình và kết quả học Flashcard). Từ đó đưa ra <b>lịch trình ôn tập phù hợp</b> riêng cho từng chữ.
+        </p>
+        <p className="flex gap-1 items-start mt-2 font-medium">
+            <span>🔔</span>
+            <span><b>Nhắc nhở:</b> Thông báo sẽ tự động xuất hiện trên giao diện web khi đến hạn ôn tập (vào lúc 5 giờ sáng).</span>
+        </p>
+    </div>
+</div>
                             
                             {/* 3. Lưu ý dữ liệu */}
                             <div className="bg-yellow-50 p-3 rounded-xl border border-yellow-100 text-sm">
@@ -196,43 +142,43 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                                 </ul>
                             </div>
                                 
-                            {/* --- MỤC 4: SAO LƯU & KHÔI PHỤC --- */}
-                            <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-sm">
-                                <h4 className="font-bold text-emerald-800 mb-2 flex items-center gap-2">
-                                    <span className="text-lg">💾</span> 4. SAO LƯU & KHÔI PHỤC
-                                </h4>
-                                
-                                <div className="text-emerald-900 leading-relaxed mb-3 text-justify">
-                                    <p className="mb-1">
-                                        <b>Tại sao cần sao lưu?</b> Để chuyển dữ liệu học tập sang máy khác (điện thoại/máy tính), hoặc phòng trường hợp lỡ tay xóa mất lịch sử duyệt web.
-                                    </p>
-                                </div>
+{/* --- MỤC 4: SAO LƯU & KHÔI PHỤC (MỚI) --- */}
+<div className="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-sm">
+    <h4 className="font-bold text-emerald-800 mb-2 flex items-center gap-2">
+        <span className="text-lg">💾</span> 4. SAO LƯU & KHÔI PHỤC
+    </h4>
+    
+    <div className="text-emerald-900 leading-relaxed mb-3 text-justify">
+        <p className="mb-1">
+            <b>Tại sao cần sao lưu?</b> Để chuyển dữ liệu học tập sang máy khác (điện thoại/máy tính), hoặc phòng trường hợp lỡ tay xóa mất lịch sử duyệt web.
+        </p>
+    </div>
 
-                                {/* Cụm nút bấm */}
-                                <div className="grid grid-cols-2 gap-3">
-                                    {/* NÚT TẢI VỀ */}
-                                    <button 
-                                        onClick={handleExport}
-                                        className="flex flex-col items-center justify-center gap-1 py-2 bg-white border border-emerald-200 text-emerald-700 font-bold rounded-lg shadow-sm hover:bg-emerald-600 hover:text-white transition-all active:scale-95"
-                                    >
-                                        <div className="flex items-center gap-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                            <span>TẢI FILE VỀ</span>
-                                        </div>
-                                        <span className="text-[9px] font-normal opacity-80">(Lưu file .json)</span>
-                                    </button>
+    {/* Cụm nút bấm */}
+    <div className="grid grid-cols-2 gap-3">
+        {/* NÚT TẢI VỀ */}
+        <button 
+            onClick={handleExport}
+            className="flex flex-col items-center justify-center gap-1 py-2 bg-white border border-emerald-200 text-emerald-700 font-bold rounded-lg shadow-sm hover:bg-emerald-600 hover:text-white transition-all active:scale-95"
+        >
+            <div className="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>TẢI FILE VỀ</span>
+            </div>
+            <span className="text-[9px] font-normal opacity-80">(Lưu file .json)</span>
+        </button>
 
-                                    {/* NÚT TẢI LÊN */}
-                                    <label className="flex flex-col items-center justify-center gap-1 py-2 bg-emerald-600 border border-emerald-600 text-white font-bold rounded-lg shadow-sm hover:bg-emerald-700 transition-all active:scale-95 cursor-pointer">
-                                        <div className="flex items-center gap-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                            <span>KHÔI PHỤC</span>
-                                        </div>
-                                        <span className="text-[9px] font-normal opacity-80">(Chọn file đã lưu)</span>
-                                        <input type="file" accept=".json" className="hidden" onChange={handleImport} />
-                                    </label>
-                                </div>
-                            </div>
+        {/* NÚT TẢI LÊN */}
+        <label className="flex flex-col items-center justify-center gap-1 py-2 bg-emerald-600 border border-emerald-600 text-white font-bold rounded-lg shadow-sm hover:bg-emerald-700 transition-all active:scale-95 cursor-pointer">
+            <div className="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>KHÔI PHỤC</span>
+            </div>
+            <span className="text-[9px] font-normal opacity-80">(Chọn file đã lưu)</span>
+            <input type="file" accept=".json" className="hidden" onChange={handleImport} />
+        </label>
+    </div>
+</div>
                             <button onClick={() => setIsHelpOpen(false)} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 text-xs uppercase">
                                 quay lại lịch trình ôn tập
                             </button>
@@ -256,7 +202,6 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
 
                         <div className="p-4 overflow-y-auto custom-scrollbar flex-1">
                             <div className="space-y-4">
-                                {/* KHUNG TODAY - GIỮ NGUYÊN */}
                                 <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-sm font-black text-orange-600 uppercase">Cần ôn ngay</span>
@@ -271,7 +216,6 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                                     ) : (<p className="text-[12px] text-gray-400 italic">Không có Kanji cần ôn. Giỏi quá! 🎉</p>)}
                                 </div>
 
-                                {/* KHUNG FUTURE - THAY ĐỔI LOGIC HIỂN THỊ */}
                                 {futureDates.length > 0 && (
                                     <div className="space-y-3">
                                          <div className="flex items-center gap-2 mt-2">
@@ -280,11 +224,20 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                                             <span className="h-[1px] flex-1 bg-gray-100"></span>
                                         </div>
                                         {futureDates.map(date => (
-                                            <FutureDateItem 
-                                                key={date} 
-                                                date={date} 
-                                                items={groupedData[date]} 
-                                            />
+                                            <div key={date} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
+                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                        Ngày {date}
+                                                    </span>
+                                                    <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 rounded">{groupedData[date].length} chữ</span>
+                                                </div>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {groupedData[date].map((char, i) => (
+                                                        <span key={i} className="inline-block bg-white text-gray-500 border border-gray-200 rounded px-1.5 py-0.5 text-base font-['Klee_One'] min-w-[28px] text-center opacity-70">{char}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         ))}
                                     </div>
                                 )}
