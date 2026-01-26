@@ -1,12 +1,12 @@
-// --- SỬA LẠI: REVIEW LIST MODAL (HÔM NAY FULL, TƯƠNG LAI RÚT GỌN 3 HÀNG) ---
+// --- SỬA LẠI: REVIEW LIST MODAL (Xem thêm: Xám nhạt, góc trái, chìm nền) ---
 const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
     const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
     const [isHelpOpen, setIsHelpOpen] = React.useState(false);
     
-    // State lưu trạng thái mở rộng của từng mục ngày tương lai
+    // State lưu trạng thái mở rộng
     const [expandedSections, setExpandedSections] = React.useState({});
 
-    // Reset trạng thái khi đóng Modal (để lần sau mở lại nó tự thu gọn)
+    // Reset trạng thái khi đóng Modal
     React.useEffect(() => {
         if (!isOpen) {
             setIsConfirmOpen(false);
@@ -82,20 +82,14 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
         return m1 === m2 ? d1 - d2 : m1 - m2;
     });
 
-    // === COMPONENT CON: RENDER LIST (ĐÃ SỬA LOGIC THEO YÊU CẦU) ===
+    // === COMPONENT CON: RENDER LIST (ĐÃ CHỈNH STYLE NÚT XEM THÊM) ===
     const RenderListSection = ({ title, count, items, bgColor, borderColor, sectionKey, isToday }) => {
-        // --- CẤU HÌNH GIỚI HẠN ---
-        // 3 hàng x 11 chữ/hàng = 33 chữ
         const LIMIT = 33; 
-        
-        // Logic kiểm tra: Chỉ áp dụng thu gọn cho TƯƠNG LAI (!isToday) và nếu danh sách dài (> LIMIT)
         const shouldCollapse = !isToday && items.length > LIMIT;
-        
         const isExpanded = expandedSections[sectionKey];
 
         return (
             <div className={`${bgColor} rounded-xl p-3 border ${borderColor} relative transition-all`}>
-                {/* Header Tiêu đề */}
                 <div className="flex items-center justify-between mb-2">
                     {isToday ? (
                         <span className="text-sm font-black text-orange-600 uppercase">{title}</span>
@@ -108,9 +102,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                     <span className={`${isToday ? 'bg-orange-200 text-orange-700' : 'bg-gray-200 text-gray-600'} text-[10px] font-bold px-1.5 rounded`}>{count} chữ</span>
                 </div>
 
-                {/* Nội dung danh sách */}
                 {items.length > 0 ? (
-                    // Nếu cần thu gọn (shouldCollapse) và chưa bấm mở (isExpanded = false) -> Giới hạn chiều cao
                     <div className={`relative ${shouldCollapse && !isExpanded ? 'max-h-[120px] overflow-hidden' : ''}`}>
                         <div className="flex flex-wrap gap-1">
                             {items.map((char, i) => (
@@ -118,15 +110,16 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                             ))}
                         </div>
                         
-                        {/* Lớp phủ mờ + Nút Xem Thêm (Chỉ hiện khi đang bị ẩn) */}
+                        {/* --- PHẦN SỬA ĐỔI: Lớp phủ mờ + Nút Chìm --- */}
                         {shouldCollapse && !isExpanded && (
                             <div 
-                                className="absolute inset-x-0 bottom-0 h-20 flex items-end justify-center pb-1 bg-gradient-to-t from-gray-100 via-gray-50/90 to-transparent cursor-pointer"
+                                className="absolute inset-x-0 bottom-0 h-16 flex items-end justify-start pl-3 pb-1 bg-gradient-to-t from-gray-50 via-gray-50/95 to-transparent cursor-pointer rounded-b-xl"
                                 onClick={() => toggleExpand(sectionKey)}
                             >
-                                <button className="text-[10px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center gap-1 bg-white/90 px-3 py-1.5 rounded-full shadow-sm border border-indigo-100 hover:bg-white transition-all backdrop-blur-sm">
-                                    Xem thêm {items.length - LIMIT}+
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                {/* Nút dạng text đơn giản, màu xám nhạt */}
+                                <button className="text-[10px] font-bold text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
+                                    Xem thêm {items.length - LIMIT} chữ...
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                                 </button>
                             </div>
                         )}
@@ -135,15 +128,15 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                     <p className="text-[12px] text-gray-400 italic">Không có Kanji cần ôn. Giỏi quá! 🎉</p>
                 )}
                 
-                {/* Nút thu gọn (Chỉ hiện khi đã bấm mở rộng hết cỡ) */}
+                {/* Nút thu gọn (Cũng làm chìm cho đồng bộ) */}
                 {shouldCollapse && isExpanded && (
-                     <div className="flex justify-center mt-2">
+                     <div className="flex justify-center mt-2 pt-2 border-t border-dashed border-gray-200">
                         <button 
                             onClick={() => toggleExpand(sectionKey)}
-                            className="text-[10px] font-bold text-gray-400 hover:text-gray-600 flex items-center gap-1"
+                            className="text-[10px] font-bold text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors"
                         >
                             Thu gọn
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
                         </button>
                      </div>
                 )}
@@ -191,7 +184,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
 
                         <div className="p-4 overflow-y-auto custom-scrollbar flex-1">
                             <div className="space-y-4">
-                                {/* HÔM NAY: isToday={true} -> Luôn hiện full, không bao giờ cắt */}
+                                {/* HÔM NAY: isToday={true} -> Luôn hiện full */}
                                 <RenderListSection 
                                     title="Cần ôn ngay"
                                     count={groupedData.today.length}
