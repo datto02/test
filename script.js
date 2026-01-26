@@ -1237,7 +1237,7 @@ return (
         </div>
     );
     };
-// --- COMPONENT MỚI: TRÒ CHƠI HỌC TẬP (FINAL UI: FLASHCARD-STYLE FINISH SCREEN) ---
+// --- COMPONENT MỚI: TRÒ CHƠI HỌC TẬP (COMPACT MODE: BUTTONS BOTTOM + LESS WHITESPACE) ---
 const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) => {
     const [queue, setQueue] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -1291,11 +1291,8 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
 
             for (let i = 0; i < validChars.length; i += CHUNK_SIZE) {
                 const chunk = validChars.slice(i, i + CHUNK_SIZE);
-                // VÒNG 1
                 chunk.forEach(char => newQueue.push({ type: 'quiz_sound', char }));
-                // VÒNG 2
                 if (chunk.length >= 2) newQueue.push({ type: 'match', chars: chunk });
-                // VÒNG 3
                 chunk.forEach(char => newQueue.push({ type: 'quiz_meaning', char }));
             }
 
@@ -1459,53 +1456,56 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
 
     return (
         <div className="fixed inset-0 z-[500] flex items-center justify-center bg-slate-900/95 backdrop-blur-md p-4 animate-in fade-in select-none">
-            <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden min-h-[450px] flex flex-col relative">
+            {/* GIẢM min-h XUỐNG CÒN 380px ĐỂ COMPACT HƠN */}
+            <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden min-h-[380px] flex flex-col relative">
                 
-                {/* --- HEADER --- */}
-                {/* Ẩn Header khi ở màn hình Kết thúc để giống giao diện Flashcard Finished */}
+                {/* --- HEADER COMPACT (py-2) --- */}
                 {gameState !== 'finished' && (
-                    <div className="px-4 py-3 flex items-center gap-3 border-b border-gray-100 bg-white">
+                    <div className="px-4 py-2 flex items-center gap-3 border-b border-gray-100 bg-white">
                         <div className="flex-1 flex items-center gap-3">
-                            <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                                 <div className="h-full bg-blue-600 transition-all duration-500 ease-out" style={{ width: `${visualPercent}%` }}></div>
                             </div>
-                            <div className="text-xs font-black text-blue-900 bg-blue-50 px-2 py-0.5 rounded-md min-w-[40px] text-center">
+                            <div className="text-[10px] font-black text-blue-900 bg-blue-50 px-2 py-0.5 rounded-md min-w-[36px] text-center">
                                 {finishedCount}/{totalKanji}
                             </div>
                         </div>
-                        <button onClick={onClose} className="text-gray-300 hover:text-red-500 transition-colors font-black text-2xl leading-none ml-1">
+                        <button onClick={onClose} className="text-gray-300 hover:text-red-500 transition-colors font-black text-xl leading-none ml-1">
                             ✕
                         </button>
                     </div>
                 )}
 
-                <div className="flex-1 flex flex-col p-4 bg-white h-full">
+                {/* GIẢM PADDING NỘI DUNG (p-3) */}
+                <div className="flex-1 flex flex-col p-3 bg-white h-full">
                     
-                    {/* 1. QUIZ */}
+                    {/* 1. QUIZ (COMPACT) */}
                     {(gameState === 'quiz_sound' || gameState === 'quiz_meaning') && currentQuizData && (
                         <div className="w-full h-full flex flex-col">
                             
-                            {/* KHU VỰC KANJI: Căn giữa tuyệt đối */}
-                            <div className="flex-1 flex flex-col items-center justify-center min-h-0">
-                                <div className="text-[85px] leading-none font-['Klee_One'] text-slate-800 drop-shadow-sm">
+                            {/* KANJI AREA: flex-1 để chiếm khoảng trống, justify-center để căn giữa */}
+                            <div className="flex-1 flex flex-col items-center justify-center w-full min-h-0">
+                                {/* Kanji nhỏ lại: 70px */}
+                                <div className="text-[70px] leading-none font-['Klee_One'] text-slate-800 drop-shadow-sm">
                                     {currentQuizData.targetChar}
                                 </div>
                                 
                                 {gameState === 'quiz_sound' && (
-                                    <p className="mt-4 text-sm font-bold text-slate-600 italic bg-slate-50 px-5 py-1.5 rounded-full border border-slate-200 shadow-sm">
+                                    <p className="mt-2 text-xs font-bold text-slate-600 italic bg-slate-50 px-3 py-1 rounded-full border border-slate-200 shadow-sm">
                                         {currentQuizData.targetInfo.meaning}
                                     </p>
                                 )}
                             </div>
                             
-                            {/* KHU VỰC NÚT BẤM: Đẩy xuống đáy */}
-                            <div className="w-full pt-2">
-                                <div className="grid grid-cols-2 gap-3 w-full">
+                            {/* BUTTONS AREA: mt-auto để đẩy xuống đáy */}
+                            <div className="w-full mt-auto pt-2">
+                                <div className="grid grid-cols-2 gap-2 w-full">
                                     {currentQuizData.options.map((opt, i) => (
                                         <button 
                                             key={i} 
                                             onClick={() => handleAnswer(opt.correct, currentQuizData)} 
-                                            className="h-16 w-full px-2 bg-white border-2 border-slate-100 text-slate-700 rounded-2xl font-bold text-sm flex items-center justify-center text-center shadow-sm break-words leading-tight transition-all active:scale-95 outline-none md:hover:bg-blue-50 md:hover:border-blue-400 md:hover:text-blue-700"
+                                            // Nút h-12 (gọn hơn), text-xs
+                                            className="h-12 w-full px-1 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center justify-center text-center shadow-sm break-words leading-tight transition-all active:scale-95 outline-none md:hover:bg-blue-50 md:hover:border-blue-400 md:hover:text-blue-700"
                                         >
                                             {opt.label}
                                         </button>
@@ -1515,23 +1515,24 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                         </div>
                     )}
 
-                    {/* 2. PENALTY */}
+                    {/* 2. PENALTY (COMPACT) */}
                     {gameState === 'penalty' && wrongItem && (
                         <div className="w-full flex flex-col items-center justify-center h-full animate-in slide-in-from-right">
-                            <h3 className="text-lg font-black text-slate-800 mb-6 mt-4">Viết lại để ghi nhớ</h3>
-                            <div className="text-7xl font-['Klee_One'] text-slate-800 mb-2">{wrongItem.targetChar}</div>
-                            <p className="text-blue-600 font-black text-2xl uppercase tracking-widest mb-1">{wrongItem.targetInfo.sound}</p>
-                            <p className="text-sm text-slate-400 font-medium italic mb-8">({wrongItem.targetInfo.meaning})</p>
+                            <h3 className="text-base font-black text-slate-800 mb-3 mt-2">Viết lại để ghi nhớ</h3>
+                            <div className="text-6xl font-['Klee_One'] text-slate-800 mb-1">{wrongItem.targetChar}</div>
+                            <p className="text-blue-600 font-black text-xl uppercase tracking-widest mb-0.5">{wrongItem.targetInfo.sound}</p>
+                            <p className="text-xs text-slate-400 font-medium italic mb-5">({wrongItem.targetInfo.meaning})</p>
 
-                            <input type="text" autoFocus value={penaltyInput} onChange={(e) => setPenaltyInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && checkPenalty()} placeholder="Nhập âm Hán Việt..." className={`w-full p-4 text-center text-lg font-bold border-2 rounded-xl outline-none transition-all shadow-inner ${penaltyFeedback === 'incorrect' ? 'border-red-500 bg-red-50' : penaltyFeedback === 'correct' ? 'border-green-500 bg-green-50' : 'border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50'}`} />
-                            <button onClick={checkPenalty} className="w-full mt-4 py-3 bg-blue-600 text-white font-bold rounded-xl active:scale-95 shadow-lg shadow-blue-200 transition-all uppercase tracking-widest text-xs outline-none md:hover:bg-blue-700">KIỂM TRA</button>
+                            <input type="text" autoFocus value={penaltyInput} onChange={(e) => setPenaltyInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && checkPenalty()} placeholder="Nhập âm Hán Việt..." className={`w-full p-3 text-center text-base font-bold border-2 rounded-xl outline-none transition-all shadow-inner ${penaltyFeedback === 'incorrect' ? 'border-red-500 bg-red-50' : penaltyFeedback === 'correct' ? 'border-green-500 bg-green-50' : 'border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50'}`} />
+                            <button onClick={checkPenalty} className="w-full mt-3 py-3 bg-blue-600 text-white font-bold rounded-xl active:scale-95 shadow-md shadow-blue-200 transition-all uppercase tracking-widest text-[10px] outline-none md:hover:bg-blue-700">KIỂM TRA</button>
                         </div>
                     )}
 
-                    {/* 3. MATCHING */}
+                    {/* 3. MATCHING (COMPACT) */}
                     {gameState === 'match' && (
                         <div className="w-full h-full flex flex-col items-center justify-center">
-                            <div className="grid grid-cols-3 gap-2 w-full">
+                            {/* gap-1.5 để các thẻ gần nhau hơn */}
+                            <div className="grid grid-cols-3 gap-1.5 w-full">
                                 {matchCards.map((card) => {
                                     const isMatched = matchedIds.includes(card.id);
                                     const isSelected = selectedCardId === card.id;
@@ -1542,15 +1543,16 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                                             key={card.id} 
                                             onClick={() => handleCardClick(card)} 
                                             disabled={isMatched} 
-                                            className={`h-20 rounded-xl border-2 font-bold flex items-center justify-center transition-all duration-200 p-1 shadow-sm outline-none
+                                            // Nút h-16 (gọn hơn h-20)
+                                            className={`h-16 rounded-xl border font-bold flex items-center justify-center transition-all duration-200 p-1 shadow-sm outline-none
                                                 ${isMatched ? 'opacity-0 scale-50 pointer-events-none' : 
                                                   isWrong ? 'bg-red-500 border-red-500 text-white animate-shake' : 
                                                   isSelected ? 'bg-blue-600 border-blue-600 text-white scale-105 shadow-md' : 
                                                   'bg-white border-slate-200 text-slate-700 active:scale-95 md:hover:border-blue-300'} 
                                                 
                                                 ${card.type === 'kanji' 
-                                                    ? "font-['Klee_One'] text-3xl"  
-                                                    : "uppercase text-sm leading-tight break-words"
+                                                    ? "font-['Klee_One'] text-2xl"  
+                                                    : "uppercase text-[10px] leading-tight break-words"
                                                 }`}
                                         >
                                             {card.content}
@@ -1561,35 +1563,30 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                         </div>
                     )}
 
-                    {/* 4. FINISHED (STYLE FLASHCARD HOÀN CHỈNH) */}
+                    {/* 4. FINISHED (COMPACT) */}
                     {gameState === 'finished' && (
                         <div className="w-full h-full flex flex-col items-center justify-center animate-in zoom-in duration-300">
                             
-                            {/* Pháo hoa to hơn, nảy sinh động */}
-                            <div className="text-7xl mb-6 animate-bounce">🎉</div>
-                            
-                            {/* Tiêu đề to đậm, màu tối */}
-                            <h2 className="text-3xl font-black text-slate-800 uppercase tracking-tight mb-2">
+                            <div className="text-5xl mb-3 animate-bounce">🎉</div>
+                            <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight mb-1">
                                 XUẤT SẮC!
                             </h2>
-                            
-                            {/* Subtitle màu xám nhẹ */}
-                            <p className="text-slate-500 font-medium text-sm mb-10">
+                            <p className="text-slate-500 font-medium text-xs mb-6">
                                 Bạn đã hoàn thành phiên học.
                             </p>
                             
-                            {/* Nút bấm trải rộng nhưng có giới hạn chiều ngang */}
-                            <div className="flex flex-col items-center gap-4 w-full px-6">
-                                <button onClick={onSwitchToFlashcard} className="w-full py-4 bg-blue-600 text-white font-black rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wide text-sm outline-none md:hover:bg-blue-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            {/* Nút nhỏ gọn hơn */}
+                            <div className="flex flex-col items-center gap-2.5 w-full px-6">
+                                <button onClick={onSwitchToFlashcard} className="w-full py-3 bg-blue-600 text-white font-black rounded-xl shadow-md shadow-blue-200 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wide text-xs outline-none md:hover:bg-blue-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                                     FLASHCARD
                                 </button>
                                 
-                                <button onClick={handleRestart} className="w-full py-3.5 bg-slate-100 text-slate-600 font-bold rounded-xl active:scale-95 transition-all uppercase tracking-wide text-xs outline-none md:hover:bg-slate-200">
+                                <button onClick={handleRestart} className="w-full py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl active:scale-95 transition-all uppercase tracking-wide text-[10px] outline-none md:hover:bg-slate-200">
                                     Học lại từ đầu
                                 </button>
                                 
-                                <button onClick={onClose} className="w-full py-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest transition-colors outline-none md:hover:text-red-500">
+                                <button onClick={onClose} className="w-full py-1.5 text-slate-400 font-bold text-[10px] uppercase tracking-widest transition-colors outline-none md:hover:text-red-500">
                                     Thoát
                                 </button>
                             </div>
