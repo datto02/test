@@ -2689,7 +2689,7 @@ LÀM SẠCH
                                 <rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4M15 13v.01M18 11v.01"/>
                             </svg>
                         </span>
-                        <span className="text-xs font-black tracking-wide uppercase">Học (Game)</span>
+                        <span className="text-xs font-black tracking-wide uppercase">HỌC</span>
                     </button>
 
                     {/* NÚT FLASHCARD - Nằm dưới nút Học */}
