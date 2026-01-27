@@ -1476,44 +1476,42 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                     </div>
                 )}
 
-                {/* GIẢM PADDING NỘI DUNG (p-3) */}
-                <div className="flex-1 flex flex-col p-3 bg-white h-full">
-                    
-                    {/* 1. QUIZ (COMPACT) */}
-                    {(gameState === 'quiz_sound' || gameState === 'quiz_meaning') && currentQuizData && (
-                        <div className="w-full h-full flex flex-col">
-                            
-                            {/* KANJI AREA: flex-1 để chiếm khoảng trống, justify-center để căn giữa */}
-                            <div className="flex-1 flex flex-col items-center justify-center w-full min-h-0">
-                                {/* Kanji nhỏ lại: 70px */}
-                                <div className="text-[70px] leading-none font-['Klee_One'] text-slate-800 drop-shadow-sm">
-                                    {currentQuizData.targetChar}
-                                </div>
-                                
-                                {gameState === 'quiz_sound' && (
-                                    <p className="mt-2 text-xs font-bold text-slate-600 italic bg-slate-50 px-3 py-1 rounded-full border border-slate-200 shadow-sm">
-                                        {currentQuizData.targetInfo.meaning}
-                                    </p>
-                                )}
-                            </div>
-                            
-                            {/* BUTTONS AREA: mt-auto để đẩy xuống đáy */}
-                            <div className="w-full mt-auto pt-2">
-                                <div className="grid grid-cols-2 gap-2 w-full">
-                                    {currentQuizData.options.map((opt, i) => (
-                                        <button 
-                                            key={i} 
-                                            onClick={() => handleAnswer(opt.correct, currentQuizData)} 
-                                            // Nút h-12 (gọn hơn), text-xs
-                                            className="h-12 w-full px-1 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center justify-center text-center shadow-sm break-words leading-tight transition-all active:scale-95 outline-none md:hover:bg-blue-50 md:hover:border-blue-400 md:hover:text-blue-700"
-                                        >
-                                            {opt.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                {/* --- PHẦN NỘI DUNG CHÍNH (Thay đổi p-3 thành pt-3 px-3 pb-0 để sát đáy) --- */}
+<div className="flex-1 flex flex-col pt-3 px-3 pb-0 bg-white h-full">
+    
+    {/* 1. QUIZ (COMPACT) */}
+    {(gameState === 'quiz_sound' || gameState === 'quiz_meaning') && currentQuizData && (
+        <div className="w-full h-full flex flex-col">
+            
+            {/* KANJI AREA: Tăng flex-grow để đẩy nút xuống */}
+            <div className="flex-1 flex flex-col items-center justify-center w-full">
+                <div className="text-[75px] leading-none font-['Klee_One'] text-slate-800 drop-shadow-sm">
+                    {currentQuizData.targetChar}
+                </div>
+                
+                {gameState === 'quiz_sound' && (
+                    <p className="mt-2 text-xs font-bold text-slate-500 italic bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+                        {currentQuizData.targetInfo.meaning}
+                    </p>
+                )}
+            </div>
+            
+            {/* BUTTONS AREA: Sát lề dưới nhờ pb-3 và -mx-3 nếu muốn tràn viền hoàn toàn */}
+            <div className="w-full mt-auto pb-3"> 
+                <div className="grid grid-cols-2 gap-2 w-full">
+                    {currentQuizData.options.map((opt, i) => (
+                        <button 
+                            key={i} 
+                            onClick={() => handleAnswer(opt.correct, currentQuizData)} 
+                            className="h-14 w-full px-2 bg-white border-2 border-slate-100 text-slate-700 rounded-xl font-bold text-xs flex items-center justify-center text-center shadow-sm active:scale-95 transition-all outline-none md:hover:bg-blue-50 md:hover:border-blue-300"
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    )}
 
                     {/* 2. PENALTY (COMPACT) */}
                     {gameState === 'penalty' && wrongItem && (
