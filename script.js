@@ -1240,7 +1240,6 @@ return (
 const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) => {
     const [queue, setQueue] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
-    // Khởi tạo là loading để tránh hiện màn hình kết thúc cũ
     const [gameState, setGameState] = useState('loading'); 
     
     // State Tiến độ
@@ -1263,6 +1262,17 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
         if (isOpen) document.body.style.overflow = 'hidden';
         else document.body.style.overflow = 'unset';
         return () => { document.body.style.overflow = 'unset'; };
+    }, [isOpen]);
+
+    // --- [FIX LỖI QUAN TRỌNG] RESET TRẠNG THÁI KHI ĐÓNG MODAL ---
+    // Đảm bảo khi mở lại, game không bị kẹt ở trạng thái 'finished' cũ
+    useEffect(() => {
+        if (!isOpen) {
+            setGameState('loading');
+            setQueue([]);
+            setFinishedCount(0);
+            setWrongItem(null);
+        }
     }, [isOpen]);
 
     // Hàm trộn mảng
@@ -1300,10 +1310,9 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
     // 1. KHỞI TẠO DỮ LIỆU
     useEffect(() => {
         if (isOpen && text && dbData) {
-            // [FIX LỖI] Reset game state ngay lập tức khi mở
+            // Reset lần nữa để chắc chắn
             setGameState('loading');
-            setFinishedCount(0);
-
+            
             let validChars = Array.from(new Set(text.split('').filter(c => dbData.KANJI_DB && dbData.KANJI_DB[c])));
             validChars = shuffleArray(validChars); 
 
@@ -1324,7 +1333,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
             setQueue(newQueue); 
             setCurrentIndex(0); 
             
-            // Set state sau khi đã tính toán xong queue
+            // Chuyển sang câu hỏi đầu tiên sau 1 khoảng nhỏ để tránh render lỗi
             setTimeout(() => {
                 if (newQueue.length > 0) setGameState(newQueue[0].type);
             }, 50);
@@ -1337,7 +1346,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
 
     // Hàm Restart
     const handleRestart = () => {
-        setGameState('loading'); // Reset trạng thái để ẩn màn hình kết thúc
+        setGameState('loading'); // Reset để ẩn màn hình kết thúc ngay lập tức
         setQueue([]);
         setFinishedCount(0); 
         setTimeout(() => {
@@ -1401,7 +1410,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                 isKanji: true
             };
 
-            // [YÊU CẦU] CHỈ LẤY ÂM HÁN VIỆT (Bỏ nghĩa đi để khó hơn chút)
+            // [GIỮ NGUYÊN] CHỈ LẤY ÂM HÁN VIỆT
             const getLabel = (info) => {
                  return info.sound; 
             };
@@ -1508,7 +1517,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
 
     if (!isOpen) return null;
 
-    // Tránh render nội dung cũ nếu đang loading
+    // Nếu đang loading thì không render gì cả (tránh nhấp nháy)
     if (gameState === 'loading') return null;
 
     const visualPercent = queue.length > 0 ? ((currentIndex + 1) / queue.length) * 100 : 0;
