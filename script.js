@@ -1254,6 +1254,16 @@ return (
     );
     };
 const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) => {
+const getCharInfo = (c) => {
+    if (!dbData) return null;
+    // 1. Tìm trong Hiragana
+    if (dbData.ALPHABETS?.hiragana?.[c]) return { ...dbData.ALPHABETS.hiragana[c], type: 'hiragana' };
+    // 2. Tìm trong Katakana
+    if (dbData.ALPHABETS?.katakana?.[c]) return { ...dbData.ALPHABETS.katakana[c], type: 'katakana' };
+    // 3. Tìm trong Kanji (Bao gồm cả bộ thủ nằm trong DB này)
+    if (dbData.KANJI_DB?.[c]) return { ...dbData.KANJI_DB[c], type: 'kanji' };
+    return null;
+};
     const [queue, setQueue] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [gameState, setGameState] = useState('loading'); 
@@ -1318,15 +1328,16 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
         return '';
     };
 
-    // 1. KHỞI TẠO DỮ LIỆU
+   // 1. KHỞI TẠO DỮ LIỆU
     useEffect(() => {
         if (isOpen && text && dbData) {
             setGameState('loading');
             
-            let validChars = Array.from(new Set(text.split('').filter(c => dbData.KANJI_DB && dbData.KANJI_DB[c])));
+            // --- SỬA: Lọc chữ dùng hàm getCharInfo để lấy cả Kana/Kanji ---
+            let validChars = Array.from(new Set(text.split('').filter(c => getCharInfo(c))));
             validChars = shuffleArray(validChars); 
 
-            if (validChars.length === 0) { alert("Chưa có dữ liệu Kanji để học!"); onClose(); return; }
+            if (validChars.length === 0) { alert("Chưa có dữ liệu để học!"); onClose(); return; }
 
             setTotalKanji(validChars.length);
             
@@ -1352,89 +1363,58 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
             setWrongPairIds([]);
         }
     }, [isOpen, text, dbData]);
-
-    // Hàm Restart
-    const handleRestart = () => {
-        setGameState('loading');
-        setQueue([]);
-        setFinishedCount(0); 
-        setTimeout(() => {
-            let validChars = Array.from(new Set(text.split('').filter(c => dbData.KANJI_DB && dbData.KANJI_DB[c])));
-            validChars = shuffleArray(validChars);
-            setTotalKanji(validChars.length);
-            
-            let newQueue = [];
-            const CHUNK_SIZE = 6;
-            for (let i = 0; i < validChars.length; i += CHUNK_SIZE) {
-                const chunk = validChars.slice(i, i + CHUNK_SIZE);
-                chunk.forEach(char => newQueue.push({ type: 'quiz_sound', char }));
-                if (chunk.length >= 2) newQueue.push({ type: 'match', chars: chunk });
-                chunk.forEach(char => newQueue.push({ type: 'quiz_reverse', char })); 
-            }
-            setQueue(newQueue); 
-            setCurrentIndex(0); 
-            setGameState(newQueue[0].type); 
-            setPenaltyInput(''); 
-            setMatchedIds([]);
-            setWrongPairIds([]);
-        }, 100);
-    };
-
-    // 2. SINH DỮ LIỆU QUIZ (CẬP NHẬT: LẤY DISTRACTOR CÙNG LEVEL)
+    
+   // 2. SINH DỮ LIỆU QUIZ (ĐÃ SỬA: HỖ TRỢ ĐA DẠNG LOẠI CHỮ)
     const currentQuizData = useMemo(() => {
         const currentItem = queue[currentIndex];
         if (!currentItem || !['quiz_sound', 'quiz_reverse'].includes(currentItem.type)) return null;
         
         const targetChar = currentItem.char;
-        const targetInfo = dbData.KANJI_DB[targetChar];
-        
-        // --- LOGIC MỚI: TÌM POOL CÙNG LEVEL ---
-        let pool = Object.keys(dbData.KANJI_DB); // Mặc định là tất cả
-        
-        // 1. Xác định Level của chữ hiện tại
-        if (dbData.KANJI_LEVELS) {
-            for (const [level, chars] of Object.entries(dbData.KANJI_LEVELS)) {
-                if (chars.includes(targetChar)) {
-                    // Nếu tìm thấy level (vd: N4), set pool là danh sách N4
-                    // Lọc lại pool để chắc chắn chữ đó có trong DB chi tiết
-                    const levelPool = chars.filter(c => dbData.KANJI_DB[c]);
-                    if (levelPool.length >= 4) { // Chỉ dùng nếu pool đủ lớn
-                        pool = levelPool;
+        const targetInfo = getCharInfo(targetChar); // Dùng hàm mới
+        if (!targetInfo) return null;
+
+        // --- LOGIC TẠO POOL (ĐÁP ÁN NHIỄU) THEO LOẠI CHỮ ---
+        let pool = [];
+
+        if (targetInfo.type === 'hiragana') {
+            pool = Object.keys(dbData.ALPHABETS.hiragana);
+        } 
+        else if (targetInfo.type === 'katakana') {
+            pool = Object.keys(dbData.ALPHABETS.katakana);
+        } 
+        else {
+            // --- LOGIC KANJI (GIỮ NGUYÊN LOGIC CŨ CỦA BẠN) ---
+            pool = Object.keys(dbData.KANJI_DB); 
+            if (dbData.KANJI_LEVELS) {
+                for (const [level, chars] of Object.entries(dbData.KANJI_LEVELS)) {
+                    if (chars.includes(targetChar)) {
+                        const levelPool = chars.filter(c => dbData.KANJI_DB[c]);
+                        if (levelPool.length >= 4) pool = levelPool;
+                        break;
                     }
-                    break;
                 }
             }
         }
 
-        // 2. Chọn đáp án nhiễu từ Pool đã lọc
+        // Chọn 3 đáp án nhiễu
         const distractors = [];
         let attempts = 0;
         while (distractors.length < 3 && attempts < 100) {
             const r = pool[Math.floor(Math.random() * pool.length)];
-            if (r !== targetChar && !distractors.includes(r)) {
-                distractors.push(r);
-            }
+            if (r !== targetChar && !distractors.includes(r)) distractors.push(r);
             attempts++;
         }
         
-        // Fallback: Nếu không tìm đủ (hiếm), lấy từ tất cả
-        if (distractors.length < 3) {
-             const allKanji = Object.keys(dbData.KANJI_DB);
-             while (distractors.length < 3) {
-                const r = allKanji[Math.floor(Math.random() * allKanji.length)];
-                if (r !== targetChar && !distractors.includes(r)) distractors.push(r);
-             }
-        }
-        // ----------------------------------------
-
+        // Logic hiển thị câu hỏi
         let questionDisplay = {}; 
-        let options = [];         
+        let options = [];          
 
-        // Dạng 2: Âm -> Kanji
+        // Dạng 2: Âm -> Chữ (Nghe âm chọn mặt chữ)
         if (currentItem.type === 'quiz_reverse') {
             questionDisplay = {
-                main: targetInfo.sound,
-                sub: targetInfo.meaning,
+                main: targetInfo.sound, // Romaji hoặc Âm Hán Việt
+                // --- SỬA: Chỉ hiện nghĩa nếu là Kanji ---
+                sub: targetInfo.type === 'kanji' ? targetInfo.meaning : null, 
                 isKanji: false 
             };
             options = [
@@ -1442,20 +1422,28 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                 ...distractors.map(d => ({ label: d, correct: false, isKanji: true }))
             ];
         } 
-        // Dạng 1: Kanji -> Âm
+        // Dạng 1: Chữ -> Âm (Nhìn mặt chữ chọn âm)
         else {
             questionDisplay = {
                 main: targetChar,
-                sub: targetInfo.meaning, 
+                // --- SỬA: Chỉ hiện nghĩa nếu là Kanji ---
+                sub: targetInfo.type === 'kanji' ? targetInfo.meaning : null, 
                 isKanji: true
             };
-            const getLabel = (info) => info.sound; 
+            
+            // Hàm lấy nhãn (label) an toàn
+            const getLabel = (charKey) => {
+                const info = getCharInfo(charKey);
+                return info ? info.sound : '---';
+            };
+
             options = [
-                { label: getLabel(targetInfo), correct: true, isKanji: false },
-                ...distractors.map(d => ({ label: getLabel(dbData.KANJI_DB[d]), correct: false, isKanji: false }))
+                { label: targetInfo.sound, correct: true, isKanji: false },
+                ...distractors.map(d => ({ label: getLabel(d), correct: false, isKanji: false }))
             ];
         }
 
+        // Trộn vị trí đáp án
         for (let i = options.length - 1; i > 0; i--) { 
             const j = Math.floor(Math.random() * (i + 1)); 
             [options[i], options[j]] = [options[j], options[i]]; 
@@ -1463,15 +1451,18 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
 
         return { targetChar, targetInfo, options, questionDisplay, quizType: currentItem.type };
     }, [queue, currentIndex, dbData]);
-
-    // 3. SINH DỮ LIỆU MATCH
+    
+  // 3. SINH DỮ LIỆU MATCH
     useEffect(() => {
         if (queue[currentIndex]?.type === 'match') {
             const chars = queue[currentIndex].chars;
             let cards = [];
             chars.forEach((c, idx) => {
-                cards.push({ id: `k-${idx}`, content: c, type: 'kanji', matchId: idx });
-                cards.push({ id: `m-${idx}`, content: dbData.KANJI_DB[c].sound, type: 'meaning', matchId: idx });
+                const info = getCharInfo(c); // SỬA: Dùng hàm getCharInfo
+                if (info) {
+                    cards.push({ id: `k-${idx}`, content: c, type: 'kanji', matchId: idx });
+                    cards.push({ id: `m-${idx}`, content: info.sound, type: 'meaning', matchId: idx });
+                }
             });
             cards.sort(() => Math.random() - 0.5);
             setMatchCards(cards); setMatchedIds([]); setSelectedCardId(null); setWrongPairIds([]);
@@ -1495,9 +1486,10 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
         }
     };
 
-    const checkPenalty = () => {
+  const checkPenalty = () => {
         if (!wrongItem) return;
         const inputClean = removeAccents(penaltyInput.trim().toLowerCase());
+        // SỬA: Lấy sound từ targetInfo đã có sẵn (đã được xử lý bởi getCharInfo ở trên)
         const targetClean = removeAccents(wrongItem.targetInfo.sound.toLowerCase());
 
         if (inputClean === targetClean) {
@@ -1512,7 +1504,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
             setTimeout(() => setPenaltyFeedback(null), 500); 
         }
     };
-
+    
     const handleCardClick = (card) => {
         if (matchedIds.includes(card.id) || wrongPairIds.length > 0) return;
         
