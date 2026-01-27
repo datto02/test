@@ -1658,7 +1658,7 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
 
                                     {/* Text Phụ (Nghĩa) - FIX LỖI: Chỉ hiện nếu có nghĩa (tránh crash với Hiragana) */}
                                     {currentQuizData.questionDisplay.sub && (
-                                        <div className="absolute bottom-6 px-4 py-1 bg-gray-50 text-gray-400 text-[10px] font-bold uppercase rounded-full border border-gray-100 max-w-[90%] truncate">
+                                        <div className="absolute bottom-6 px-4 py-1.5 bg-gray-50 text-gray-500 text-sm font-bold uppercase rounded-full border border-gray-100 max-w-[90%] truncate">
                                             {currentQuizData.questionDisplay.sub}
                                         </div>
                                     )}
