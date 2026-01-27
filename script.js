@@ -1639,7 +1639,7 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
                         <div className="text-white/40 text-[10px] font-bold min-w-[30px] text-center">
                             {finishedCount}/{totalKanji}
                         </div>
-                        <button onClick={onClose} className="text-white/40 hover:text-red-500 transition-colors font-black text-lg leading-none ml-1">
+                        <button onClick={onClose} className="text-white/40 md:hover:text-red-500 transition-all font-black text-3xl leading-none p-3 -mr-3 active:scale-110 flex items-center justify-center">
                             ✕
                         </button>
                     </div>
