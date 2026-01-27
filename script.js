@@ -1382,17 +1382,32 @@ const getCharInfo = (c) => {
         else if (targetInfo.type === 'katakana') {
             pool = Object.keys(dbData.ALPHABETS.katakana);
         } 
-        else {
-            // --- LOGIC KANJI (GIỮ NGUYÊN LOGIC CŨ CỦA BẠN) ---
-            pool = Object.keys(dbData.KANJI_DB); 
+       else {
+            // --- LOGIC KANJI ---
+            pool = Object.keys(dbData.KANJI_DB); // Mặc định lấy toàn bộ
+            let isLevelFound = false; // 1. Tạo biến cờ hiệu
+
             if (dbData.KANJI_LEVELS) {
                 for (const [level, chars] of Object.entries(dbData.KANJI_LEVELS)) {
                     if (chars.includes(targetChar)) {
                         const levelPool = chars.filter(c => dbData.KANJI_DB[c]);
-                        if (levelPool.length >= 4) pool = levelPool;
+                        if (levelPool.length >= 4) {
+                             pool = levelPool;
+                             isLevelFound = true; // 2. Đánh dấu là đã tìm thấy trong N5-N1
+                        }
                         break;
                     }
                 }
+            }
+
+            // 3. --- ĐOẠN CODE MỚI CẦN THÊM CHO BỘ THỦ ---
+            // Nếu không thuộc N1-N5 (tức là Bộ thủ), lấy pool từ chính danh sách đang học (biến text)
+            if (!isLevelFound) {
+                 const inputChars = Array.from(new Set(text.split(''))).filter(c => dbData.KANJI_DB[c]);
+                 // Chỉ lấy từ file bộ thủ nếu danh sách đủ dài (>= 4 chữ) để tạo đáp án nhiễu
+                 if (inputChars.length >= 4) {
+                     pool = inputChars;
+                 }
             }
         }
 
@@ -1450,7 +1465,7 @@ const getCharInfo = (c) => {
         }
 
         return { targetChar, targetInfo, options, questionDisplay, quizType: currentItem.type };
-    }, [queue, currentIndex, dbData]);
+    }, [queue, currentIndex, dbData, text]);
     
   // 3. SINH DỮ LIỆU MATCH
     useEffect(() => {
