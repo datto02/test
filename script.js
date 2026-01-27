@@ -1562,19 +1562,8 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
     const triggerConfetti = React.useCallback(() => { if (typeof confetti === 'undefined') return; const count = 200; const defaults = { origin: { y: 0.6 }, zIndex: 1500 }; function fire(particleRatio, opts) { confetti({ ...defaults, ...opts, particleCount: Math.floor(count * particleRatio) }); } fire(0.25, { spread: 26, startVelocity: 55 }); fire(0.2, { spread: 60 }); fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 }); fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 }); fire(0.1, { spread: 120, startVelocity: 45 }); }, []);
     useEffect(() => { if (gameState === 'finished' && isOpen) { triggerConfetti(); } }, [gameState, isOpen, triggerConfetti]);
 // --- FIX LỖI: THÊM HÀM XỬ LÝ HỌC LẠI TỪ ĐẦU ---
-    const handleRestart = () => {
-        // 1. Reset các trạng thái về ban đầu
-        setGameState('loading');
-        setFinishedCount(0);
-        setWrongItem(null);
-        setPenaltyInput('');
-        setMatchedIds([]);
-        setWrongPairIds([]);
-        setSelectedIdx(null);
-        setIsChecking(false);
-
-const handleRestart = () => {
-    // 1. Reset các trạng thái phụ về giá trị ban đầu ngay lập tức
+  const handleRestart = () => {
+    // 1. Dọn dẹp các state cũ (React sẽ gom các lệnh này lại)
     setFinishedCount(0);
     setWrongItem(null);
     setPenaltyInput('');
@@ -1583,20 +1572,14 @@ const handleRestart = () => {
     setSelectedIdx(null);
     setIsChecking(false);
 
-    // 2. Tính toán lại dữ liệu hàng chờ (Queue) mới ngay tại đây
+    // 2. Tính toán dữ liệu mới (Chạy cực nhanh, không lo lag)
     let validChars = Array.from(new Set(text.split('').filter(c => getCharInfo(c))));
     validChars = shuffleArray(validChars);
 
-    if (validChars.length === 0) { 
-        onClose(); 
-        return; 
-    }
+    if (validChars.length === 0) return onClose();
 
-    setTotalKanji(validChars.length);
-    
     let newQueue = [];
     const CHUNK_SIZE = 6; 
-
     for (let i = 0; i < validChars.length; i += CHUNK_SIZE) {
         const chunk = validChars.slice(i, i + CHUNK_SIZE);
         chunk.forEach(char => newQueue.push({ type: 'quiz_sound', char }));
@@ -1604,13 +1587,11 @@ const handleRestart = () => {
         chunk.forEach(char => newQueue.push({ type: 'quiz_reverse', char }));
     }
 
-    // 3. CẬP NHẬT TẤT CẢ TRONG MỘT LƯỢT RENDER
-    // Không set 'loading' nữa, mà chuyển thẳng sang kiểu game đầu tiên
+    // 3. Cập nhật dữ liệu và nhảy thẳng vào Game
+    // Không set 'loading', không setTimeout!
     setQueue(newQueue);
     setCurrentIndex(0);
-    setGameState(newQueue[0].type); // Chuyển trực tiếp sang Quiz hoặc Match
-
-    // Loại bỏ hoàn toàn setTimeout 50ms
+    setGameState(newQueue[0].type); 
 };
 // --- PHẦN RENDER GIAO DIỆN (GIỮ NGUYÊN UI, CHỈ FIX LỖI LOGIC) ---
     if (!isOpen) return null;
