@@ -1373,7 +1373,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
 const currentQuizData = useMemo(() => {
     const currentItem = queue[currentIndex];
     if (!currentItem || !['quiz_sound', 'quiz_reverse'].includes(currentItem.type)) return null;
-    
+
     const targetChar = currentItem.char;
     const targetInfo = getCharInfo(targetChar);
     if (!targetInfo) return null;
@@ -1381,7 +1381,7 @@ const currentQuizData = useMemo(() => {
     // 1. Lấy danh sách toàn bộ chữ người dùng đã nhập vào (đã lọc trùng và hợp lệ)
     const userChars = Array.from(new Set(text.split('').filter(c => getCharInfo(c))));
 
-   // 2. Xác định "Bể bơi" (Pool) để lấy đáp án nhiễu
+    // 2. Xác định "Bể bơi" (Pool) để lấy đáp án nhiễu
     let distractorPool = [];
 
     // ƯU TIÊN 1: Nếu người dùng nhập >= 4 chữ, lấy từ danh sách của người dùng
@@ -1411,47 +1411,30 @@ const currentQuizData = useMemo(() => {
         }
     }
 
-    // 3. Chọn ra 3 đáp án nhiễu (FIX LỖI BACKUP CÙNG LOẠI)
+    // 3. Chọn ra 3 đáp án nhiễu (Dọn dẹp lại logic chọn và backup cùng loại)
     const distractors = [];
-    const shuffledPool = shuffleArray(distractorPool.filter(c => c !== targetChar));
-    
+    const filteredPool = distractorPool.filter(c => c !== targetChar);
+    const shuffledPool = shuffleArray(filteredPool);
+
     for (let i = 0; i < 3; i++) {
         if (shuffledPool[i]) {
             distractors.push(shuffledPool[i]);
         } else {
-            // FIX TẠI ĐÂY: Backup phải cùng loại với targetChar để không bị lẫn Hiragana vào Kanji
+            // Backup cùng loại nếu pool chính không đủ 3 chữ
             let backupSource = [];
             if (targetInfo.type === 'hiragana') backupSource = Object.keys(dbData.ALPHABETS.hiragana);
             else if (targetInfo.type === 'katakana') backupSource = Object.keys(dbData.ALPHABETS.katakana);
             else backupSource = Object.keys(dbData.KANJI_DB);
 
             const backupChar = backupSource.find(c => c !== targetChar && !distractors.includes(c));
-            distractors.push(backupChar);
-        }
-    }
-            }
+            if (backupChar) distractors.push(backupChar);
         }
     }
 
-    // 3. Chọn ra 3 đáp án nhiễu từ Pool đã xác định
-    const distractors = [];
-    const shuffledPool = shuffleArray(distractorPool.filter(c => c !== targetChar));
-    
-    // Bốc 3 chữ, nếu Pool vẫn thiếu (trường hợp hy hữu) thì bốc từ KANJI_DB cho đủ
-    for (let i = 0; i < 3; i++) {
-        if (shuffledPool[i]) {
-            distractors.push(shuffledPool[i]);
-        } else {
-            // Backup: Lấy đại một chữ trong DB nếu pool bị cạn
-            const backupChar = Object.keys(dbData.KANJI_DB).find(c => c !== targetChar && !distractors.includes(c));
-            distractors.push(backupChar);
-        }
-    }
-
-    // 4. Tạo Options dựa trên loại bài tập (Dữ liệu cũ của bác)
+    // 4. Tạo Options dựa trên loại bài tập
     let options = [];
     if (currentItem.type === 'quiz_reverse') {
-        // BÀI TRẮC NGHIỆM SỐ 2: CHỌN MẶT CHỮ (Cái bác đang cần)
+        // BÀI TRẮC NGHIỆM SỐ 2: CHỌN MẶT CHỮ
         options = [
             { label: targetChar, correct: true, isKanji: true },
             ...distractors.map(d => ({ label: d, correct: false, isKanji: true }))
@@ -1465,10 +1448,8 @@ const currentQuizData = useMemo(() => {
         ];
     }
 
-    // 5. Trộn đáp án (Shuffle)
+    // 5. Trộn đáp án và cấu hình hiển thị
     options = shuffleArray(options);
-
-    // 6. Cấu hình hiển thị câu hỏi
     const questionDisplay = {
         main: currentItem.type === 'quiz_reverse' ? targetInfo.sound : targetChar,
         sub: targetInfo.type === 'kanji' ? targetInfo.meaning : null,
