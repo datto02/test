@@ -1215,7 +1215,7 @@ return (
                     </p>
                     <p className="flex items-center gap-2">
                         <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">3</span>
-                        <span>Tạo nhanh <span className="font-bold">Flashcard</span> trong phần "tiện ích".</span>
+                        <span>Chế độ <span className="font-bold">HỌC, FLASHCARD</span> trong phần "tiện ích".</span>
                     </p>
                     <p className="flex items-center gap-2">
                         <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">4</span>
