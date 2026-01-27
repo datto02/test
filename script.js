@@ -1240,6 +1240,7 @@ return (
 const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) => {
     const [queue, setQueue] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    // Khởi tạo là loading để tránh hiện màn hình kết thúc cũ
     const [gameState, setGameState] = useState('loading'); 
     
     // State Tiến độ
@@ -1274,44 +1275,69 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
         return newArr;
     };
 
-    // 1. KHỞI TẠO DỮ LIỆU (CẬP NHẬT LOGIC DẠNG 2)
+    // --- HÀM TÍNH TOÁN CỠ CHỮ TỰ ĐỘNG (Auto-scale) ---
+    const getDynamicFontSize = (text, type = 'normal') => {
+        const len = text ? text.length : 0;
+        
+        // 1. Dành cho Tiêu đề to (Quiz 2 - Âm Hán Việt)
+        if (type === 'title') {
+             if (len > 12) return 'text-3xl'; // Rất dài -> Nhỏ
+             if (len > 8) return 'text-4xl';  // Dài -> Vừa
+             if (len > 4) return 'text-5xl';  // Trung bình -> To
+             return 'text-6xl';               // Ngắn -> Rất to (Mặc định)
+        }
+
+        // 2. Dành cho Nút bấm (Button)
+        if (type === 'button') {
+            if (len > 15) return 'text-[9px]';  // Cực dài -> Rất nhỏ
+            if (len > 10) return 'text-[10px]'; // Dài -> Nhỏ
+            if (len > 6) return 'text-[11px]';  // Hơi dài -> Hơi nhỏ
+            return 'text-sm';                   // Ngắn -> Chuẩn (Giữ nguyên)
+        }
+        return '';
+    };
+
+    // 1. KHỞI TẠO DỮ LIỆU
     useEffect(() => {
         if (isOpen && text && dbData) {
+            // [FIX LỖI] Reset game state ngay lập tức khi mở
+            setGameState('loading');
+            setFinishedCount(0);
+
             let validChars = Array.from(new Set(text.split('').filter(c => dbData.KANJI_DB && dbData.KANJI_DB[c])));
             validChars = shuffleArray(validChars); 
 
             if (validChars.length === 0) { alert("Chưa có dữ liệu Kanji để học!"); onClose(); return; }
 
             setTotalKanji(validChars.length);
-            setFinishedCount(0); 
-
+            
             let newQueue = [];
             const CHUNK_SIZE = 6; 
 
             for (let i = 0; i < validChars.length; i += CHUNK_SIZE) {
                 const chunk = validChars.slice(i, i + CHUNK_SIZE);
-                
-                // Dạng 1: Nhìn Kanji đoán Âm/Nghĩa
                 chunk.forEach(char => newQueue.push({ type: 'quiz_sound', char }));
-                
-                // Game ghép thẻ
                 if (chunk.length >= 2) newQueue.push({ type: 'match', chars: chunk });
-                
-                // Dạng 2 (MỚI): Nhìn Âm/Nghĩa đoán Kanji
                 chunk.forEach(char => newQueue.push({ type: 'quiz_reverse', char })); 
             }
 
             setQueue(newQueue); 
             setCurrentIndex(0); 
-            setGameState(newQueue[0].type); 
+            
+            // Set state sau khi đã tính toán xong queue
+            setTimeout(() => {
+                if (newQueue.length > 0) setGameState(newQueue[0].type);
+            }, 50);
+
             setPenaltyInput(''); 
             setMatchedIds([]);
             setWrongPairIds([]);
         }
     }, [isOpen, text, dbData]);
 
-    // Hàm Restart (Cũng cập nhật logic tương tự)
+    // Hàm Restart
     const handleRestart = () => {
+        setGameState('loading'); // Reset trạng thái để ẩn màn hình kết thúc
         setQueue([]);
         setFinishedCount(0); 
         setTimeout(() => {
@@ -1325,7 +1351,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                 const chunk = validChars.slice(i, i + CHUNK_SIZE);
                 chunk.forEach(char => newQueue.push({ type: 'quiz_sound', char }));
                 if (chunk.length >= 2) newQueue.push({ type: 'match', chars: chunk });
-                chunk.forEach(char => newQueue.push({ type: 'quiz_reverse', char })); // Dạng 2 mới
+                chunk.forEach(char => newQueue.push({ type: 'quiz_reverse', char })); 
             }
             setQueue(newQueue); 
             setCurrentIndex(0); 
@@ -1336,36 +1362,32 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
         }, 100);
     };
 
-    // 2. SINH DỮ LIỆU QUIZ (XỬ LÝ 2 DẠNG BÀI)
+    // 2. SINH DỮ LIỆU QUIZ
     const currentQuizData = useMemo(() => {
         const currentItem = queue[currentIndex];
-        // Chấp nhận cả quiz_reverse
         if (!currentItem || !['quiz_sound', 'quiz_reverse'].includes(currentItem.type)) return null;
         
         const targetChar = currentItem.char;
         const targetInfo = dbData.KANJI_DB[targetChar];
         const allKanji = Object.keys(dbData.KANJI_DB);
         
-        // Tạo danh sách đáp án nhiễu
         const distractors = [];
         while (distractors.length < 3) {
             const r = allKanji[Math.floor(Math.random() * allKanji.length)];
             if (r !== targetChar && !distractors.includes(r)) distractors.push(r);
         }
 
-        let questionDisplay = {}; // Nội dung hiển thị trên thẻ câu hỏi
-        let options = [];         // Danh sách nút đáp án
+        let questionDisplay = {}; 
+        let options = [];         
 
         // --- DẠNG 2: NHÌN ÂM ĐOÁN KANJI (REVERSE) ---
         if (currentItem.type === 'quiz_reverse') {
-            // Câu hỏi: Âm Hán Việt + Nghĩa
             questionDisplay = {
                 main: targetInfo.sound,
                 sub: targetInfo.meaning,
-                isKanji: false // Để chỉnh font chữ
+                isKanji: false 
             };
 
-            // Đáp án: Các chữ Kanji
             options = [
                 { label: targetChar, correct: true, isKanji: true },
                 ...distractors.map(d => ({ label: d, correct: false, isKanji: true }))
@@ -1373,17 +1395,15 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
         } 
         // --- DẠNG 1: NHÌN KANJI ĐOÁN ÂM (SOUND) ---
         else {
-            // Câu hỏi: Chữ Kanji
             questionDisplay = {
                 main: targetChar,
-                sub: targetInfo.meaning, // Gợi ý nhỏ (nếu cần)
+                sub: targetInfo.meaning, 
                 isKanji: true
             };
 
-            // Đáp án: Âm Hán Việt (+ Nghĩa rút gọn)
+            // [YÊU CẦU] CHỈ LẤY ÂM HÁN VIỆT (Bỏ nghĩa đi để khó hơn chút)
             const getLabel = (info) => {
-                 const shortMeaning = info.meaning ? info.meaning.split(',')[0] : '';
-                 return `${info.sound} (${shortMeaning})`;
+                 return info.sound; 
             };
 
             options = [
@@ -1392,7 +1412,6 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
             ];
         }
 
-        // Trộn đáp án
         for (let i = options.length - 1; i > 0; i--) { 
             const j = Math.floor(Math.random() * (i + 1)); 
             [options[i], options[j]] = [options[j], options[i]]; 
@@ -1401,7 +1420,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
         return { targetChar, targetInfo, options, questionDisplay, quizType: currentItem.type };
     }, [queue, currentIndex, dbData]);
 
-    // 3. SINH DỮ LIỆU MATCH (GIỮ NGUYÊN)
+    // 3. SINH DỮ LIỆU MATCH
     useEffect(() => {
         if (queue[currentIndex]?.type === 'match') {
             const chars = queue[currentIndex].chars;
@@ -1417,7 +1436,6 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
 
     const handleAnswer = (isCorrect, itemData) => {
         if (isCorrect) {
-            // Nếu làm đúng dạng đảo ngược (khó hơn) thì tính là hoàn thành
             if (itemData.quizType === 'quiz_reverse') {
                 setFinishedCount(prev => prev + 1);
             }
@@ -1425,7 +1443,6 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
         } else {
             setWrongItem(itemData); 
             setGameState('penalty');
-            // Phạt: Chèn lại câu hỏi này vào sau vài lượt nữa
             const currentQ = queue[currentIndex];
             const nextQ = [...queue];
             const insertIndex = Math.min(currentIndex + 5, nextQ.length);
@@ -1491,6 +1508,9 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
 
     if (!isOpen) return null;
 
+    // Tránh render nội dung cũ nếu đang loading
+    if (gameState === 'loading') return null;
+
     const visualPercent = queue.length > 0 ? ((currentIndex + 1) / queue.length) * 100 : 0;
 
     return (
@@ -1540,27 +1560,34 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                                 {/* HÌNH ẢNH CÂU HỎI (Nền trắng) */}
                                 <div className="bg-white rounded-[2rem] w-64 h-64 flex flex-col items-center justify-center shadow-2xl mb-8 relative animate-in zoom-in-95 duration-300">
                                      
-                                     {/* Text Chính */}
-                                     <div className={`text-center leading-none mb-2 text-gray-800 ${currentQuizData.questionDisplay.isKanji ? "text-8xl font-['Klee_One']" : "text-6xl font-black uppercase tracking-wider"}`}>
+                                     {/* Text Chính (Tự động co dãn) */}
+                                     <div className={`text-center leading-none mb-2 text-gray-800 
+                                        ${currentQuizData.questionDisplay.isKanji 
+                                            ? "text-8xl font-['Klee_One'] -translate-y-4" // Kanji: Dịch lên 1 chút như yêu cầu
+                                            : getDynamicFontSize(currentQuizData.questionDisplay.main, 'title') + " font-black uppercase tracking-wider px-2 break-words" // Âm Hán Việt: Co dãn
+                                        }`}>
                                         {currentQuizData.questionDisplay.main}
                                     </div>
 
                                     {/* Text Phụ (Nghĩa) */}
                                     {currentQuizData.questionDisplay.sub && (
-                                        <div className="absolute bottom-6 px-4 py-1 bg-gray-50 text-gray-400 text-[10px] font-bold uppercase rounded-full border border-gray-100 max-w-[80%] truncate">
+                                        <div className="absolute bottom-6 px-4 py-1 bg-gray-50 text-gray-400 text-[10px] font-bold uppercase rounded-full border border-gray-100 max-w-[90%] truncate">
                                             {currentQuizData.questionDisplay.sub}
                                         </div>
                                     )}
                                 </div>
 
-                                {/* 4 NÚT ĐÁP ÁN (Nằm dưới) */}
+                                {/* 4 NÚT ĐÁP ÁN (Nằm dưới - Tự động co dãn) */}
                                 <div className="grid grid-cols-2 gap-3 w-full">
                                     {currentQuizData.options.map((opt, i) => (
                                         <button 
                                             key={i} 
                                             onClick={() => handleAnswer(opt.correct, currentQuizData)} 
                                             className={`h-14 w-full px-2 bg-white/10 hover:bg-white/20 active:bg-white/30 text-white border border-white/10 rounded-xl font-bold flex items-center justify-center text-center shadow-lg backdrop-blur-sm transition-all active:scale-95
-                                                ${opt.isKanji ? "text-3xl font-['Klee_One']" : "text-xs font-sans"}`}
+                                                ${opt.isKanji 
+                                                    ? "text-3xl font-['Klee_One']" 
+                                                    : getDynamicFontSize(opt.label, 'button') + " font-sans uppercase break-words leading-tight" // Co dãn chữ
+                                                }`}
                                         >
                                             {opt.label}
                                         </button>
@@ -1592,7 +1619,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                             </div>
                         )}
 
-                        {/* --- TRƯỜNG HỢP: MATCHING (Ghép thẻ) --- */}
+                        {/* --- TRƯỜNG HỢP: MATCHING (Ghép thẻ - Co dãn chữ) --- */}
                         {gameState === 'match' && (
                             <div className="w-full flex flex-col items-center justify-center">
                                 {/* Khung bao quanh mỏng (Dashed) */}
@@ -1616,7 +1643,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
                                                         
                                                         ${card.type === 'kanji' 
                                                             ? "font-['Klee_One'] text-3xl"  
-                                                            : "uppercase text-[10px] leading-tight break-words"
+                                                            : getDynamicFontSize(card.content, 'button') + " font-sans uppercase break-words leading-tight" // Co dãn chữ
                                                         }`}
                                                 >
                                                     {card.content}
