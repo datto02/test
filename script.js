@@ -3113,6 +3113,17 @@ TÀI LIỆU HỌC TẬP
         <li>Nên dùng <b>Máy tính (PC/Laptop)</b>.</li>
         <li>Trình duyệt khuyên dùng: <b>Google Chrome</b>.</li>
         <li>Không nên dùng <b>iphone</b>.</li>
+        <li>
+              Hoặc có thể tải file tạo sẵn: 
+              <a 
+                href="https://drive.google.com/drive/folders/1J8psBuUeV8VBUC90gxw5tTNPy050FDha?usp=sharing" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="ml-1 font-bold text-blue-600 underline hover:text-blue-800 transition-colors"
+              >
+                [tại đây]
+              </a>
+            </li>
         </ul>
     </div>
 
