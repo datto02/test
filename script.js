@@ -1282,6 +1282,7 @@ const getCharInfo = (c) => {
     const [selectedCardId, setSelectedCardId] = useState(null);
     const [matchedIds, setMatchedIds] = useState([]);
     const [wrongPairIds, setWrongPairIds] = useState([]);
+    const [answerFeedback, setAnswerFeedback] = useState(null);
 
     // Khóa cuộn trang
     useEffect(() => {
@@ -1484,23 +1485,32 @@ const getCharInfo = (c) => {
         }
     }, [queue, currentIndex, dbData]);
 
-    const handleAnswer = (isCorrect, itemData) => {
-        if (isCorrect) {
-            if (itemData.quizType === 'quiz_reverse') {
-                setFinishedCount(prev => prev + 1);
-            }
-            goNext();
-        } else {
-            setWrongItem(itemData); 
-            setGameState('penalty');
-            const currentQ = queue[currentIndex];
-            const nextQ = [...queue];
-            const insertIndex = Math.min(currentIndex + 5, nextQ.length);
-            nextQ.splice(insertIndex, 0, currentQ);
-            setQueue(nextQ);
-        }
-    };
+   const handleAnswer = (isCorrect, itemData, index) => {
+        // 1. Gán trạng thái để hiển thị màu (Xanh/Đỏ)
+        setAnswerFeedback({ index, isCorrect });
 
+        // 2. Tạm dừng 0.5 giây để người dùng kịp nhìn thấy màu
+        setTimeout(() => {
+            setAnswerFeedback(null); // Reset trạng thái màu
+
+            // 3. Thực hiện logic chuyển câu như cũ
+            if (isCorrect) {
+                if (itemData.quizType === 'quiz_reverse') {
+                    setFinishedCount(prev => prev + 1);
+                }
+                goNext();
+            } else {
+                setWrongItem(itemData); 
+                setGameState('penalty');
+                const currentQ = queue[currentIndex];
+                const nextQ = [...queue];
+                const insertIndex = Math.min(currentIndex + 5, nextQ.length);
+                nextQ.splice(insertIndex, 0, currentQ);
+                setQueue(nextQ);
+            }
+        }, 500); // 500ms delay
+    };
+    
   const checkPenalty = () => {
         if (!wrongItem) return;
         const inputClean = removeAccents(penaltyInput.trim().toLowerCase());
@@ -1631,7 +1641,7 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
                         <div className="text-white/40 text-[10px] font-bold min-w-[30px] text-center">
                             {finishedCount}/{totalKanji}
                         </div>
-                        <button onClick={onClose} className="text-white/40 hover:text-red-500 transition-colors font-black text-lg leading-none ml-1">
+                        className="text-white/40 hover:text-red-500 transition-colors font-black text-2xl leading-none ml-1 p-3 min-w-[44px] flex items-center justify-center active:scale-90"
                             ✕
                         </button>
                     </div>
@@ -1662,24 +1672,34 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
                                     )}
                                 </div>
 
-                                {/* 4 NÚT ĐÁP ÁN */}
+                               {/* 4 NÚT ĐÁP ÁN (ĐÃ SỬA MÀU) */}
                                 <div className="grid grid-cols-2 gap-3 w-full">
-                                    {currentQuizData.options.map((opt, i) => (
-                                        <button 
-                                            key={i} 
-                                            onClick={() => handleAnswer(opt.correct, currentQuizData)} 
-                                            className={`h-14 w-full px-2 bg-white/10 hover:bg-white/20 active:bg-white/30 text-white border border-white/10 rounded-xl font-bold flex items-center justify-center text-center shadow-lg backdrop-blur-sm transition-all active:scale-95
-                                                ${opt.isKanji 
-                                                    ? "text-3xl font-['Klee_One']" 
-                                                    : getDynamicFontSize(opt.label, 'button') + " font-sans uppercase break-words leading-tight" 
-                                                }`}
-                                        >
-                                            {opt.label}
-                                        </button>
-                                    ))}
+                                    {currentQuizData.options.map((opt, i) => {
+                                        // Logic xác định màu sắc
+                                        let btnColorClass = "bg-white/10 md:hover:bg-white/20 active:bg-white/30 border-white/10";
+                                        
+                                        if (answerFeedback && answerFeedback.index === i) {
+                                            if (answerFeedback.isCorrect) btnColorClass = "!bg-green-500 !border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.6)] scale-105 z-10"; // Đúng -> Xanh
+                                            else btnColorClass = "!bg-red-500 !border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)] animate-shake"; // Sai -> Đỏ
+                                        }
+
+                                        return (
+                                            <button 
+                                                key={i} 
+                                                // Truyền thêm index 'i' vào hàm xử lý
+                                                onClick={() => !answerFeedback && handleAnswer(opt.correct, currentQuizData, i)} 
+                                                disabled={!!answerFeedback} // Khóa nút khi đang hiện màu
+                                                className={`h-14 w-full px-2 text-white border rounded-xl font-bold flex items-center justify-center text-center shadow-lg backdrop-blur-sm transition-all active:scale-95 ${btnColorClass}
+                                                    ${opt.isKanji 
+                                                        ? "text-3xl font-['Klee_One']" 
+                                                        : getDynamicFontSize(opt.label, 'button') + " font-sans uppercase break-words leading-tight" 
+                                                    }`}
+                                            >
+                                                {opt.label}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
-                            </>
-                        )}
 
                         {/* --- DẠNG BÀI: PENALTY (Phạt viết lại) --- */}
                         {gameState === 'penalty' && wrongItem && (
