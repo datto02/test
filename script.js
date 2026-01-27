@@ -1633,23 +1633,19 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
                 /* --- TRƯỜNG HỢP 2: ĐANG CHƠI GAME --- */
                 <div className="w-full max-w-sm flex flex-col items-center h-full max-h-[80vh]">
                     
-                   {/* THANH TIẾN ĐỘ */}
-<div className="w-full flex items-center gap-3 mb-6 px-2">
-    <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-        <div className="h-full bg-blue-500 transition-all duration-500 ease-out" style={{ width: `${visualPercent}%` }}></div>
-    </div>
-    <div className="text-white/40 text-[10px] font-bold min-w-[30px] text-center">
-        {finishedCount}/{totalKanji}
-    </div>
-    
-    {/* --- ĐÃ SỬA: THÊM LẠI THẺ BUTTON BỊ THIẾU --- */}
-    <button 
-        onClick={onClose}
-        className="text-white/40 hover:text-red-500 transition-colors font-black text-2xl leading-none ml-1 p-3 min-w-[44px] flex items-center justify-center active:scale-90"
-    >
-        ✕
-    </button>
-</div>
+                    {/* THANH TIẾN ĐỘ */}
+                    <div className="w-full flex items-center gap-3 mb-6 px-2">
+                        <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <div className="h-full bg-blue-500 transition-all duration-500 ease-out" style={{ width: `${visualPercent}%` }}></div>
+                        </div>
+                        <div className="text-white/40 text-[10px] font-bold min-w-[30px] text-center">
+                            {finishedCount}/{totalKanji}
+                        </div>
+                        className="text-white/40 hover:text-red-500 transition-colors font-black text-2xl leading-none ml-1 p-3 min-w-[44px] flex items-center justify-center active:scale-90"
+                            ✕
+                        </button>
+                    </div>
+
                     {/* NỘI DUNG CHÍNH */}
                     <div className="flex-1 w-full flex flex-col items-center justify-center relative">
 
