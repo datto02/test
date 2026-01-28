@@ -1459,6 +1459,7 @@ const currentQuizData = useMemo(() => {
     return { targetChar, targetInfo, options, questionDisplay, quizType: currentItem.type };
 }, [queue, currentIndex, dbData, text]);
     
+    
   // 3. SINH DỮ LIỆU MATCH
     useEffect(() => {
         if (queue[currentIndex]?.type === 'match') {
@@ -1723,7 +1724,7 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
                                     value={penaltyInput} 
                                     onChange={(e) => setPenaltyInput(e.target.value)} 
                                     onKeyDown={(e) => e.key === 'Enter' && checkPenalty()} 
-                                    placeholder="Nhập cách đọc..." 
+                                    placeholder="Nhập âm Hán Việt..." 
                                     className={`w-full p-3 text-center text-base font-bold border-2 rounded-xl outline-none transition-all ${penaltyFeedback === 'incorrect' ? 'border-red-500 bg-red-50' : penaltyFeedback === 'correct' ? 'border-green-500 bg-green-50' : 'border-gray-200 focus:border-blue-500'}`} 
                                 />
                                 <button onClick={checkPenalty} className="w-full mt-3 py-3 bg-gray-900 text-white font-bold rounded-xl active:scale-95 transition-all uppercase text-[10px] tracking-widest">
@@ -2136,12 +2137,48 @@ try {
             }
 
             // 4. Xáo trộn và cắt lấy số lượng cần thiết
-            const shuffled = shuffleString(cleanText); // Hàm shuffleString có sẵn trong code cũ rồi
-            let count = randomCount > 50 ? 50 : randomCount;
-            const selectedChars = shuffled.slice(0, count);
+           // 1. Chuyển chuỗi từ file thành mảng các chữ cái
+        const allChars = Array.from(cleanText);
 
-            // 5. Hiển thị
-            setFilterOptions(prev => ({ ...prev, kanji: true }));
+        // 2. Phân loại: Chữ nào chưa học, chữ nào đã từng học (dựa vào srsData)
+        const unstudiedChars = allChars.filter(char => !srsData[char]);
+        const studiedChars = allChars.filter(char => srsData[char]);
+
+        // 3. Giới hạn số lượng lấy (tối đa 50)
+        const count = randomCount > 50 ? 50 : randomCount;
+
+        let selectedPool = "";
+
+        // Logic ưu tiên:
+        if (unstudiedChars.length >= count) {
+            // NẾU CÒN ĐỦ CHỮ MỚI: Chỉ bốc trong đống chưa học
+            selectedPool = shuffleString(unstudiedChars.join('')).slice(0, count);
+        } 
+        else if (unstudiedChars.length > 0) {
+            // NẾU CHỮ MỚI KHÔNG ĐỦ: Lấy hết chữ mới + bù thêm chữ cũ cho đủ số lượng
+            const neededMore = count - unstudiedChars.length;
+            const extraFromStudied = shuffleString(studiedChars.join('')).slice(0, neededMore);
+            selectedPool = unstudiedChars.join('') + extraFromStudied;
+        } 
+        else {
+            // NẾU ĐÃ HỌC HẾT SẠCH: Lấy ngẫu nhiên bất kỳ chữ nào trong file
+            selectedPool = shuffleString(cleanText).slice(0, count);
+        }
+
+        // 4. Xáo trộn lần cuối để vị trí các chữ xuất hiện ngẫu nhiên
+        const finalResult = shuffleString(selectedPool);
+
+        // --- Cập nhật giao diện ---
+        setFilterOptions(prev => ({ ...prev, kanji: true }));
+        setProgress(30);
+        
+        setTimeout(() => setProgress(100), 300);
+
+        setTimeout(() => {
+            setLocalText(finalResult);
+            onChange({ ...config, text: finalResult });
+            setIsLoading(false);
+        }, 500);
             
             setProgress(30);
             setTimeout(() => setProgress(100), 300);
@@ -2611,6 +2648,21 @@ LÀM SẠCH
                                         />
                                         <span className="text-[10px] font-bold text-gray-400 uppercase">chữ</span>
                                     </div>
+                                          {/* BIỂU TƯỢNG (i) NẰM CUỐI CÙNG */}
+        <div className="group relative cursor-help">
+            <div className="text-gray-400 hover:text-indigo-500 border border-gray-300 rounded-full w-3.5 h-3.5 flex items-center justify-center text-[9px] font-serif font-bold bg-gray-50 transition-colors">i</div>
+            
+            {/* TOOLTIP GIẢI THÍCH (Hiện lên khi di chuột vào) */}
+            <div className="absolute right-0 bottom-full mb-2 w-56 p-2.5 bg-gray-900 text-white text-[10px] rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none shadow-2xl z-[70] leading-relaxed border border-white/10">
+                <div className="font-black text-indigo-400 mb-1 uppercase text-[9px] flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    Học tập thông minh
+                </div>
+                Hệ thống ưu tiên lấy những chữ bạn <b>chưa học Flashcard bao giờ</b>. Nếu đã hết chữ mới, hệ thống sẽ lấy thêm chữ cũ để đủ số lượng yêu cầu.
+                {/* Mũi tên nhỏ trỏ xuống */}
+                <div className="absolute top-full right-1 -mt-1 w-2 h-2 bg-gray-900 rotate-45 border-r border-b border-white/10"></div>
+            </div>
+        </div>      
                                 </div>
                                 <div className="grid grid-cols-5 gap-1.5">
                                     {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
@@ -2995,7 +3047,19 @@ TÀI LIỆU HỌC TẬP
 
             {/* Danh sách tài liệu (Cuộn được nếu dài) */}
             <div className="p-4 space-y-3 overflow-y-auto custom-scrollbar">
-                
+
+                {/* Luyện viết (tạo sẵn) */}
+                <a href="https://drive.google.com/drive/folders/1J8psBuUeV8VBUC90gxw5tTNPy050FDha?usp=sharing" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all group">
+                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-gray-800 truncate group-hover:text-purple-700 pb-1">File tập viết đã tạo sẵn</p>
+                        <p className="text-[10px] text-gray-400">Bảng chữ cái, bộ thủ, kanji</p>
+                    </div>
+                    <svg className="w-4 h-4 text-gray-300 group-hover:text-purple-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+
                 {/* 2139 kanji */}
                 <a href="https://drive.google.com/file/d/1Q3bbd3Aao7R71wemjESHddbvmXWYe542/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all group">
                     <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -3114,14 +3178,14 @@ TÀI LIỆU HỌC TẬP
         <li>Trình duyệt khuyên dùng: <b>Google Chrome</b>.</li>
         <li>Không nên dùng <b>iphone</b>.</li>
         <li>
-              Hoặc có thể tải file tạo sẵn: 
+              Hoặc có thể tải file tạo sẵn 
               <a 
                 href="https://drive.google.com/drive/folders/1J8psBuUeV8VBUC90gxw5tTNPy050FDha?usp=sharing" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="ml-1 font-bold text-blue-600 underline hover:text-blue-800 transition-colors"
+                className="ml-1 font-bold text-green-700 underline hover:text-green-500 transition-colors"
               >
-                [tại đây]
+                ở đây
               </a>
             </li>
         </ul>
