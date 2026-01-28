@@ -2649,7 +2649,7 @@ LÀM SẠCH
                                         <span className="text-[10px] font-bold text-gray-400 uppercase">chữ</span>
                                     </div>
                                           {/* BIỂU TƯỢNG (i) NẰM CUỐI CÙNG */}
-        <div className="group relative cursor-help">
+        <div className="group relative cursor-help ml-auto">
             <div className="text-gray-400 hover:text-indigo-500 border border-gray-300 rounded-full w-3.5 h-3.5 flex items-center justify-center text-[9px] font-serif font-bold bg-gray-50 transition-colors">i</div>
             
             {/* TOOLTIP GIẢI THÍCH (Hiện lên khi di chuột vào) */}
