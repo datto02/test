@@ -225,7 +225,7 @@ const useKanjiReadings = (char, active, dbData) => {
   return readings;
 };
 
-const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
+const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars }) => {
     const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
     const [isHelpOpen, setIsHelpOpen] = React.useState(false);
 
@@ -285,14 +285,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
             setIsHelpOpen(false);
         }
     }, [isOpen]);
-const handleCopyKanji = (chars) => {
-        if (!chars || chars.length === 0) return;
-        const textToCopy = chars.join('');
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            // Hiển thị thông báo nhỏ (tùy chọn)
-            alert(`Đã sao chép ${chars.length} chữ!`);
-        });
-    };
+
    
     const groupedData = React.useMemo(() => {
         const groups = { today: [] }; 
@@ -438,16 +431,19 @@ const handleCopyKanji = (chars) => {
                             <div className="space-y-4">
                                 <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-sm font-black text-orange-600 uppercase">Cần ôn ngay</span>
-                                       <div className="flex items-center gap-2">
-    {/* Nút Copy cho mục hôm nay */}
+                                       <span className="text-sm font-black text-orange-600 uppercase">Cần ôn ngay</span>
+<div className="flex items-center gap-2">
+    {/* --- NÚT DẤU CỘNG (MỚI) --- */}
     {groupedData.today.length > 0 && (
         <button 
-            onClick={() => handleCopyKanji(groupedData.today)}
-            className="text-orange-400 hover:text-orange-600 transition-colors p-1"
-            title="Sao chép toàn bộ Kanji hôm nay"
+            onClick={(e) => {
+                e.stopPropagation();
+                onLoadChars(groupedData.today.join(''));
+            }}
+            className="w-6 h-6 flex items-center justify-center rounded-full bg-white border border-orange-200 text-orange-500 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all active:scale-90 shadow-sm"
+            title="Tạo bài luyện cho các chữ này"
         >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
     )}
     <span className="bg-orange-200 text-orange-700 text-sm font-bold px-1.5 rounded">{groupedData.today.length} chữ</span>
@@ -472,18 +468,21 @@ const handleCopyKanji = (chars) => {
                                         {futureDates.map(date => (
                                             <div key={date} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
                                                 <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
-                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                                        Ngày {date}
-                                                    </span>
-                                                   <div className="flex items-center gap-1.5">
-    {/* Nút Copy cho các ngày tương lai */}
+                                                   <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
+    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+    Ngày {date}
+</span>
+<div className="flex items-center gap-2">
+    {/* --- NÚT DẤU CỘNG (MỚI) --- */}
     <button 
-        onClick={() => handleCopyKanji(groupedData[date])}
-        className="text-gray-400 hover:text-indigo-500 transition-colors p-1"
-        title={`Sao chép Kanji ngày ${date}`}
+        onClick={(e) => {
+            e.stopPropagation();
+            onLoadChars(groupedData[date].join(''));
+        }}
+        className="w-5 h-5 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-400 hover:bg-indigo-500 hover:text-white hover:border-indigo-500 transition-all active:scale-90 shadow-sm"
+        title="Tạo bài luyện cho ngày này"
     >
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
     </button>
     <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 rounded">{groupedData[date].length} chữ</span>
 </div>
@@ -2165,8 +2164,7 @@ try {
                     return;
             }
 
-            // 4. Xáo trộn và cắt lấy số lượng cần thiết
-           // 1. Chuyển chuỗi từ file thành mảng các chữ cái
+            // 1. Chuyển chuỗi từ file thành mảng các chữ cái
         const allChars = Array.from(cleanText);
 
         // 2. Phân loại: Chữ nào chưa học, chữ nào đã từng học (dựa vào srsData)
@@ -2677,7 +2675,7 @@ LÀM SẠCH
                                         />
                                         <span className="text-[10px] font-bold text-gray-400 uppercase">chữ</span>
                                     </div>
-                                          {/* BIỂU TƯỢNG (i) NẰM CUỐI CÙNG */}
+                                                  {/* BIỂU TƯỢNG (i) NẰM CUỐI CÙNG */}
         <div className="group relative cursor-help ml-auto">
             <div className="text-gray-400 hover:text-indigo-500 border border-gray-300 rounded-full w-3.5 h-3.5 flex items-center justify-center text-[9px] font-serif font-bold bg-gray-50 transition-colors">i</div>
             
@@ -2816,7 +2814,7 @@ LÀM SẠCH
             <label className="text-[11px] font-bold text-gray-600">Độ đậm chữ</label>
             <span className="text-[11px] font-black text-indigo-600 bg-indigo-50 px-1.5 rounded">{Math.round(config.traceOpacity * 100)}%</span>
         </div>
-        <input type="range" min="0.05" max="0.5" step="0.05" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.traceOpacity} onChange={(e) => handleChange('traceOpacity', parseFloat(e.target.value))} />
+        <input type="range" min="0.05" max="0.3" step="0.05" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.traceOpacity} onChange={(e) => handleChange('traceOpacity', parseFloat(e.target.value))} />
     </div>
 
     {/* MỤC 3: CỠ CHỮ */}
@@ -2825,7 +2823,7 @@ LÀM SẠCH
             <label className="text-[11px] font-bold text-gray-600">Cỡ chữ</label>
             <span className="text-[11px] font-black text-indigo-600 bg-indigo-50 px-1.5 rounded">{config.fontSize} pt</span>
         </div>
-        <input type="range" min="30" max="40" step="1" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.fontSize} onChange={(e) => handleChange('fontSize', parseInt(e.target.value))} />
+        <input type="range" min="27" max="40" step="1" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.fontSize} onChange={(e) => handleChange('fontSize', parseInt(e.target.value))} />
     </div>
 
     {/* MỤC 4: ĐỘ ĐẬM KHUNG */}
@@ -3444,6 +3442,10 @@ return (
                 onClose={() => setIsReviewListOpen(false)}
                 srsData={srsData}
                 onResetSRS={handleResetAllSRS}
+                onLoadChars={(chars) => {
+        setConfig({ ...config, text: chars }); 
+        setIsReviewListOpen(false);            
+    }}
             />
         </div>
 );
