@@ -285,7 +285,14 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
             setIsHelpOpen(false);
         }
     }, [isOpen]);
-
+const handleCopyKanji = (chars) => {
+        if (!chars || chars.length === 0) return;
+        const textToCopy = chars.join('');
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            // Hiển thị thông báo nhỏ (tùy chọn)
+            alert(`Đã sao chép ${chars.length} chữ!`);
+        });
+    };
    
     const groupedData = React.useMemo(() => {
         const groups = { today: [] }; 
@@ -432,7 +439,19 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                                 <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-sm font-black text-orange-600 uppercase">Cần ôn ngay</span>
-                                        <span className="bg-orange-200 text-orange-700 text-sm font-bold px-1.5 rounded">{groupedData.today.length} chữ</span>
+                                       <div className="flex items-center gap-2">
+    {/* Nút Copy cho mục hôm nay */}
+    {groupedData.today.length > 0 && (
+        <button 
+            onClick={() => handleCopyKanji(groupedData.today)}
+            className="text-orange-400 hover:text-orange-600 transition-colors p-1"
+            title="Sao chép toàn bộ Kanji hôm nay"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        </button>
+    )}
+    <span className="bg-orange-200 text-orange-700 text-sm font-bold px-1.5 rounded">{groupedData.today.length} chữ</span>
+</div>
                                     </div>
                                     {groupedData.today.length > 0 ? (
                                         <div className="flex flex-wrap gap-1">
@@ -457,7 +476,17 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS }) => {
                                                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                                                         Ngày {date}
                                                     </span>
-                                                    <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 rounded">{groupedData[date].length} chữ</span>
+                                                   <div className="flex items-center gap-1.5">
+    {/* Nút Copy cho các ngày tương lai */}
+    <button 
+        onClick={() => handleCopyKanji(groupedData[date])}
+        className="text-gray-400 hover:text-indigo-500 transition-colors p-1"
+        title={`Sao chép Kanji ngày ${date}`}
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    </button>
+    <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 rounded">{groupedData[date].length} chữ</span>
+</div>
                                                 </div>
                                                 <div className="flex flex-wrap gap-1">
                                                     {groupedData[date].map((char, i) => (
