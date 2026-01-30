@@ -1123,6 +1123,21 @@ const HeaderSection = ({ char, paths, loading, failed, config, dbData }) => {
         </div>
     );
 };
+// --- BẮT ĐẦU CODE MỚI BƯỚC 3 ---
+const VocabHeaderSection = ({ word }) => {
+    return (
+        <div className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" style={{ width: '184mm', minWidth: '184mm', maxWidth: '184mm' }}>
+            {/* 1. TỪ VỰNG (To, đậm) */}
+            <span className="font-['Klee_One'] font-bold text-lg leading-none text-black mr-3 whitespace-nowrap">
+                {word}
+            </span>
+
+            {/* 2. Dòng kẻ mờ trang trí */}
+            <div className="flex-1 border-b border-dotted border-gray-300 mb-1 ml-2"></div>
+        </div>
+    );
+};
+// --- KẾT THÚC CODE MỚI BƯỚC 3 ---
 // 2. GridBox (Đã thêm class reference-box và chỉnh Hover xanh nhạt)
 const GridBox = ({ char, type, config, index, svgData, failed, onClick }) => {
 const isReference = type === 'reference';
@@ -1239,9 +1254,68 @@ return (
         </div>
     );
 };
+// --- BẮT ĐẦU CODE MỚI BƯỚC 4 ---
+const VocabWorkbookRow = ({ word, config }) => {
+    const chars = Array.from(word);
+    const wordLength = chars.length;
+    
+    if (wordLength === 0) return null;
 
+    // Logic tính toán: 12 ô chuẩn / (độ dài từ + 1 khoảng trống)
+    const gapSize = 1; 
+    const unitSize = wordLength + gapSize; 
+    const renderBlocks = Array.from({ length: 12 }, (_, i) => i);
+    const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
+
+    return (
+        <div className="flex flex-col w-full px-[8mm] mb-1">
+            <VocabHeaderSection word={word} />
+            
+            <div className="flex border-t border-l w-fit" style={{ borderColor: gridBorderColor }}>
+                {renderBlocks.map((colIndex) => {
+                    const cycleIndex = colIndex % unitSize;
+                    let charToShow = '';
+                    let isReference = false;
+                    let isGap = false;
+
+                    if (cycleIndex < wordLength) {
+                        charToShow = chars[cycleIndex];
+                        // Nếu nằm ở cụm đầu tiên thì là Chữ Mẫu (Reference)
+                        if (colIndex < wordLength) isReference = true; 
+                    } else {
+                        isGap = true;
+                    }
+
+                    return (
+                        <div key={colIndex} className={`relative ${isGap ? 'bg-gray-50/30' : ''}`}>
+                             {!isGap ? (
+                                 <GridBox
+                                    index={colIndex}
+                                    char={charToShow}
+                                    type={isReference ? 'reference' : 'trace'} 
+                                    config={config}
+                                    svgData={null} // Từ vựng không cần SVG animation nét viết
+                                    failed={false}
+                                    // Tắt sự kiện click ở chế độ từ vựng để tránh lỗi popup
+                                    onClick={undefined} 
+                                 />
+                             ) : (
+                                 // Ô khoảng cách (Gap)
+                                 <div 
+                                    className="w-[16mm] h-[16mm] border-r border-b box-border"
+                                    style={{ borderColor: gridBorderColor }}
+                                 />
+                             )}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+// --- KẾT THÚC CODE MỚI BƯỚC 4 ---
     // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
-    const Page = ({ chars, config, dbData }) => {
+    const Page = ({ chars, config, dbData, mode }) => {
 // 1. Hàm Xuất dữ liệu (Tải file về máy)
     const handlePageExport = () => {
         const data = localStorage.getItem('phadao_srs_data');
@@ -1321,18 +1395,30 @@ return (
                 </div>
             </div>
         )}
-
-        {/* DANH SÁCH CÁC DÒNG */}
-        <div className="flex flex-col gap-[4mm]">
-            {chars.map((char, index) => (
-            <WorkbookRow
-                key={`${index}-${char}`}
-                char={char}
-                config={config}
-                dbData={dbData}
-            />
-            ))}
-        </div>
+{/* --- BẮT ĐẦU CODE MỚI BƯỚC 5 (Phần hiển thị) --- */}
+            <div className="flex flex-col gap-[4mm]">
+                {chars.map((item, index) => {
+                    if (mode === 'vocab') {
+                        return (
+                            <VocabWorkbookRow 
+                                key={`vocab-${index}`}
+                                word={item} 
+                                config={config}
+                            />
+                        );
+                    } else {
+                        return (
+                             <WorkbookRow
+                                key={`kanji-${index}`}
+                                char={item}
+                                config={config}
+                                dbData={dbData}
+                            />
+                        );
+                    }
+                })}
+            </div>
+            {/* --- KẾT THÚC CODE MỚI BƯỚC 5 --- */}
 
         {/* Branding Footer */}
         <div className="absolute bottom-[5mm] left-[12.5mm] text-gray-600 text-xs font-sans">
@@ -1873,7 +1959,7 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
     );
 };
 // 5. Sidebar (Phiên bản: Final)
-   const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen }) => {
+   const Sidebar = ({ mode, config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen }) => {
    
 
 // 1. Logic bộ lọc mới
@@ -2115,53 +2201,49 @@ return () => document.removeEventListener("mousedown", handleClickOutside);
         handleChange('text', cleaned); 
     };
 
-    // --- 5. XỬ LÝ NHẬP LIỆU (ĐÃ FIX LỖI IME) ---
-    // --- 5. XỬ LÝ NHẬP LIỆU (REAL-TIME FILTER) ---
-    const handleInputText = (e) => {
+   const handleInputText = (e) => {
         const rawInput = e.target.value;
-
-        // Nếu đang lơ lửng gõ bộ gõ (IME) thì cứ để hiện
-        if (isComposing.current) {
-            setLocalText(rawInput);
-            return;
-        }
+        if (isComposing.current) { setLocalText(rawInput); return; }
         
-        // 1. Lọc ký tự rác (số, icon...)
-        const allowedString = getAllowedRegexString(filterOptions, true);
-        const blockRegex = new RegExp(`[^${allowedString}]`, 'g');
-        let validForInput = rawInput.replace(blockRegex, '');
+        // --- LOGIC MỚI: Kiểm tra mode ---
+        let validForInput = rawInput;
+        if (mode !== 'vocab') {
+            // Nếu là Kanji: Lọc gắt gao như cũ (xóa hết latinh, xuống dòng)
+            const allowedString = getAllowedRegexString(filterOptions, true);
+            const blockRegex = new RegExp(`[^${allowedString}]`, 'g');
+            validForInput = rawInput.replace(blockRegex, '');
+        } 
+        // Nếu là Vocab: Giữ nguyên rawInput (cho phép Enter, Latinh...)
 
-        // 2. LOGIC QUAN TRỌNG: Lọc trùng ngay lập tức
-        if (filterOptions.removeDuplicates) {
+        if (filterOptions.removeDuplicates && mode !== 'vocab') {
+             // Chỉ xóa trùng lặp ở chế độ Kanji
             validForInput = getUniqueChars(validForInput);
         }
 
         setLocalText(validForInput);
-        handleChange('text', validForInput.replace(/[a-zA-Z]/g, ''));
+        handleChange('text', validForInput); // Lưu ý: Ở mode vocab không replace a-zA-Z nữa
     };
-
+       
     const handleCompositionStart = () => {
         isComposing.current = true;
     };
 
     const handleCompositionEnd = (e) => {
         isComposing.current = false;
-        
-        // Lấy toàn bộ nội dung trong ô nhập lúc này
         const rawInput = e.target.value;
         
-        // 1. Lọc rác
-        const allowedString = getAllowedRegexString(filterOptions, true);
-        const blockRegex = new RegExp(`[^${allowedString}]`, 'g');
-        let validForInput = rawInput.replace(blockRegex, '');
-
-        // 2. LOGIC QUAN TRỌNG: Lọc trùng ngay khi chốt chữ
-        if (filterOptions.removeDuplicates) {
-            validForInput = getUniqueChars(validForInput);
+        let validForInput = rawInput;
+        if (mode !== 'vocab') {
+            const allowedString = getAllowedRegexString(filterOptions, true);
+            const blockRegex = new RegExp(`[^${allowedString}]`, 'g');
+            validForInput = rawInput.replace(blockRegex, '');
+             if (filterOptions.removeDuplicates) {
+                validForInput = getUniqueChars(validForInput);
+            }
         }
-
+        
         setLocalText(validForInput);
-        handleChange('text', validForInput.replace(/[a-zA-Z]/g, ''));
+        handleChange('text', validForInput);
     };
 // Thêm tham số type (mặc định là 'kanji')
 const handleLoadFromGithub = async (url, type = 'kanji') => {
@@ -2621,7 +2703,7 @@ LÀM SẠCH
                 </div>
                 <textarea 
                 className={`w-full h-[104px] p-3 pr-1 border border-gray-300 rounded-lg resize-none text-lg bg-white text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner input-scrollbar ${(isWarningMode && !localText) ? 'font-sans' : "font-['Klee_One']"}`}
-                placeholder={getDynamicPlaceholder()} 
+               placeholder={mode === 'vocab' ? "Nhập từ vựng (Mỗi từ 1 dòng, ấn Enter để xuống dòng)..." : getDynamicPlaceholder()} 
                 value={localText} 
                 onChange={handleInputText} 
                 onCompositionStart={handleCompositionStart}
@@ -3336,7 +3418,25 @@ TÀI LIỆU HỌC TẬP
     );
     };
 
-    
+    const ModeToggleButton = ({ mode, setMode }) => {
+    return (
+        <button
+            onClick={() => setMode(prev => prev === 'kanji' ? 'vocab' : 'kanji')}
+            className={`fixed bottom-6 right-6 z-[999] h-14 w-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 border-4 border-white ${
+                mode === 'kanji' 
+                ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-300' 
+                : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-300'
+            }`}
+            title={mode === 'kanji' ? "Chuyển sang chế độ Từ vựng" : "Chuyển về chế độ Kanji"}
+        >
+            <span className="text-2xl font-black text-white leading-none pb-1">
+                {mode === 'kanji' ? '漢' : '語'}
+            </span>
+            {/* Hiệu ứng sóng lan tỏa nhỏ */}
+            <span className="absolute inset-0 rounded-full animate-ping opacity-20 bg-white"></span>
+        </button>
+    );
+};
     const App = () => {
 // --- Các state cũ giữ nguyên ---
 const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
@@ -3346,6 +3446,7 @@ const [isMenuOpen, setIsMenuOpen] = useState(false);
 const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
         const [isLearnGameOpen, setIsLearnGameOpen] = useState(false);
         const [isReviewListOpen, setIsReviewListOpen] = useState(false);
+        const [mode, setMode] = useState('kanji');
         const [srsData, setSrsData] = useState(() => {
     // Tự động lấy dữ liệu cũ từ máy người dùng khi mở web
     const saved = localStorage.getItem('phadao_srs_data');
@@ -3401,16 +3502,36 @@ useEffect(() => {
 }, [config.text]); */
 // ------------------------------
 
-// 3. Logic phân trang (giữ nguyên)
-const pages = useMemo(() => {
-    const contentToShow = (config.text && config.text.trim().length > 0) ? config.text : "日本語"; 
-    const chars = Array.from(contentToShow).filter(c => c.trim().length > 0);
-    const chunks = [];
-    const ROWS_PER_PAGE = 10;
-    for (let i = 0; i < chars.length; i += ROWS_PER_PAGE) { chunks.push(chars.slice(i, i + ROWS_PER_PAGE)); }
-    if (chunks.length === 0) return [[]];
-    return chunks;
-}, [config.text]);
+// --- BẮT ĐẦU CODE MỚI BƯỚC 5 (Logic phân trang) ---
+    const pages = useMemo(() => {
+        if (!config.text || config.text.trim().length === 0) return [[]];
+
+        if (mode === 'vocab') {
+            // --- CHẾ ĐỘ TỪ VỰNG: Tách theo dòng (Enter) ---
+            const lines = config.text.split(/\r?\n/).filter(line => line.trim() !== '');
+            // Mỗi trang 8 dòng từ vựng
+            const ROWS_PER_PAGE_VOCAB = 8; 
+            const chunks = [];
+            for (let i = 0; i < lines.length; i += ROWS_PER_PAGE_VOCAB) {
+                chunks.push(lines.slice(i, i + ROWS_PER_PAGE_VOCAB));
+            }
+            if (chunks.length === 0) return [[]];
+            return chunks;
+
+        } else {
+            // --- CHẾ ĐỘ KANJI CŨ ---
+            const contentToShow = config.text;
+            const charsArr = Array.from(contentToShow).filter(c => c.trim().length > 0);
+            const chunks = [];
+            const ROWS_PER_PAGE = 10;
+            for (let i = 0; i < charsArr.length; i += ROWS_PER_PAGE) { 
+                chunks.push(charsArr.slice(i, i + ROWS_PER_PAGE)); 
+            }
+            if (chunks.length === 0) return [[]];
+            return chunks;
+        }
+    }, [config.text, mode]);
+// --- KẾT THÚC CODE MỚI BƯỚC 5 ---
 
 // 4. Logic in ấn (giữ nguyên)
 const handlePrint = () => {
@@ -3433,8 +3554,11 @@ if (!isDbLoaded) {
 // --- GIAO DIỆN CHÍNH (Khi đã có dữ liệu) ---
 return (
     <div className="min-h-screen flex flex-col md:flex-row print-layout-reset">
+    <ModeToggleButton mode={mode} setMode={setMode} />
     <div className="no-print z-50">
+    
     <Sidebar 
+        mode={mode}
         config={config} onChange={setConfig} onPrint={handlePrint} 
         isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen}
         isConfigOpen={isConfigOpen} setIsConfigOpen={setIsConfigOpen}
@@ -3453,6 +3577,7 @@ return (
     {pages.map((pageChars, index) => (
         <Page 
         key={index} 
+mode={mode}
         chars={pageChars} 
         config={config} 
         
