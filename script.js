@@ -461,37 +461,43 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars, db
 
                         <div className="p-4 overflow-y-auto custom-scrollbar flex-1">
                             <div className="space-y-4">
-                    {/* --- HIỂN THỊ TIẾN ĐỘ --- */}
-        {levelProgress.length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 mb-4">
-                <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-                    Tiến độ học tập
-                </h4>
-                <div className="grid grid-cols-2 gap-2">
-                    {levelProgress.map((item) => {
-                        const style = levelColors[item.level] || levelColors.N5;
-                        return (
-                            <div key={item.level} className={`${style.bg} border ${style.border} rounded-lg p-2.5 flex flex-col justify-center`}>
-                                <div className="flex justify-between items-end mb-1.5">
-                                    <span className={`text-xs font-black ${style.text}`}>{item.level}</span>
-                                    <span className={`text-[10px] font-bold ${style.text} opacity-80`}>
-                                        {item.learned}/{item.total}
-                                    </span>
-                                </div>
-                                {/* Thanh Progress */}
-                                <div className="w-full h-1.5 bg-white/60 rounded-full overflow-hidden">
+                 {/* --- HIỂN THỊ TIẾN ĐỘ (ĐÃ SỬA CO DÃN) --- */}
+                {levelProgress.length > 0 && (
+                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 mb-4">
+                        <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                            Tiến độ học tập
+                        </h4>
+                        
+                        {/* 1. SỬA CONTAINER: Dùng Flexbox để co dãn */}
+                        <div className="flex flex-wrap gap-2">
+                            {levelProgress.map((item) => {
+                                const style = levelColors[item.level] || levelColors.N5;
+                                return (
                                     <div 
-                                        className={`h-full rounded-full ${style.bar} transition-all duration-500`} 
-                                        style={{ width: `${item.percent}%` }}
-                                    ></div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-        )}
+                                        key={item.level} 
+                                        // 2. SỬA ITEM: Thêm flex-1 và min-w-[40%]
+                                        className={`${style.bg} border ${style.border} rounded-lg p-2.5 flex flex-col justify-center flex-1 min-w-[40%]`}
+                                    >
+                                        <div className="flex justify-between items-end mb-1.5">
+                                            <span className={`text-xs font-black ${style.text}`}>{item.level}</span>
+                                            <span className={`text-[10px] font-bold ${style.text} opacity-80`}>
+                                                {item.learned}/{item.total}
+                                            </span>
+                                        </div>
+                                        {/* Thanh Progress */}
+                                        <div className="w-full h-1.5 bg-white/60 rounded-full overflow-hidden">
+                                            <div 
+                                                className={`h-full rounded-full ${style.bar} transition-all duration-500`} 
+                                                style={{ width: `${item.percent}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
                                 <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
                                     <div className="flex items-center justify-between mb-2">
                                        <span className="text-sm font-black text-orange-600 uppercase">Cần ôn ngay</span>
