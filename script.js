@@ -225,10 +225,42 @@ const useKanjiReadings = (char, active, dbData) => {
   return readings;
 };
 
-const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars }) => {
+const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars, dbData }) => {
     const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
     const [isHelpOpen, setIsHelpOpen] = React.useState(false);
+// --- LOGIC MỚI: TÍNH TIẾN ĐỘ THEO CẤP ĐỘ ---
+    const levelProgress = React.useMemo(() => {
+        if (!dbData || !dbData.KANJI_LEVELS) return [];
+        const levels = ['N5', 'N4', 'N3', 'N2', 'N1'];
+        const result = [];
+        
+        levels.forEach(lvl => {
+            const totalChars = dbData.KANJI_LEVELS[lvl] || [];
+            const totalCount = totalChars.length;
+            if (totalCount === 0) return;
 
+            // Đếm số chữ đã có trong srsData (đã học/đang học)
+            const learnedCount = totalChars.filter(char => srsData && srsData[char]).length;
+
+            if (learnedCount > 0) {
+                result.push({ 
+                    level: lvl, 
+                    learned: learnedCount, 
+                    total: totalCount,
+                    percent: Math.round((learnedCount / totalCount) * 100)
+                });
+            }
+        });
+        return result;
+    }, [srsData, dbData]);
+
+    const levelColors = {
+        N5: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', bar: 'bg-emerald-500' },
+        N4: { bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200', bar: 'bg-sky-500' },
+        N3: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', bar: 'bg-orange-500' },
+        N2: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200', bar: 'bg-purple-500' },
+        N1: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', bar: 'bg-rose-500' }
+    };
     const handleExport = () => {
         const data = localStorage.getItem('phadao_srs_data');
         if (!data || data === '{}') {
@@ -429,6 +461,37 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars }) 
 
                         <div className="p-4 overflow-y-auto custom-scrollbar flex-1">
                             <div className="space-y-4">
+                    {/* --- HIỂN THỊ TIẾN ĐỘ --- */}
+        {levelProgress.length > 0 && (
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 mb-4">
+                <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                    Tiến độ học tập
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
+                    {levelProgress.map((item) => {
+                        const style = levelColors[item.level] || levelColors.N5;
+                        return (
+                            <div key={item.level} className={`${style.bg} border ${style.border} rounded-lg p-2.5 flex flex-col justify-center`}>
+                                <div className="flex justify-between items-end mb-1.5">
+                                    <span className={`text-xs font-black ${style.text}`}>{item.level}</span>
+                                    <span className={`text-[10px] font-bold ${style.text} opacity-80`}>
+                                        {item.learned}/{item.total}
+                                    </span>
+                                </div>
+                                {/* Thanh Progress */}
+                                <div className="w-full h-1.5 bg-white/60 rounded-full overflow-hidden">
+                                    <div 
+                                        className={`h-full rounded-full ${style.bar} transition-all duration-500`} 
+                                        style={{ width: `${item.percent}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        )}
                                 <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
                                     <div className="flex items-center justify-between mb-2">
                                        <span className="text-sm font-black text-orange-600 uppercase">Cần ôn ngay</span>
@@ -468,7 +531,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars }) 
                                         {futureDates.map(date => (
                                             <div key={date} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
                                                 <div className="flex items-center justify-between mb-2">
-                                                   <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
+                                                    <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
     Ngày {date}
 </span>
@@ -2823,7 +2886,7 @@ LÀM SẠCH
             <label className="text-[11px] font-bold text-gray-600">Cỡ chữ</label>
             <span className="text-[11px] font-black text-indigo-600 bg-indigo-50 px-1.5 rounded">{config.fontSize} pt</span>
         </div>
-        <input type="range" min="27" max="40" step="1" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.fontSize} onChange={(e) => handleChange('fontSize', parseInt(e.target.value))} />
+        <input type="range" min="27" max="37" step="1" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.fontSize} onChange={(e) => handleChange('fontSize', parseInt(e.target.value))} />
     </div>
 
     {/* MỤC 4: ĐỘ ĐẬM KHUNG */}
@@ -2891,7 +2954,7 @@ LÀM SẠCH
 {/* NÚT ĐẶT LẠI MẶC ĐỊNH - Đã thu gọn */}
 <div className="pt-2 mt-1 border-t border-gray-200"> {/* Giảm padding top từ pt-1 về pt-0 */}
 <button 
-    onClick={() => onChange({ ...config, fontSize: 33, traceCount: 9, traceOpacity: 0.15, gridOpacity: 0.8, displayMode: 'strokes' })} 
+    onClick={() => onChange({ ...config, fontSize: 32, traceCount: 9, traceOpacity: 0.15, gridOpacity: 0.8, displayMode: 'strokes' })} 
    className="w-full py-1.5 text-[10px] font-bold text-red-500 bg-red-50 md:hover:bg-red-500 md:hover:text-white active:bg-red-500 active:text-white rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95"
 >
     {/* Giảm size icon từ 12 xuống 10 */}
@@ -3297,7 +3360,7 @@ const handleResetAllSRS = () => {
 };
 // State cấu hình mặc định
 const [config, setConfig] = useState({ 
-    text: '', fontSize: 33, traceCount: 9, verticalOffset: -3, 
+    text: '', fontSize: 32, traceCount: 9, verticalOffset: -3, 
     traceOpacity: 0.15, guideScale: 1.02, guideX: 0, guideY: 0.5, 
     gridOpacity: 0.8, gridType: 'cross', 
     fontFamily: "'Klee One', 'UD Digi Kyokasho N-R', 'UD Digi Kyokasho', 'UD デジタル 教科書体 N-R', 'UD デジタル 教科書体', cursive",
@@ -3441,10 +3504,11 @@ return (
                 isOpen={isReviewListOpen}
                 onClose={() => setIsReviewListOpen(false)}
                 srsData={srsData}
+                dbData={dbData}
                 onResetSRS={handleResetAllSRS}
                 onLoadChars={(chars) => {
         setConfig({ ...config, text: chars }); 
-        setIsReviewListOpen(false);            
+        setIsReviewListOpen(false);           
     }}
             />
         </div>
