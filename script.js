@@ -617,6 +617,250 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars, db
         </div>
     );
 };
+// --- COMPONENT GAME GHÉP TỪ (SANJI JUKUGO) ---
+const SanjiGameModal = ({ isOpen, onClose }) => {
+    const [level, setLevel] = useState(null); // Chưa chọn level
+    const [targets, setTargets] = useState([]); // 3 từ mục tiêu
+    const [pool, setPool] = useState([]); // 9 ký tự xáo trộn
+    const [slots, setSlots] = useState([null, null, null]); // 3 ô đang ghép
+    const [foundWords, setFoundWords] = useState([]); // Danh sách từ đã tìm thấy
+    const [isWrong, setIsWrong] = useState(false); // Trạng thái sai để rung lắc
+    const [gameStatus, setGameStatus] = useState('menu'); // 'menu', 'playing', 'won'
+
+    // Khóa cuộn khi mở
+    useEffect(() => {
+        if (isOpen) document.body.style.overflow = 'hidden';
+        else document.body.style.overflow = 'unset';
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [isOpen]);
+
+    // Hàm trộn mảng
+    const shuffle = (array) => {
+        const newArr = [...array];
+        for (let i = newArr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+        }
+        return newArr;
+    };
+
+    // Bắt đầu game
+    const startGame = async (selectedLevel) => {
+        try {
+            const res = await fetch('./data/game.json');
+            const data = await res.json();
+            const words = data[selectedLevel.toLowerCase()];
+            
+            if (!words || words.length < 3) {
+                alert("Dữ liệu cấp độ này chưa đủ!");
+                return;
+            }
+
+            // Lấy ngẫu nhiên 3 từ
+            const shuffledWords = shuffle(words).slice(0, 3);
+            setTargets(shuffledWords);
+
+            // Tách thành 9 ký tự
+            let chars = [];
+            shuffledWords.forEach((w, wIdx) => {
+                w.word.split('').forEach((c, cIdx) => {
+                    // Tạo ID duy nhất cho từng ký tự: wordIndex_charIndex
+                    chars.push({ id: `${wIdx}_${cIdx}`, char: c, visible: true });
+                });
+            });
+
+            setPool(shuffle(chars));
+            setFoundWords([]);
+            setSlots([null, null, null]);
+            setLevel(selectedLevel);
+            setGameStatus('playing');
+        } catch (e) {
+            console.error(e);
+            alert("Lỗi tải dữ liệu game!");
+        }
+    };
+
+    // Xử lý khi bấm vào Pool (Chọn chữ)
+    const handlePoolClick = (charObj) => {
+        if (isWrong) { setIsWrong(false); setSlots([null, null, null]); } // Reset nếu đang báo sai
+
+        // Tìm ô trống đầu tiên
+        const emptyIndex = slots.findIndex(s => s === null);
+        if (emptyIndex !== -1) {
+            const newSlots = [...slots];
+            newSlots[emptyIndex] = charObj;
+            setSlots(newSlots);
+
+            // Ẩn chữ đó ở Pool
+            setPool(prev => prev.map(p => p.id === charObj.id ? { ...p, visible: false } : p));
+        }
+    };
+
+    // Xử lý khi bấm vào Slot (Trả chữ về)
+    const handleSlotClick = (index) => {
+        const charObj = slots[index];
+        if (!charObj) return;
+
+        // Trả về Pool
+        setPool(prev => prev.map(p => p.id === charObj.id ? { ...p, visible: true } : p));
+        
+        // Xóa khỏi Slot
+        const newSlots = [...slots];
+        newSlots[index] = null;
+        setSlots(newSlots);
+        setIsWrong(false);
+    };
+
+    // Logic kiểm tra kết quả (Tự động chạy khi Slots đầy)
+    useEffect(() => {
+        // Chỉ kiểm tra khi cả 3 ô đều có chữ
+        if (slots.every(s => s !== null)) {
+            const currentWord = slots.map(s => s.char).join('');
+            
+            // Tìm xem từ ghép được có nằm trong danh sách mục tiêu không
+            const matchWord = targets.find(t => t.word === currentWord);
+
+            if (matchWord) {
+                // --- ĐÚNG ---
+                // 1. Thêm vào danh sách tìm thấy
+                setFoundWords(prev => [...prev, matchWord]);
+                
+                // 2. Clear slots
+                setSlots([null, null, null]);
+
+                // 3. Pool giữ nguyên trạng thái (vì các chữ đó đã visible: false rồi)
+                // Ta có thể xóa hẳn chúng khỏi pool nếu muốn, nhưng ẩn đi là đủ.
+
+                // 4. Kiểm tra chiến thắng
+                if (foundWords.length + 1 === targets.length) {
+                    setTimeout(() => setGameStatus('won'), 500);
+                }
+
+            } else {
+                // --- SAI ---
+                setIsWrong(true);
+                // Hiệu ứng rung, người chơi phải tự bấm xóa hoặc bấm chữ khác
+            }
+        }
+    }, [slots, targets, foundWords]);
+    
+    // Hiệu ứng pháo hoa khi thắng
+    const triggerConfetti = React.useCallback(() => { if (typeof confetti === 'undefined') return; confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); }, []);
+    useEffect(() => { if (gameStatus === 'won') triggerConfetti(); }, [gameStatus, triggerConfetti]);
+
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl p-4 animate-in fade-in select-none">
+            
+            {/* 1. MÀN HÌNH CHỌN LEVEL */}
+            {gameStatus === 'menu' && (
+                <div className="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl animate-in zoom-in-95">
+                    <h2 className="text-2xl font-black text-indigo-700 mb-2 uppercase">Sanji Challenge</h2>
+                    <p className="text-sm text-gray-500 mb-6">Ghép 3 chữ Kanji thành từ có nghĩa.</p>
+                    <div className="grid grid-cols-1 gap-3">
+                        {['N5', 'N4', 'N3', 'N2', 'N1'].map(lvl => (
+                            <button key={lvl} onClick={() => startGame(lvl)} 
+                                className="w-full py-3 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-black rounded-xl transition-all active:scale-95 border border-indigo-100">
+                                CẤP ĐỘ {lvl}
+                            </button>
+                        ))}
+                    </div>
+                    <button onClick={onClose} className="mt-6 text-gray-400 hover:text-gray-600 text-xs font-bold uppercase tracking-widest">Đóng</button>
+                </div>
+            )}
+
+            {/* 2. MÀN HÌNH CHƠI */}
+            {gameStatus === 'playing' && (
+                <div className="w-full max-w-md flex flex-col items-center h-full max-h-[90vh]">
+                    
+                    {/* Header: Nút thoát & Level */}
+                    <div className="w-full flex justify-between items-center mb-4 text-white">
+                        <button onClick={() => setGameStatus('menu')} className="text-white/50 hover:text-white text-xs font-bold uppercase">← Menu</button>
+                        <span className="font-black text-xl text-white/90">LEVEL {level}</span>
+                        <button onClick={onClose} className="text-white/50 hover:text-red-400 text-xl font-bold">✕</button>
+                    </div>
+
+                    {/* KHU VỰC 1: TỪ ĐÃ TÌM THẤY (HIỆN KẾT QUẢ) */}
+                    <div className="w-full bg-white/10 rounded-2xl p-4 mb-6 min-h-[120px] flex flex-col justify-center gap-2 border border-white/10">
+                        {foundWords.length === 0 ? (
+                            <p className="text-center text-white/30 text-sm italic">Hãy tìm 3 từ vựng ẩn giấu...</p>
+                        ) : (
+                            foundWords.map((word, idx) => (
+                                <div key={idx} className="bg-green-500/20 border border-green-500/50 rounded-lg p-2 flex justify-between items-center animate-in slide-in-from-bottom duration-300">
+                                    <div>
+                                        <p className="text-xs text-green-200 font-bold">{word.reading}</p>
+                                        <p className="text-white font-bold">{word.meaning}</p>
+                                    </div>
+                                    <p className="text-2xl font-['Klee_One'] text-white font-black">{word.word}</p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    {/* KHU VỰC 2: Ô GHÉP (ACTIVE SLOT) */}
+                    <div className="mb-8 relative">
+                        {/* Nút xóa nhanh nếu sai */}
+                        {isWrong && (
+                            <div className="absolute -top-8 left-0 right-0 text-center text-red-400 text-xs font-bold animate-pulse">
+                                Sai rồi! Bấm vào ô để sửa
+                            </div>
+                        )}
+                        <div className={`flex gap-3 ${isWrong ? 'animate-shake' : ''}`}>
+                            {slots.map((s, i) => (
+                                <button 
+                                    key={i} 
+                                    onClick={() => handleSlotClick(i)}
+                                    className={`w-20 h-24 rounded-xl border-4 flex items-center justify-center text-5xl font-['Klee_One'] transition-all shadow-lg
+                                        ${s ? 'bg-white border-white text-gray-800' : 'bg-white/5 border-white/20 text-transparent'}
+                                        ${isWrong ? 'border-red-500 bg-red-50 text-red-600' : ''}
+                                    `}
+                                >
+                                    {s ? s.char : ''}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* KHU VỰC 3: KHO CHỮ (POOL) */}
+                    <div className="grid grid-cols-3 gap-3">
+                        {pool.map((p, i) => (
+                            <button 
+                                key={p.id} 
+                                onClick={() => handlePoolClick(p)}
+                                disabled={!p.visible}
+                                className={`w-20 h-20 rounded-xl font-['Klee_One'] text-4xl font-bold flex items-center justify-center transition-all duration-200 shadow-sm
+                                    ${p.visible 
+                                        ? 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200 hover:scale-105 active:scale-95 cursor-pointer' 
+                                        : 'bg-transparent text-transparent border-2 border-white/5 cursor-default'
+                                    }`}
+                            >
+                                {p.char}
+                            </button>
+                        ))}
+                    </div>
+                    
+                </div>
+            )}
+
+            {/* 3. MÀN HÌNH CHIẾN THẮNG */}
+            {gameStatus === 'won' && (
+                <div className="bg-white rounded-[2rem] p-8 w-full max-w-[280px] text-center shadow-2xl animate-in zoom-in-95">
+                    <div className="text-6xl mb-4 animate-bounce">🏆</div>
+                    <h3 className="text-xl font-black text-gray-800 mb-2 uppercase">XUẤT SẮC!</h3>
+                    <p className="text-gray-500 mb-6 text-sm">Bạn đã tìm ra tất cả từ vựng.</p>
+                    <button onClick={() => startGame(level)} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold mb-3 shadow-lg active:scale-95">
+                        CHƠI TIẾP CẤP ĐỘ {level}
+                    </button>
+                    <button onClick={() => setGameStatus('menu')} className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-bold active:scale-95">
+                        CHỌN CẤP ĐỘ KHÁC
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
 // --- BƯỚC 4: FLASHCARD MODAL (ĐÃ GẮN SỰ KIỆN LƯU DỮ LIỆU) ---
 const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, onSrsRestore }) => { 
     const [originalQueue, setOriginalQueue] = React.useState([]);
@@ -1123,21 +1367,6 @@ const HeaderSection = ({ char, paths, loading, failed, config, dbData }) => {
         </div>
     );
 };
-// --- BẮT ĐẦU CODE MỚI BƯỚC 3 ---
-const VocabHeaderSection = ({ word }) => {
-    return (
-        <div className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" style={{ width: '184mm', minWidth: '184mm', maxWidth: '184mm' }}>
-            {/* 1. TỪ VỰNG (To, đậm) */}
-            <span className="font-['Klee_One'] font-bold text-lg leading-none text-black mr-3 whitespace-nowrap">
-                {word}
-            </span>
-
-            {/* 2. Dòng kẻ mờ trang trí */}
-            <div className="flex-1 border-b border-dotted border-gray-300 mb-1 ml-2"></div>
-        </div>
-    );
-};
-// --- KẾT THÚC CODE MỚI BƯỚC 3 ---
 // 2. GridBox (Đã thêm class reference-box và chỉnh Hover xanh nhạt)
 const GridBox = ({ char, type, config, index, svgData, failed, onClick }) => {
 const isReference = type === 'reference';
@@ -1254,68 +1483,9 @@ return (
         </div>
     );
 };
-// --- BẮT ĐẦU CODE MỚI BƯỚC 4 ---
-const VocabWorkbookRow = ({ word, config }) => {
-    const chars = Array.from(word);
-    const wordLength = chars.length;
-    
-    if (wordLength === 0) return null;
 
-    // Logic tính toán: 12 ô chuẩn / (độ dài từ + 1 khoảng trống)
-    const gapSize = 1; 
-    const unitSize = wordLength + gapSize; 
-    const renderBlocks = Array.from({ length: 12 }, (_, i) => i);
-    const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
-
-    return (
-        <div className="flex flex-col w-full px-[8mm] mb-1">
-            <VocabHeaderSection word={word} />
-            
-            <div className="flex border-t border-l w-fit" style={{ borderColor: gridBorderColor }}>
-                {renderBlocks.map((colIndex) => {
-                    const cycleIndex = colIndex % unitSize;
-                    let charToShow = '';
-                    let isReference = false;
-                    let isGap = false;
-
-                    if (cycleIndex < wordLength) {
-                        charToShow = chars[cycleIndex];
-                        // Nếu nằm ở cụm đầu tiên thì là Chữ Mẫu (Reference)
-                        if (colIndex < wordLength) isReference = true; 
-                    } else {
-                        isGap = true;
-                    }
-
-                    return (
-                        <div key={colIndex} className={`relative ${isGap ? 'bg-gray-50/30' : ''}`}>
-                             {!isGap ? (
-                                 <GridBox
-                                    index={colIndex}
-                                    char={charToShow}
-                                    type={isReference ? 'reference' : 'trace'} 
-                                    config={config}
-                                    svgData={null} // Từ vựng không cần SVG animation nét viết
-                                    failed={false}
-                                    // Tắt sự kiện click ở chế độ từ vựng để tránh lỗi popup
-                                    onClick={undefined} 
-                                 />
-                             ) : (
-                                 // Ô khoảng cách (Gap)
-                                 <div 
-                                    className="w-[16mm] h-[16mm] border-r border-b box-border"
-                                    style={{ borderColor: gridBorderColor }}
-                                 />
-                             )}
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
-};
-// --- KẾT THÚC CODE MỚI BƯỚC 4 ---
     // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
-    const Page = ({ chars, config, dbData, mode }) => {
+    const Page = ({ chars, config, dbData }) => {
 // 1. Hàm Xuất dữ liệu (Tải file về máy)
     const handlePageExport = () => {
         const data = localStorage.getItem('phadao_srs_data');
@@ -1395,30 +1565,18 @@ const VocabWorkbookRow = ({ word, config }) => {
                 </div>
             </div>
         )}
-{/* --- BẮT ĐẦU CODE MỚI BƯỚC 5 (Phần hiển thị) --- */}
-            <div className="flex flex-col gap-[4mm]">
-                {chars.map((item, index) => {
-                    if (mode === 'vocab') {
-                        return (
-                            <VocabWorkbookRow 
-                                key={`vocab-${index}`}
-                                word={item} 
-                                config={config}
-                            />
-                        );
-                    } else {
-                        return (
-                             <WorkbookRow
-                                key={`kanji-${index}`}
-                                char={item}
-                                config={config}
-                                dbData={dbData}
-                            />
-                        );
-                    }
-                })}
-            </div>
-            {/* --- KẾT THÚC CODE MỚI BƯỚC 5 --- */}
+
+        {/* DANH SÁCH CÁC DÒNG */}
+        <div className="flex flex-col gap-[4mm]">
+            {chars.map((char, index) => (
+            <WorkbookRow
+                key={`${index}-${char}`}
+                char={char}
+                config={config}
+                dbData={dbData}
+            />
+            ))}
+        </div>
 
         {/* Branding Footer */}
         <div className="absolute bottom-[5mm] left-[12.5mm] text-gray-600 text-xs font-sans">
@@ -1959,7 +2117,7 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
     );
 };
 // 5. Sidebar (Phiên bản: Final)
-   const Sidebar = ({ mode, config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen }) => {
+   const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen, setIsSanjiGameOpen }) => {
    
 
 // 1. Logic bộ lọc mới
@@ -2201,49 +2359,53 @@ return () => document.removeEventListener("mousedown", handleClickOutside);
         handleChange('text', cleaned); 
     };
 
-   const handleInputText = (e) => {
+    // --- 5. XỬ LÝ NHẬP LIỆU (ĐÃ FIX LỖI IME) ---
+    // --- 5. XỬ LÝ NHẬP LIỆU (REAL-TIME FILTER) ---
+    const handleInputText = (e) => {
         const rawInput = e.target.value;
-        if (isComposing.current) { setLocalText(rawInput); return; }
-        
-        // --- LOGIC MỚI: Kiểm tra mode ---
-        let validForInput = rawInput;
-        if (mode !== 'vocab') {
-            // Nếu là Kanji: Lọc gắt gao như cũ (xóa hết latinh, xuống dòng)
-            const allowedString = getAllowedRegexString(filterOptions, true);
-            const blockRegex = new RegExp(`[^${allowedString}]`, 'g');
-            validForInput = rawInput.replace(blockRegex, '');
-        } 
-        // Nếu là Vocab: Giữ nguyên rawInput (cho phép Enter, Latinh...)
 
-        if (filterOptions.removeDuplicates && mode !== 'vocab') {
-             // Chỉ xóa trùng lặp ở chế độ Kanji
+        // Nếu đang lơ lửng gõ bộ gõ (IME) thì cứ để hiện
+        if (isComposing.current) {
+            setLocalText(rawInput);
+            return;
+        }
+        
+        // 1. Lọc ký tự rác (số, icon...)
+        const allowedString = getAllowedRegexString(filterOptions, true);
+        const blockRegex = new RegExp(`[^${allowedString}]`, 'g');
+        let validForInput = rawInput.replace(blockRegex, '');
+
+        // 2. LOGIC QUAN TRỌNG: Lọc trùng ngay lập tức
+        if (filterOptions.removeDuplicates) {
             validForInput = getUniqueChars(validForInput);
         }
 
         setLocalText(validForInput);
-        handleChange('text', validForInput); // Lưu ý: Ở mode vocab không replace a-zA-Z nữa
+        handleChange('text', validForInput.replace(/[a-zA-Z]/g, ''));
     };
-       
+
     const handleCompositionStart = () => {
         isComposing.current = true;
     };
 
     const handleCompositionEnd = (e) => {
         isComposing.current = false;
+        
+        // Lấy toàn bộ nội dung trong ô nhập lúc này
         const rawInput = e.target.value;
         
-        let validForInput = rawInput;
-        if (mode !== 'vocab') {
-            const allowedString = getAllowedRegexString(filterOptions, true);
-            const blockRegex = new RegExp(`[^${allowedString}]`, 'g');
-            validForInput = rawInput.replace(blockRegex, '');
-             if (filterOptions.removeDuplicates) {
-                validForInput = getUniqueChars(validForInput);
-            }
+        // 1. Lọc rác
+        const allowedString = getAllowedRegexString(filterOptions, true);
+        const blockRegex = new RegExp(`[^${allowedString}]`, 'g');
+        let validForInput = rawInput.replace(blockRegex, '');
+
+        // 2. LOGIC QUAN TRỌNG: Lọc trùng ngay khi chốt chữ
+        if (filterOptions.removeDuplicates) {
+            validForInput = getUniqueChars(validForInput);
         }
-        
+
         setLocalText(validForInput);
-        handleChange('text', validForInput);
+        handleChange('text', validForInput.replace(/[a-zA-Z]/g, ''));
     };
 // Thêm tham số type (mặc định là 'kanji')
 const handleLoadFromGithub = async (url, type = 'kanji') => {
@@ -2703,7 +2865,7 @@ LÀM SẠCH
                 </div>
                 <textarea 
                 className={`w-full h-[104px] p-3 pr-1 border border-gray-300 rounded-lg resize-none text-lg bg-white text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner input-scrollbar ${(isWarningMode && !localText) ? 'font-sans' : "font-['Klee_One']"}`}
-               placeholder={mode === 'vocab' ? "Nhập từ vựng (Mỗi từ 1 dòng, ấn Enter để xuống dòng)..." : getDynamicPlaceholder()} 
+                placeholder={getDynamicPlaceholder()} 
                 value={localText} 
                 onChange={handleInputText} 
                 onCompositionStart={handleCompositionStart}
@@ -2876,7 +3038,20 @@ LÀM SẠCH
                     Xáo trộn danh sách hiện tại
                 </button>
             </div>
-
+{/* NÚT GAME SANJI (MỚI) */}
+    <button 
+        onClick={() => {
+            setIsSanjiGameOpen(true);
+            setIsUtilsOpen(false);
+        }}
+        className="w-full py-3 bg-[#8b5cf6] md:hover:bg-[#7c3aed] text-white rounded-xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 group mt-2"
+    >
+        <span className="bg-white p-0.5 rounded flex items-center justify-center group-hover:-rotate-12 transition-transform">
+             {/* Icon 3 ô vuông */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        </span>
+        <span className="text-xs font-black tracking-wide uppercase">GHÉP TỪ 3 CHỮ</span>
+    </button>
             {/* 2. PHẦN HỌC & ÔN TẬP */}
             <div className="pt-0">
                 <div className="flex items-center gap-2 mb-3">
@@ -3418,25 +3593,7 @@ TÀI LIỆU HỌC TẬP
     );
     };
 
-    const ModeToggleButton = ({ mode, setMode }) => {
-    return (
-        <button
-            onClick={() => setMode(prev => prev === 'kanji' ? 'vocab' : 'kanji')}
-            className={`fixed bottom-6 right-6 z-[999] h-14 w-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 border-4 border-white ${
-                mode === 'kanji' 
-                ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-300' 
-                : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-300'
-            }`}
-            title={mode === 'kanji' ? "Chuyển sang chế độ Từ vựng" : "Chuyển về chế độ Kanji"}
-        >
-            <span className="text-2xl font-black text-white leading-none pb-1">
-                {mode === 'kanji' ? '漢' : '語'}
-            </span>
-            {/* Hiệu ứng sóng lan tỏa nhỏ */}
-            <span className="absolute inset-0 rounded-full animate-ping opacity-20 bg-white"></span>
-        </button>
-    );
-};
+    
     const App = () => {
 // --- Các state cũ giữ nguyên ---
 const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
@@ -3444,9 +3601,9 @@ const [showMobilePreview, setShowMobilePreview] = useState(false);
 const [isConfigOpen, setIsConfigOpen] = React.useState(false);
 const [isMenuOpen, setIsMenuOpen] = useState(false);
 const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
+        const [isSanjiGameOpen, setIsSanjiGameOpen] = useState(false);
         const [isLearnGameOpen, setIsLearnGameOpen] = useState(false);
         const [isReviewListOpen, setIsReviewListOpen] = useState(false);
-        const [mode, setMode] = useState('kanji');
         const [srsData, setSrsData] = useState(() => {
     // Tự động lấy dữ liệu cũ từ máy người dùng khi mở web
     const saved = localStorage.getItem('phadao_srs_data');
@@ -3502,36 +3659,16 @@ useEffect(() => {
 }, [config.text]); */
 // ------------------------------
 
-// --- BẮT ĐẦU CODE MỚI BƯỚC 5 (Logic phân trang) ---
-    const pages = useMemo(() => {
-        if (!config.text || config.text.trim().length === 0) return [[]];
-
-        if (mode === 'vocab') {
-            // --- CHẾ ĐỘ TỪ VỰNG: Tách theo dòng (Enter) ---
-            const lines = config.text.split(/\r?\n/).filter(line => line.trim() !== '');
-            // Mỗi trang 8 dòng từ vựng
-            const ROWS_PER_PAGE_VOCAB = 8; 
-            const chunks = [];
-            for (let i = 0; i < lines.length; i += ROWS_PER_PAGE_VOCAB) {
-                chunks.push(lines.slice(i, i + ROWS_PER_PAGE_VOCAB));
-            }
-            if (chunks.length === 0) return [[]];
-            return chunks;
-
-        } else {
-            // --- CHẾ ĐỘ KANJI CŨ ---
-            const contentToShow = config.text;
-            const charsArr = Array.from(contentToShow).filter(c => c.trim().length > 0);
-            const chunks = [];
-            const ROWS_PER_PAGE = 10;
-            for (let i = 0; i < charsArr.length; i += ROWS_PER_PAGE) { 
-                chunks.push(charsArr.slice(i, i + ROWS_PER_PAGE)); 
-            }
-            if (chunks.length === 0) return [[]];
-            return chunks;
-        }
-    }, [config.text, mode]);
-// --- KẾT THÚC CODE MỚI BƯỚC 5 ---
+// 3. Logic phân trang (giữ nguyên)
+const pages = useMemo(() => {
+    const contentToShow = (config.text && config.text.trim().length > 0) ? config.text : "日本語"; 
+    const chars = Array.from(contentToShow).filter(c => c.trim().length > 0);
+    const chunks = [];
+    const ROWS_PER_PAGE = 10;
+    for (let i = 0; i < chars.length; i += ROWS_PER_PAGE) { chunks.push(chars.slice(i, i + ROWS_PER_PAGE)); }
+    if (chunks.length === 0) return [[]];
+    return chunks;
+}, [config.text]);
 
 // 4. Logic in ấn (giữ nguyên)
 const handlePrint = () => {
@@ -3554,11 +3691,8 @@ if (!isDbLoaded) {
 // --- GIAO DIỆN CHÍNH (Khi đã có dữ liệu) ---
 return (
     <div className="min-h-screen flex flex-col md:flex-row print-layout-reset">
-    <ModeToggleButton mode={mode} setMode={setMode} />
     <div className="no-print z-50">
-    
     <Sidebar 
-        mode={mode}
         config={config} onChange={setConfig} onPrint={handlePrint} 
         isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen}
         isConfigOpen={isConfigOpen} setIsConfigOpen={setIsConfigOpen}
@@ -3569,6 +3703,7 @@ return (
         dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống Sidebar
             srsData={srsData}
          onOpenReviewList={() => setIsReviewListOpen(true)}
+             setIsSanjiGameOpen={setIsSanjiGameOpen}
       
     />
     </div>
@@ -3577,7 +3712,6 @@ return (
     {pages.map((pageChars, index) => (
         <Page 
         key={index} 
-mode={mode}
         chars={pageChars} 
         config={config} 
         
@@ -3605,7 +3739,10 @@ mode={mode}
         </div>
     </div>
     )}
-        
+       <SanjiGameModal 
+    isOpen={isSanjiGameOpen}
+    onClose={() => setIsSanjiGameOpen(false)}
+/> 
 <FlashcardModal 
     isOpen={isFlashcardOpen} 
     onClose={() => setIsFlashcardOpen(false)} 
@@ -3620,6 +3757,7 @@ mode={mode}
         localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
     }}
 />
+    
 <LearnGameModal 
     isOpen={isLearnGameOpen}
     onClose={() => setIsLearnGameOpen(false)}
