@@ -617,153 +617,206 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars, db
         </div>
     );
 };
-// --- COMPONENT GAME GHÉP TỪ (SANJI JUKUGO) ---
 const SanjiGameModal = ({ isOpen, onClose }) => {
-    const [level, setLevel] = useState(null); // Chưa chọn level
-    const [targets, setTargets] = useState([]); // 3 từ mục tiêu
-    const [pool, setPool] = useState([]); // 9 ký tự xáo trộn
-    const [slots, setSlots] = useState([null, null, null]); // 3 ô đang ghép
-    const [foundWords, setFoundWords] = useState([]); // Danh sách từ đã tìm thấy
-    const [isWrong, setIsWrong] = useState(false); // Trạng thái sai để rung lắc
-    const [gameStatus, setGameStatus] = useState('menu'); // 'menu', 'playing', 'won'
+    const [level, setLevel] = useState(null);
+    const [targets, setTargets] = useState([]); // 3 từ vựng mục tiêu
+    const [pool, setPool] = useState([]); // 10 ký tự (9 đúng + 1 nhiễu)
+    
+    // Grid: Mảng 3 hàng, mỗi hàng 3 ô. Giá trị là object ký tự hoặc null
+    const [grid, setGrid] = useState([
+        [null, null, null], // Hàng 1
+        [null, null, null], // Hàng 2
+        [null, null, null]  // Hàng 3
+    ]);
 
-    // Khóa cuộn khi mở
-    useEffect(() => {
-        if (isOpen) document.body.style.overflow = 'hidden';
-        else document.body.style.overflow = 'unset';
-        return () => { document.body.style.overflow = 'unset'; };
-    }, [isOpen]);
+    // Trạng thái hoàn thành của từng hàng
+    const [rowStatus, setRowStatus] = useState([false, false, false]); // true = đã đúng (xanh)
 
-    // Hàm trộn mảng
-    const shuffle = (array) => {
-        const newArr = [...array];
-        for (let i = newArr.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
-        }
-        return newArr;
+    const [gameStatus, setGameStatus] = useState('menu'); // 'menu', 'playing', 'summary'
+
+    // --- LOGIC GAME ---
+
+    // 1. Hàm lấy chữ nhiễu (Distractor)
+    const getRandomChar = (allWords, excludeChars) => {
+        // Lấy 1 từ ngẫu nhiên không nằm trong bài chơi hiện tại
+        const randomWord = allWords[Math.floor(Math.random() * allWords.length)];
+        const char = randomWord.word.charAt(Math.floor(Math.random() * randomWord.word.length));
+        // Nếu trùng với chữ đã có thì lấy lại
+        if (excludeChars.includes(char)) return getRandomChar(allWords, excludeChars);
+        return char;
     };
 
-    // Bắt đầu game
+    // 2. Bắt đầu Game
     const startGame = async (selectedLevel) => {
         try {
+            // Reset trạng thái
+            setGrid([[null, null, null], [null, null, null], [null, null, null]]);
+            setRowStatus([false, false, false]);
+            setGameStatus('playing');
+            setLevel(selectedLevel);
+
             const res = await fetch('./data/game.json');
             const data = await res.json();
             const words = data[selectedLevel.toLowerCase()];
-            
-            if (!words || words.length < 3) {
-                alert("Dữ liệu cấp độ này chưa đủ!");
+
+            if (!words || words.length < 4) { // Cần ít nhất 4 từ để lấy 1 từ làm nhiễu
+                alert("Dữ liệu chưa đủ để tạo chữ nhiễu!");
                 return;
             }
 
-            // Lấy ngẫu nhiên 3 từ
-            const shuffledWords = shuffle(words).slice(0, 3);
+            // A. Lấy 3 từ mục tiêu
+            const shuffledWords = [...words].sort(() => 0.5 - Math.random()).slice(0, 3);
             setTargets(shuffledWords);
 
-            // Tách thành 9 ký tự
+            // B. Tạo Pool chữ cái (9 chữ đúng)
             let chars = [];
+            let charValues = []; // Dùng để check trùng chữ nhiễu
             shuffledWords.forEach((w, wIdx) => {
                 w.word.split('').forEach((c, cIdx) => {
-                    // Tạo ID duy nhất cho từng ký tự: wordIndex_charIndex
-                    chars.push({ id: `${wIdx}_${cIdx}`, char: c, visible: true });
+                    chars.push({ 
+                        id: `w${wIdx}_c${cIdx}`, // ID định danh
+                        char: c, 
+                        visible: true 
+                    });
+                    charValues.push(c);
                 });
             });
 
-            setPool(shuffle(chars));
-            setFoundWords([]);
-            setSlots([null, null, null]);
-            setLevel(selectedLevel);
-            setGameStatus('playing');
+            // C. Thêm 1 chữ nhiễu
+            const distractorChar = getRandomChar(words, charValues);
+            chars.push({ id: 'distractor', char: distractorChar, visible: true });
+
+            // D. Trộn Pool
+            setPool(chars.sort(() => 0.5 - Math.random()));
+
         } catch (e) {
             console.error(e);
-            alert("Lỗi tải dữ liệu game!");
+            alert("Lỗi tải dữ liệu!");
         }
     };
 
-    // Xử lý khi bấm vào Pool (Chọn chữ)
+    // 3. Xử lý Click vào Pool (Chọn chữ)
     const handlePoolClick = (charObj) => {
-        if (isWrong) { setIsWrong(false); setSlots([null, null, null]); } // Reset nếu đang báo sai
+        // Tìm ô trống đầu tiên trong các hàng CHƯA HOÀN THÀNH
+        let newGrid = [...grid];
+        let placed = false;
 
-        // Tìm ô trống đầu tiên
-        const emptyIndex = slots.findIndex(s => s === null);
-        if (emptyIndex !== -1) {
-            const newSlots = [...slots];
-            newSlots[emptyIndex] = charObj;
-            setSlots(newSlots);
+        for (let r = 0; r < 3; r++) {
+            if (rowStatus[r]) continue; // Bỏ qua hàng đã đúng
 
-            // Ẩn chữ đó ở Pool
+            for (let c = 0; c < 3; c++) {
+                if (newGrid[r][c] === null) {
+                    newGrid[r][c] = charObj;
+                    placed = true;
+                    break;
+                }
+            }
+            if (placed) break;
+        }
+
+        if (placed) {
+            setGrid(newGrid);
+            // Ẩn chữ trong pool
             setPool(prev => prev.map(p => p.id === charObj.id ? { ...p, visible: false } : p));
         }
     };
 
-    // Xử lý khi bấm vào Slot (Trả chữ về)
-    const handleSlotClick = (index) => {
-        const charObj = slots[index];
+    // 4. Xử lý Click vào Grid (Trả chữ về)
+    const handleGridClick = (r, c) => {
+        if (rowStatus[r]) return; // Hàng đã đúng thì không cho sửa
+        
+        const charObj = grid[r][c];
         if (!charObj) return;
 
-        // Trả về Pool
+        // Trả chữ về pool
         setPool(prev => prev.map(p => p.id === charObj.id ? { ...p, visible: true } : p));
-        
-        // Xóa khỏi Slot
-        const newSlots = [...slots];
-        newSlots[index] = null;
-        setSlots(newSlots);
-        setIsWrong(false);
+
+        // Xóa khỏi grid
+        let newGrid = [...grid];
+        newGrid[r][c] = null;
+        setGrid(newGrid);
     };
 
-    // Logic kiểm tra kết quả (Tự động chạy khi Slots đầy)
+    // 5. Kiểm tra kết quả (Chạy mỗi khi Grid thay đổi)
     useEffect(() => {
-        // Chỉ kiểm tra khi cả 3 ô đều có chữ
-        if (slots.every(s => s !== null)) {
-            const currentWord = slots.map(s => s.char).join('');
-            
-            // Tìm xem từ ghép được có nằm trong danh sách mục tiêu không
-            const matchWord = targets.find(t => t.word === currentWord);
+        if (gameStatus !== 'playing') return;
 
-            if (matchWord) {
-                // --- ĐÚNG ---
-                // 1. Thêm vào danh sách tìm thấy
-                setFoundWords(prev => [...prev, matchWord]);
+        let newRowStatus = [...rowStatus];
+        let hasChange = false;
+
+        // Duyệt qua từng hàng
+        grid.forEach((row, rIdx) => {
+            // Nếu hàng này chưa hoàn thành VÀ đã điền đủ 3 ô
+            if (!newRowStatus[rIdx] && row.every(cell => cell !== null)) {
+                const currentWord = row.map(cell => cell.char).join('');
                 
-                // 2. Clear slots
-                setSlots([null, null, null]);
-
-                // 3. Pool giữ nguyên trạng thái (vì các chữ đó đã visible: false rồi)
-                // Ta có thể xóa hẳn chúng khỏi pool nếu muốn, nhưng ẩn đi là đủ.
-
-                // 4. Kiểm tra chiến thắng
-                if (foundWords.length + 1 === targets.length) {
-                    setTimeout(() => setGameStatus('won'), 500);
+                // Kiểm tra xem từ này có khớp với TỪNG TỪ MỤC TIÊU CỤ THỂ KHÔNG?
+                // Logic: Hàng 1 phải khớp từ 1? Hay hàng nào khớp từ nào cũng được?
+                // Để dễ chơi: Hàng 1 phải khớp targets[0], Hàng 2 khớp targets[1]...
+                // Hoặc: Chỉ cần tạo thành 1 từ CÓ NGHĨA trong list targets là được.
+                
+                // ==> CHỌN CÁCH: Hàng nào khớp targets[rIdx] thì ăn (Sắp xếp theo thứ tự hiển thị ngầm định)
+                // Tuy nhiên, người chơi không biết thứ tự. 
+                // ==> CÁCH TỐT NHẤT: So sánh với BẤT KỲ từ nào trong targets chưa được giải.
+                
+                const matchedTargetIndex = targets.findIndex(t => t.word === currentWord);
+                
+                if (matchedTargetIndex !== -1) {
+                    // Nếu đúng từ (Lưu ý: Nếu targets có 2 từ giống nhau logic này cần sửa chút, nhưng game ghép từ thường không trùng)
+                    // Ở đây ta check đơn giản: Nếu từ ghép ra == targets[rIdx].word thì đúng.
+                    // Nhưng để linh hoạt (người chơi ghép dòng 1 là từ thứ 3), ta cần check chéo.
+                    // TUY NHIÊN, với giao diện này, để đơn giản hóa logic "Điền vào chỗ trống":
+                    // Ta quy định: Người chơi phải ghép đúng từ của dòng đó. Nhưng người chơi ko biết đề bài.
+                    // => Vậy giải pháp là: Nếu ghép thành công BẤT KỲ TỪ NÀO trong 3 từ target -> Row đó xanh.
+                    
+                    // Để tránh bug logic phức tạp: 
+                    // Ta chỉ check: currentWord === targets[rIdx].word
+                    // Nhưng như thế người chơi phải đoán đúng thứ tự -> Rất khó.
+                    
+                    // FIX: Check nếu currentWord nằm trong targets -> OK.
+                    // Nhưng 3 hàng phải là 3 từ khác nhau.
+                    // Do targets đã random vị trí lúc đầu, ta cứ quy định Hàng 1 = targets[0].
+                    // Nếu người chơi ghép từ của targets[1] vào Hàng 1 -> Vẫn tính là SAI (hoặc không phản hồi).
+                    // => Để trải nghiệm tốt nhất: Hàng 1 phải ghép đúng targets[0].
+                    // (Người chơi sẽ thử sai, nếu ghép đủ 3 chữ mà không xanh -> Ghép sai hoặc sai dòng -> Tháo ra ghép lại).
+                    
+                    if (currentWord === targets[rIdx].word) {
+                        newRowStatus[rIdx] = true;
+                        hasChange = true;
+                    }
                 }
+            }
+        });
 
-            } else {
-                // --- SAI ---
-                setIsWrong(true);
-                // Hiệu ứng rung, người chơi phải tự bấm xóa hoặc bấm chữ khác
+        if (hasChange) {
+            setRowStatus(newRowStatus);
+            // Kiểm tra thắng
+            if (newRowStatus.every(s => s === true)) {
+                setTimeout(() => setGameStatus('summary'), 600);
             }
         }
-    }, [slots, targets, foundWords]);
-    
-    // Hiệu ứng pháo hoa khi thắng
-    const triggerConfetti = React.useCallback(() => { if (typeof confetti === 'undefined') return; confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); }, []);
-    useEffect(() => { if (gameStatus === 'won') triggerConfetti(); }, [gameStatus, triggerConfetti]);
+    }, [grid, targets, gameStatus, rowStatus]);
 
+
+    // Hiệu ứng pháo hoa
+    const triggerConfetti = React.useCallback(() => { if (typeof confetti === 'undefined') return; confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } }); }, []);
+    useEffect(() => { if (gameStatus === 'summary') triggerConfetti(); }, [gameStatus, triggerConfetti]);
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-[500] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl p-4 animate-in fade-in select-none">
             
-            {/* 1. MÀN HÌNH CHỌN LEVEL */}
+            {/* MENU CHỌN CẤP ĐỘ */}
             {gameStatus === 'menu' && (
                 <div className="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl animate-in zoom-in-95">
-                    <h2 className="text-2xl font-black text-indigo-700 mb-2 uppercase">Sanji Challenge</h2>
-                    <p className="text-sm text-gray-500 mb-6">Ghép 3 chữ Kanji thành từ có nghĩa.</p>
+                    <h2 className="text-2xl font-black text-indigo-700 mb-2 uppercase">Ghép từ Kanji</h2>
+                    <p className="text-sm text-gray-500 mb-6">Sắp xếp các chữ Kanji thành 3 từ vựng đúng.</p>
                     <div className="grid grid-cols-1 gap-3">
                         {['N5', 'N4', 'N3', 'N2', 'N1'].map(lvl => (
                             <button key={lvl} onClick={() => startGame(lvl)} 
                                 className="w-full py-3 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-black rounded-xl transition-all active:scale-95 border border-indigo-100">
-                                CẤP ĐỘ {lvl}
+                                {lvl}
                             </button>
                         ))}
                     </div>
@@ -771,91 +824,93 @@ const SanjiGameModal = ({ isOpen, onClose }) => {
                 </div>
             )}
 
-            {/* 2. MÀN HÌNH CHƠI */}
+            {/* MÀN HÌNH CHƠI GAME */}
             {gameStatus === 'playing' && (
                 <div className="w-full max-w-md flex flex-col items-center h-full max-h-[90vh]">
-                    
-                    {/* Header: Nút thoát & Level */}
-                    <div className="w-full flex justify-between items-center mb-4 text-white">
+                    {/* Header */}
+                    <div className="w-full flex justify-between items-center mb-8 text-white">
                         <button onClick={() => setGameStatus('menu')} className="text-white/50 hover:text-white text-xs font-bold uppercase">← Menu</button>
                         <span className="font-black text-xl text-white/90">LEVEL {level}</span>
                         <button onClick={onClose} className="text-white/50 hover:text-red-400 text-xl font-bold">✕</button>
                     </div>
 
-                    {/* KHU VỰC 1: TỪ ĐÃ TÌM THẤY (HIỆN KẾT QUẢ) */}
-                    <div className="w-full bg-white/10 rounded-2xl p-4 mb-6 min-h-[120px] flex flex-col justify-center gap-2 border border-white/10">
-                        {foundWords.length === 0 ? (
-                            <p className="text-center text-white/30 text-sm italic">Hãy tìm 3 từ vựng ẩn giấu...</p>
-                        ) : (
-                            foundWords.map((word, idx) => (
-                                <div key={idx} className="bg-green-500/20 border border-green-500/50 rounded-lg p-2 flex justify-between items-center animate-in slide-in-from-bottom duration-300">
-                                    <div>
-                                        <p className="text-xs text-green-200 font-bold">{word.reading}</p>
-                                        <p className="text-white font-bold">{word.meaning}</p>
-                                    </div>
-                                    <p className="text-2xl font-['Klee_One'] text-white font-black">{word.word}</p>
-                                </div>
-                            ))
-                        )}
+                    {/* KHU VỰC GRID (3 Hàng x 3 Ô) */}
+                    <div className="space-y-3 mb-10">
+                        {grid.map((row, rIdx) => (
+                            <div key={rIdx} className="flex gap-2">
+                                {row.map((cell, cIdx) => (
+                                    <button 
+                                        key={cIdx}
+                                        onClick={() => handleGridClick(rIdx, cIdx)}
+                                        disabled={rowStatus[rIdx]} // Khóa nếu hàng đã đúng
+                                        className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 flex items-center justify-center text-4xl font-['Klee_One'] font-bold transition-all duration-300 shadow-lg
+                                            ${rowStatus[rIdx] 
+                                                ? 'bg-green-500 border-green-400 text-white scale-105' // Đúng -> Xanh
+                                                : cell 
+                                                    ? 'bg-white border-white text-gray-800' // Có chữ -> Trắng
+                                                    : 'bg-white/10 border-white/10 text-transparent' // Trống
+                                            }
+                                        `}
+                                    >
+                                        {cell ? cell.char : ''}
+                                    </button>
+                                ))}
+                            </div>
+                        ))}
                     </div>
 
-                    {/* KHU VỰC 2: Ô GHÉP (ACTIVE SLOT) */}
-                    <div className="mb-8 relative">
-                        {/* Nút xóa nhanh nếu sai */}
-                        {isWrong && (
-                            <div className="absolute -top-8 left-0 right-0 text-center text-red-400 text-xs font-bold animate-pulse">
-                                Sai rồi! Bấm vào ô để sửa
-                            </div>
-                        )}
-                        <div className={`flex gap-3 ${isWrong ? 'animate-shake' : ''}`}>
-                            {slots.map((s, i) => (
+                    {/* KHU VỰC POOL (10 ô nhỏ) */}
+                    <div className="bg-white/10 p-4 rounded-2xl w-full">
+                        <div className="flex flex-wrap justify-center gap-2">
+                            {pool.map((p) => (
                                 <button 
-                                    key={i} 
-                                    onClick={() => handleSlotClick(i)}
-                                    className={`w-20 h-24 rounded-xl border-4 flex items-center justify-center text-5xl font-['Klee_One'] transition-all shadow-lg
-                                        ${s ? 'bg-white border-white text-gray-800' : 'bg-white/5 border-white/20 text-transparent'}
-                                        ${isWrong ? 'border-red-500 bg-red-50 text-red-600' : ''}
-                                    `}
+                                    key={p.id} 
+                                    onClick={() => handlePoolClick(p)}
+                                    disabled={!p.visible}
+                                    className={`w-12 h-12 rounded-lg font-['Klee_One'] text-2xl font-bold flex items-center justify-center transition-all duration-200
+                                        ${p.visible 
+                                            ? 'bg-indigo-100 text-indigo-900 hover:bg-indigo-200 active:scale-95 shadow-sm' 
+                                            : 'opacity-0 pointer-events-none'
+                                        }`}
                                 >
-                                    {s ? s.char : ''}
+                                    {p.char}
                                 </button>
                             ))}
                         </div>
                     </div>
-
-                    {/* KHU VỰC 3: KHO CHỮ (POOL) */}
-                    <div className="grid grid-cols-3 gap-3">
-                        {pool.map((p, i) => (
-                            <button 
-                                key={p.id} 
-                                onClick={() => handlePoolClick(p)}
-                                disabled={!p.visible}
-                                className={`w-20 h-20 rounded-xl font-['Klee_One'] text-4xl font-bold flex items-center justify-center transition-all duration-200 shadow-sm
-                                    ${p.visible 
-                                        ? 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200 hover:scale-105 active:scale-95 cursor-pointer' 
-                                        : 'bg-transparent text-transparent border-2 border-white/5 cursor-default'
-                                    }`}
-                            >
-                                {p.char}
-                            </button>
-                        ))}
-                    </div>
-                    
+                    <p className="mt-4 text-white/40 text-xs italic">Có 1 chữ gây nhiễu, hãy cẩn thận!</p>
                 </div>
             )}
 
-            {/* 3. MÀN HÌNH CHIẾN THẮNG */}
-            {gameStatus === 'won' && (
-                <div className="bg-white rounded-[2rem] p-8 w-full max-w-[280px] text-center shadow-2xl animate-in zoom-in-95">
-                    <div className="text-6xl mb-4 animate-bounce">🏆</div>
-                    <h3 className="text-xl font-black text-gray-800 mb-2 uppercase">XUẤT SẮC!</h3>
-                    <p className="text-gray-500 mb-6 text-sm">Bạn đã tìm ra tất cả từ vựng.</p>
-                    <button onClick={() => startGame(level)} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold mb-3 shadow-lg active:scale-95">
-                        CHƠI TIẾP CẤP ĐỘ {level}
-                    </button>
-                    <button onClick={() => setGameStatus('menu')} className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-bold active:scale-95">
-                        CHỌN CẤP ĐỘ KHÁC
-                    </button>
+            {/* MÀN HÌNH TỔNG KẾT (SUMMARY) */}
+            {gameStatus === 'summary' && (
+                <div className="bg-white rounded-[2rem] p-6 w-full max-w-sm text-center shadow-2xl animate-in zoom-in-95">
+                    <div className="text-5xl mb-2 animate-bounce">🎉</div>
+                    <h3 className="text-lg font-black text-gray-800 mb-6 uppercase">HOÀN THÀNH!</h3>
+                    
+                    {/* Danh sách từ vựng đã học */}
+                    <div className="space-y-3 mb-6">
+                        {targets.map((word, idx) => (
+                            <div key={idx} className="bg-indigo-50 rounded-xl p-3 flex justify-between items-center text-left border border-indigo-100">
+                                <div>
+                                    <p className="text-2xl font-['Klee_One'] font-bold text-indigo-700 leading-none">{word.word}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-xs font-bold text-gray-500">{word.reading}</p>
+                                    <p className="text-xs text-gray-400 italic">{word.meaning}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="space-y-2">
+                        <button onClick={() => startGame(level)} className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg active:scale-95 transition-all">
+                            CÂU TIẾP THEO
+                        </button>
+                        <button onClick={() => setGameStatus('menu')} className="w-full py-3.5 bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 rounded-xl font-bold active:scale-95 transition-all">
+                            VỀ MENU
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
