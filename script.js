@@ -3402,10 +3402,29 @@ const pointsToPath = (points) => {
 };
 
 const KanjiWriteQuizModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
-    // 1. Chuẩn bị dữ liệu
-    const [chars] = useState(() => Array.from(new Set(text.split(''))).filter(c => dbData.KANJI_DB[c]));
+  // 1. Thay đổi cách khai báo state
+    const [chars, setChars] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const currentChar = chars ? chars[currentIndex] : null;
+    
+    // 2. Thêm useEffect để nạp lại dữ liệu mỗi khi mở Modal
+    useEffect(() => {
+        if (isOpen && text && dbData?.KANJI_DB) {
+            // Lọc ra các chữ Kanji có trong Database
+            const validChars = Array.from(new Set(text.split('')))
+                .filter(c => dbData.KANJI_DB[c]); // Chỉ lấy chữ có dữ liệu vẽ
+            
+            setChars(validChars);
+            setCurrentIndex(0); // Reset về chữ đầu tiên
+            setCompletedStrokes([]); // Reset nét vẽ cũ
+            setFeedbackStatus(null);
+            setIsDrawing(false);
+            setActivePoints([]);
+        }
+    }, [isOpen, text, dbData]); // Chạy lại khi isOpen hoặc text thay đổi
+
+    const currentChar = chars && chars.length > 0 ? chars[currentIndex] : null;
+    // --- HẾT PHẦN SỬA ---
+
     const info = dbData?.KANJI_DB?.[currentChar] || {};
 
     // 2. State vẽ và xử lý SVG
