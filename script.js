@@ -3395,121 +3395,277 @@ TÀI LIỆU HỌC TẬP
     );
     };
 
-   const KanjiWriteQuizModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
-    if (!isOpen || !text) return null;
+ // --- HELPER: Chuyển đổi tọa độ vẽ thành SVG Path ---
+const pointsToPath = (points) => {
+    if (points.length < 2) return "";
+    return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(" ");
+};
 
+const KanjiWriteQuizModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
+    // 1. Chuẩn bị dữ liệu
     const [chars] = useState(() => Array.from(new Set(text.split(''))).filter(c => dbData.KANJI_DB[c]));
     const [currentIndex, setCurrentIndex] = useState(0);
-    const currentChar = chars[currentIndex];
-    const info = dbData.KANJI_DB[currentChar] || {};
-    
-    const { paths, loading } = useKanjiSvg(currentChar);
-    const [currentStrokeIdx, setCurrentStrokeIdx] = useState(0);
-    const [userStrokes, setUserStrokes] = useState([]); // Các nét đã vẽ đúng
-    const [isDrawing, setIsDrawing] = useState(false);
-    const [activePoints, setActivePoints] = useState([]); // Nét đang vẽ
-    const [feedback, setFeedback] = useState(null); // 'wrong' hoặc 'correct'
+    const currentChar = chars ? chars[currentIndex] : null;
+    const info = dbData?.KANJI_DB?.[currentChar] || {};
 
+    // 2. State vẽ và xử lý SVG
     const svgRef = useRef(null);
+    const { paths, loading } = useKanjiSvg(currentChar);
+    
+    const [currentStrokeIdx, setCurrentStrokeIdx] = useState(0); // Nét hiện tại đang cần vẽ
+    const [completedStrokes, setCompletedStrokes] = useState([]); // Danh sách các nét ĐÃ VẼ ĐÚNG (Lưu dưới dạng index của nét chuẩn)
+    
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [activePoints, setActivePoints] = useState([]); // Tọa độ nét đang vẽ (real-time)
+    const [feedbackStatus, setFeedbackStatus] = useState(null); // 'correct' | 'wrong' | null
+    const [showHint, setShowHint] = useState(false);
 
-    const getMousePos = (e) => {
-        const rect = svgRef.current.getBoundingClientRect();
-        const clientX = e.clientX || e.touches[0].clientX;
-        const clientY = e.clientY || e.touches[0].clientY;
-        return {
-            x: ((clientX - rect.left) / rect.width) * 109,
-            y: ((clientY - rect.top) / rect.height) * 109
-        };
+    // --- LOGIC XỬ LÝ TỌA ĐỘ CHUẨN (Scale về 109x109 như file gốc) ---
+    const getCoordinates = (e) => {
+        const svg = svgRef.current;
+        if (!svg) return { x: 0, y: 0 };
+        
+        const pt = svg.createSVGPoint();
+        // Hỗ trợ cả Touch và Mouse/Pointer
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        pt.x = clientX;
+        pt.y = clientY;
+        
+        // Biến đổi tọa độ màn hình -> tọa độ SVG
+        const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+        return { x: svgP.x, y: svgP.y };
     };
 
+    // --- EVENT HANDLERS ---
     const handleStart = (e) => {
+        if (!isOpen || feedbackStatus === 'finished') return;
+        e.preventDefault(); // Chặn cuộn trang
         setIsDrawing(true);
-        setActivePoints([getMousePos(e)]);
+        setActivePoints([getCoordinates(e)]);
+        setFeedbackStatus(null);
     };
 
     const handleMove = (e) => {
         if (!isDrawing) return;
-        setActivePoints(prev => [...prev, getMousePos(e)]);
+        e.preventDefault();
+        const newPoint = getCoordinates(e);
+        setActivePoints(prev => [...prev, newPoint]);
     };
 
     const handleEnd = () => {
         if (!isDrawing) return;
         setIsDrawing(false);
-        
+
+        // Logic của họ: Nếu nét quá ngắn (< 3 điểm) thì bỏ qua
+        if (activePoints.length < 3) {
+            setActivePoints([]);
+            return;
+        }
+
+        // --- SO SÁNH NÉT VẼ (Dùng hàm evaluateStroke có sẵn của bạn) ---
+        // So nét vừa vẽ (activePoints) với nét chuẩn (paths[currentStrokeIdx])
         const gScore = evaluateStroke(activePoints, paths[currentStrokeIdx]);
-        
-        if (gScore < 2.5) { // Ngưỡng đúng (G < 2.5)
-            setUserStrokes(prev => [...prev, paths[currentStrokeIdx]]);
+
+        // Ngưỡng điểm (Logic web gốc dùng ngưỡng khá lỏng để tạo cảm giác dễ chịu)
+        if (gScore < 3.5) {
+            // == ĐÚNG ==
+            // 1. Thêm index của nét chuẩn vào mảng đã hoàn thành (Snap-to-perfect)
+            setCompletedStrokes(prev => [...prev, currentStrokeIdx]);
+            
+            // 2. Chuyển sang nét tiếp theo
             const nextIdx = currentStrokeIdx + 1;
+            
             if (nextIdx >= paths.length) {
-                setFeedback('finished');
-                onSrsUpdate(currentChar, 1);
-                setTimeout(() => nextChar(), 1000);
+                // HOÀN THÀNH CHỮ
+                setFeedbackStatus('finished');
+                if (onSrsUpdate) onSrsUpdate(currentChar, 1);
+                
+                // Hiệu ứng pháo hoa (nếu có thư viện)
+                if (typeof triggerConfetti === 'function') triggerConfetti();
+
+                // Chuyển chữ sau 1s
+                setTimeout(() => {
+                    if (currentIndex < chars.length - 1) {
+                        setCurrentIndex(prev => prev + 1);
+                        setCurrentStrokeIdx(0);
+                        setCompletedStrokes([]);
+                        setFeedbackStatus(null);
+                        setShowHint(false);
+                    } else {
+                        onClose(); // Hết bài
+                    }
+                }, 1000);
             } else {
+                // CHƯA XONG CHỮ
                 setCurrentStrokeIdx(nextIdx);
+                setFeedbackStatus('correct');
+                setShowHint(false); // Tắt gợi ý nếu vẽ đúng
             }
         } else {
-            setFeedback('wrong');
-            setTimeout(() => setFeedback(null), 500);
+            // == SAI ==
+            setFeedbackStatus('wrong');
+            if (onSrsUpdate) onSrsUpdate(currentChar, 0); // Phạt SRS
+            
+            // Hiện gợi ý sau khi sai
+            setTimeout(() => {
+                setFeedbackStatus(null);
+                setShowHint(true);
+            }, 500);
         }
-        setActivePoints([]);
+        
+        setActivePoints([]); // Xóa nét nháp
     };
 
-    const nextChar = () => {
-        if (currentIndex < chars.length - 1) {
-            setCurrentIndex(prev => prev + 1);
-            setUserStrokes([]);
-            setCurrentStrokeIdx(0);
-            setFeedback(null);
-        } else {
-            onClose();
-        }
-    };
+    if (!isOpen || !chars || chars.length === 0) return null;
+
+    // Tính % tiến độ
+    const progress = paths.length > 0 ? (currentStrokeIdx / paths.length) * 100 : 0;
 
     return (
-        <div className="fixed inset-0 z-[600] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-[600] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl p-4 animate-in fade-in duration-300 touch-none select-none">
             <div className="w-full max-w-sm flex flex-col items-center">
-                <div className="text-center mb-6">
-                    <h3 className="text-3xl font-black text-indigo-400 uppercase mb-1">{info.sound}</h3>
-                    <p className="text-gray-400 italic text-sm">{info.meaning}</p>
+                
+                {/* --- HEADER THÔNG TIN (Giống giao diện web mẫu) --- */}
+                <div className="w-full flex justify-between items-end mb-6 text-white px-4">
+                    <div>
+                        <h1 className="text-6xl font-black font-['Klee_One'] leading-none drop-shadow-md">{currentChar}</h1>
+                        <div className="text-indigo-300 font-bold uppercase tracking-widest text-sm mt-1">{info.sound || "Unknown"}</div>
+                    </div>
+                    <div className="text-right">
+                        <div className="text-xs text-gray-400 font-medium italic mb-1 max-w-[150px] truncate">{info.meaning}</div>
+                        <div className="bg-white/10 px-3 py-1 rounded-full text-xs font-mono">
+                            {currentStrokeIdx} / {paths.length} nét
+                        </div>
+                    </div>
                 </div>
 
-                <div className="relative w-72 h-72 bg-white rounded-2xl shadow-2xl overflow-hidden border-4" 
-                     style={{ borderColor: feedback === 'wrong' ? '#ef4444' : feedback === 'finished' ? '#22c55e' : 'white' }}>
-                    <svg ref={svgRef} viewBox="0 0 109 109" className="w-full h-full touch-none"
-                         onPointerDown={handleStart} onPointerMove={handleMove} onPointerUp={handleEnd}>
-                        {/* Grid mờ */}
-                        <line x1="54.5" y1="0" x2="54.5" y2="109" stroke="#f0f0f0" strokeDasharray="4" />
-                        <line x1="0" y1="54.5" x2="109" y2="54.5" stroke="#f0f0f0" strokeDasharray="4" />
-                        
-                        {/* Chữ mờ hướng dẫn */}
-                        {!loading && paths.map((d, i) => (
-                            <path key={i} d={d} fill="none" stroke="#f0f0f0" strokeWidth="3" />
-                        ))}
+                {/* --- KHUNG VẼ CHÍNH (SVG ROOT) --- */}
+                <div className={`relative bg-white rounded-xl shadow-2xl overflow-hidden transition-transform duration-200 ${feedbackStatus === 'wrong' ? 'animate-shake border-4 border-red-500' : 'border-4 border-white'}`}
+                     style={{ width: '330px', height: '330px' }}> {/* Kích thước cố định giống mẫu */}
+                    
+                    <svg 
+                        ref={svgRef}
+                        version="1.1" 
+                        viewBox="0 0 109 109" 
+                        className="w-full h-full touch-none cursor-crosshair"
+                        onMouseDown={handleStart} onMouseMove={handleMove} onMouseUp={handleEnd} onMouseLeave={handleEnd}
+                        onTouchStart={handleStart} onTouchMove={handleMove} onTouchEnd={handleEnd}
+                    >
+                        {/* 1. DEFS: Filter Mực Loang (Glow) - Copy y nguyên */}
+                        <defs>
+                            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                                <feOffset result="offOut" in="SourceAlpha" dx="0" dy="0" />
+                                <feColorMatrix id="glowMatrix" result="matrixOut" in="offOut" type="matrix" values="0 0 0 .5 0 0 0 .5 0 0 0 0 0 0 0 1 0" />
+                                <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="0.75" />
+                                <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+                            </filter>
+                        </defs>
 
-                        {/* Các nét đã vẽ đúng (Màu đen) */}
-                        {userStrokes.map((d, i) => (
-                            <path key={i} d={d} fill="none" stroke="#000" strokeWidth="4" strokeLinecap="round" />
-                        ))}
+                        {/* 2. BACKGROUND & GRID (Lớp nền) */}
+                        <rect x="1" y="1" width="108" height="108" className="padBackground" />
+                        <line x1="1" y1="1" x2="108" y2="108" className="padLine1" />
+                        <line x1="108" y1="1" x2="1" y2="108" className="padLine1" />
+                        <line x1="54.5" y1="1" x2="54.5" y2="108" className="padLine2" />
+                        <line x1="1" y1="54.5" x2="108" y2="54.5" className="padLine2" />
+                        <rect x="1" y="1" width="107" height="107" fill="none" className="padBorder" />
 
-                        {/* Nét đang vẽ (Màu tím) */}
-                        {activePoints.length > 1 && (
-                            <path d={`M ${activePoints.map(p => `${p.x},${p.y}`).join(' L ')}`} 
-                                  fill="none" stroke="#8040ff" strokeWidth="4" strokeLinecap="round" />
-                        )}
+                        {/* 3. KANJI VG (Lớp mẫu - Ẩn hoặc Hiện hint) */}
+                        <g id="kanjiVG">
+                            {!loading && paths.map((d, i) => {
+                                // Logic Hint: Chỉ hiện nét hiện tại nếu showHint = true
+                                const isTarget = i === currentStrokeIdx;
+                                const isVisible = isTarget && showHint;
+                                return (
+                                    <path 
+                                        key={i} 
+                                        d={d} 
+                                        className={isVisible ? "hintStroke" : ""} 
+                                        style={{ opacity: isVisible ? 1 : 0 }} 
+                                    />
+                                );
+                            })}
+                        </g>
+
+                        {/* 4. USER STROKES (Lớp vẽ - Quan trọng nhất) */}
+                        <g id="userStrokes">
+                            {/* A. Các nét đã vẽ xong (Hiển thị bằng NÉT CHUẨN - Snap to perfect) */}
+                            {completedStrokes.map((strokeIndex) => (
+                                <path 
+                                    key={strokeIndex} 
+                                    d={paths[strokeIndex]} 
+                                    className="correctStroke" /* Class này có filter glow */
+                                />
+                            ))}
+
+                            {/* B. Nét đang vẽ thời gian thực (Real-time) */}
+                            {activePoints.length > 0 && (
+                                <path 
+                                    d={pointsToPath(activePoints)} 
+                                    /* Style inline để đè lên CSS mặc định */
+                                    style={{ 
+                                        stroke: '#8040ff', 
+                                        strokeWidth: '4px', 
+                                        fill: 'none', 
+                                        strokeLinecap: 'round', 
+                                        strokeLinejoin: 'round',
+                                        opacity: 0.8 
+                                    }}
+                                />
+                            )}
+                        </g>
                     </svg>
+
+                    {/* Feedback Icon (Chữ X đỏ khi sai) */}
+                    {feedbackStatus === 'wrong' && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <span className="text-8xl animate-in zoom-in duration-200">❌</span>
+                        </div>
+                    )}
                 </div>
 
-                <div className="mt-8 flex gap-4 w-full">
-                    <button onClick={() => { setUserStrokes([]); setCurrentStrokeIdx(0); }} 
-                            className="flex-1 py-3 bg-white/10 text-white rounded-xl font-bold uppercase text-xs">Xóa viết lại</button>
-                    <button onClick={onClose} 
-                            className="flex-1 py-3 bg-red-500/20 text-red-500 rounded-xl font-bold uppercase text-xs">Thoát</button>
+                {/* --- FOOTER CONTROLS --- */}
+                <div className="w-full mt-8 px-4 space-y-4">
+                    {/* Thanh tiến độ */}
+                    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                        <div 
+                            className="h-full bg-indigo-500 transition-all duration-300 ease-out" 
+                            style={{ width: `${progress}%` }}
+                        ></div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                        <button 
+                            onClick={() => setShowHint(!showHint)}
+                            className="py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors"
+                        >
+                            {showHint ? 'Ẩn Gợi ý' : 'Gợi ý'}
+                        </button>
+                        <button 
+                            onClick={() => {
+                                // Reset chữ hiện tại
+                                setCompletedStrokes([]);
+                                setCurrentStrokeIdx(0);
+                                setFeedbackStatus(null);
+                                setShowHint(false);
+                            }}
+                            className="py-3 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/30 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors"
+                        >
+                            Viết lại
+                        </button>
+                        <button 
+                            onClick={onClose}
+                            className="py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors"
+                        >
+                            Thoát
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     );
-}; 
+};
     const App = () => {
 // --- Các state cũ giữ nguyên ---
 const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
