@@ -232,28 +232,3 @@ transition: color 0.2s ease;
 .progress-thumb-animate {
     transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.padBackground { fill: #fff; }
-.padLine1 { stroke: #f5f5f5; stroke-width: 1; stroke-dasharray: 4,4; }
-.padLine2 { stroke: #dfdfdf; stroke-width: 1; stroke-dasharray: 4,4; }
-.padBorder { stroke: #ccc; stroke-width: 1.5; }
-
-/* Nét mẫu (ẩn đi) */
-#kanjiVG path { fill: none; stroke: #000; stroke-width: 4px; stroke-linecap: round; stroke-linejoin: round; }
-
-/* Nét người dùng đang vẽ (Màu tím nhạt, có độ trong suốt) */
-#userStrokes { fill: none; stroke: #8040ff; stroke-width: 4px; stroke-linecap: round; stroke-linejoin: round; stroke-opacity: 0.75; }
-
-/* Các trạng thái nét sau khi vẽ xong */
-.correctStroke { stroke: #2c2c2c !important; stroke-opacity: 1 !important; filter: url(#glow); }
-.wrongStroke { stroke: #dc3545 !important; stroke-opacity: 0.7 !important; }
-.hintStroke { stroke: #3991d4 !important; stroke-opacity: 0.5 !important; stroke-dasharray: 5,5; }
-
-/* Hiệu ứng rung khi sai */
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
-}
-.animate-shake { animation: shake 0.3s ease-in-out; }
