@@ -3394,7 +3394,6 @@ TÀI LIỆU HỌC TẬP
         </div>
     );
     };
-import React, { useState, useRef, useEffect, useMemo } from 'react';
 
 // --- CÁC HÀM HELPER CHO PHẦN VIẾT KANJI (KAKIMASHOU STYLE) ---
 
