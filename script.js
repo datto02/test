@@ -3394,28 +3394,94 @@ TÀI LIỆU HỌC TẬP
         </div>
     );
     };
+// Hàm helper để tính khoảng cách giữa 2 điểm
+const getDistance = (p1, p2) => {
+    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+};
 
-   const KanjiWriteQuizModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
+// Hàm lấy mẫu điểm từ đường dẫn SVG chuẩn (SVG Path String)
+const samplePath = (pathString, sampleCount = 10) => {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathString);
+    const length = path.getTotalLength();
+    const points = [];
+    for (let i = 0; i < sampleCount; i++) {
+        const point = path.getPointAtLength((i / (sampleCount - 1)) * length);
+        points.push({ x: point.x, y: point.y });
+    }
+    return points;
+};
+
+// Hàm lấy mẫu điểm từ nét vẽ của người dùng
+const sampleUserStroke = (points, sampleCount = 10) => {
+    if (points.length < 2) return [];
+    // Tính tổng độ dài nét vẽ người dùng
+    let totalLength = 0;
+    const lengths = [0];
+    for (let i = 1; i < points.length; i++) {
+        const d = getDistance(points[i - 1], points[i]);
+        totalLength += d;
+        lengths.push(totalLength);
+    }
+    
+    const sampled = [];
+    for (let i = 0; i < sampleCount; i++) {
+        const targetLen = (i / (sampleCount - 1)) * totalLength;
+        // Tìm điểm tương ứng trên nét vẽ
+        let index = lengths.findIndex(l => l >= targetLen);
+        if (index === -1) index = points.length - 1;
+        if (index === 0) index = 1;
+        
+        // Nội suy tuyến tính (Linear Interpolation) để lấy điểm chính xác hơn
+        const p1 = points[index - 1];
+        const p2 = points[index];
+        const dist = lengths[index] - lengths[index - 1];
+        const ratio = (targetLen - lengths[index - 1]) / (dist || 1);
+        
+        sampled.push({
+            x: p1.x + (p2.x - p1.x) * ratio,
+            y: p1.y + (p2.y - p1.y) * ratio
+        });
+    }
+    return sampled;
+};
+
+const KanjiWriteQuizModal = ({ isOpen, onClose, text, dbData, onSrsUpdate }) => {
     if (!isOpen || !text) return null;
 
+    // Lọc ra các chữ có trong DB
     const [chars] = useState(() => Array.from(new Set(text.split(''))).filter(c => dbData.KANJI_DB[c]));
     const [currentIndex, setCurrentIndex] = useState(0);
     const currentChar = chars[currentIndex];
     const info = dbData.KANJI_DB[currentChar] || {};
     
-    const { paths, loading } = useKanjiSvg(currentChar);
-    const [currentStrokeIdx, setCurrentStrokeIdx] = useState(0);
-    const [userStrokes, setUserStrokes] = useState([]); // Các nét đã vẽ đúng
-    const [isDrawing, setIsDrawing] = useState(false);
-    const [activePoints, setActivePoints] = useState([]); // Nét đang vẽ
-    const [feedback, setFeedback] = useState(null); // 'wrong' hoặc 'correct'
+    // Giả lập hook useKanjiSvg (bạn cần thay bằng hook thực tế của bạn để lấy paths)
+    // Ở đây tôi giả định paths là mảng các chuỗi d="M..." chuẩn KanjiVG (109x109)
+    const paths = info.strokes || []; // Lấy strokes từ DB nếu có, hoặc từ hook useKanjiSvg
 
+    const [currentStrokeIdx, setCurrentStrokeIdx] = useState(0);
+    const [userStrokes, setUserStrokes] = useState([]); // Lưu index các nét đã vẽ đúng
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [activePoints, setActivePoints] = useState([]);
+    const [feedback, setFeedback] = useState(null); // 'wrong', 'correct', 'finished'
+    
     const svgRef = useRef(null);
+
+    // Reset khi chuyển chữ
+    useEffect(() => {
+        setUserStrokes([]);
+        setCurrentStrokeIdx(0);
+        setFeedback(null);
+        setActivePoints([]);
+    }, [currentIndex]);
 
     const getMousePos = (e) => {
         const rect = svgRef.current.getBoundingClientRect();
-        const clientX = e.clientX || e.touches[0].clientX;
-        const clientY = e.clientY || e.touches[0].clientY;
+        // Hỗ trợ cả Touch và Mouse
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        // Map to 109x109 coordinate system (KanjiVG standard)
         return {
             x: ((clientX - rect.left) / rect.width) * 109,
             y: ((clientY - rect.top) / rect.height) * 109
@@ -3423,93 +3489,200 @@ TÀI LIỆU HỌC TẬP
     };
 
     const handleStart = (e) => {
+        if (feedback === 'finished') return;
+        // Ngăn scroll trên mobile
+        if(e.cancelable) e.preventDefault(); 
+        
         setIsDrawing(true);
         setActivePoints([getMousePos(e)]);
+        setFeedback(null);
     };
 
     const handleMove = (e) => {
         if (!isDrawing) return;
-        setActivePoints(prev => [...prev, getMousePos(e)]);
+        if(e.cancelable) e.preventDefault();
+        
+        const newPos = getMousePos(e);
+        setActivePoints(prev => [...prev, newPos]);
     };
 
     const handleEnd = () => {
         if (!isDrawing) return;
         setIsDrawing(false);
+
+        if (activePoints.length < 3) {
+            setActivePoints([]);
+            return; // Click nhầm, không phải vẽ
+        }
+
+        const targetPath = paths[currentStrokeIdx];
+        if (!targetPath) return;
+
+        // --- ALGORITHM: SO SÁNH NÉT VẼ ---
+        const targetPoints = samplePath(targetPath, 15); // Lấy mẫu nét chuẩn
+        const drawnPoints = sampleUserStroke(activePoints, 15); // Lấy mẫu nét người dùng
         
-        const gScore = evaluateStroke(activePoints, paths[currentStrokeIdx]);
+        let totalDist = 0;
+        let maxDist = 0;
+
+        // Tính khoảng cách trung bình giữa các điểm tương ứng
+        for (let i = 0; i < 15; i++) {
+            const d = getDistance(targetPoints[i], drawnPoints[i]);
+            totalDist += d;
+            if (d > maxDist) maxDist = d;
+        }
         
-        if (gScore < 5) { // Ngưỡng đúng (G < 2.5)
-            setUserStrokes(prev => [...prev, paths[currentStrokeIdx]]);
+        const avgDist = totalDist / 15;
+        
+        // Logic chấm điểm:
+        // avgDist < 12: Trung bình sai lệch không quá 12 đơn vị
+        // maxDist < 25: Không có điểm nào sai lệch quá 25 đơn vị (tránh vẽ đúng hướng nhưng sai vị trí quá xa)
+        const isCorrect = avgDist < 12 && maxDist < 30; 
+
+        if (isCorrect) {
+            // ĐÚNG: Snap to perfect path
+            const newUserStrokes = [...userStrokes, targetPath]; // Lưu path chuẩn vào mảng đã vẽ
+            setUserStrokes(newUserStrokes);
+            
             const nextIdx = currentStrokeIdx + 1;
             if (nextIdx >= paths.length) {
+                // Hoàn thành chữ
                 setFeedback('finished');
-                onSrsUpdate(currentChar, 1);
-                setTimeout(() => nextChar(), 1000);
+                if (onSrsUpdate) onSrsUpdate(currentChar, 1);
+                setTimeout(() => nextChar(), 1500);
             } else {
                 setCurrentStrokeIdx(nextIdx);
             }
         } else {
+            // SAI
             setFeedback('wrong');
+            // Rung hoặc nháy đỏ (xử lý bằng CSS)
             setTimeout(() => setFeedback(null), 500);
         }
+        
+        // Xóa nét vẽ nháp màu tím ngay lập tức
         setActivePoints([]);
     };
 
     const nextChar = () => {
         if (currentIndex < chars.length - 1) {
             setCurrentIndex(prev => prev + 1);
-            setUserStrokes([]);
-            setCurrentStrokeIdx(0);
-            setFeedback(null);
         } else {
             onClose();
         }
     };
 
     return (
-        <div className="fixed inset-0 z-[600] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-[600] flex items-center justify-center bg-gray-100 p-4 animate-in fade-in font-sans">
+            {/* Nút đóng */}
+            <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
             <div className="w-full max-w-sm flex flex-col items-center">
-                <div className="text-center mb-6">
-                    <h3 className="text-3xl font-black text-indigo-400 uppercase mb-1">{info.sound}</h3>
-                    <p className="text-gray-400 italic text-sm">{info.meaning}</p>
+                {/* Phần thông tin chữ (Header) */}
+                <div className="w-full flex justify-between items-start mb-4 px-4">
+                     <div className="text-left">
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">Kunyomi</p>
+                        <h3 className="text-xl font-bold text-gray-800">{info.kun || "..."}</h3>
+                     </div>
+                     <div className="text-center">
+                        <h1 className="text-4xl font-black text-gray-800 mb-1">{currentChar}</h1>
+                        <p className="text-sm text-gray-500">{info.meaning}</p>
+                     </div>
+                     <div className="text-right">
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">Onyomi</p>
+                        <h3 className="text-xl font-bold text-gray-800">{info.on || "..."}</h3>
+                     </div>
                 </div>
 
-                <div className="relative w-72 h-72 bg-white rounded-2xl shadow-2xl overflow-hidden border-4" 
-                     style={{ borderColor: feedback === 'wrong' ? '#ef4444' : feedback === 'finished' ? '#22c55e' : 'white' }}>
-                    <svg ref={svgRef} viewBox="0 0 109 109" className="w-full h-full touch-none"
-                         onPointerDown={handleStart} onPointerMove={handleMove} onPointerUp={handleEnd}>
-                        {/* Grid mờ */}
-                        <line x1="54.5" y1="0" x2="54.5" y2="109" stroke="#f0f0f0" strokeDasharray="4" />
-                        <line x1="0" y1="54.5" x2="109" y2="54.5" stroke="#f0f0f0" strokeDasharray="4" />
+                {/* KHUNG VẼ (Canvas) */}
+                <div className={`relative w-[300px] h-[300px] bg-white rounded-none shadow-sm border border-gray-300 select-none touch-none transition-colors duration-300 ${feedback === 'wrong' ? 'border-red-500 bg-red-50' : ''}`}>
+                    
+                    <svg 
+                        ref={svgRef} 
+                        viewBox="0 0 109 109" 
+                        className="w-full h-full"
+                        onMouseDown={handleStart} onMouseMove={handleMove} onMouseUp={handleEnd} onMouseLeave={handleEnd}
+                        onTouchStart={handleStart} onTouchMove={handleMove} onTouchEnd={handleEnd}
+                    >
+                        {/* 1. LƯỚI NỀN (GRID) - Giống video */}
+                        <line x1="54.5" y1="0" x2="54.5" y2="109" stroke="#e5e7eb" strokeWidth="0.5" strokeDasharray="3 3" />
+                        <line x1="0" y1="54.5" x2="109" y2="54.5" stroke="#e5e7eb" strokeWidth="0.5" strokeDasharray="3 3" />
                         
-                        {/* Chữ mờ hướng dẫn */}
-                        {!loading && paths.map((d, i) => (
-                            <path key={i} d={d} fill="none" stroke="#f0f0f0" strokeWidth="3" />
-                        ))}
+                        {/* 2. CHỮ MỜ (GUIDE) - Màu xám rất nhạt */}
+                        <g className="opacity-20">
+                            {paths.map((d, i) => (
+                                <path key={i} d={d} fill="none" stroke="#9ca3af" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                            ))}
+                        </g>
 
-                        {/* Các nét đã vẽ đúng (Màu đen) */}
+                        {/* 3. CÁC NÉT ĐÃ VẼ ĐÚNG (SNAP) - Màu đen/đỏ */}
                         {userStrokes.map((d, i) => (
-                            <path key={i} d={d} fill="none" stroke="#000" strokeWidth="4" strokeLinecap="round" />
+                            <path 
+                                key={i} 
+                                d={d} 
+                                fill="none" 
+                                // Nét vừa vẽ xong có thể màu đỏ để highlight, các nét cũ màu đen
+                                stroke={i === userStrokes.length - 1 && feedback !== 'finished' ? "#ef4444" : "#1f2937"} 
+                                strokeWidth="5" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round"
+                                className="animate-in fade-in duration-300" 
+                            />
                         ))}
 
-                        {/* Nét đang vẽ (Màu tím) */}
+                        {/* 4. NÉT ĐANG VẼ (ACTIVE) - Màu tím giống video */}
                         {activePoints.length > 1 && (
-                            <path d={`M ${activePoints.map(p => `${p.x},${p.y}`).join(' L ')}`} 
-                                  fill="none" stroke="#8040ff" strokeWidth="4" strokeLinecap="round" />
+                            <path 
+                                d={`M ${activePoints.map(p => `${p.x},${p.y}`).join(' L ')}`} 
+                                fill="none" 
+                                stroke="#a855f7" // Purple-500
+                                strokeWidth="5" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round"
+                                style={{ filter: 'drop-shadow(0px 2px 2px rgba(168, 85, 247, 0.3))' }}
+                            />
                         )}
                     </svg>
+
+                    {/* Feedback Icon Correct (Dấu tròn đỏ giống bài kiểm tra) */}
+                    {feedback === 'finished' && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-in zoom-in duration-300">
+                             <div className="w-48 h-48 border-8 border-red-500/50 rounded-full flex items-center justify-center">
+                                 <div className="w-36 h-36 border-4 border-red-500/30 rounded-full"></div>
+                             </div>
+                        </div>
+                    )}
                 </div>
 
-                <div className="mt-8 flex gap-4 w-full">
-                    <button onClick={() => { setUserStrokes([]); setCurrentStrokeIdx(0); }} 
-                            className="flex-1 py-3 bg-white/10 text-white rounded-xl font-bold uppercase text-xs">Xóa viết lại</button>
-                    <button onClick={onClose} 
-                            className="flex-1 py-3 bg-red-500/20 text-red-500 rounded-xl font-bold uppercase text-xs">Thoát</button>
+                {/* Footer Controls */}
+                <div className="mt-8 flex gap-3 w-full max-w-[300px]">
+                    <button 
+                        className="flex-1 py-3 bg-[#4fd1c5] text-white rounded shadow font-bold uppercase text-sm active:scale-95 transition-transform"
+                        onClick={() => { /* Logic Hint */ }}
+                    >
+                        Hint
+                    </button>
+                    <button 
+                        className="flex-1 py-3 bg-[#38a169] text-white rounded shadow font-bold uppercase text-sm active:scale-95 transition-transform"
+                        onClick={() => { /* Logic Show Me */ }}
+                    >
+                        Show Me
+                    </button>
+                    <button 
+                        className="flex-1 py-3 bg-[#dd6b20] text-white rounded shadow font-bold uppercase text-sm active:scale-95 transition-transform"
+                        onClick={() => { setUserStrokes([]); setCurrentStrokeIdx(0); }}
+                    >
+                        Clear
+                    </button>
                 </div>
             </div>
         </div>
     );
-}; 
+};
     const App = () => {
 // --- Các state cũ giữ nguyên ---
 const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
