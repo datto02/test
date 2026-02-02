@@ -1917,7 +1917,7 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
     );
 };
 // 5. Sidebar (Phiên bản: Final)
-   const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen }) => {
+   const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen, setIsWriteQuizOpen }) => {
    
 
 // 1. Logic bộ lọc mới
@@ -3438,7 +3438,7 @@ TÀI LIỆU HỌC TẬP
         
         const gScore = evaluateStroke(activePoints, paths[currentStrokeIdx]);
         
-        if (gScore < 2.5) { // Ngưỡng đúng (G < 2.5)
+        if (gScore < 5.5) { // Ngưỡng đúng (G < 2.5)
             setUserStrokes(prev => [...prev, paths[currentStrokeIdx]]);
             const nextIdx = currentStrokeIdx + 1;
             if (nextIdx >= paths.length) {
