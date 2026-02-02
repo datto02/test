@@ -3438,7 +3438,7 @@ TÀI LIỆU HỌC TẬP
         
         const gScore = evaluateStroke(activePoints, paths[currentStrokeIdx]);
         
-        if (gScore < 10) { // Ngưỡng đúng (G < 2.5)
+        if (gScore < 5) { // Ngưỡng đúng (G < 2.5)
             setUserStrokes(prev => [...prev, paths[currentStrokeIdx]]);
             const nextIdx = currentStrokeIdx + 1;
             if (nextIdx >= paths.length) {
