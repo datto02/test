@@ -51,15 +51,16 @@ const calculateSRS = (currentData, quality) => {
   }
 };
 
-// --- FETCH DATA FROM GITHUB (ĐÃ SỬA: TẢI THÊM N5-N1) --- 
+// --- FETCH DATA FROM GITHUB (ĐÃ SỬA LỖI KHAI BÁO BIẾN) --- 
 const fetchDataFromGithub = async () => {
   try { 
     // 1. Tải các file cơ sở dữ liệu chính
-    const [dbResponse, onkunResponse, vocabResponse] = await Promise.all([
+    // SỬA LỖI: Thêm tuvungResponse vào mảng nhận kết quả
+    const [dbResponse, onkunResponse, vocabResponse, tuvungResponse] = await Promise.all([
       fetch('./data/kanji_db.json'),
       fetch('./data/onkun.json'),
       fetch('./data/vocab.json'),
-        fetch('./data/tuvungg.json')
+      fetch('./data/tuvungg.json')
     ]);
 
     // 2. Tải thêm 5 file danh sách cấp độ (N5 -> N1) để dùng cho Game & Sidebar
@@ -94,53 +95,25 @@ const fetchDataFromGithub = async () => {
             kanjiLevels[lvlKey] = [];
         }
     }
-let tuvungDb = {};
-    if (tuvungResponse.ok) tuvungDb = await tuvungResponse.json();
-    else console.warn("Không tải được tuvungg.json");
+
+    // Xử lý file Từ vựng
+    let tuvungDb = {};
+    // Kiểm tra xem tuvungResponse có tồn tại và ok không
+    if (tuvungResponse && tuvungResponse.ok) {
+        tuvungDb = await tuvungResponse.json();
+    } else {
+        console.warn("Không tải được tuvungg.json hoặc file chưa tồn tại");
+    }
       
     // Trả về dữ liệu gộp, thêm KANJI_LEVELS vào
-    return { ...kanjiDb, ONKUN_DB: onkunDb, VOCAB_DB: vocabDb, TUVUNG_DB: tuvungDb, KANJI_LEVELS: kanjiLevels };
+    return { ...kanjiDb, ONKUN_DB: onkunDb, VOCAB_DB: vocabDb, TUVUNG_DB: tuvungDb, KANJI_LEVELS: kanjiLevels }; 
   } catch (error) {
     console.error("Lỗi tải dữ liệu hệ thống:", error);
+    // Quan trọng: Trả về null sẽ khiến App treo ở loading. 
+    // Nếu lỗi, hãy kiểm tra tab Console (F12) để xem chi tiết.
     return null;
   }
 };
-    // --- UTILS & DATA FETCHING ---
-
-    const getHex = (char) => char.codePointAt(0).toString(16).toLowerCase().padStart(5, '0');
-
-    
-
-    
-   const fetchKanjiData = async (char) => {
-    const hex = getHex(char);
-    
-  
-    const sources = [
-      `./data/svg/${hex}.svg`,  
-      `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}.svg`,
-      `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}-Kaisho.svg`,
-      `https://cdn.jsdelivr.net/gh/parsimonhi/animCJK@master/svgsKana/${hex}.svg`,
-      `https://cdn.jsdelivr.net/gh/parsimonhi/animCJK@master/svgsJa/${hex}.svg`
-    ];
-
-    for (const url of sources) {
-      try {
-        const res = await fetch(url);
-        if (res.ok) {
-          const text = await res.text();
-          
-          if (text.includes('<svg')) {
-             return { success: true, svg: text, source: url };
-          }
-        }
-      } catch (e) {
-        continue;
-      }
-    }
-    
-    return { success: false };
-  };
 
     
     const useKanjiSvg = (char) => {
