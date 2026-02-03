@@ -3408,8 +3408,9 @@ const [isMenuOpen, setIsMenuOpen] = useState(false);
 const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
         const [isLearnGameOpen, setIsLearnGameOpen] = useState(false);
         const [isReviewListOpen, setIsReviewListOpen] = useState(false);
+         const [practiceMode, setPracticeMode] = useState('kanji');
         const [srsData, setSrsData] = useState(() => {
-            const [practiceMode, setPracticeMode] = useState('kanji');
+           
     // Tự động lấy dữ liệu cũ từ máy người dùng khi mở web
     const saved = localStorage.getItem('phadao_srs_data');
             
