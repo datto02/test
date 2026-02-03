@@ -1124,7 +1124,7 @@ const HeaderSection = ({ char, paths, loading, failed, config, dbData }) => {
     );
 };
 // 2. GridBox (Đã thêm class reference-box và chỉnh Hover xanh nhạt)
-const GridBox = ({ char, type, config, index, svgData, failed, onClick }) => {
+const GridBox = ({ char, type, config, index, svgData, failed, onClick, isInternal }) => {
 const isReference = type === 'reference';
 const showTrace = index < config.traceCount;
 const { gridType, gridOpacity } = config; 
@@ -1138,13 +1138,19 @@ const refStyle = isReference ? {
 } : {};
 
 return (
-    <div 
-    
-    className={`relative w-[16mm] h-[16mm] border-r border-b box-border flex justify-center items-center overflow-hidden bg-transparent ${isReference ? 'reference-box cursor-pointer hover:bg-indigo-50 transition-colors duration-200' : ''}`}
-    style={{ borderColor: gridColor }}
-    onClick={isReference ? onClick : undefined} 
-    title={isReference ? "Bấm để xem cách viết" : ""}
-    >
+   <div 
+            className={`relative w-[16mm] h-[16mm] border-r border-b box-border flex justify-center items-center overflow-hidden bg-transparent ${isReference ? 'reference-box cursor-pointer hover:bg-indigo-50 transition-colors duration-200' : ''}`}
+            style={{ 
+                borderColor: gridColor,
+                // --- THÊM LOGIC NÀY ---
+                // Nếu là vạch ngăn cách trong từ: dùng nét đứt (dashed)
+                // Nếu là vạch ngăn cách giữa các từ: dùng nét liền (solid - mặc định)
+                borderRightStyle: isInternal ? 'dashed' : 'solid', 
+                // Có thể chỉnh độ dày nếu cần, nhưng dashed mặc định đã khá giống nét 0.5 của chữ thập
+            }}
+            onClick={isReference ? onClick : undefined} 
+            title={isReference ? "Bấm để xem cách viết" : ""}
+        >
     
     <div className="absolute inset-0 pointer-events-none z-0">
         {gridType !== 'blank' && (
@@ -1244,34 +1250,36 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
     // =================================================================
     // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (CODE MỚI TỪ BẢN NHÁP)
     // =================================================================
-    else {
-        // char ở đây chính là nguyên cụm từ vựng (ví dụ: "日本語")
+   else {
         const word = char.trim();
         const wordLen = word.length;
         const totalBoxes = 12;
         const boxes = [];
         
-        // 1. Logic điền từ lặp lại vào 12 ô
-        let currentIndex = 0;
-        // Tạo mảng 12 ô trống trước
-        for(let i=0; i<totalBoxes; i++) boxes.push(null);
+        // 1. Tạo mảng 12 ô trống trước (lưu object thay vì null)
+        for(let i=0; i<totalBoxes; i++) boxes.push({ char: null, isInternal: false });
 
-        // Lấp đầy
+        let currentIndex = 0;
+
+        // 2. Logic điền từ
         while (currentIndex + wordLen <= totalBoxes) {
             for (let i = 0; i < wordLen; i++) {
-                boxes[currentIndex + i] = word[i];
+                // Sửa logic: Nếu KHÔNG phải là chữ cuối cùng của từ thì là isInternal (vạch kẻ trong)
+                const isInsideWord = i < wordLen - 1;
+                boxes[currentIndex + i] = { 
+                    char: word[i], 
+                    isInternal: isInsideWord // True = nét đứt, False = nét liền
+                };
             }
-            currentIndex += wordLen; // Nối tiếp nhau
+            currentIndex += wordLen; 
         }
 
         const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
-        
-        // Lấy thông tin nghĩa từ file tuvungg.json (nếu có)
         const vocabInfo = dbData?.TUVUNG_DB?.[word] || {};
 
         return (
             <div className="flex flex-col w-full px-[8mm]">
-                {/* HEADER RIÊNG CHO TỪ VỰNG */}
+                {/* HEADER GIỮ NGUYÊN */}
                 <div className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" style={{ width: '184mm' }}>
                     <div className="flex-shrink-0 mr-4 flex items-baseline gap-2 mb-[3px]">
                         <span className="font-bold text-sm leading-none text-black whitespace-nowrap">{word}</span>
@@ -1283,16 +1291,17 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
                     </div>
                 </div>
 
-                {/* GRID TỪ VỰNG: Tất cả đều là nét mờ (trace), không có SVG mẫu */}
+                {/* GRID TỪ VỰNG: Render các ô với tham số isInternal */}
                 <div className="flex border-l border-t w-fit" style={{ borderColor: gridBorderColor }}>
-                    {boxes.map((charInBox, i) => (
+                    {boxes.map((item, i) => (
                         <GridBox
                             key={i} index={i} 
-                            char={charInBox} // Ký tự hoặc null
-                            type={'trace'}   // Luôn là trace
+                            char={item.char} 
+                            type={'trace'}
                             config={config} 
-                            svgData={null}   // Không cần SVG
+                            svgData={null}
                             failed={false}
+                            isInternal={item.isInternal} // <--- TRUYỀN THAM SỐ NÀY
                         />
                     ))}
                 </div>
