@@ -2,7 +2,7 @@ const removeAccents = (str) => {
 return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
 };
     const { useState, useEffect, useMemo, useRef } = React;
- 
+
 const calculateSRS = (currentData, quality) => {
   let { level = 0, easeFactor = 2.5, nextReview } = currentData || {};
   const now = Date.now();
@@ -51,19 +51,18 @@ const calculateSRS = (currentData, quality) => {
   }
 };
 
-// --- FETCH DATA FROM GITHUB (ĐÃ SỬA LỖI KHAI BÁO BIẾN) --- 
+// --- FETCH DATA FROM GITHUB (ĐÃ SỬA: TẢI THÊM N5-N1) --- 
 const fetchDataFromGithub = async () => {
   try { 
-    // 1. Tải các file cơ sở dữ liệu chính
-    // SỬA LỖI: Thêm tuvungResponse vào mảng nhận kết quả
+    // 1. Tải các file cơ sở dữ liệu chính (THÊM tuvungg.json)
     const [dbResponse, onkunResponse, vocabResponse, tuvungResponse] = await Promise.all([
       fetch('./data/kanji_db.json'),
       fetch('./data/onkun.json'),
       fetch('./data/vocab.json'),
-      fetch('./data/tuvungg.json')
+      fetch('./data/tuvungg.json') // <--- File mới
     ]);
 
-    // 2. Tải thêm 5 file danh sách cấp độ (N5 -> N1) để dùng cho Game & Sidebar
+    // 2. Tải thêm 5 file danh sách cấp độ (N5 -> N1)
     const levels = ['n5', 'n4', 'n3', 'n2', 'n1'];
     const levelPromises = levels.map(l => fetch(`./data/kanji${l}.json`));
     const levelResponses = await Promise.all(levelPromises);
@@ -71,49 +70,73 @@ const fetchDataFromGithub = async () => {
     let kanjiDb = null;
     let onkunDb = null;
     let vocabDb = null;
-    let kanjiLevels = {}; // Object chứa danh sách theo cấp độ
+    let kanjiLevels = {}; 
 
     // Xử lý DB chính
     if (dbResponse.ok) kanjiDb = await dbResponse.json();
-    else console.warn("Không tải được kanji_db.json");
-
     if (onkunResponse.ok) onkunDb = await onkunResponse.json();
-    else console.warn("Không tải được onkun.json");
-
     if (vocabResponse.ok) vocabDb = await vocabResponse.json();
-    else vocabDb = {};
+
+    // Xử lý file Từ vựng (MỚI)
+    let tuvungDb = {};
+    if (tuvungResponse && tuvungResponse.ok) {
+        tuvungDb = await tuvungResponse.json();
+    }
 
     // Xử lý 5 file cấp độ
     for (let i = 0; i < levels.length; i++) {
-        const lvlKey = levels[i].toUpperCase(); // N5, N4...
+        const lvlKey = levels[i].toUpperCase();
         if (levelResponses[i].ok) {
             const text = await levelResponses[i].text();
-            // Làm sạch dữ liệu (xóa xuống dòng, dấu câu...) để thành mảng ký tự
             kanjiLevels[lvlKey] = Array.from(new Set(text.replace(/["\n\r\s,\[\]]/g, '').split('')));
         } else {
-            console.warn(`Không tải được file kanji${levels[i]}.json`);
             kanjiLevels[lvlKey] = [];
         }
     }
 
-    // Xử lý file Từ vựng
-    let tuvungDb = {};
-    // Kiểm tra xem tuvungResponse có tồn tại và ok không
-    if (tuvungResponse && tuvungResponse.ok) {
-        tuvungDb = await tuvungResponse.json();
-    } else {
-        console.warn("Không tải được tuvungg.json hoặc file chưa tồn tại");
-    }
-      
-    // Trả về dữ liệu gộp, thêm KANJI_LEVELS vào
+    // Trả về dữ liệu gộp (THÊM TUVUNG_DB)
     return { ...kanjiDb, ONKUN_DB: onkunDb, VOCAB_DB: vocabDb, TUVUNG_DB: tuvungDb, KANJI_LEVELS: kanjiLevels }; 
   } catch (error) {
     console.error("Lỗi tải dữ liệu hệ thống:", error);
-    // Quan trọng: Trả về null sẽ khiến App treo ở loading. 
-    // Nếu lỗi, hãy kiểm tra tab Console (F12) để xem chi tiết.
     return null;
   }
 };
+    // --- UTILS & DATA FETCHING ---
+
+    const getHex = (char) => char.codePointAt(0).toString(16).toLowerCase().padStart(5, '0');
+
+    
+
+    
+   const fetchKanjiData = async (char) => {
+    const hex = getHex(char);
+    
+  
+    const sources = [
+      `./data/svg/${hex}.svg`,  
+      `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}.svg`,
+      `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}-Kaisho.svg`,
+      `https://cdn.jsdelivr.net/gh/parsimonhi/animCJK@master/svgsKana/${hex}.svg`,
+      `https://cdn.jsdelivr.net/gh/parsimonhi/animCJK@master/svgsJa/${hex}.svg`
+    ];
+
+    for (const url of sources) {
+      try {
+        const res = await fetch(url);
+        if (res.ok) {
+          const text = await res.text();
+          
+          if (text.includes('<svg')) {
+             return { success: true, svg: text, source: url };
+          }
+        }
+      } catch (e) {
+        continue;
+      }
+    }
+    
+    return { success: false };
+  };
 
     
     const useKanjiSvg = (char) => {
@@ -1170,10 +1193,11 @@ return (
 );
 };
 
-// 3. WorkbookRow (ĐÃ CẬP NHẬT CHẾ ĐỘ TỪ VỰNG)
 const WorkbookRow = ({ char, config, dbData, mode }) => {
-    // === LOGIC CHẾ ĐỘ KANJI (GIỮ NGUYÊN 100%) ===
-    if (mode === 'kanji') {
+    // =================================================================
+    // TRƯỜNG HỢP 1: CHẾ ĐỘ KANJI (GIỮ NGUYÊN 100% CODE CŨ CỦA BẠN)
+    // =================================================================
+    if (mode === 'kanji' || !mode) { 
         const { loading, paths, fullSvg, failed } = useKanjiSvg(char);
         const boxes = Array.from({ length: 12 }, (_, i) => i);
         const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
@@ -1181,23 +1205,45 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
 
         return (
             <div className="flex flex-col w-full px-[8mm]">
-                <HeaderSection char={char} paths={paths} loading={loading} failed={failed} config={config} dbData={dbData} />
+                <HeaderSection 
+                    char={char} 
+                    paths={paths} 
+                    loading={loading} 
+                    failed={failed} 
+                    config={config} 
+                    dbData={dbData}
+                />
+                
                 <div className="flex border-l border-t w-fit" style={{ borderColor: gridBorderColor }}>
                     {boxes.map((i) => (
-                        <GridBox
-                            key={i} index={i} char={char}
-                            type={i === 0 ? 'reference' : 'trace'}
-                            config={config} svgData={fullSvg} failed={failed}
-                            onClick={i === 0 ? () => setIsAnimOpen(true) : undefined}
-                        />
+                    <GridBox
+                        key={i}
+                        index={i}
+                        char={char}
+                        type={i === 0 ? 'reference' : 'trace'}
+                        config={config}
+                        svgData={fullSvg}
+                        failed={failed}
+                        onClick={i === 0 ? () => setIsAnimOpen(true) : undefined}
+                    />
                     ))}
                 </div>
-                <KanjiAnimationModal char={char} paths={paths} fullSvg={fullSvg} dbData={dbData} isOpen={isAnimOpen} onClose={() => setIsAnimOpen(false)} />
+
+                <KanjiAnimationModal 
+                    char={char}
+                    paths={paths}
+                    fullSvg={fullSvg} 
+                    dbData={dbData}    
+                    isOpen={isAnimOpen}
+                    onClose={() => setIsAnimOpen(false)}
+                />
             </div>
         );
     }
 
-    // === LOGIC CHẾ ĐỘ TỪ VỰNG (MỚI) ===
+    // =================================================================
+    // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (CODE MỚI TỪ BẢN NHÁP)
+    // =================================================================
     else {
         // char ở đây chính là nguyên cụm từ vựng (ví dụ: "日本語")
         const word = char.trim();
@@ -1205,28 +1251,27 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
         const totalBoxes = 12;
         const boxes = [];
         
-        // 1. Tính toán lấp đầy ô (Chỉ điền nếu đủ chỗ cho cả từ)
+        // 1. Logic điền từ lặp lại vào 12 ô
         let currentIndex = 0;
-        
         // Tạo mảng 12 ô trống trước
         for(let i=0; i<totalBoxes; i++) boxes.push(null);
 
-        // Logic điền từ: Điền từ -> Cách 1 ô -> Điền từ... (Nếu không đủ chỗ cho cả từ thì dừng)
+        // Lấp đầy
         while (currentIndex + wordLen <= totalBoxes) {
             for (let i = 0; i < wordLen; i++) {
                 boxes[currentIndex + i] = word[i];
             }
-            currentIndex += wordLen; // +1 để tạo khoảng trống giữa các từ
+            currentIndex += wordLen; // Nối tiếp nhau
         }
 
         const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
         
-        // Lấy thông tin nghĩa từ file tuvungg.json
+        // Lấy thông tin nghĩa từ file tuvungg.json (nếu có)
         const vocabInfo = dbData?.TUVUNG_DB?.[word] || {};
 
         return (
             <div className="flex flex-col w-full px-[8mm]">
-                {/* HEADER TỪ VỰNG: Thay vì hiện nét, hiện Nghĩa/Cách đọc */}
+                {/* HEADER RIÊNG CHO TỪ VỰNG */}
                 <div className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" style={{ width: '184mm' }}>
                     <div className="flex-shrink-0 mr-4 flex items-baseline gap-2 mb-[3px]">
                         <span className="font-bold text-sm leading-none text-black whitespace-nowrap">{word}</span>
@@ -1238,15 +1283,15 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
                     </div>
                 </div>
 
-                {/* GRID TỪ VỰNG: Bỏ ô Reference, bắt đầu in mờ luôn */}
+                {/* GRID TỪ VỰNG: Tất cả đều là nét mờ (trace), không có SVG mẫu */}
                 <div className="flex border-l border-t w-fit" style={{ borderColor: gridBorderColor }}>
                     {boxes.map((charInBox, i) => (
                         <GridBox
                             key={i} index={i} 
-                            char={charInBox} // Nếu null thì GridBox sẽ hiện ô trống
-                            type={'trace'}   // Tất cả đều là nét mờ (trace)
+                            char={charInBox} // Ký tự hoặc null
+                            type={'trace'}   // Luôn là trace
                             config={config} 
-                            svgData={null}   // Không cần SVG hoạt họa
+                            svgData={null}   // Không cần SVG
                             failed={false}
                         />
                     ))}
@@ -1257,7 +1302,7 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
 };
 
     // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
-    const Page = ({ chars, config, dbData }) => {
+    const Page = ({ chars, config, dbData, mode }) => {
 // 1. Hàm Xuất dữ liệu (Tải file về máy)
     const handlePageExport = () => {
         const data = localStorage.getItem('phadao_srs_data');
@@ -1346,6 +1391,7 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
                 char={char}
                 config={config}
                 dbData={dbData}
+                    mode={mode}
             />
             ))}
         </div>
@@ -2118,7 +2164,7 @@ return () => document.removeEventListener("mousedown", handleClickOutside);
         cleaned = cleaned.replace(/[a-zA-Z]/g, '');
         
         // 2. Xóa hết dấu xuống dòng (Enter) -> Thay bằng rỗng ''
-        //cleaned = cleaned.replace(/[\n\r]+/g, '');
+        cleaned = cleaned.replace(/[\n\r]+/g, '');
         
         // 3. Xóa hết các loại dấu cách (thường, tab, Nhật) -> Thay bằng rỗng ''
         // Regex này bao gồm: dấu cách thường ( ), dấu cách Nhật (　), và tab (\t)
@@ -3352,196 +3398,195 @@ TÀI LIỆU HỌC TẬP
     );
     };
 
-const App = () => {
-    // --- CÁC STATE CŨ (GIỮ NGUYÊN) ---
-    const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
-    const [showMobilePreview, setShowMobilePreview] = useState(false);
-    const [isConfigOpen, setIsConfigOpen] = React.useState(false);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
-    const [isLearnGameOpen, setIsLearnGameOpen] = useState(false);
-    const [isReviewListOpen, setIsReviewListOpen] = useState(false);
     
-    // State SRS
-    const [srsData, setSrsData] = useState(() => {
-        const saved = localStorage.getItem('phadao_srs_data');
-        return saved ? JSON.parse(saved) : {};
-    });
+    const App = () => {
+// --- Các state cũ giữ nguyên ---
+const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
+const [showMobilePreview, setShowMobilePreview] = useState(false);
+const [isConfigOpen, setIsConfigOpen] = React.useState(false);
+const [isMenuOpen, setIsMenuOpen] = useState(false);
+const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
+        const [isLearnGameOpen, setIsLearnGameOpen] = useState(false);
+        const [isReviewListOpen, setIsReviewListOpen] = useState(false);
+        const [srsData, setSrsData] = useState(() => {
+            const [practiceMode, setPracticeMode] = useState('kanji');
+    // Tự động lấy dữ liệu cũ từ máy người dùng khi mở web
+    const saved = localStorage.getItem('phadao_srs_data');
+            
+    return saved ? JSON.parse(saved) : {};
+});
 
-    // State cấu hình
-    const [config, setConfig] = useState({ 
-        text: '', fontSize: 32, traceCount: 9, verticalOffset: -3, 
-        traceOpacity: 0.15, guideScale: 1.02, guideX: 0, guideY: 0.5, 
-        gridOpacity: 0.8, gridType: 'cross', 
-        fontFamily: "'Klee One', 'UD Digi Kyokasho N-R', 'UD Digi Kyokasho', 'UD デジタル 教科書体 N-R', 'UD デジタル 教科書体', cursive", 
-        displayMode: 'strokes' 
-    });
+// Hàm để lưu kết quả học tập
+const updateSRSProgress = (char, quality) => {
+    const newProgress = calculateSRS(srsData[char], quality);
+    const newData = { ...srsData, [char]: newProgress };
+    setSrsData(newData);
+    localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
+};
+const handleResetAllSRS = () => {
+    setSrsData({}); // Xóa sạch state
+    localStorage.removeItem('phadao_srs_data'); // Xóa sạch trong bộ nhớ máy
+};
+// State cấu hình mặc định
+const [config, setConfig] = useState({ 
+    text: '', fontSize: 32, traceCount: 9, verticalOffset: -3, 
+    traceOpacity: 0.15, guideScale: 1.02, guideX: 0, guideY: 0.5, 
+    gridOpacity: 0.8, gridType: 'cross', 
+    fontFamily: "'Klee One', 'UD Digi Kyokasho N-R', 'UD Digi Kyokasho', 'UD デジタル 教科書体 N-R', 'UD デジタル 教科書体', cursive",
+    displayMode: 'strokes' 
+});
 
-    const [showPostPrintDonate, setShowPostPrintDonate] = useState(false);
-    const [dbData, setDbData] = useState(null);
-    const [isDbLoaded, setIsDbLoaded] = useState(false);
+const [showPostPrintDonate, setShowPostPrintDonate] = useState(false);
 
-    // --- STATE MỚI: CHẾ ĐỘ LUYỆN TẬP ---
-    const [practiceMode, setPracticeMode] = useState('kanji'); // 'kanji' | 'vocab'
+// --- PHẦN MỚI: State chứa dữ liệu tải về ---
+const [dbData, setDbData] = useState(null);
+const [isDbLoaded, setIsDbLoaded] = useState(false);
 
-    // --- EFFECT & LOGIC ---
-
-    // 1. Tải dữ liệu
-    useEffect(() => {
-        fetchDataFromGithub().then(data => {
-            if (data) {
-                setDbData(data);
-                setIsDbLoaded(true);
-            }
-        });
-    }, []);
-
-    // 2. Khóa cuộn khi hiện popup
-    useEffect(() => {
-        if (showPostPrintDonate) document.body.style.overflow = 'hidden';
-        else document.body.style.overflow = 'unset';
-        return () => { document.body.style.overflow = 'unset'; };
-    }, [showPostPrintDonate]);
-
-    // 3. Hàm xử lý SRS
-    const updateSRSProgress = (char, quality) => {
-        const newProgress = calculateSRS(srsData[char], quality);
-        const newData = { ...srsData, [char]: newProgress };
-        setSrsData(newData);
-        localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
-    };
-
-    const handleResetAllSRS = () => {
-        setSrsData({});
-        localStorage.removeItem('phadao_srs_data');
-    };
-
-    // 4. Logic phân trang (ĐÃ CẬP NHẬT CHO TỪ VỰNG)
-    const pages = useMemo(() => {
-        // Nội dung mẫu nếu trống
-        const defaultText = practiceMode === 'kanji' ? "日本語" : "日本語\n先生\n学生";
-        const contentToShow = (config.text && config.text.trim().length > 0) ? config.text : defaultText;
-        
-        let items = [];
-        
-        if (practiceMode === 'kanji') {
-            // Chế độ Kanji: Tách từng ký tự (như cũ)
-            // Lọc bỏ dấu xuống dòng và khoảng trắng thừa để xếp ô cho đẹp
-            const cleanText = contentToShow.replace(/[\n\r\s]/g, ''); 
-            items = Array.from(cleanText);
-        } else {
-            // Chế độ Từ vựng: Tách theo dòng (Enter)
-            // Giữ lại từ vựng nguyên vẹn
-            items = contentToShow.split('\n').filter(w => w.trim().length > 0);
+// 1. Dùng useEffect để tải dữ liệu ngay khi mở web
+useEffect(() => {
+    fetchDataFromGithub().then(data => {
+        if (data) {
+            setDbData(data);      // Lưu dữ liệu vào state
+            setIsDbLoaded(true); // Báo hiệu đã tải xong
         }
+    });
+}, []);
 
-        const chunks = [];
-        const ROWS_PER_PAGE = 10;
-        for (let i = 0; i < items.length; i += ROWS_PER_PAGE) { 
-            chunks.push(items.slice(i, i + ROWS_PER_PAGE)); 
-        }
-        
-        if (chunks.length === 0) return [[]];
-        return chunks;
-    }, [config.text, practiceMode]);
+// 2. Logic xử lý cuộn trang khi hiện popup (giữ nguyên)
+useEffect(() => {
+    if (showPostPrintDonate) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = 'unset';
+    return () => { document.body.style.overflow = 'unset'; };
+}, [showPostPrintDonate]);
 
-    // 5. Hàm in ấn
-    const handlePrint = () => {
-        const handleAfterPrint = () => { 
-            setShowPostPrintDonate(true); 
-            window.removeEventListener("afterprint", handleAfterPrint); 
-        };
-        window.addEventListener("afterprint", handleAfterPrint);
-        window.print();
-    };
+/*useEffect(() => {
+    if (!config.text || config.text.trim().length === 0) setShowMobilePreview(false);
+}, [config.text]); */
+// ------------------------------
 
-    // --- MÀN HÌNH LOADING ---
-    if (!isDbLoaded) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-                <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
-                <p className="text-gray-500 font-bold animate-pulse">Đang tải dữ liệu Kanji...</p>
-            </div>
-        );
+// 4. Logic phân trang (ĐÃ CẬP NHẬT CHO TỪ VỰNG)
+const pages = useMemo(() => {
+    // Nội dung mẫu nếu trống
+    const defaultText = practiceMode === 'kanji' ? "日本語" : "日本語\n先生\n学生";
+    const contentToShow = (config.text && config.text.trim().length > 0) ? config.text : defaultText;
+    
+    let items = [];
+    
+    if (practiceMode === 'kanji') {
+        // Chế độ Kanji: Tách từng ký tự (như cũ)
+        // Lọc bỏ dấu xuống dòng và khoảng trắng thừa
+        const cleanText = contentToShow.replace(/[\n\r\s]/g, ''); 
+        items = Array.from(cleanText);
+    } else {
+        // Chế độ Từ vựng: Tách theo dòng (Enter)
+        // Giữ lại từ vựng nguyên vẹn
+        items = contentToShow.split('\n').filter(w => w.trim().length > 0);
     }
 
-    // --- GIAO DIỆN CHÍNH (RETURN) ---
+    const chunks = [];
+    const ROWS_PER_PAGE = 10;
+    for (let i = 0; i < items.length; i += ROWS_PER_PAGE) { 
+        chunks.push(items.slice(i, i + ROWS_PER_PAGE)); 
+    }
+    
+    if (chunks.length === 0) return [[]];
+    return chunks;
+}, [config.text, practiceMode]); // Thêm practiceMode vào dependency
+
+// 4. Logic in ấn (giữ nguyên)
+const handlePrint = () => {
+    const handleAfterPrint = () => { setShowPostPrintDonate(true); window.removeEventListener("afterprint", handleAfterPrint); };
+    window.addEventListener("afterprint", handleAfterPrint);
+    window.print();
+};
+
+// --- MÀN HÌNH CHỜ (LOADING) ---
+// Nếu dữ liệu chưa tải xong, hiện màn hình xoay vòng tròn
+if (!isDbLoaded) {
     return (
-        <div className="min-h-screen flex flex-col md:flex-row print-layout-reset">
-            {/* 1. SIDEBAR */}
-            <div className="no-print z-50">
-                <Sidebar 
-                    config={config} onChange={setConfig} onPrint={handlePrint} 
-                    isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen}
-                    isConfigOpen={isConfigOpen} setIsConfigOpen={setIsConfigOpen}
-                    isCafeModalOpen={isCafeModalOpen} setIsCafeModalOpen={setIsCafeModalOpen} 
-                    showMobilePreview={showMobilePreview} setShowMobilePreview={setShowMobilePreview}
-                    setIsFlashcardOpen={setIsFlashcardOpen}
-                    setIsLearnGameOpen={setIsLearnGameOpen}
-                    dbData={dbData}
-                    srsData={srsData}
-                    onOpenReviewList={() => setIsReviewListOpen(true)}
-                />
-            </div>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+            <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-500 font-bold animate-pulse">Đang tải dữ liệu Kanji...</p>
+        </div>
+    );
+}
 
-            {/* 2. PREVIEW AREA (VÙNG HIỂN THỊ TRANG GIẤY) */}
-            <div id="preview-area" className={`flex-1 bg-gray-100 p-0 md:p-8 overflow-auto flex-col items-center min-h-screen print-layout-reset custom-scrollbar ${showMobilePreview ? 'flex' : 'hidden md:flex'}`}>
-                {pages.map((pageItems, index) => (
-                    <Page 
-                        key={index} 
-                        chars={pageItems} // Đây là mảng chars (kanji) hoặc words (từ vựng)
-                        config={config} 
-                        dbData={dbData} 
-                        mode={practiceMode} // Truyền chế độ xuống Page -> WorkbookRow
-                    /> 
-                ))}
-            </div>
+// --- GIAO DIỆN CHÍNH (Khi đã có dữ liệu) ---
+return (
+    <div className="min-h-screen flex flex-col md:flex-row print-layout-reset">
+    <div className="no-print z-50">
+    <Sidebar 
+        config={config} onChange={setConfig} onPrint={handlePrint} 
+        isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen}
+        isConfigOpen={isConfigOpen} setIsConfigOpen={setIsConfigOpen}
+        isCafeModalOpen={isCafeModalOpen} setIsCafeModalOpen={setIsCafeModalOpen} 
+        showMobilePreview={showMobilePreview} setShowMobilePreview={setShowMobilePreview}
+        setIsFlashcardOpen={setIsFlashcardOpen}
+        setIsLearnGameOpen={setIsLearnGameOpen}
+        dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống Sidebar
+            srsData={srsData}
+         onOpenReviewList={() => setIsReviewListOpen(true)}
+      
+    />
+    </div>
 
-            {/* 3. CÁC POPUP/MODAL */}
-            {showPostPrintDonate && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative animate-in zoom-in-95 duration-300 border border-orange-100">
-                        <button onClick={() => setShowPostPrintDonate(false)} className="absolute top-3 right-3 p-1.5 bg-gray-100 hover:bg-red-100 hover:text-red-500 rounded-full transition-colors z-10">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                        </button>
-                        <div className="p-6 flex flex-col items-center text-center">
-                            <h3 className="text-xl font-bold text-gray-800 mb-2">BẠN TẠO ĐƯỢC FILE CHƯA?</h3>
-                            <p className="text-sm text-gray-500 mb-6 leading-relaxed">Nếu bạn thấy trang web hữu ích <br/> hãy mời mình một ly cafe nhé!</p>
-                            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl shadow-inner border border-orange-200 mb-4">
-                                <img src="https://i.ibb.co/JWGwcTL1/3381513652021492183.jpg" alt="QR Donate" className="w-40 h-auto rounded-lg mix-blend-multiply" />
-                            </div>
-                            <p className="text-[11px] font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-full mb-4">MB BANK: 99931082002</p>
-                            <button onClick={() => setShowPostPrintDonate(false)} className="w-full py-2.5 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold rounded-xl transition-all shadow-lg active:scale-95">Lần sau nhé!</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-            
-            <FlashcardModal 
-                isOpen={isFlashcardOpen} 
-                onClose={() => setIsFlashcardOpen(false)} 
-                text={config.text} 
-                dbData={dbData} 
-                onSrsUpdate={updateSRSProgress}
-                srsData={srsData} 
-                onSrsRestore={(char, oldData) => {
-                    const newData = { ...srsData, [char]: oldData };
-                    setSrsData(newData);
-                    localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
-                }}
-            />
-            
-            <LearnGameModal 
-                isOpen={isLearnGameOpen}
-                onClose={() => setIsLearnGameOpen(false)}
-                text={config.text}
-                dbData={dbData}
-                onSwitchToFlashcard={() => {
-                    setIsLearnGameOpen(false);
-                    setIsFlashcardOpen(true);
-                }}
-            />
-            
+    <div id="preview-area" className={`flex-1 bg-gray-100 p-0 md:p-8 overflow-auto flex-col items-center min-h-screen print-layout-reset custom-scrollbar ${showMobilePreview ? 'flex' : 'hidden md:flex'}`}>
+    {pages.map((pageChars, index) => (
+        <Page 
+        key={index} 
+        chars={pageChars} 
+        config={config} 
+        mode={practiceMode}
+        dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống page 
+        /> 
+    ))}
+    </div>
+
+    {/* Popup Donate  */}
+    {showPostPrintDonate && (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative animate-in zoom-in-95 duration-300 border border-orange-100">
+        <button onClick={() => setShowPostPrintDonate(false)} className="absolute top-3 right-3 p-1.5 bg-gray-100 hover:bg-red-100 hover:text-red-500 rounded-full transition-colors z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <div className="p-6 flex flex-col items-center text-center">
+            <h3 className="text-xl font-bold text-gray-800 mb-2">BẠN TẠO ĐƯỢC FILE CHƯA?</h3>
+            <p className="text-sm text-gray-500 mb-6 leading-relaxed">Nếu bạn thấy trang web hữu ích <br/> hãy mời mình một ly cafe nhé!</p>
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl shadow-inner border border-orange-200 mb-4">
+            <img src="https://i.ibb.co/JWGwcTL1/3381513652021492183.jpg" alt="QR Donate" className="w-40 h-auto rounded-lg mix-blend-multiply" />
+            </div>
+            <p className="text-[11px] font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-full mb-4">MB BANK: 99931082002</p>
+            <button onClick={() => setShowPostPrintDonate(false)} className="w-full py-2.5 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold rounded-xl transition-all shadow-lg active:scale-95">Lần sau nhé!</button>
+        </div>
+        </div>
+    </div>
+    )}
+        
+<FlashcardModal 
+    isOpen={isFlashcardOpen} 
+    onClose={() => setIsFlashcardOpen(false)} 
+    text={config.text} 
+    dbData={dbData} 
+    onSrsUpdate={updateSRSProgress}
+    srsData={srsData} 
+    onSrsRestore={(char, oldData) => {
+        // Hàm này sẽ đè dữ liệu cũ (snapshot) lên dữ liệu hiện tại
+        const newData = { ...srsData, [char]: oldData };
+        setSrsData(newData);
+        localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
+    }}
+/>
+<LearnGameModal 
+    isOpen={isLearnGameOpen}
+    onClose={() => setIsLearnGameOpen(false)}
+    text={config.text}
+    dbData={dbData}
+    onSwitchToFlashcard={() => {
+        setIsLearnGameOpen(false); // Đóng Game
+        setIsFlashcardOpen(true);  // Mở Flashcard ngay lập tức
+    }}
+/>
+       {/* 3. RENDER MODAL MỚI */}
             <ReviewListModal 
                 isOpen={isReviewListOpen}
                 onClose={() => setIsReviewListOpen(false)}
@@ -3549,40 +3594,38 @@ const App = () => {
                 dbData={dbData}
                 onResetSRS={handleResetAllSRS}
                 onLoadChars={(chars) => {
-                    setConfig({ ...config, text: chars }); 
-                    setIsReviewListOpen(false);            
-                }}
+        setConfig({ ...config, text: chars }); 
+        setIsReviewListOpen(false);           
+    }}
             />
-
-            {/* 4. NÚT CHUYỂN CHẾ ĐỘ (GÓC DƯỚI BÊN PHẢI) */}
-            <div className="fixed bottom-6 right-6 z-[100] no-print">
-                <button
-                    onClick={() => {
-                        const newMode = practiceMode === 'kanji' ? 'vocab' : 'kanji';
-                        setPracticeMode(newMode);
-                        // Reset text mẫu và hiện thông báo nhỏ (alert) hoặc chỉ reset
-                        setConfig(prev => ({ ...prev, text: '' })); 
-                    }}
-                    className={`h-12 pl-4 pr-6 rounded-full font-black text-[11px] uppercase tracking-widest shadow-2xl border-2 transition-all active:scale-95 flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-300 ${
-                        practiceMode === 'kanji' 
-                        ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-indigo-700 shadow-indigo-200' 
-                        : 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-700 shadow-emerald-200'
-                    }`}
-                >
-                    {/* Icon chuyển đổi */}
-                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">
-                         {practiceMode === 'kanji' ? '字' : '語'}
-                    </div>
-                    
-                    <div className="flex flex-col items-start leading-none gap-0.5">
-                        <span className="opacity-70 text-[9px]">Chế độ hiện tại</span>
-                        <span>{practiceMode === 'kanji' ? 'LUYỆN KANJI' : 'LUYỆN TỪ VỰNG'}</span>
-                    </div>
-                </button>
-            </div>
-
+                    {/* 4. NÚT CHUYỂN CHẾ ĐỘ (GÓC DƯỚI BÊN PHẢI) */}
+<div className="fixed bottom-6 right-6 z-[100] no-print">
+    <button
+        onClick={() => {
+            const newMode = practiceMode === 'kanji' ? 'vocab' : 'kanji';
+            setPracticeMode(newMode);
+            // Reset text mẫu để tránh rối mắt
+            setConfig(prev => ({ ...prev, text: '' })); 
+        }}
+        className={`h-12 pl-4 pr-6 rounded-full font-black text-[11px] uppercase tracking-widest shadow-2xl border-2 transition-all active:scale-95 flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-300 ${
+            practiceMode === 'kanji' 
+            ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-indigo-700 shadow-indigo-200' 
+            : 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-700 shadow-emerald-200'
+        }`}
+    >
+        {/* Icon chuyển đổi */}
+        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">
+                {practiceMode === 'kanji' ? '字' : '語'}
         </div>
-    );
+        
+        <div className="flex flex-col items-start leading-none gap-0.5">
+            <span className="opacity-70 text-[9px]">Chế độ hiện tại</span>
+            <span>{practiceMode === 'kanji' ? 'LUYỆN KANJI' : 'LUYỆN TỪ VỰNG'}</span>
+        </div>
+    </button>
+</div>
+        </div>
+);
 };
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
