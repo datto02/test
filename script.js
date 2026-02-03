@@ -1100,77 +1100,77 @@ const HeaderSection = ({ char, paths, loading, failed, config, dbData }) => {
         </div>
     );
 };
-// 2. GridBox (Đã thêm class reference-box và chỉnh Hover xanh nhạt)
-const GridBox = ({ char, type, config, index, svgData, failed, onClick }) => {
-const isReference = type === 'reference';
-const showTrace = index < config.traceCount;
-const { gridType, gridOpacity } = config; 
+// 2. GridBox (ĐÃ SỬA: HỖ TRỢ NÉT ĐỨT BÊN PHẢI)
+const GridBox = ({ char, type, config, index, svgData, failed, onClick, dashedRight }) => { // <--- Thêm prop dashedRight
+    const isReference = type === 'reference';
+    const showTrace = index < config.traceCount;
+    const { gridType, gridOpacity } = config; 
 
-const gridColor = `rgba(0, 0, 0, ${gridOpacity})`;
+    const gridColor = `rgba(0, 0, 0, ${gridOpacity})`;
 
-const refStyle = isReference ? {
-    '--guide-scale': config.guideScale,
-    '--guide-x': `${config.guideX}px`,
-    '--guide-y': `${config.guideY}px`
-} : {};
+    const refStyle = isReference ? {
+        '--guide-scale': config.guideScale,
+        '--guide-x': `${config.guideX}px`,
+        '--guide-y': `${config.guideY}px`
+    } : {};
 
-return (
-    <div 
-    
-    className={`relative w-[16mm] h-[16mm] border-r border-b box-border flex justify-center items-center overflow-hidden bg-transparent ${isReference ? 'reference-box cursor-pointer hover:bg-indigo-50 transition-colors duration-200' : ''}`}
-    style={{ borderColor: gridColor }}
-    onClick={isReference ? onClick : undefined} 
-    title={isReference ? "Bấm để xem cách viết" : ""}
-    >
-    
-    <div className="absolute inset-0 pointer-events-none z-0">
-        {gridType !== 'blank' && (
-        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <line x1="50" y1="0" x2="50" y2="100" stroke="black" strokeOpacity={gridOpacity} strokeWidth="0.5" strokeDasharray="4 4" />
-            <line x1="0" y1="50" x2="100" y2="50" stroke="black" strokeOpacity={gridOpacity} strokeWidth="0.5" strokeDasharray="4 4" />
-        </svg>
-        )}
-    </div>
-
-    {char && (
-        <>
-        {isReference && (
-            <div className="relative z-20 w-full h-full flex items-center justify-center p-[1px]">
-                {!failed && svgData ? (
-                <div className="ref-wrapper" style={refStyle} dangerouslySetInnerHTML={{ __html: svgData }} />
-                ) : (
-                <span className="kanji-trace !text-black flex justify-center items-center h-full w-full"
-                    style={{ fontSize: `${config.fontSize}pt`, color: 'black', transform: `translateY(${config.verticalOffset}px)`, textShadow: 'none', webkitTextStroke: '0' }}>
-                    {char}
-                </span>
-                )}
-                
-                {/* Icon bàn tay gợi ý (ẩn đi vì đã có hiệu ứng đổi màu chữ làm tín hiệu) */}
-                <div className="absolute bottom-0.5 right-0.5 opacity-0 hover:opacity-0 text-indigo-400 pointer-events-none transition-opacity">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                </div>
-            </div>
-        )}
-
-        {!isReference && showTrace && (
-            <span className="kanji-trace"
-            style={{
-                fontSize: `${config.fontSize}pt`,
-                transform: `translateY(${config.verticalOffset}px)`,
-                color: `rgba(0, 0, 0, ${config.traceOpacity})`,
-                //fontFamily: config.fontFamily
+    return (
+        <div 
+            className={`relative w-[16mm] h-[16mm] border-r border-b box-border flex justify-center items-center overflow-hidden bg-transparent ${isReference ? 'reference-box cursor-pointer hover:bg-indigo-50 transition-colors duration-200' : ''}`}
+            style={{ 
+                borderColor: gridColor,
+                borderRightStyle: dashedRight ? 'dashed' : 'solid' // <--- LOGIC QUAN TRỌNG: Đổi kiểu nét kẻ
             }}
-            >
-            {char}
-            </span>
-        )}
-        </>
-    )}
-    </div>
-);
+            onClick={isReference ? onClick : undefined} 
+            title={isReference ? "Bấm để xem cách viết" : ""}
+        >
+            
+            <div className="absolute inset-0 pointer-events-none z-0">
+                {gridType !== 'blank' && (
+                <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <line x1="50" y1="0" x2="50" y2="100" stroke="black" strokeOpacity={gridOpacity} strokeWidth="0.5" strokeDasharray="4 4" />
+                    <line x1="0" y1="50" x2="100" y2="50" stroke="black" strokeOpacity={gridOpacity} strokeWidth="0.5" strokeDasharray="4 4" />
+                </svg>
+                )}
+            </div>
+
+            {char && (
+                <>
+                {isReference && (
+                    <div className="relative z-20 w-full h-full flex items-center justify-center p-[1px]">
+                        {!failed && svgData ? (
+                        <div className="ref-wrapper" style={refStyle} dangerouslySetInnerHTML={{ __html: svgData }} />
+                        ) : (
+                        <span className="kanji-trace !text-black flex justify-center items-center h-full w-full"
+                            style={{ fontSize: `${config.fontSize}pt`, color: 'black', transform: `translateY(${config.verticalOffset}px)`, textShadow: 'none', webkitTextStroke: '0' }}>
+                            {char}
+                        </span>
+                        )}
+                        
+                        <div className="absolute bottom-0.5 right-0.5 opacity-0 hover:opacity-0 text-indigo-400 pointer-events-none transition-opacity">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                        </div>
+                    </div>
+                )}
+
+                {!isReference && showTrace && (
+                    <span className="kanji-trace"
+                    style={{
+                        fontSize: `${config.fontSize}pt`,
+                        transform: `translateY(${config.verticalOffset}px)`,
+                        color: `rgba(0, 0, 0, ${config.traceOpacity})`,
+                    }}
+                    >
+                    {char}
+                    </span>
+                )}
+                </>
+            )}
+        </div>
+    );
 };
 
-// 3. WorkbookRow (ĐÃ CẬP NHẬT CHẾ ĐỘ TỪ VỰNG)
+// 3. WorkbookRow (ĐÃ SỬA: LOGIC NÉT ĐỨT GIỮA TỪ)
 const WorkbookRow = ({ char, config, dbData, mode }) => {
     // === LOGIC CHẾ ĐỘ KANJI (GIỮ NGUYÊN 100%) ===
     if (mode === 'kanji') {
@@ -1197,36 +1197,41 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
         );
     }
 
-    // === LOGIC CHẾ ĐỘ TỪ VỰNG (MỚI) ===
+    // === LOGIC CHẾ ĐỘ TỪ VỰNG (CÓ NÉT ĐỨT) ===
     else {
-        // char ở đây chính là nguyên cụm từ vựng (ví dụ: "日本語")
         const word = char.trim();
         const wordLen = word.length;
         const totalBoxes = 12;
         const boxes = [];
+        // Tạo mảng style cho đường kẻ bên phải của từng ô (mặc định là false - tức là nét liền)
+        const dashedBorders = Array(totalBoxes).fill(false);
         
-        // 1. Tính toán lấp đầy ô (Chỉ điền nếu đủ chỗ cho cả từ)
-        let currentIndex = 0;
-        
-        // Tạo mảng 12 ô trống trước
         for(let i=0; i<totalBoxes; i++) boxes.push(null);
 
-        // Logic điền từ: Điền từ -> Cách 1 ô -> Điền từ... (Nếu không đủ chỗ cho cả từ thì dừng)
+        let currentIndex = 0;
+        
+        // Logic điền từ
         while (currentIndex + wordLen <= totalBoxes) {
             for (let i = 0; i < wordLen; i++) {
-                boxes[currentIndex + i] = word[i];
+                const globalIndex = currentIndex + i;
+                boxes[globalIndex] = word[i];
+                
+                // LOGIC MỚI:
+                // Nếu ký tự này KHÔNG PHẢI là ký tự cuối cùng của từ -> Đường kẻ bên phải là NÉT ĐỨT
+                if (i < wordLen - 1) {
+                    dashedBorders[globalIndex] = true;
+                }
+                // Nếu là ký tự cuối cùng (i == wordLen - 1) -> Giữ nguyên (false) để là NÉT LIỀN
             }
-            currentIndex += wordLen + 1; // +1 để tạo khoảng trống giữa các từ
+            currentIndex += wordLen; 
         }
 
         const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
-        
-        // Lấy thông tin nghĩa từ file tuvungg.json
         const vocabInfo = dbData?.TUVUNG_DB?.[word] || {};
 
         return (
             <div className="flex flex-col w-full px-[8mm]">
-                {/* HEADER TỪ VỰNG: Thay vì hiện nét, hiện Nghĩa/Cách đọc */}
+                {/* HEADER TỪ VỰNG */}
                 <div className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" style={{ width: '184mm' }}>
                     <div className="flex-shrink-0 mr-4 flex items-baseline gap-2 mb-[3px]">
                         <span className="font-bold text-sm leading-none text-black whitespace-nowrap">{word}</span>
@@ -1238,16 +1243,17 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
                     </div>
                 </div>
 
-                {/* GRID TỪ VỰNG: Bỏ ô Reference, bắt đầu in mờ luôn */}
+                {/* GRID TỪ VỰNG */}
                 <div className="flex border-l border-t w-fit" style={{ borderColor: gridBorderColor }}>
                     {boxes.map((charInBox, i) => (
                         <GridBox
                             key={i} index={i} 
-                            char={charInBox} // Nếu null thì GridBox sẽ hiện ô trống
-                            type={'trace'}   // Tất cả đều là nét mờ (trace)
+                            char={charInBox} 
+                            type={'trace'}   
                             config={config} 
-                            svgData={null}   // Không cần SVG hoạt họa
+                            svgData={null}   
                             failed={false}
+                            dashedRight={dashedBorders[i]} // <--- Truyền cấu hình nét đứt vào ô
                         />
                     ))}
                 </div>
