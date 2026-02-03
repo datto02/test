@@ -1290,7 +1290,7 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
                             {vocabInfo.reading && (hanviet || vocabInfo.meaning) && <span> - </span>}
 
                             {/* 2. Âm Hán Việt (MỚI THÊM - IN ĐẬM NHẸ) */}
-                            {hanviet && <span className="font-bold text-gray-700">{hanviet}</span>}
+                            {hanviet && <span className="font-bold text-black">{hanviet}</span>}
 
                             {/* Gạch nối 2: Nếu có Hán Việt VÀ có Nghĩa */}
                             {hanviet && vocabInfo.meaning && <span> - </span>}
