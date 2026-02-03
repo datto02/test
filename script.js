@@ -1142,11 +1142,8 @@ return (
             className={`relative w-[16mm] h-[16mm] border-r border-b box-border flex justify-center items-center overflow-hidden bg-transparent ${isReference ? 'reference-box cursor-pointer hover:bg-indigo-50 transition-colors duration-200' : ''}`}
             style={{ 
                 borderColor: gridColor,
-                // --- THÊM LOGIC NÀY ---
-                // Nếu là vạch ngăn cách trong từ: dùng nét đứt (dashed)
-                // Nếu là vạch ngăn cách giữa các từ: dùng nét liền (solid - mặc định)
-                borderRightStyle: isInternal ? 'dashed' : 'solid', 
-                // Có thể chỉnh độ dày nếu cần, nhưng dashed mặc định đã khá giống nét 0.5 của chữ thập
+                borderRightStyle: isInternal ? 'dashed' : 'solid',
+                borderRightWidth: isInternal ? '0.5px' : '1px',
             }}
             onClick={isReference ? onClick : undefined} 
             title={isReference ? "Bấm để xem cách viết" : ""}
