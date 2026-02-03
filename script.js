@@ -1124,7 +1124,7 @@ const HeaderSection = ({ char, paths, loading, failed, config, dbData }) => {
     );
 };
 // 2. GridBox (Đã thêm class reference-box và chỉnh Hover xanh nhạt)
-const GridBox = ({ char, type, config, index, svgData, failed, onClick, isInternal }) => {
+const GridBox = ({ char, type, config, index, svgData, failed, onClick }) => {
 const isReference = type === 'reference';
 const showTrace = index < config.traceCount;
 const { gridType, gridOpacity } = config; 
@@ -1138,80 +1138,59 @@ const refStyle = isReference ? {
 } : {};
 
 return (
-        <div 
-            className={`relative w-[16mm] h-[16mm] border-r border-b box-border flex justify-center items-center overflow-hidden bg-transparent ${isReference ? 'reference-box cursor-pointer hover:bg-indigo-50 transition-colors duration-200' : ''}`}
-            style={{ 
-                borderColor: gridColor,
-                
-                // --- SỬA ĐỔI QUAN TRỌNG ---
-                // 1. Nếu là vạch trong từ (isInternal): Ẩn viền CSS đi (transparent) để dùng viền SVG vẽ thay thế.
-                // 2. Nếu không phải: Hiện viền màu như bình thường.
-                borderRightColor: isInternal ? 'transparent' : gridColor,
-                borderRightStyle: 'solid', 
-                borderRightWidth: '1px',   
-            }}
-            onClick={isReference ? onClick : undefined} 
-            title={isReference ? "Bấm để xem cách viết" : ""}
-        >
-            <div className="absolute inset-0 pointer-events-none z-0">
-                <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    {/* 1. Kẻ chữ thập (+) - GIỮ NGUYÊN */}
-                    {gridType !== 'blank' && (
-                    <>
-                        <line x1="50" y1="0" x2="50" y2="100" stroke="black" strokeOpacity={gridOpacity} strokeWidth="0.5" strokeDasharray="4 4" />
-                        <line x1="0" y1="50" x2="100" y2="50" stroke="black" strokeOpacity={gridOpacity} strokeWidth="0.5" strokeDasharray="4 4" />
-                    </>
-                    )}
+    <div 
+    
+    className={`relative w-[16mm] h-[16mm] border-r border-b box-border flex justify-center items-center overflow-hidden bg-transparent ${isReference ? 'reference-box cursor-pointer hover:bg-indigo-50 transition-colors duration-200' : ''}`}
+    style={{ borderColor: gridColor }}
+    onClick={isReference ? onClick : undefined} 
+    title={isReference ? "Bấm để xem cách viết" : ""}
+    >
+    
+    <div className="absolute inset-0 pointer-events-none z-0">
+        {gridType !== 'blank' && (
+        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line x1="50" y1="0" x2="50" y2="100" stroke="black" strokeOpacity={gridOpacity} strokeWidth="0.5" strokeDasharray="4 4" />
+            <line x1="0" y1="50" x2="100" y2="50" stroke="black" strokeOpacity={gridOpacity} strokeWidth="0.5" strokeDasharray="4 4" />
+        </svg>
+        )}
+    </div>
 
-                    {/* 2. Kẻ vạch ngăn cách từ vựng (MỚI THÊM) */}
-                    {/* Chỉ vẽ khi là isInternal. Vẽ đè lên vị trí bên phải */}
-                    {/* Copy y hệt thông số của chữ thập: width 0.5, dasharray 4 4 */}
-                    {isInternal && (
-                        <line 
-                            x1="100" y1="0" x2="100" y2="100" 
-                            stroke="black" 
-                            strokeOpacity={gridOpacity} 
-                            strokeWidth="0.5" 
-                            strokeDasharray="4 4" 
-                        />
-                    )}
-                </svg>
-            </div>
-
-            {char && (
-                <>
-                {isReference && (
-                    <div className="relative z-20 w-full h-full flex items-center justify-center p-[1px]">
-                        {!failed && svgData ? (
-                        <div className="ref-wrapper" style={refStyle} dangerouslySetInnerHTML={{ __html: svgData }} />
-                        ) : (
-                        <span className="kanji-trace !text-black flex justify-center items-center h-full w-full"
-                            style={{ fontSize: `${config.fontSize}pt`, color: 'black', transform: `translateY(${config.verticalOffset}px)`, textShadow: 'none', webkitTextStroke: '0' }}>
-                            {char}
-                        </span>
-                        )}
-                        
-                        <div className="absolute bottom-0.5 right-0.5 opacity-0 hover:opacity-0 text-indigo-400 pointer-events-none transition-opacity">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                        </div>
-                    </div>
-                )}
-
-                {!isReference && showTrace && (
-                    <span className="kanji-trace"
-                    style={{
-                        fontSize: `${config.fontSize}pt`,
-                        transform: `translateY(${config.verticalOffset}px)`,
-                        color: `rgba(0, 0, 0, ${config.traceOpacity})`,
-                    }}
-                    >
+    {char && (
+        <>
+        {isReference && (
+            <div className="relative z-20 w-full h-full flex items-center justify-center p-[1px]">
+                {!failed && svgData ? (
+                <div className="ref-wrapper" style={refStyle} dangerouslySetInnerHTML={{ __html: svgData }} />
+                ) : (
+                <span className="kanji-trace !text-black flex justify-center items-center h-full w-full"
+                    style={{ fontSize: `${config.fontSize}pt`, color: 'black', transform: `translateY(${config.verticalOffset}px)`, textShadow: 'none', webkitTextStroke: '0' }}>
                     {char}
-                    </span>
+                </span>
                 )}
-                </>
-            )}
-        </div>
-    );
+                
+                {/* Icon bàn tay gợi ý (ẩn đi vì đã có hiệu ứng đổi màu chữ làm tín hiệu) */}
+                <div className="absolute bottom-0.5 right-0.5 opacity-0 hover:opacity-0 text-indigo-400 pointer-events-none transition-opacity">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                </div>
+            </div>
+        )}
+
+        {!isReference && showTrace && (
+            <span className="kanji-trace"
+            style={{
+                fontSize: `${config.fontSize}pt`,
+                transform: `translateY(${config.verticalOffset}px)`,
+                color: `rgba(0, 0, 0, ${config.traceOpacity})`,
+                //fontFamily: config.fontFamily
+            }}
+            >
+            {char}
+            </span>
+        )}
+        </>
+    )}
+    </div>
+);
 };
 
 const WorkbookRow = ({ char, config, dbData, mode }) => {
@@ -1262,29 +1241,23 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
         );
     }
 
+  // =================================================================
+    // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (CÓ ÂM HÁN VIỆT - KHÔNG KẺ MỜ)
     // =================================================================
-    // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (CODE MỚI TỪ BẢN NHÁP)
-    // =================================================================
-   else {
+    else {
         const word = char.trim();
         const wordLen = word.length;
         const totalBoxes = 12;
         const boxes = [];
         
-        // 1. Tạo mảng 12 ô trống trước (lưu object thay vì null)
-        for(let i=0; i<totalBoxes; i++) boxes.push({ char: null, isInternal: false });
+        // 1. Tạo mảng 12 ô trống
+        for(let i=0; i<totalBoxes; i++) boxes.push(null);
 
+        // 2. Logic điền từ (Đơn giản, không tính toán vạch kẻ mờ)
         let currentIndex = 0;
-
-        // 2. Logic điền từ
         while (currentIndex + wordLen <= totalBoxes) {
             for (let i = 0; i < wordLen; i++) {
-                // Sửa logic: Nếu KHÔNG phải là chữ cuối cùng của từ thì là isInternal (vạch kẻ trong)
-                const isInsideWord = i < wordLen - 1;
-                boxes[currentIndex + i] = { 
-                    char: word[i], 
-                    isInternal: isInsideWord // True = nét đứt, False = nét liền
-                };
+                boxes[currentIndex + i] = word[i]; // Chỉ lưu ký tự
             }
             currentIndex += wordLen; 
         }
@@ -1292,38 +1265,60 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
         const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
         const vocabInfo = dbData?.TUVUNG_DB?.[word] || {};
 
+        // --- MỚI: TẠO CHUỖI ÂM HÁN VIỆT ---
+        // Tách từ thành từng ký tự -> Tra cứu trong KANJI_DB -> Gộp lại
+        const hanviet = word.split('').map(c => {
+            return dbData?.KANJI_DB?.[c]?.sound || ''; 
+        }).filter(s => s).join(' '); 
+        // ----------------------------------
+
         return (
             <div className="flex flex-col w-full px-[8mm]">
-                {/* HEADER GIỮ NGUYÊN */}
+                {/* HEADER TỪ VỰNG: CẬP NHẬT HIỂN THỊ HÁN VIỆT */}
                 <div className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" style={{ width: '184mm' }}>
                     <div className="flex-shrink-0 mr-4 flex items-baseline gap-2 mb-[3px]">
+                        {/* Từ vựng chính */}
                         <span className="font-bold text-sm leading-none text-black whitespace-nowrap">{word}</span>
-                        {(vocabInfo.meaning || vocabInfo.reading) && (
-                            <span className="text-[13px] font-normal text-black leading-none whitespace-nowrap">
-                                ({vocabInfo.reading ? vocabInfo.reading + ' - ' : ''}{vocabInfo.meaning || ''})
-                            </span>
-                        )}
+                        
+                        {/* Phần thông tin trong ngoặc */}
+                        <span className="text-[13px] font-normal text-black leading-none whitespace-nowrap">
+                            (
+                            {/* 1. Cách đọc (Hiragana/Katakana) */}
+                            {vocabInfo.reading && <span>{vocabInfo.reading}</span>}
+
+                            {/* Gạch nối 1: Nếu có cách đọc VÀ (có Hán Việt hoặc có Nghĩa) */}
+                            {vocabInfo.reading && (hanviet || vocabInfo.meaning) && <span> - </span>}
+
+                            {/* 2. Âm Hán Việt (MỚI THÊM - IN ĐẬM NHẸ) */}
+                            {hanviet && <span className="font-bold text-gray-700">{hanviet}</span>}
+
+                            {/* Gạch nối 2: Nếu có Hán Việt VÀ có Nghĩa */}
+                            {hanviet && vocabInfo.meaning && <span> - </span>}
+
+                            {/* 3. Nghĩa tiếng Việt */}
+                            {vocabInfo.meaning && <span>{vocabInfo.meaning}</span>}
+                            )
+                        </span>
                     </div>
                 </div>
 
-                {/* GRID TỪ VỰNG: Render các ô với tham số isInternal */}
+                {/* GRID TỪ VỰNG: QUAY VỀ MẶC ĐỊNH (KHÔNG KẺ MỜ) */}
                 <div className="flex border-l border-t w-fit" style={{ borderColor: gridBorderColor }}>
-                    {boxes.map((item, i) => (
+                    {boxes.map((charInBox, i) => (
                         <GridBox
                             key={i} index={i} 
-                            char={item.char} 
+                            char={charInBox} 
                             type={'trace'}
                             config={config} 
                             svgData={null}
                             failed={false}
-                            isInternal={item.isInternal} // <--- TRUYỀN THAM SỐ NÀY
+                            // Không truyền isInternal nữa -> GridBox sẽ tự dùng nét liền mặc định
                         />
                     ))}
                 </div>
             </div>
         );
     }
-};
 
     // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
     const Page = ({ chars, config, dbData, mode }) => {
