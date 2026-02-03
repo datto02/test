@@ -1138,65 +1138,80 @@ const refStyle = isReference ? {
 } : {};
 
 return (
-   <div 
+        <div 
             className={`relative w-[16mm] h-[16mm] border-r border-b box-border flex justify-center items-center overflow-hidden bg-transparent ${isReference ? 'reference-box cursor-pointer hover:bg-indigo-50 transition-colors duration-200' : ''}`}
             style={{ 
                 borderColor: gridColor,
-                // --- THÊM LOGIC NÀY ---
-                // Nếu là vạch ngăn cách trong từ: dùng nét đứt (dashed)
-                // Nếu là vạch ngăn cách giữa các từ: dùng nét liền (solid - mặc định)
-                borderRightStyle: isInternal ? 'dashed' : 'solid', 
-                // Có thể chỉnh độ dày nếu cần, nhưng dashed mặc định đã khá giống nét 0.5 của chữ thập
+                
+                // --- SỬA ĐỔI QUAN TRỌNG ---
+                // 1. Nếu là vạch trong từ (isInternal): Ẩn viền CSS đi (transparent) để dùng viền SVG vẽ thay thế.
+                // 2. Nếu không phải: Hiện viền màu như bình thường.
+                borderRightColor: isInternal ? 'transparent' : gridColor,
+                borderRightStyle: 'solid', 
+                borderRightWidth: '1px',   
             }}
             onClick={isReference ? onClick : undefined} 
             title={isReference ? "Bấm để xem cách viết" : ""}
         >
-    
-    <div className="absolute inset-0 pointer-events-none z-0">
-        {gridType !== 'blank' && (
-        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <line x1="50" y1="0" x2="50" y2="100" stroke="black" strokeOpacity={gridOpacity} strokeWidth="0.5" strokeDasharray="4 4" />
-            <line x1="0" y1="50" x2="100" y2="50" stroke="black" strokeOpacity={gridOpacity} strokeWidth="0.5" strokeDasharray="4 4" />
-        </svg>
-        )}
-    </div>
+            <div className="absolute inset-0 pointer-events-none z-0">
+                <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    {/* 1. Kẻ chữ thập (+) - GIỮ NGUYÊN */}
+                    {gridType !== 'blank' && (
+                    <>
+                        <line x1="50" y1="0" x2="50" y2="100" stroke="black" strokeOpacity={gridOpacity} strokeWidth="0.5" strokeDasharray="4 4" />
+                        <line x1="0" y1="50" x2="100" y2="50" stroke="black" strokeOpacity={gridOpacity} strokeWidth="0.5" strokeDasharray="4 4" />
+                    </>
+                    )}
 
-    {char && (
-        <>
-        {isReference && (
-            <div className="relative z-20 w-full h-full flex items-center justify-center p-[1px]">
-                {!failed && svgData ? (
-                <div className="ref-wrapper" style={refStyle} dangerouslySetInnerHTML={{ __html: svgData }} />
-                ) : (
-                <span className="kanji-trace !text-black flex justify-center items-center h-full w-full"
-                    style={{ fontSize: `${config.fontSize}pt`, color: 'black', transform: `translateY(${config.verticalOffset}px)`, textShadow: 'none', webkitTextStroke: '0' }}>
-                    {char}
-                </span>
-                )}
-                
-                {/* Icon bàn tay gợi ý (ẩn đi vì đã có hiệu ứng đổi màu chữ làm tín hiệu) */}
-                <div className="absolute bottom-0.5 right-0.5 opacity-0 hover:opacity-0 text-indigo-400 pointer-events-none transition-opacity">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                </div>
+                    {/* 2. Kẻ vạch ngăn cách từ vựng (MỚI THÊM) */}
+                    {/* Chỉ vẽ khi là isInternal. Vẽ đè lên vị trí bên phải */}
+                    {/* Copy y hệt thông số của chữ thập: width 0.5, dasharray 4 4 */}
+                    {isInternal && (
+                        <line 
+                            x1="100" y1="0" x2="100" y2="100" 
+                            stroke="black" 
+                            strokeOpacity={gridOpacity} 
+                            strokeWidth="0.5" 
+                            strokeDasharray="4 4" 
+                        />
+                    )}
+                </svg>
             </div>
-        )}
 
-        {!isReference && showTrace && (
-            <span className="kanji-trace"
-            style={{
-                fontSize: `${config.fontSize}pt`,
-                transform: `translateY(${config.verticalOffset}px)`,
-                color: `rgba(0, 0, 0, ${config.traceOpacity})`,
-                //fontFamily: config.fontFamily
-            }}
-            >
-            {char}
-            </span>
-        )}
-        </>
-    )}
-    </div>
-);
+            {char && (
+                <>
+                {isReference && (
+                    <div className="relative z-20 w-full h-full flex items-center justify-center p-[1px]">
+                        {!failed && svgData ? (
+                        <div className="ref-wrapper" style={refStyle} dangerouslySetInnerHTML={{ __html: svgData }} />
+                        ) : (
+                        <span className="kanji-trace !text-black flex justify-center items-center h-full w-full"
+                            style={{ fontSize: `${config.fontSize}pt`, color: 'black', transform: `translateY(${config.verticalOffset}px)`, textShadow: 'none', webkitTextStroke: '0' }}>
+                            {char}
+                        </span>
+                        )}
+                        
+                        <div className="absolute bottom-0.5 right-0.5 opacity-0 hover:opacity-0 text-indigo-400 pointer-events-none transition-opacity">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                        </div>
+                    </div>
+                )}
+
+                {!isReference && showTrace && (
+                    <span className="kanji-trace"
+                    style={{
+                        fontSize: `${config.fontSize}pt`,
+                        transform: `translateY(${config.verticalOffset}px)`,
+                        color: `rgba(0, 0, 0, ${config.traceOpacity})`,
+                    }}
+                    >
+                    {char}
+                    </span>
+                )}
+                </>
+            )}
+        </div>
+    );
 };
 
 const WorkbookRow = ({ char, config, dbData, mode }) => {
@@ -3635,7 +3650,7 @@ return (
     </button>
 </div>
         </div>
-); 
+);
 };
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
