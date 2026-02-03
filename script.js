@@ -1319,7 +1319,7 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
             </div>
         );
     }
-
+};
     // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
     const Page = ({ chars, config, dbData, mode }) => {
 // 1. Hàm Xuất dữ liệu (Tải file về máy)
