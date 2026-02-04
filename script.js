@@ -638,6 +638,19 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
 
     // --- STATE CHO CẤU HÌNH HIỂN THỊ ---
     const [isConfigOpen, setIsConfigOpen] = React.useState(false);
+    // 1. Khai báo ref để "tóm" lấy cái menu
+    const configRef = React.useRef(null);
+
+    // 2. Thêm logic: hễ click chuột mà không trúng menu thì đóng nó lại
+    React.useEffect(() => {
+        function handleClickOutside(event) {
+            if (isConfigOpen && configRef.current && !configRef.current.contains(event.target)) {
+                setIsConfigOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [isConfigOpen]);
     const [frontOptions, setFrontOptions] = React.useState({ word: true, reading: false, hanviet: false, meaning: false });
     const [backOptions, setBackOptions] = React.useState({ word: false, reading: true, hanviet: true, meaning: true });
 // --- LOGIC XỬ LÝ CHECKBOX (MỚI: TỰ ĐỘNG BỎ TÍCH MẶT KIA) ---
@@ -855,8 +868,8 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
     }
 
     return (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl animate-in fade-in duration-200 select-none touch-none" style={{ touchAction: 'none' }} onClick={(e) => e.stopPropagation()}>
-            <div className="w-full max-w-sm flex flex-col items-center relative">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl animate-in fade-in duration-200 select-none touch-none cursor-pointer" style={{ touchAction: 'none' }} onClick={(e) => e.stopPropagation()}>
+            <div className="w-full max-w-sm flex flex-col items-center relative cursor-default" onClick={(e) => e.stopPropagation()}>
                 
                 {!isFinished ? (
                     <>
@@ -884,7 +897,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
 
                             {/* Nút Cài Đặt (Nằm bên phải thanh tiến độ) */}
                             {mode === 'vocab' && (
-                                <div className="relative">
+                                <div className="relative" ref={configRef}>
                                     <button 
                                         onClick={() => setIsConfigOpen(!isConfigOpen)}
                                         className="w-8 h-8 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-all shadow-sm active:scale-95"
