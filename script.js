@@ -1295,14 +1295,14 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
                         {hasInfo && (
                             <span className="text-[13px] font-normal text-black leading-none whitespace-nowrap">
                                 (
-                                {/* 1. Cách đọc (Chỉ hiện nếu không trùng với mặt chữ) */}
-                                {displayReading && <span>{displayReading}</span>}
-
+                                 {/* 2. Âm Hán Việt */}
+                                {hanviet && <span className="font-bold text-gray-700">{hanviet}</span>}
+                                   
                                 {/* Gạch nối 1: Giữa Reading và (Hán Việt hoặc Nghĩa) */}
                                 {displayReading && (hanviet || vocabInfo.meaning) && <span> - </span>}
 
-                                {/* 2. Âm Hán Việt */}
-                                {hanviet && <span className="font-bold text-gray-700">{hanviet}</span>}
+                                {/* 1. Cách đọc (Chỉ hiện nếu không trùng với mặt chữ) */}
+                                {displayReading && <span>{displayReading}</span>}
 
                                 {/* Gạch nối 2: Giữa Hán Việt và Nghĩa */}
                                 {hanviet && vocabInfo.meaning && <span> - </span>}
