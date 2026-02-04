@@ -617,7 +617,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars, db
         </div>
     );
 };
-// --- BƯỚC 4: FLASHCARD MODAL (ĐÃ GẮN SỰ KIỆN LƯU DỮ LIỆU) ---
+
 // --- BƯỚC 4: FLASHCARD MODAL (ĐÃ CẬP NHẬT TÙY CHỈNH TỪ VỰNG) ---
 const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, onSrsRestore, mode }) => { 
     const [originalQueue, setOriginalQueue] = React.useState([]);
@@ -672,7 +672,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
     
     // --- Các hàm xử lý UI ---
     const toggleFlip = React.useCallback(() => { setIsFlipped(prev => !prev); if (currentIndex === 0) setShowHint(false); }, [currentIndex]);
-    const handleNext = React.useCallback((isKnown) => { 
+   const handleNext = React.useCallback((isKnown) => { 
         if (exitDirection || isFinished || queue.length === 0) return; 
         
         const currentChar = queue[currentIndex];
@@ -686,7 +686,15 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
             setUnknownIndices(prev => [...prev, currentIndex]); 
         } 
 
+        // --- SỬA: CHỈ LƯU SRS NẾU KHÔNG PHẢI TỪ VỰNG ---
+        // (Vẫn lưu history để nút Back hoạt động, nhưng không lưu vào database lâu dài)
         setHistory(prev => [...prev, { isKnown, char: currentChar, snapshot }]); 
+
+        // Nếu là Kanji (không phải vocab) thì mới gọi updateSRS
+        if (mode !== 'vocab' && onSrsUpdate) {
+             onSrsUpdate(currentChar, isKnown ? 1 : 0);
+        }
+        // ------------------------------------------------
 
         setBtnFeedback(isKnown ? 'right' : 'left'); 
         setExitDirection(isKnown ? 'right' : 'left'); 
@@ -704,9 +712,9 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
                 } 
             }); 
         }, 175); 
-    }, [currentIndex, queue, exitDirection, isFinished, srsData]);
+    }, [currentIndex, queue, exitDirection, isFinished, srsData, mode, onSrsUpdate]); 
 
-    const handleBack = (e) => { 
+  const handleBack = (e) => { 
         if (e) { e.preventDefault(); e.stopPropagation(); e.currentTarget.blur(); } 
         
         if (currentIndex > 0 && history.length > 0) { 
@@ -718,9 +726,11 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
                 setUnknownIndices(prev => prev.slice(0, -1)); 
             } 
 
-            if (onSrsRestore && lastItem.char) {
+            // --- SỬA: CHỈ KHÔI PHỤC SRS NẾU KHÔNG PHẢI TỪ VỰNG ---
+            if (mode !== 'vocab' && onSrsRestore && lastItem.char) {
                 onSrsRestore(lastItem.char, lastItem.snapshot);
             }
+            // -----------------------------------------------------
 
             setHistory(prev => prev.slice(0, -1)); 
             setCurrentIndex(prev => prev - 1); 
@@ -764,15 +774,14 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, isFinished, toggleFlip, handleNext, onClose, onSrsUpdate, queue, currentIndex]);
 
-    const handleDragEnd = () => {
+  const handleDragEnd = () => {
         if (!isDragging) return;
         setIsDragging(false);
         if (dragX > 70) {
-             if(onSrsUpdate) onSrsUpdate(queue[currentIndex], 1);
+             // Logic SRS đã chuyển vào handleNext, chỉ cần gọi handleNext
              handleNext(true);
         }
         else if (dragX < -70) {
-             if(onSrsUpdate) onSrsUpdate(queue[currentIndex], 0);
              handleNext(false);
         }
         else setDragX(0);
@@ -783,64 +792,67 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
     if (!currentChar && !isFinished && isOpen) { setIsFinished(true); }
     const progressRatio = currentIndex / (queue.length - 1 || 1);
 
-    // --- LOGIC LẤY THÔNG TIN (TÁCH BIỆT KANJI VÀ VOCAB) ---
-    let cardContent = {
-        front: null,
-        back: null
-    };
+  // --- LOGIC LẤY THÔNG TIN & RENDER CONTENT ---
+    let cardContent = { front: null, back: null };
+    
+    // Nút công cụ (Quay lại / Xáo trộn) - Dùng chung cho cả 2 chế độ
+    const CardTools = (
+        <div className={`absolute bottom-5 left-0 right-0 px-6 items-center z-50 ${isFlipped ? 'hidden sm:flex' : 'flex'} justify-between`}>
+            <button onClick={handleBack} className={`p-2.5 bg-black/5 hover:bg-black/10 active:scale-90 rounded-full transition-all flex items-center justify-center ${currentIndex === 0 ? 'opacity-10 cursor-not-allowed' : 'text-gray-400 hover:text-gray-700'}`} disabled={currentIndex === 0}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="pointer-events-none"><path d="M9 14 4 9l5-5"/><path d="M4 9h12a5 5 0 0 1 0 10H7"/></svg>
+            </button>
+            <button onClick={handleToggleShuffle} className={`p-2.5 bg-black/5 hover:bg-black/10 active:scale-90 rounded-full transition-all flex items-center justify-center ${isShuffleOn ? 'bg-indigo-100 text-indigo-600' : 'text-gray-400 hover:text-gray-700'}`}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`pointer-events-none ${btnFeedback === 'shuffle' ? 'animate-[spin_0.4s_linear_infinite]' : ''}`}><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
+            </button>
+        </div>
+    );
 
     if (mode === 'vocab') {
-        // === LOGIC TỪ VỰNG (MỚI) ===
+        // === TỪ VỰNG: Giao diện giống hệt Kanji ===
         const vocabInfo = dbData?.TUVUNG_DB?.[currentChar] || {};
         const hanviet = currentChar.split('').map(c => dbData?.KANJI_DB?.[c]?.sound || '').filter(s => s).join(' ');
 
-        // Hàm render nội dung dựa trên tùy chọn (Front/Back options)
-        const renderVocabContent = (options) => (
-            <div className="flex flex-col items-center gap-4 w-full">
-                {/* 1. Mặt chữ */}
+        // Hàm render nội dung tùy chỉnh
+        const renderVocabFace = (options) => (
+            <div className="flex-1 flex flex-col items-center justify-center w-full transform -translate-y-3 px-2">
+                {/* 1. Mặt chữ (Main) */}
                 {options.word && (
-                    <div className="text-5xl font-sans font-bold text-gray-800 text-center break-words w-full px-2">
+                    <h3 className={`${getFlashcardFontSize(currentChar)} font-bold mb-2 uppercase tracking-tighter leading-tight text-center break-words w-full font-sans`}>
                         {currentChar}
-                    </div>
+                    </h3>
                 )}
                 
-                {/* 2. Hán Việt (Cho phép bật/tắt) */}
-                {options.hanviet && hanviet && (
-                    <div className="text-xl font-bold text-gray-500 uppercase tracking-widest border-b-2 border-gray-100 pb-1">
-                        {hanviet}
-                    </div>
-                )}
-
-                {/* 3. Cách đọc */}
-                {options.reading && vocabInfo.reading && (
-                    <div className="text-2xl font-bold text-indigo-600">
-                        {vocabInfo.reading}
-                    </div>
-                )}
-
-                {/* 4. Nghĩa */}
-                {options.meaning && vocabInfo.meaning && (
-                    <div className="text-lg font-medium text-gray-600 italic text-center px-4">
-                        {vocabInfo.meaning}
-                    </div>
-                )}
+                {/* Các thông tin phụ */}
+                <div className="space-y-1 text-center">
+                    {/* Hán Việt */}
+                    {options.hanviet && hanviet && (
+                        <p className="text-sm font-bold text-gray-500 uppercase tracking-widest">{hanviet}</p>
+                    )}
+                    {/* Cách đọc */}
+                    {options.reading && vocabInfo.reading && (
+                        <p className="text-lg font-bold text-indigo-600">{vocabInfo.reading}</p>
+                    )}
+                    {/* Nghĩa */}
+                    {options.meaning && vocabInfo.meaning && (
+                        <p className="text-base opacity-90 font-medium italic leading-snug">{vocabInfo.meaning}</p>
+                    )}
+                </div>
             </div>
         );
 
-        cardContent.front = renderVocabContent(frontOptions);
-        cardContent.back = renderVocabContent(backOptions);
+        cardContent.front = <>{renderVocabFace(frontOptions)} {currentIndex === 0 && showHint && (<p className="absolute bottom-14 text-indigo-400 text-[7px] font-black uppercase tracking-[0.4em] animate-pulse">Chạm để lật</p>)} {CardTools}</>;
+        cardContent.back = <>{renderVocabFace(backOptions)}</>;
 
     } else {
-        // === LOGIC KANJI (GIỮ NGUYÊN 100% CŨ) ===
+        // === KANJI (GIỮ NGUYÊN) ===
         const info = dbData?.KANJI_DB?.[currentChar] || dbData?.ALPHABETS?.hiragana?.[currentChar] || dbData?.ALPHABETS?.katakana?.[currentChar] || {};
-        
         cardContent.front = (
             <>
                  <span className="text-8xl font-['Klee_One'] text-gray-800 transform -translate-y-5">{currentChar}</span>
                  {currentIndex === 0 && showHint && (<p className="absolute bottom-14 text-indigo-400 text-[7px] font-black uppercase tracking-[0.4em] animate-pulse">Chạm để lật</p>)}
+                 {CardTools}
             </>
         );
-
         cardContent.back = (
              <div className="flex-1 flex flex-col items-center justify-center w-full transform -translate-y-3">
                 <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter leading-tight">{info.sound || '---'}</h3>
@@ -848,7 +860,17 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
             </div>
         );
     }
-
+// --- HÀM TÍNH CỠ CHỮ ĐỘNG (MỚI) ---
+    const getFlashcardFontSize = (text) => {
+        if (!text) return 'text-3xl';
+        const len = text.length;
+        if (len <= 2) return "text-8xl";      // 1-2 chữ: Rất to
+        if (len <= 4) return "text-6xl";      // 3-4 chữ: To
+        if (len <= 8) return "text-5xl";      // 5-8 chữ: Vừa
+        if (len <= 15) return "text-4xl";     // Dài
+        if (len <= 25) return "text-3xl";     // Rất dài
+        return "text-xl";                     // Cực dài
+    };
     return (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl animate-in fade-in duration-200 select-none touch-none" style={{ touchAction: 'none' }} onClick={(e) => e.stopPropagation()}>
             <div className="w-full max-w-sm flex flex-col items-center relative">
