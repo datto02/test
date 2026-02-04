@@ -1512,7 +1512,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
              if (len > 8) return 'text-2xl leading-tight break-words';      // Dài
              if (len > 5) return 'text-4xl leading-tight break-words';      // Trung bình (6-8 chữ)
              if (len > 3) return 'text-5xl whitespace-nowrap';              // 4-5 chữ (Sửa cho "America")
-             return 'text-7xl whitespace-nowrap';                              // Mặc định: Cỡ đại
+             return 'text-6xl';                          // Mặc định: Cỡ đại
         }
 
         // 2. DÀNH CHO NÚT BẤM & THẺ GHÉP (Button & Match Card)
@@ -1530,7 +1530,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
     // 1. KHỞI TẠO DỮ LIỆU (ĐÃ SỬA: LỌC KỸ DỮ LIỆU ĐẦU VÀO)
     const initGame = () => {
         if (!text || !dbData) return;
-        setGameState('loading');
+    
 
         let validItems = [];
         const isVocabMode = mode === 'vocab';
@@ -1586,13 +1586,16 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
         setQueue(newQueue); 
         setCurrentIndex(0);
         
-        setTimeout(() => {
-            if (newQueue.length > 0) setGameState(newQueue[0].type);
-        }, 50);
 
         setPenaltyInput(''); 
         setMatchedIds([]);
         setWrongPairIds([]);
+    // Set luôn trạng thái game để render ngay (fix lỗi nháy)
+        if (newQueue.length > 0) {
+            setGameState(newQueue[0].type);
+        } else {
+            setGameState('finished');
+        }
     };
 
 
@@ -1663,7 +1666,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
                 questionDisplay = {
                     main: target,
                     sub: readingDisplay, // Hiện cách đọc ở dưới
-                    isKanji: false // Để dùng font thường
+                    isKanji: true // Để dùng font thường
                 };
                 
                 // Đáp án là NGHĨA
@@ -1870,7 +1873,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
                 <div className="bg-white rounded-[2rem] p-8 w-full max-w-[280px] text-center shadow-2xl border-4 border-indigo-50 animate-in zoom-in-95">
                     <div className="text-5xl mb-4 animate-bounce cursor-pointer hover:scale-125 transition-transform" onClick={triggerConfetti}>🎉</div>
                     <h3 className="text-lg font-black text-gray-800 mb-1 uppercase">XUẤT SẮC!</h3>
-                    <p className="text-gray-400 mb-6 text-[11px] font-medium italic">Bạn đã hoàn thành bài luyện tập.</p>
+                    <p className="text-gray-400 mb-6 text-[11px] font-medium italic">Bạn đã hoàn thành bài học.</p>
                     <div className="space-y-2">
                         <button onClick={onSwitchToFlashcard} className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-[11px] shadow-lg active:scale-95 transition-colors">
                             ÔN FLASHCARD
@@ -1913,7 +1916,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
 <div className={`text-center mb-2 text-gray-800 flex items-center justify-center h-full w-full px-4
     ${currentQuizData.questionDisplay.isKanji 
         ? "text-8xl font-['Klee_One'] -translate-y-4" 
-        : getDynamicFontSize(currentQuizData.questionDisplay.main, 'title') + " font-black uppercase tracking-wider break-words"
+        : getDynamicFontSize(currentQuizData.questionDisplay.main, 'title') + " font-['Klee_One'] font-medium"
     }`}>
    {currentQuizData.questionDisplay.main}
 </div>
@@ -2025,9 +2028,9 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
           isSelected ? 'bg-blue-500 text-white scale-105 ring-2 ring-white/50' : 
           'bg-white text-gray-800 hover:bg-gray-50 active:scale-95'}
         
-        ${card.type === 'kanji' 
-            ? "font-['Klee_One'] text-3xl"  
-            : getDynamicFontSize(card.content, 'button') + " font-sans uppercase" // Dùng chung logic 'button'
+       ${(card.type === 'kanji' || card.type === 'word') // <-- SỬA: Thêm card.type === 'word'
+            ? (card.type === 'kanji' ? "text-3xl" : getDynamicFontSize(card.content, 'button')) + " font-['Klee_One']"  
+            : getDynamicFontSize(card.content, 'button') + " font-sans uppercase" 
         }`}
 >
     {card.content}
