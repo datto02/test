@@ -1520,6 +1520,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
     };
 
    // 1. KHỞI TẠO DỮ LIỆU (PHÂN TÁCH LOGIC TỪ VỰNG VÀ KANJI)
+    // 1. KHỞI TẠO DỮ LIỆU (ĐÃ SỬA: LỌC KỸ DỮ LIỆU ĐẦU VÀO)
     const initGame = () => {
         if (!text || !dbData) return;
         setGameState('loading');
@@ -1528,16 +1529,31 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
         const isVocabMode = mode === 'vocab';
 
         if (isVocabMode) {
-            // --- LOGIC TỪ VỰNG: Tách theo dòng ---
-            validItems = Array.from(new Set(text.split('\n').map(w => w.trim()).filter(w => w.length > 0 && dbData.TUVUNG_DB?.[w])));
+            // --- LOGIC TỪ VỰNG: Tách dòng -> Trim -> Kiểm tra tồn tại trong DB ---
+            validItems = Array.from(new Set(
+                text.split('\n')
+                    .map(w => w.trim())
+                    // Lọc: 1. Có độ dài, 2. Có trong database TUVUNG_DB
+                    .filter(w => w.length > 0 && dbData.TUVUNG_DB && dbData.TUVUNG_DB[w])
+            ));
         } else {
-            // --- LOGIC KANJI: Tách theo ký tự ---
-            validItems = Array.from(new Set(text.split('').filter(c => getCharInfo(c))));
+            // --- LOGIC KANJI: Tách ký tự -> Kiểm tra tồn tại ---
+            validItems = Array.from(new Set(
+                text.split('')
+                    // Lọc: Hàm getCharInfo trả về dữ liệu thì mới lấy
+                    .filter(c => getCharInfo(c))
+            ));
         }
 
-        validItems = shuffleArray(validItems); 
+        // Nếu lọc xong mà không còn từ nào (do nhập linh tinh hoặc chưa có data)
+        if (validItems.length === 0) { 
+            alert("Không có từ nào hợp lệ hoặc có trong dữ liệu để học!"); 
+            onClose(); 
+            return; 
+        }
 
-        if (validItems.length === 0) { alert("Chưa có dữ liệu để học!"); onClose(); return; }
+        // Trộn ngẫu nhiên
+        validItems = shuffleArray(validItems); 
 
         setTotalKanji(validItems.length);
         
@@ -1546,13 +1562,13 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
 
         for (let i = 0; i < validItems.length; i += CHUNK_SIZE) {
             const chunk = validItems.slice(i, i + CHUNK_SIZE);
-            // Quiz 1 (Kanji: Âm Hán | Vocab: Mặt chữ -> Nghĩa)
+            // Quiz 1
             chunk.forEach(item => newQueue.push({ type: 'quiz_sound', item }));
             
-            // Match (Kanji: Chữ-Hán Việt | Vocab: Chữ-Cách đọc)
+            // Match
             if (chunk.length >= 2) newQueue.push({ type: 'match', items: chunk });
             
-            // Quiz 2 (Kanji: Âm Hán -> Chữ | Vocab: Nghĩa -> Chữ)
+            // Quiz 2
             chunk.forEach(item => newQueue.push({ type: 'quiz_reverse', item })); 
         }
 
@@ -1567,6 +1583,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
         setMatchedIds([]);
         setWrongPairIds([]);
     };
+
 
     useEffect(() => {
         if (isOpen) initGame();
@@ -1694,7 +1711,38 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
                     if (info) {
                         cards.push({ id: `w-${idx}`, content: item, type: 'word', matchId: idx });
                         // Nếu không có reading (ví dụ rỗng), dùng meaning làm fallback, hoặc dùng chính nó
-                        const content2 = info.reading || info.meaning || item;
+                       // 3. SINH DỮ LIỆU MATCH (GHÉP THẺ)
+        useEffect(() => {
+        if (queue[currentIndex]?.type === 'match') {
+            const items = queue[currentIndex].items;
+            let cards = [];
+            const isVocabMode = mode === 'vocab';
+
+            items.forEach((item, idx) => {
+                if (isVocabMode) {
+                    // TỪ VỰNG: Ghép [Mặt chữ] <-> [Ý NGHĨA] (Đã sửa theo yêu cầu)
+                    const info = dbData.TUVUNG_DB[item];
+                    if (info) {
+                        cards.push({ id: `w-${idx}`, content: item, type: 'word', matchId: idx });
+                        
+                        // SỬA Ở ĐÂY: Ưu tiên lấy meaning (nghĩa) trước
+                        const content2 = info.meaning || info.reading || item;
+                        
+                        cards.push({ id: `m-${idx}`, content: content2, type: 'meaning', matchId: idx });
+                    }
+                } else {
+                    // KANJI: Ghép [Chữ] <-> [Âm Hán] (Giữ nguyên)
+                    const info = getCharInfo(item);
+                    if (info) {
+                        cards.push({ id: `k-${idx}`, content: item, type: 'kanji', matchId: idx });
+                        cards.push({ id: `m-${idx}`, content: info.sound, type: 'meaning', matchId: idx });
+                    }
+                }
+            });
+            cards.sort(() => Math.random() - 0.5);
+            setMatchCards(cards); setMatchedIds([]); setSelectedCardId(null); setWrongPairIds([]);
+        }
+    }, [queue, currentIndex, dbData, mode]);
                         cards.push({ id: `r-${idx}`, content: content2, type: 'reading', matchId: idx });
                     }
                 } else {
@@ -1728,27 +1776,26 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
         }
     };
 
-  const checkPenalty = () => {
+ const checkPenalty = () => {
         if (!wrongItem) return;
         const inputClean = removeAccents(penaltyInput.trim().toLowerCase());
         
-        let targetClean = '';
+        let isCorrect = false;
+
         if (mode === 'vocab') {
-            // Vocab: Phạt bằng cách gõ lại MẶT CHỮ (Word)
-            // Hoặc gõ lại cách đọc? Thường là gõ lại Reading (Hiragana). 
-            // Tuy nhiên để đơn giản và tránh phải gõ tiếng Nhật, ta so sánh với READING (Romanji?) hoặc MEANING?
-            // Ở đây bạn yêu cầu đơn giản, tôi sẽ để là: Phải nhập đúng "Cách đọc" (nếu có) hoặc "Mặt chữ".
-            // Nhưng để dễ nhất cho người dùng Việt: Nhập lại MẶT CHỮ (Copy paste cũng được) để nhớ mặt chữ.
-            targetClean = removeAccents(wrongItem.target.toLowerCase()); 
+            // TỪ VỰNG: Chấp nhận gõ đúng MẶT CHỮ hoặc CÁCH ĐỌC
+            const targetWord = removeAccents(wrongItem.target.toLowerCase());
+            const targetReading = wrongItem.targetInfo.reading ? removeAccents(wrongItem.targetInfo.reading.toLowerCase()) : '';
             
-            // NOTE: Nếu bạn muốn phạt gõ Âm Hán Việt cho từ vựng thì cần logic tra cứu phức tạp hơn.
-            // Tạm thời ở chế độ Vocab: Yêu cầu gõ lại đúng MẶT CHỮ để qua màn.
+            // Đúng nếu khớp 1 trong 2
+            isCorrect = (inputClean === targetWord) || (inputClean === targetReading);
         } else {
-            // Kanji: Phạt gõ Âm Hán Việt (Giữ nguyên)
-            targetClean = removeAccents(wrongItem.targetInfo.sound.toLowerCase());
+            // KANJI: Phải gõ đúng Âm Hán Việt (Giữ nguyên)
+            const targetClean = removeAccents(wrongItem.targetInfo.sound.toLowerCase());
+            isCorrect = inputClean === targetClean;
         }
 
-        if (inputClean === targetClean) {
+        if (isCorrect) {
             setPenaltyFeedback('correct'); 
             setTimeout(() => { 
                 setPenaltyFeedback(null); 
@@ -1946,7 +1993,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
                                     value={penaltyInput} 
                                     onChange={(e) => setPenaltyInput(e.target.value)} 
                                     onKeyDown={(e) => e.key === 'Enter' && checkPenalty()} 
-                                    placeholder={mode === 'kanji' ? "Nhập âm Hán Việt..." : "Nhập lại từ..."} 
+                                    placeholder={mode === 'kanji' ? "Nhập âm Hán Việt..." : "Nhập lại từ vựng..."}
                                     className={`w-full p-3 text-center text-base font-bold border-2 rounded-xl outline-none transition-all ${penaltyFeedback === 'incorrect' ? 'border-red-500 bg-red-50' : penaltyFeedback === 'correct' ? 'border-green-500 bg-green-50' : 'border-gray-200 focus:border-blue-500'}`} 
                                 />
                                 <button onClick={checkPenalty} className="w-full mt-3 py-3 bg-gray-900 text-white font-bold rounded-xl active:scale-95 transition-all uppercase text-[10px] tracking-widest">
@@ -2991,7 +3038,7 @@ LÀM SẠCH
                     <label className="text-[11px] font-bold text-gray-600">Số chữ mẫu</label>
                     <span className="text-[11px] font-black text-indigo-600 bg-indigo-50 px-1.5 rounded">{config.traceCount} chữ</span>
                 </div>
-                <input type="range" min="0" max="12" step="1" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.traceCount} onChange={(e) => handleChange('traceCount', parseInt(e.target.value))} />
+                <input type="range" min="1" max="12" step="1" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.traceCount} onChange={(e) => handleChange('traceCount', parseInt(e.target.value))} />
             </div>
         )}
 
