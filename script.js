@@ -1501,20 +1501,28 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
         return newArr;
     };
 
+   // --- HÀM TÍNH CỠ CHỮ ĐỘNG (ĐÃ NÂNG CẤP) ---
     const getDynamicFontSize = (text, type = 'normal') => {
-        const len = text ? text.length : 0;
+        if (!text) return '';
+        const len = text.length;
+
+        // 1. DÀNH CHO TIÊU ĐỀ LỚN (Phần câu hỏi)
         if (type === 'title') {
-             if (len > 12) return 'text-3xl';
-             if (len > 8) return 'text-4xl';
-             if (len > 4) return 'text-5xl';
-             return 'text-6xl';
+             if (len > 25) return 'text-xl leading-tight';      // > 25 ký tự: Cỡ rất nhỏ
+             if (len > 15) return 'text-2xl leading-tight';     // > 15 ký tự: Cỡ nhỏ
+             if (len > 10) return 'text-4xl leading-tight';     // > 10 ký tự: Cỡ vừa
+             if (len > 6) return 'text-5xl';                    // > 6 ký tự: Cỡ to
+             return 'text-6xl';                                 // Mặc định: Cỡ đại
         }
+
+        // 2. DÀNH CHO NÚT BẤM & THẺ GHÉP (Button & Match Card)
         if (type === 'button') {
-            if (len > 25) return 'text-[9px]'; // Giảm thêm cho nghĩa dài
-            if (len > 15) return 'text-[10px]';
-            if (len > 10) return 'text-[11px]';
-            if (len > 6) return 'text-xs';
-            return 'text-sm';
+            // Logic: Giảm size trước, nếu quá dài mới cho break-words (xuống dòng)
+            if (len > 50) return 'text-[8px] leading-tight break-words whitespace-normal px-1'; // Siêu dài (Giải nghĩa chi tiết)
+            if (len > 30) return 'text-[9px] leading-tight break-words whitespace-normal px-1'; // Rất dài
+            if (len > 20) return 'text-[10px] leading-snug whitespace-nowrap'; // Dài vừa -> Ép 1 dòng
+            if (len > 12) return 'text-xs leading-snug whitespace-nowrap';     // Hơi dài -> Ép 1 dòng
+            return 'text-sm font-bold whitespace-nowrap';                      // Ngắn -> Giữ nguyên
         }
         return '';
     };
@@ -1902,14 +1910,14 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
                                 {/* HÌNH ẢNH CÂU HỎI */}
                                 <div className="bg-white rounded-[2rem] w-64 h-64 flex flex-col items-center justify-center shadow-2xl mb-8 relative animate-in zoom-in-95 duration-300">
                                      
-                                     {/* Text Chính */}
-                                     <div className={`text-center leading-none mb-2 text-gray-800 
-                                        ${currentQuizData.questionDisplay.isKanji 
-                                            ? "text-8xl font-['Klee_One'] -translate-y-4" 
-                                            : getDynamicFontSize(currentQuizData.questionDisplay.main, 'title') + " font-black uppercase tracking-wider px-2 break-words"
-                                        }`}>
-                                        {currentQuizData.questionDisplay.main}
-                                     </div>
+                                    {/* Text Chính */}
+<div className={`text-center mb-2 text-gray-800 flex items-center justify-center h-full w-full px-4
+    ${currentQuizData.questionDisplay.isKanji 
+        ? "text-8xl font-['Klee_One'] -translate-y-4" 
+        : getDynamicFontSize(currentQuizData.questionDisplay.main, 'title') + " font-black uppercase tracking-wider break-words"
+    }`}>
+   {currentQuizData.questionDisplay.main}
+</div>
 
                                     {/* Text Phụ (Nghĩa hoặc Cách đọc) */}
                                     {currentQuizData.questionDisplay.sub && (
@@ -1946,16 +1954,16 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
                                                         setIsChecking(false);
                                                     }, 350);
                                                 }} 
-                                                className={`h-14 w-full px-2 border rounded-xl font-bold flex items-center justify-center text-center shadow-lg backdrop-blur-sm transition-all duration-200 active:scale-95
-                                                    ${statusClass}
-                                                    ${!isChecking ? 'md:hover:bg-white/20' : ''} 
-                                                    ${opt.isKanji 
-                                                        ? "text-3xl font-['Klee_One']"  
-                                                        : getDynamicFontSize(opt.label, 'button') + " font-sans uppercase break-words leading-tight" 
-                                                    }`}
-                                            >
-                                                {opt.label}
-                                            </button>
+                                                className={`h-14 w-full px-1 border rounded-xl font-bold flex items-center justify-center text-center shadow-lg backdrop-blur-sm transition-all duration-200 active:scale-95
+        ${statusClass}
+        ${!isChecking ? 'md:hover:bg-white/20' : ''} 
+        ${opt.isKanji 
+            ? "text-3xl font-['Klee_One']"  
+            : getDynamicFontSize(opt.label, 'button') + " font-sans uppercase" 
+        }`}
+>
+    {opt.label}
+</button>
                                         );
                                     })}
                                 </div>
@@ -2008,23 +2016,23 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
                                             const isWrong = wrongPairIds.includes(card.id);
 
                                             return (
-                                                <button 
-                                                    key={card.id} 
-                                                    onClick={() => handleCardClick(card)} 
-                                                    disabled={isMatched} 
-                                                    className={`h-20 rounded-xl font-bold flex items-center justify-center transition-all duration-200 p-1 shadow-lg
-                                                        ${isMatched ? 'opacity-0 scale-50 pointer-events-none' : 
-                                                          isWrong ? 'bg-red-500 text-white animate-shake' : 
-                                                          isSelected ? 'bg-blue-500 text-white scale-105 ring-2 ring-white/50' : 
-                                                          'bg-white text-gray-800 hover:bg-gray-50 active:scale-95'}
-                                                        
-                                                        ${card.type === 'kanji' 
-                                                            ? "font-['Klee_One'] text-3xl"  
-                                                            : getDynamicFontSize(card.content, 'button') + " font-sans uppercase break-words leading-tight" 
-                                                        }`}
-                                                >
-                                                    {card.content}
-                                                </button>
+                                               <button 
+    key={card.id} 
+    onClick={() => handleCardClick(card)} 
+    disabled={isMatched} 
+    className={`h-20 rounded-xl font-bold flex items-center justify-center transition-all duration-200 p-1 shadow-lg
+        ${isMatched ? 'opacity-0 scale-50 pointer-events-none' : 
+          isWrong ? 'bg-red-500 text-white animate-shake' : 
+          isSelected ? 'bg-blue-500 text-white scale-105 ring-2 ring-white/50' : 
+          'bg-white text-gray-800 hover:bg-gray-50 active:scale-95'}
+        
+        ${card.type === 'kanji' 
+            ? "font-['Klee_One'] text-3xl"  
+            : getDynamicFontSize(card.content, 'button') + " font-sans uppercase" // Dùng chung logic 'button'
+        }`}
+>
+    {card.content}
+</button>
                                             );
                                         })}
                                     </div>
