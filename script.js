@@ -717,7 +717,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
             let chars = [];
             if (mode === 'vocab') {
                  // CHỈNH SỬA: Chỉ lấy những từ có độ dài > 0 VÀ tồn tại trong TUVUNG_DB
-                 chars = text.split('\n')
+                 chars = text.split(/[\n;]+/)
                     .map(w => w.trim())
                     .filter(w => w.length > 0 && dbData?.TUVUNG_DB && dbData.TUVUNG_DB[w]);
             } else {
@@ -1675,7 +1675,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
         // --- LOGIC TỪ VỰNG: SỬA ĐOẠN NÀY ---
         // Tách dòng -> Trim -> Kiểm tra kỹ xem từ đó có trong TUVUNG_DB không
         validItems = Array.from(new Set(
-            text.split('\n')
+            text.split(/[\n;]+/)
                 .map(w => w.trim())
                 // ĐIỀU KIỆN QUAN TRỌNG:
                 // 1. Không được rỗng
@@ -2370,7 +2370,7 @@ return () => document.removeEventListener("mousedown", handleClickOutside);
 
     // --- HÀM TRỢ GIÚP: REGEX ---
     const getAllowedRegexString = (options, allowLatin = false) => {
-        let ranges = "\\s"; 
+        let ranges = "\\s;"; 
         if (allowLatin) ranges += "a-zA-Z"; // Latinh luôn được phép ở input
 
         if (options.hiragana) ranges += "\\u3040-\\u309F";
@@ -2632,26 +2632,26 @@ try {
     };
 
 
-   const handleShuffleCurrent = () => {
+ const handleShuffleCurrent = () => {
         if (!config.text) { alert("Chưa có nội dung!"); return; }
         
         let newContent = "";
 
         if (mode === 'vocab') {
-            // === CHẾ ĐỘ TỪ VỰNG: Xáo trộn thứ tự dòng ===
-            // 1. Tách văn bản thành mảng các từ (theo dòng)
-            const lines = config.text.split('\n').filter(line => line.trim() !== '');
+            // === CHẾ ĐỘ TỪ VỰNG: Xáo trộn (Hỗ trợ xuống dòng và chấm phẩy) ===
+            // 1. Tách bằng Regex: Xuống dòng HOẶC dấu chấm phẩy
+            const lines = config.text.split(/[\n;]+/).filter(line => line.trim() !== '');
             
-            // 2. Xáo trộn mảng (Thuật toán Fisher-Yates)
+            // 2. Xáo trộn
             for (let i = lines.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [lines[i], lines[j]] = [lines[j], lines[i]];
             }
             
-            // 3. Gộp lại thành chuỗi
+            // 3. Gộp lại (Chuẩn hóa về xuống dòng cho đẹp)
             newContent = lines.join('\n');
         } else {
-            // === CHẾ ĐỘ KANJI: Xáo trộn ký tự (Như cũ) ===
+            // === CHẾ ĐỘ KANJI (Như cũ) ===
             newContent = shuffleString(config.text);
         }
 
@@ -2869,6 +2869,7 @@ return (
                 <div className="flex items-center gap-3 relative">
                     
                     {/* 1. NÚT MỞ BỘ LỌC */}
+                    {mode !== 'vocab' && (
                     <div className="relative" ref={filterRef}>
                         <button 
                             onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
@@ -2937,7 +2938,7 @@ LÀM SẠCH
                             </div>
                         )}
                     </div>
-
+)}
                     {/* 2. NÚT XÓA TẤT CẢ */}
                     <button onClick={() => { setLocalText(''); handleChange('text', ''); }} className="flex items-center gap-1 text-[10px] font-bold text-red-500 hover:text-red-700 transition-colors uppercase tracking-tighter">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> XÓA TẤT CẢ
@@ -3163,6 +3164,7 @@ LÀM SẠCH
             </div>
 
             {/* 3. DANH SÁCH ÔN TẬP (MÀU CAM) */}
+     {mode !== 'vocab' && (
             <div className="pt-1">
                 <button 
                     onClick={() => {
@@ -3180,10 +3182,11 @@ LÀM SẠCH
                     <span className="text-xs font-bold uppercase tracking-wide">LỊCH TRÌNH ÔN TẬP</span>
                 </button>
             </div>
-
+)}
         </div>
     )}
 </div>
+     
                     {/* 3. TÙY CHỈNH */}
                     <div className="relative flex-1" ref={configMenuRef}> 
                     <button onClick={() => toggleMenu('config')} className={`w-full h-full px-1 border rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-[0.98] ${isConfigOpen ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}`}>
@@ -3747,7 +3750,7 @@ const pages = useMemo(() => {
     } else {
         // Chế độ Từ vựng: Tách theo dòng (Enter)
         // Giữ lại từ vựng nguyên vẹn
-        items = contentToShow.split('\n').filter(w => w.trim().length > 0);
+        items = contentToShow.split(/[\n;]+/).filter(w => w.trim().length > 0);
     }
 
     const chunks = [];
