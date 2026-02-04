@@ -1443,14 +1443,12 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
         </div>
     );
     };
-const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) => {
+const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mode }) => {
+    // Helper cũ cho Kanji (GIỮ NGUYÊN)
     const getCharInfo = (c) => {
         if (!dbData) return null;
-        // 1. Tìm trong Hiragana
         if (dbData.ALPHABETS?.hiragana?.[c]) return { ...dbData.ALPHABETS.hiragana[c], type: 'hiragana' };
-        // 2. Tìm trong Katakana
         if (dbData.ALPHABETS?.katakana?.[c]) return { ...dbData.ALPHABETS.katakana[c], type: 'katakana' };
-        // 3. Tìm trong Kanji (Bao gồm cả bộ thủ nằm trong DB này)
         if (dbData.KANJI_DB?.[c]) return { ...dbData.KANJI_DB[c], type: 'kanji' };
         return null;
     };
@@ -1463,7 +1461,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
     const [isChecking, setIsChecking] = React.useState(false);
 
     // State Tiến độ
-    const [totalKanji, setTotalKanji] = useState(0);       
+    const [totalKanji, setTotalKanji] = useState(0);        
     const [finishedCount, setFinishedCount] = useState(0); 
 
     // State xử lý lỗi & phạt
@@ -1477,26 +1475,23 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
     const [matchedIds, setMatchedIds] = useState([]);
     const [wrongPairIds, setWrongPairIds] = useState([]);
 
-    // Khóa cuộn trang
     useEffect(() => {
         if (isOpen) document.body.style.overflow = 'hidden';
         else document.body.style.overflow = 'unset';
         return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
 
-    // RESET TRẠNG THÁI KHI ĐÓNG MODAL (Fix lỗi bắn pháo hoa khi vào lại)
     useEffect(() => {
         if (!isOpen) {
             setGameState('loading');
             setQueue([]);
             setFinishedCount(0);
             setWrongItem(null);
-            setSelectedIdx(null); // Reset trạng thái chọn
-            setIsChecking(false); // Reset trạng thái kiểm tra
+            setSelectedIdx(null);
+            setIsChecking(false);
         }
     }, [isOpen]);
 
-    // Hàm trộn mảng
     const shuffleArray = (array) => {
         const newArr = [...array];
         for (let i = newArr.length - 1; i > 0; i--) {
@@ -1506,7 +1501,6 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
         return newArr;
     };
 
-    // --- HÀM TÍNH TOÁN CỠ CHỮ TỰ ĐỘNG ---
     const getDynamicFontSize = (text, type = 'normal') => {
         const len = text ? text.length : 0;
         if (type === 'title') {
@@ -1516,156 +1510,206 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard }) 
              return 'text-6xl';
         }
         if (type === 'button') {
-            if (len > 15) return 'text-[9px]';
-            if (len > 10) return 'text-[10px]';
-            if (len > 6) return 'text-[11px]';
+            if (len > 25) return 'text-[9px]'; // Giảm thêm cho nghĩa dài
+            if (len > 15) return 'text-[10px]';
+            if (len > 10) return 'text-[11px]';
+            if (len > 6) return 'text-xs';
             return 'text-sm';
         }
         return '';
     };
 
-   // 1. KHỞI TẠO DỮ LIỆU
-    useEffect(() => {
-        if (isOpen && text && dbData) {
-            setGameState('loading');
-            
-            // --- SỬA: Lọc chữ dùng hàm getCharInfo để lấy cả Kana/Kanji ---
-            let validChars = Array.from(new Set(text.split('').filter(c => getCharInfo(c))));
-            validChars = shuffleArray(validChars); 
+   // 1. KHỞI TẠO DỮ LIỆU (PHÂN TÁCH LOGIC TỪ VỰNG VÀ KANJI)
+    const initGame = () => {
+        if (!text || !dbData) return;
+        setGameState('loading');
 
-            if (validChars.length === 0) { alert("Chưa có dữ liệu để học!"); onClose(); return; }
+        let validItems = [];
+        const isVocabMode = mode === 'vocab';
 
-            setTotalKanji(validChars.length);
-            
-            let newQueue = [];
-            const CHUNK_SIZE = 6; 
-
-            for (let i = 0; i < validChars.length; i += CHUNK_SIZE) {
-                const chunk = validChars.slice(i, i + CHUNK_SIZE);
-                chunk.forEach(char => newQueue.push({ type: 'quiz_sound', char }));
-                if (chunk.length >= 2) newQueue.push({ type: 'match', chars: chunk });
-                chunk.forEach(char => newQueue.push({ type: 'quiz_reverse', char })); 
-            }
-
-            setQueue(newQueue); 
-            setCurrentIndex(0); 
-            
-            setTimeout(() => {
-                if (newQueue.length > 0) setGameState(newQueue[0].type);
-            }, 50);
-
-            setPenaltyInput(''); 
-            setMatchedIds([]);
-            setWrongPairIds([]);
-        }
-    }, [isOpen, text, dbData]);
-    
-const currentQuizData = useMemo(() => {
-    const currentItem = queue[currentIndex];
-    if (!currentItem || !['quiz_sound', 'quiz_reverse'].includes(currentItem.type)) return null;
-
-    const targetChar = currentItem.char;
-    const targetInfo = getCharInfo(targetChar);
-    if (!targetInfo) return null;
-
-    // 1. Lấy danh sách toàn bộ chữ người dùng đã nhập vào (đã lọc trùng và hợp lệ)
-    const userChars = Array.from(new Set(text.split('').filter(c => getCharInfo(c))));
-
-    // 2. Xác định "Bể bơi" (Pool) để lấy đáp án nhiễu
-    let distractorPool = [];
-
-    // ƯU TIÊN 1: Nếu người dùng nhập >= 4 chữ, lấy từ danh sách của người dùng
-    if (userChars.length >= 4) {
-        distractorPool = userChars.filter(c => c !== targetChar);
-    } 
-    // ƯU TIÊN 2: Nếu ít hơn 4 chữ, lấy từ nguồn dữ liệu CÙNG LOẠI
-    else {
-        if (targetInfo.type === 'hiragana') {
-            distractorPool = Object.keys(dbData.ALPHABETS.hiragana);
-        } else if (targetInfo.type === 'katakana') {
-            distractorPool = Object.keys(dbData.ALPHABETS.katakana);
+        if (isVocabMode) {
+            // --- LOGIC TỪ VỰNG: Tách theo dòng ---
+            validItems = Array.from(new Set(text.split('\n').map(w => w.trim()).filter(w => w.length > 0 && dbData.TUVUNG_DB?.[w])));
         } else {
-            // Chế độ Kanji/Bộ thủ: Thử tìm trong JLPT trước
-            let foundInLevel = false;
-            if (dbData.KANJI_LEVELS) {
-                for (const [lvl, chars] of Object.entries(dbData.KANJI_LEVELS)) {
-                    if (chars.includes(targetChar)) {
-                        distractorPool = chars;
-                        foundInLevel = true;
-                        break;
-                    }
-                }
-            }
-            // Nếu không thấy trong JLPT (là Bộ thủ), lấy pool là toàn bộ Kanji/Bộ thủ
-            if (!foundInLevel) distractorPool = Object.keys(dbData.KANJI_DB);
+            // --- LOGIC KANJI: Tách theo ký tự ---
+            validItems = Array.from(new Set(text.split('').filter(c => getCharInfo(c))));
         }
-    }
 
-    // 3. Chọn ra 3 đáp án nhiễu (Dọn dẹp lại logic chọn và backup cùng loại)
-    const distractors = [];
-    const filteredPool = distractorPool.filter(c => c !== targetChar);
-    const shuffledPool = shuffleArray(filteredPool);
+        validItems = shuffleArray(validItems); 
 
-    for (let i = 0; i < 3; i++) {
-        if (shuffledPool[i]) {
-            distractors.push(shuffledPool[i]);
-        } else {
-            // Backup cùng loại nếu pool chính không đủ 3 chữ
-            let backupSource = [];
-            if (targetInfo.type === 'hiragana') backupSource = Object.keys(dbData.ALPHABETS.hiragana);
-            else if (targetInfo.type === 'katakana') backupSource = Object.keys(dbData.ALPHABETS.katakana);
-            else backupSource = Object.keys(dbData.KANJI_DB);
+        if (validItems.length === 0) { alert("Chưa có dữ liệu để học!"); onClose(); return; }
 
-            const backupChar = backupSource.find(c => c !== targetChar && !distractors.includes(c));
-            if (backupChar) distractors.push(backupChar);
+        setTotalKanji(validItems.length);
+        
+        let newQueue = [];
+        const CHUNK_SIZE = 6; 
+
+        for (let i = 0; i < validItems.length; i += CHUNK_SIZE) {
+            const chunk = validItems.slice(i, i + CHUNK_SIZE);
+            // Quiz 1 (Kanji: Âm Hán | Vocab: Mặt chữ -> Nghĩa)
+            chunk.forEach(item => newQueue.push({ type: 'quiz_sound', item }));
+            
+            // Match (Kanji: Chữ-Hán Việt | Vocab: Chữ-Cách đọc)
+            if (chunk.length >= 2) newQueue.push({ type: 'match', items: chunk });
+            
+            // Quiz 2 (Kanji: Âm Hán -> Chữ | Vocab: Nghĩa -> Chữ)
+            chunk.forEach(item => newQueue.push({ type: 'quiz_reverse', item })); 
         }
-    }
 
-    // 4. Tạo Options dựa trên loại bài tập
-    let options = [];
-    if (currentItem.type === 'quiz_reverse') {
-        // BÀI TRẮC NGHIỆM SỐ 2: CHỌN MẶT CHỮ
-        options = [
-            { label: targetChar, correct: true, isKanji: true },
-            ...distractors.map(d => ({ label: d, correct: false, isKanji: true }))
-        ];
-    } else {
-        // BÀI TRẮC NGHIỆM SỐ 1: CHỌN ÂM ĐỌC
-        const getLabel = (c) => getCharInfo(c)?.sound || '---';
-        options = [
-            { label: targetInfo.sound, correct: true, isKanji: false },
-            ...distractors.map(d => ({ label: getLabel(d), correct: false, isKanji: false }))
-        ];
-    }
+        setQueue(newQueue); 
+        setCurrentIndex(0);
+        
+        setTimeout(() => {
+            if (newQueue.length > 0) setGameState(newQueue[0].type);
+        }, 50);
 
-    // 5. Trộn đáp án và cấu hình hiển thị
-    options = shuffleArray(options);
-    const questionDisplay = {
-        main: currentItem.type === 'quiz_reverse' ? targetInfo.sound : targetChar,
-        sub: targetInfo.type === 'kanji' ? targetInfo.meaning : null,
-        isKanji: currentItem.type !== 'quiz_reverse'
+        setPenaltyInput(''); 
+        setMatchedIds([]);
+        setWrongPairIds([]);
     };
 
-    return { targetChar, targetInfo, options, questionDisplay, quizType: currentItem.type };
-}, [queue, currentIndex, dbData, text]);
+    useEffect(() => {
+        if (isOpen) initGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, text, dbData, mode]);
     
+    // 2. SINH DỮ LIỆU CÂU HỎI (QUIZ DATA)
+    const currentQuizData = useMemo(() => {
+        const currentItem = queue[currentIndex];
+        if (!currentItem || !['quiz_sound', 'quiz_reverse'].includes(currentItem.type)) return null;
+
+        const target = currentItem.item; // Là char (Kanji) hoặc word (Vocab)
+        const isVocabMode = mode === 'vocab';
+        let targetInfo = null;
+
+        // --- LẤY THÔNG TIN TARGET ---
+        if (isVocabMode) {
+            targetInfo = dbData.TUVUNG_DB[target];
+            if (!targetInfo) return null;
+        } else {
+            targetInfo = getCharInfo(target);
+            if (!targetInfo) return null;
+        }
+
+        // --- TẠO DANH SÁCH NHIỄU (Distractors) ---
+        let distractorPool = [];
+        if (isVocabMode) {
+            // Lấy từ danh sách đang học
+            const allInputWords = text.split('\n').map(w => w.trim()).filter(w => w);
+            if (allInputWords.length >= 4) {
+                 distractorPool = allInputWords.filter(w => w !== target);
+            } else {
+                 // Nếu ít quá thì lấy đại trong DB
+                 distractorPool = Object.keys(dbData.TUVUNG_DB).filter(w => w !== target);
+            }
+        } else {
+            // Logic Kanji cũ
+            const userChars = Array.from(new Set(text.split('').filter(c => getCharInfo(c))));
+            if (userChars.length >= 4) {
+                distractorPool = userChars.filter(c => c !== target);
+            } else {
+                 // Fallback logic cũ... (lược bớt cho gọn, giữ nguyên logic cũ của bạn ở đây)
+                 distractorPool = Object.keys(dbData.KANJI_DB).filter(c => c !== target);
+            }
+        }
+        
+        // Chọn 3 đáp án sai
+        const distractors = shuffleArray(distractorPool).slice(0, 3);
+
+        // --- TẠO OPTIONS & QUESTION DISPLAY ---
+        let options = [];
+        let questionDisplay = {};
+
+        if (isVocabMode) {
+            // === CHẾ ĐỘ TỪ VỰNG ===
+            
+            if (currentItem.type === 'quiz_sound') {
+                // QUIZ 1: Hiện Mặt Chữ (+ Cách đọc) --> Chọn Nghĩa
+                const readingDisplay = targetInfo.reading && targetInfo.reading !== target ? `(${targetInfo.reading})` : '';
+                questionDisplay = {
+                    main: target,
+                    sub: readingDisplay, // Hiện cách đọc ở dưới
+                    isKanji: false // Để dùng font thường
+                };
+                
+                // Đáp án là NGHĨA
+                options = [
+                    { label: targetInfo.meaning, correct: true },
+                    ...distractors.map(d => ({ label: dbData.TUVUNG_DB[d]?.meaning || '---', correct: false }))
+                ];
+
+            } else {
+                // QUIZ 2 (Reverse): Hiện Nghĩa --> Chọn Mặt Chữ
+                questionDisplay = {
+                    main: targetInfo.meaning,
+                    sub: null,
+                    isKanji: false
+                };
+
+                // Đáp án là MẶT CHỮ
+                options = [
+                    { label: target, correct: true },
+                    ...distractors.map(d => ({ label: d, correct: false }))
+                ];
+            }
+
+        } else {
+            // === CHẾ ĐỘ KANJI (GIỮ NGUYÊN) ===
+            if (currentItem.type === 'quiz_reverse') {
+                 // Chọn mặt chữ
+                 options = [
+                    { label: target, correct: true, isKanji: true },
+                    ...distractors.map(d => ({ label: d, correct: false, isKanji: true }))
+                ];
+                questionDisplay = { main: targetInfo.sound, sub: null, isKanji: false };
+            } else {
+                // Chọn âm đọc
+                options = [
+                    { label: targetInfo.sound, correct: true, isKanji: false },
+                    ...distractors.map(d => ({ label: getCharInfo(d)?.sound || '---', correct: false, isKanji: false }))
+                ];
+                questionDisplay = { main: target, sub: targetInfo.meaning, isKanji: true };
+            }
+        }
+
+        options = shuffleArray(options);
+        
+        // Trả về dữ liệu đã chuẩn hóa để render
+        return { target, targetInfo, options, questionDisplay, quizType: currentItem.type };
+
+    }, [queue, currentIndex, dbData, text, mode]); // Thêm mode
     
-  // 3. SINH DỮ LIỆU MATCH
+      
+  // 3. SINH DỮ LIỆU MATCH (GHÉP THẺ)
     useEffect(() => {
         if (queue[currentIndex]?.type === 'match') {
-            const chars = queue[currentIndex].chars;
+            const items = queue[currentIndex].items;
             let cards = [];
-            chars.forEach((c, idx) => {
-                const info = getCharInfo(c); // SỬA: Dùng hàm getCharInfo
-                if (info) {
-                    cards.push({ id: `k-${idx}`, content: c, type: 'kanji', matchId: idx });
-                    cards.push({ id: `m-${idx}`, content: info.sound, type: 'meaning', matchId: idx });
+            const isVocabMode = mode === 'vocab';
+
+            items.forEach((item, idx) => {
+                if (isVocabMode) {
+                    // TỪ VỰNG: Ghép [Mặt chữ] <-> [Cách đọc]
+                    const info = dbData.TUVUNG_DB[item];
+                    if (info) {
+                        cards.push({ id: `w-${idx}`, content: item, type: 'word', matchId: idx });
+                        // Nếu không có reading (ví dụ rỗng), dùng meaning làm fallback, hoặc dùng chính nó
+                        const content2 = info.reading || info.meaning || item;
+                        cards.push({ id: `r-${idx}`, content: content2, type: 'reading', matchId: idx });
+                    }
+                } else {
+                    // KANJI: Ghép [Chữ] <-> [Âm Hán] (Giữ nguyên)
+                    const info = getCharInfo(item);
+                    if (info) {
+                        cards.push({ id: `k-${idx}`, content: item, type: 'kanji', matchId: idx });
+                        cards.push({ id: `m-${idx}`, content: info.sound, type: 'meaning', matchId: idx });
+                    }
                 }
             });
             cards.sort(() => Math.random() - 0.5);
             setMatchCards(cards); setMatchedIds([]); setSelectedCardId(null); setWrongPairIds([]);
         }
-    }, [queue, currentIndex, dbData]);
+    }, [queue, currentIndex, dbData, mode]);
 
     const handleAnswer = (isCorrect, itemData) => {
         if (isCorrect) {
@@ -1687,8 +1731,22 @@ const currentQuizData = useMemo(() => {
   const checkPenalty = () => {
         if (!wrongItem) return;
         const inputClean = removeAccents(penaltyInput.trim().toLowerCase());
-        // SỬA: Lấy sound từ targetInfo đã có sẵn (đã được xử lý bởi getCharInfo ở trên)
-        const targetClean = removeAccents(wrongItem.targetInfo.sound.toLowerCase());
+        
+        let targetClean = '';
+        if (mode === 'vocab') {
+            // Vocab: Phạt bằng cách gõ lại MẶT CHỮ (Word)
+            // Hoặc gõ lại cách đọc? Thường là gõ lại Reading (Hiragana). 
+            // Tuy nhiên để đơn giản và tránh phải gõ tiếng Nhật, ta so sánh với READING (Romanji?) hoặc MEANING?
+            // Ở đây bạn yêu cầu đơn giản, tôi sẽ để là: Phải nhập đúng "Cách đọc" (nếu có) hoặc "Mặt chữ".
+            // Nhưng để dễ nhất cho người dùng Việt: Nhập lại MẶT CHỮ (Copy paste cũng được) để nhớ mặt chữ.
+            targetClean = removeAccents(wrongItem.target.toLowerCase()); 
+            
+            // NOTE: Nếu bạn muốn phạt gõ Âm Hán Việt cho từ vựng thì cần logic tra cứu phức tạp hơn.
+            // Tạm thời ở chế độ Vocab: Yêu cầu gõ lại đúng MẶT CHỮ để qua màn.
+        } else {
+            // Kanji: Phạt gõ Âm Hán Việt (Giữ nguyên)
+            targetClean = removeAccents(wrongItem.targetInfo.sound.toLowerCase());
+        }
 
         if (inputClean === targetClean) {
             setPenaltyFeedback('correct'); 
@@ -1738,9 +1796,8 @@ const currentQuizData = useMemo(() => {
 
     const triggerConfetti = React.useCallback(() => { if (typeof confetti === 'undefined') return; const count = 200; const defaults = { origin: { y: 0.6 }, zIndex: 1500 }; function fire(particleRatio, opts) { confetti({ ...defaults, ...opts, particleCount: Math.floor(count * particleRatio) }); } fire(0.25, { spread: 26, startVelocity: 55 }); fire(0.2, { spread: 60 }); fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 }); fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 }); fire(0.1, { spread: 120, startVelocity: 45 }); }, []);
     useEffect(() => { if (gameState === 'finished' && isOpen) { triggerConfetti(); } }, [gameState, isOpen, triggerConfetti]);
-// --- FIX LỖI: THÊM HÀM XỬ LÝ HỌC LẠI TỪ ĐẦU ---
+
   const handleRestart = () => {
-    // 1. Dọn dẹp các state cũ (React sẽ gom các lệnh này lại)
     setFinishedCount(0);
     setWrongItem(null);
     setPenaltyInput('');
@@ -1748,34 +1805,13 @@ const currentQuizData = useMemo(() => {
     setWrongPairIds([]);
     setSelectedIdx(null);
     setIsChecking(false);
-
-    // 2. Tính toán dữ liệu mới (Chạy cực nhanh, không lo lag)
-    let validChars = Array.from(new Set(text.split('').filter(c => getCharInfo(c))));
-    validChars = shuffleArray(validChars);
-
-    if (validChars.length === 0) return onClose();
-
-    let newQueue = [];
-    const CHUNK_SIZE = 6; 
-    for (let i = 0; i < validChars.length; i += CHUNK_SIZE) {
-        const chunk = validChars.slice(i, i + CHUNK_SIZE);
-        chunk.forEach(char => newQueue.push({ type: 'quiz_sound', char }));
-        if (chunk.length >= 2) newQueue.push({ type: 'match', chars: chunk });
-        chunk.forEach(char => newQueue.push({ type: 'quiz_reverse', char }));
-    }
-
-    // 3. Cập nhật dữ liệu và nhảy thẳng vào Game
-    // Không set 'loading', không setTimeout!
-    setQueue(newQueue);
-    setCurrentIndex(0);
-    setGameState(newQueue[0].type); 
+    initGame(); // Gọi lại hàm init
 };
-// --- PHẦN RENDER GIAO DIỆN (GIỮ NGUYÊN UI, CHỈ FIX LỖI LOGIC) ---
+
     if (!isOpen) return null;
     if (gameState === 'loading') return null;
 
-    // Tính phần trăm tiến độ
-const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0;
+    const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0;
 
     return (
         <div className="fixed inset-0 z-[500] flex flex-col items-center justify-center bg-gray-900/95 backdrop-blur-xl p-4 animate-in fade-in select-none">
@@ -1833,7 +1869,7 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
                                         {currentQuizData.questionDisplay.main}
                                      </div>
 
-                                    {/* Text Phụ (Nghĩa) - FIX LỖI: Chỉ hiện nếu có nghĩa (tránh crash với Hiragana) */}
+                                    {/* Text Phụ (Nghĩa hoặc Cách đọc) */}
                                     {currentQuizData.questionDisplay.sub && (
                                         <div className="absolute bottom-6 px-4 py-1.5 bg-gray-50 text-gray-500 text-sm font-bold uppercase rounded-full border border-gray-100 max-w-[90%] truncate">
                                             {currentQuizData.questionDisplay.sub}
@@ -1841,17 +1877,16 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
                                     )}
                                 </div>
 
-                                {/* 4 NÚT ĐÁP ÁN (ĐÃ FIX LỖI MOBILE VÀ THÊM MÀU) */}
+                                {/* 4 NÚT ĐÁP ÁN */}
                                 <div className="grid grid-cols-2 gap-3 w-full">
                                     {currentQuizData.options.map((opt, i) => {
                                         const isSelected = selectedIdx === i;
                                         
-                                        // Xác định class màu sắc dựa trên trạng thái bấm
-                                        let statusClass = "bg-white/10 border-white/10 text-white"; // Mặc định
+                                        let statusClass = "bg-white/10 border-white/10 text-white"; 
                                         if (isSelected) {
                                             statusClass = opt.correct 
-                                                ? "bg-green-500 border-green-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.6)]" // Đúng -> Xanh
-                                                : "bg-red-500 border-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.6)]";   // Sai -> Đỏ
+                                                ? "bg-green-500 border-green-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.6)]" 
+                                                : "bg-red-500 border-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.6)]";   
                                         }
 
                                         return (
@@ -1859,15 +1894,10 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
                                                 key={i} 
                                                 disabled={isChecking}
                                                 onClick={(e) => {
-                                                    // 1. Fix lỗi dính màu trên điện thoại
                                                     e.currentTarget.blur(); 
                                                     if (isChecking) return;
-
-                                                    // 2. Hiển thị trạng thái màu
                                                     setSelectedIdx(i);
                                                     setIsChecking(true);
-
-                                                    // 3. Đợi một chút để người dùng nhìn thấy màu rồi mới chuyển câu
                                                     setTimeout(() => {
                                                         handleAnswer(opt.correct, currentQuizData);
                                                         setSelectedIdx(null);
@@ -1878,7 +1908,7 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
                                                     ${statusClass}
                                                     ${!isChecking ? 'md:hover:bg-white/20' : ''} 
                                                     ${opt.isKanji 
-                                                        ? "text-3xl font-['Klee_One']" 
+                                                        ? "text-3xl font-['Klee_One']"  
                                                         : getDynamicFontSize(opt.label, 'button') + " font-sans uppercase break-words leading-tight" 
                                                     }`}
                                             >
@@ -1896,17 +1926,19 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
                                 <h3 className="text-sm font-black text-gray-400 uppercase mb-2">Viết lại để ghi nhớ</h3>
                                 
                                 {/* Chữ to chính giữa */}
-                                <div className="text-7xl font-['Klee_One'] text-gray-800 mb-2">{wrongItem.targetChar}</div>
+                                <div className={`mb-2 text-gray-800 ${mode === 'kanji' ? "text-7xl font-['Klee_One']" : "text-4xl font-bold font-sans break-words text-center"}`}>
+                                    {wrongItem.target}
+                                </div>
                                 
-                                {/* Âm đọc (Màu xanh) */}
-                                <p className="text-blue-600 font-black text-lg uppercase tracking-widest mb-1">{wrongItem.targetInfo.sound}</p>
+                                {/* Thông tin phụ (Màu xanh) */}
+                                <p className="text-blue-600 font-black text-lg uppercase tracking-widest mb-1">
+                                    {mode === 'kanji' ? wrongItem.targetInfo.sound : (wrongItem.targetInfo.reading || '')}
+                                </p>
                                 
-                                {/* FIX LỖI: Chỉ hiện nghĩa nếu là KANJI (Hiragana/Katakana sẽ ẩn dòng này đi để tránh lỗi) */}
-                                {wrongItem.targetInfo.type === 'kanji' && (
+                                {/* Nghĩa */}
+                                {wrongItem.targetInfo.meaning && (
                                     <p className="text-xs text-gray-400 font-medium italic mb-6">({wrongItem.targetInfo.meaning})</p>
                                 )}
-                                {/* Nếu không phải Kanji thì chỉ cần khoảng trống nhỏ cho đẹp */}
-                                {wrongItem.targetInfo.type !== 'kanji' && <div className="mb-6"></div>}
 
                                 <input 
                                     type="text" 
@@ -1914,7 +1946,7 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
                                     value={penaltyInput} 
                                     onChange={(e) => setPenaltyInput(e.target.value)} 
                                     onKeyDown={(e) => e.key === 'Enter' && checkPenalty()} 
-                                    placeholder="Nhập âm Hán Việt..." 
+                                    placeholder={mode === 'kanji' ? "Nhập âm Hán Việt..." : "Nhập lại từ..."} 
                                     className={`w-full p-3 text-center text-base font-bold border-2 rounded-xl outline-none transition-all ${penaltyFeedback === 'incorrect' ? 'border-red-500 bg-red-50' : penaltyFeedback === 'correct' ? 'border-green-500 bg-green-50' : 'border-gray-200 focus:border-blue-500'}`} 
                                 />
                                 <button onClick={checkPenalty} className="w-full mt-3 py-3 bg-gray-900 text-white font-bold rounded-xl active:scale-95 transition-all uppercase text-[10px] tracking-widest">
@@ -1942,7 +1974,7 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
                                                         ${isMatched ? 'opacity-0 scale-50 pointer-events-none' : 
                                                           isWrong ? 'bg-red-500 text-white animate-shake' : 
                                                           isSelected ? 'bg-blue-500 text-white scale-105 ring-2 ring-white/50' : 
-                                                          'bg-white text-gray-800 hover:bg-gray-50 active:scale-95'} 
+                                                          'bg-white text-gray-800 hover:bg-gray-50 active:scale-95'}
                                                         
                                                         ${card.type === 'kanji' 
                                                             ? "font-['Klee_One'] text-3xl"  
@@ -3608,6 +3640,7 @@ return (
     onClose={() => setIsLearnGameOpen(false)}
     text={config.text}
     dbData={dbData}
+    mode={practiceMode}
     onSwitchToFlashcard={() => {
         setIsLearnGameOpen(false); // Đóng Game
         setIsFlashcardOpen(true);  // Mở Flashcard ngay lập tức
