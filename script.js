@@ -1666,7 +1666,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
                 questionDisplay = {
                     main: target,
                     sub: readingDisplay, // Hiện cách đọc ở dưới
-                    isKanji: false // Để dùng font thường
+                    isKanji: true // Để dùng font thường
                 };
                 
                 // Đáp án là NGHĨA
