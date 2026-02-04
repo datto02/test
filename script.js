@@ -2212,7 +2212,59 @@ const handleLoadDueCards = () => {
     const [activeIndex, setActiveIndex] = useState(0); 
     const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
     const [isDocsModalOpen, setIsDocsModalOpen] = useState(false);
-    
+    // --- KHAI BÁO STATE & LOGIC CHO NÚT CHỌN NHANH (Bắt buộc phải có) ---
+    const [vocabSelect, setVocabSelect] = useState({
+        minna: '',
+        mimikara: { level: 'n3', chapter: '' },
+        tango: { level: 'n3', chapter: '' }
+    });
+
+    const getMimikaraMax = (level) => (level === 'n3' ? 12 : level === 'n2' ? 13 : 14);
+    const getTangoMax = (level) => (level === 'n3' ? 12 : level === 'n2' ? 12 : 14);
+
+    const handleMinnaInput = (val) => {
+        setVocabSelect({
+            minna: val,
+            mimikara: { level: 'n3', chapter: '' },
+            tango: { level: 'n3', chapter: '' }
+        });
+    };
+
+    const handleMimikaraInput = (field, val) => {
+        setVocabSelect(prev => ({
+            minna: '',
+            mimikara: { ...prev.mimikara, [field]: val },
+            tango: { level: 'n3', chapter: '' }
+        }));
+    };
+
+    const handleTangoInput = (field, val) => {
+        setVocabSelect(prev => ({
+            minna: '',
+            mimikara: { level: 'n3', chapter: '' },
+            tango: { ...prev.tango, [field]: val }
+        }));
+    };
+
+    const handleLoadVocabCurriculum = () => {
+        let url = '';
+        if (vocabSelect.minna) {
+            url = `./data/tuvung/minna/bai${vocabSelect.minna}.json`;
+        } else if (vocabSelect.mimikara.chapter) {
+            const { level, chapter } = vocabSelect.mimikara;
+            url = `./data/mimikara/${level}/${level}chuong${chapter}.json`;
+        } else if (vocabSelect.tango.chapter) {
+            const { level, chapter } = vocabSelect.tango;
+            url = `./data/tango/${level}/${level}tangochuong${chapter}.json`;
+        }
+
+        if (!url) {
+            alert("Vui lòng nhập số bài hoặc chương để tải!");
+            return;
+        }
+        handleLoadFromGithub(url, 'vocab');
+    };
+    // --------------------------------------------------------------------
     // --- CHẶN TUYỆT ĐỐI CTRL + P (KHÔNG CÓ GÌ XẢY RA) ---
     useEffect(() => {
     const handleKeyDown = (e) => {
@@ -2302,84 +2354,7 @@ N1: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-600 hover:text-white ho
         kanji: true,
         removeDuplicates: false 
     });
-// --- STATE CHO CHỌN NHANH TỪ VỰNG ---
-    const [vocabSelect, setVocabSelect] = useState({
-        minna: '',
-        mimikara: { level: 'n3', chapter: '' },
-        tango: { level: 'n3', chapter: '' }
-    });
 
-    // Hàm lấy giới hạn chương cho Mimikara
-    const getMimikaraMax = (level) => {
-        if (level === 'n3') return 12;
-        if (level === 'n2') return 13; // Theo file bạn liệt kê
-        if (level === 'n1') return 14;
-        return 12;
-    };
-
-    // Hàm lấy giới hạn chương cho Tango
-    const getTangoMax = (level) => {
-        if (level === 'n3') return 12;
-        if (level === 'n2') return 12;
-        if (level === 'n1') return 14;
-        return 12;
-    };
-
-    // 1. Xử lý khi nhập Minna (Reset 2 cái kia)
-    const handleMinnaInput = (val) => {
-        setVocabSelect({
-            minna: val,
-            mimikara: { level: 'n3', chapter: '' },
-            tango: { level: 'n3', chapter: '' }
-        });
-    };
-
-    // 2. Xử lý khi nhập Mimikara (Reset Minna, Tango)
-    const handleMimikaraInput = (field, val) => {
-        setVocabSelect(prev => ({
-            minna: '',
-            mimikara: { ...prev.mimikara, [field]: val },
-            tango: { level: 'n3', chapter: '' }
-        }));
-    };
-
-    // 3. Xử lý khi nhập Tango (Reset Minna, Mimikara)
-    const handleTangoInput = (field, val) => {
-        setVocabSelect(prev => ({
-            minna: '',
-            mimikara: { level: 'n3', chapter: '' },
-            tango: { ...prev.tango, [field]: val }
-        }));
-    };
-
-    // 4. Hàm Submit (Tạo đường dẫn và tải)
-    const handleLoadVocabCurriculum = () => {
-        let url = '';
-        
-        // Logic tạo URL
-        if (vocabSelect.minna) {
-            // Minna: data/tuvung/minna/bai1.json
-            url = `./data/tuvung/minna/bai${vocabSelect.minna}.json`;
-        } 
-        else if (vocabSelect.mimikara.chapter) {
-            // Mimikara: data/mimikara/n3/n3chuong1.json
-            const { level, chapter } = vocabSelect.mimikara;
-            url = `./data/mimikara/${level}/${level}chuong${chapter}.json`;
-        } 
-        else if (vocabSelect.tango.chapter) {
-            // Tango: data/tango/n3/n3tangochuong1.json
-            const { level, chapter } = vocabSelect.tango;
-            url = `./data/tango/${level}/${level}tangochuong${chapter}.json`;
-        }
-
-        if (!url) {
-            alert("Vui lòng chọn bài hoặc chương để tải!");
-            return;
-        }
-
-        // Gọi hàm tải file (Tái sử dụng hàm có sẵn)
-        handleLoadFromGithub(url, 'vocab'); 
-    };
     // --- HÀM TẠO PLACEHOLDER ---
     const getDynamicPlaceholder = () => {
         const labels = [];
