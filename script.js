@@ -2,7 +2,7 @@ const removeAccents = (str) => {
 return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
 };
     const { useState, useEffect, useMemo, useRef } = React;
- 
+
 const calculateSRS = (currentData, quality) => {
   let { level = 0, easeFactor = 2.5, nextReview } = currentData || {};
   const now = Date.now();
@@ -59,7 +59,7 @@ const fetchDataFromGithub = async () => {
       fetch('./data/kanji_db.json'),
       fetch('./data/onkun.json'),
       fetch('./data/vocab.json'),
-      fetch(`./data/tuvungg.json?v=${timestamp}`)
+      fetch('./data/tuvungg.json')
     ]);
 
     // 2. Tải thêm 5 file danh sách cấp độ (N5 -> N1)
