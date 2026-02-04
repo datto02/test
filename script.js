@@ -1528,22 +1528,26 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
         let validItems = [];
         const isVocabMode = mode === 'vocab';
 
-        if (isVocabMode) {
-            // --- LOGIC TỪ VỰNG: Tách dòng -> Trim -> Kiểm tra tồn tại trong DB ---
-            validItems = Array.from(new Set(
-                text.split('\n')
-                    .map(w => w.trim())
-                    // Lọc: 1. Có độ dài, 2. Có trong database TUVUNG_DB
-                    .filter(w => w.length > 0 && dbData.TUVUNG_DB && dbData.TUVUNG_DB[w])
-            ));
-        } else {
-            // --- LOGIC KANJI: Tách ký tự -> Kiểm tra tồn tại ---
-            validItems = Array.from(new Set(
-                text.split('')
-                    // Lọc: Hàm getCharInfo trả về dữ liệu thì mới lấy
-                    .filter(c => getCharInfo(c))
-            ));
-        }
+       if (isVocabMode) {
+        // --- LOGIC TỪ VỰNG: SỬA ĐOẠN NÀY ---
+        // Tách dòng -> Trim -> Kiểm tra kỹ xem từ đó có trong TUVUNG_DB không
+        validItems = Array.from(new Set(
+            text.split('\n')
+                .map(w => w.trim())
+                // ĐIỀU KIỆN QUAN TRỌNG:
+                // 1. Không được rỗng
+                // 2. dbData phải tồn tại
+                // 3. TUVUNG_DB phải tồn tại
+                // 4. Từ 'w' phải có Key nằm trong TUVUNG_DB
+                .filter(w => w.length > 0 && dbData?.TUVUNG_DB && dbData.TUVUNG_DB[w]) 
+        ));
+    } else {
+        // --- LOGIC KANJI (Giữ nguyên hoặc thêm kiểm tra chặt chẽ) ---
+        validItems = Array.from(new Set(
+            text.split('')
+                .filter(c => getCharInfo(c)) // Hàm getCharInfo đã kiểm tra DB rồi
+        ));
+    }
 
         // Nếu lọc xong mà không còn từ nào (do nhập linh tinh hoặc chưa có data)
         if (validItems.length === 0) { 
@@ -1608,16 +1612,22 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
             if (!targetInfo) return null;
         }
 
-        // --- TẠO DANH SÁCH NHIỄU (Distractors) ---
-        let distractorPool = [];
+       let distractorPool = [];
         if (isVocabMode) {
-            // Lấy từ danh sách đang học
+            // Lấy từ danh sách đang học (input)
             const allInputWords = text.split('\n').map(w => w.trim()).filter(w => w);
-            if (allInputWords.length >= 4) {
-                 distractorPool = allInputWords.filter(w => w !== target);
+            
+            // LỌC KỸ: Chỉ lấy những từ CÓ trong DB và KHÁC từ hiện tại
+            const validPool = allInputWords.filter(w => w !== target && dbData?.TUVUNG_DB?.[w]);
+
+            if (validPool.length >= 3) {
+                 distractorPool = validPool;
             } else {
-                 // Nếu ít quá thì lấy đại trong DB
-                 distractorPool = Object.keys(dbData.TUVUNG_DB).filter(w => w !== target);
+                 // Nếu ít quá thì lấy đại trong DB (nhưng phải đảm bảo key tồn tại)
+                 // Object.keys lấy tất cả key, nên chắc chắn tồn tại, chỉ cần filter khác target
+                 if (dbData?.TUVUNG_DB) {
+                    distractorPool = Object.keys(dbData.TUVUNG_DB).filter(w => w !== target);
+                 }
             }
         } else {
             // Logic Kanji cũ
