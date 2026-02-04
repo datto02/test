@@ -1743,22 +1743,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
     }, [queue, currentIndex, dbData, mode]);
 
     
-                        cards.push({ id: `r-${idx}`, content: content2, type: 'reading', matchId: idx });
-                    }
-                } else {
-                    // KANJI: Ghép [Chữ] <-> [Âm Hán] (Giữ nguyên)
-                    const info = getCharInfo(item);
-                    if (info) {
-                        cards.push({ id: `k-${idx}`, content: item, type: 'kanji', matchId: idx });
-                        cards.push({ id: `m-${idx}`, content: info.sound, type: 'meaning', matchId: idx });
-                    }
-                }
-            });
-            cards.sort(() => Math.random() - 0.5);
-            setMatchCards(cards); setMatchedIds([]); setSelectedCardId(null); setWrongPairIds([]);
-        }
-    }, [queue, currentIndex, dbData, mode]);
-
+                   
     const handleAnswer = (isCorrect, itemData) => {
         if (isCorrect) {
             if (itemData.quizType === 'quiz_reverse') {
