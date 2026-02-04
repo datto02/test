@@ -662,7 +662,10 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
         if (isOpen && text) { 
             let chars = [];
             if (mode === 'vocab') {
-                 chars = text.split('\n').map(w => w.trim()).filter(w => w.length > 0);
+                 // CHỈNH SỬA: Chỉ lấy những từ có độ dài > 0 VÀ tồn tại trong TUVUNG_DB
+                 chars = text.split('\n')
+                    .map(w => w.trim())
+                    .filter(w => w.length > 0 && dbData?.TUVUNG_DB && dbData.TUVUNG_DB[w]);
             } else {
                 chars = Array.from(text).filter(c => c.trim()); 
             }
@@ -672,7 +675,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
             startNewSession(queueToLoad); 
             setShowHint(true); 
         } 
-    }, [isOpen, text, startNewSession, mode]);
+    }, [isOpen, text, startNewSession, mode, dbData]);
 
     React.useEffect(() => { if (isOpen) { const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth; document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden'; document.body.style.paddingRight = `${scrollBarWidth}px`; document.body.style.touchAction = 'none'; } else { document.documentElement.style.overflow = ''; document.body.style.overflow = ''; document.body.style.paddingRight = ''; document.body.style.touchAction = ''; } return () => { document.documentElement.style.overflow = ''; document.body.style.overflow = ''; document.body.style.paddingRight = ''; document.body.style.touchAction = ''; }; }, [isOpen]);
     
