@@ -3667,29 +3667,28 @@ TÀI LIỆU HỌC TẬP
     );
     };
 
-    // --- COMPONENT HIỆU ỨNG CHUYỂN CẢNH ---
+// --- COMPONENT HIỆU ỨNG CHUYỂN CẢNH ---
 const ModeTransition = ({ isVisible, origin, targetMode, onMiddle, onEnd }) => {
-    const [phase, setPhase] = useState('idle'); // 'idle', 'expand', 'contract'
+    const [phase, setPhase] = useState('idle');
 
     useEffect(() => {
         if (isVisible) {
-            // Giai đoạn 1: Bắt đầu mở rộng (Expand)
-            // Cần setTimeout nhỏ để trình duyệt kịp render DOM trước khi thêm class active
+            // 1. Vòng tròn màu mở rộng
             setTimeout(() => setPhase('expand'), 50);
 
-            // Giai đoạn 2: Giữa chừng (đổi dữ liệu + icon hoạt họa)
+            // 2. Đổi dữ liệu ngầm (sớm hơn chút để khớp với lúc chữ hiện ra)
             setTimeout(() => {
-                if (onMiddle) onMiddle(); // Gọi hàm đổi dữ liệu thật sự
-            }, 600); // Khớp với duration của CSS (0.6s)
+                if (onMiddle) onMiddle();
+            }, 600); 
 
-            // Giai đoạn 3: Thu về (Contract)
+            // 3. Vòng tròn màu thu về
             setTimeout(() => {
                 setPhase('contract');
-            }, 1200); // Đợi icon quay xong
+            }, 1400); // Đợi chữ biến mất xong mới thu màu
 
-            // Giai đoạn 4: Kết thúc
+            // 4. Kết thúc toàn bộ
             setTimeout(() => {
-                if (onEnd) onEnd(); // Tắt component
+                if (onEnd) onEnd();
                 setPhase('idle');
             }, 1800);
         }
@@ -3697,25 +3696,23 @@ const ModeTransition = ({ isVisible, origin, targetMode, onMiddle, onEnd }) => {
 
     if (!isVisible) return null;
 
-    // Màu sắc dựa trên chế độ ĐÍCH ĐẾN
-    // Nếu đích là vocab (Từ vựng) -> Màu xanh lá. Nếu đích là kanji -> Màu tím.
     const bgColor = targetMode === 'vocab' ? 'bg-emerald-600' : 'bg-indigo-600';
     const label = targetMode === 'vocab' ? '語' : '字';
     const subLabel = targetMode === 'vocab' ? 'TỪ VỰNG' : 'KANJI';
 
     return (
         <div className="fixed inset-0 z-[9999] pointer-events-none overflow-hidden flex items-center justify-center">
-            {/* 1. VÒNG TRÒN MÀU LAN TỎA */}
+            {/* VÒNG TRÒN MÀU */}
             <div 
                 className={`ripple-circle ${bgColor} ${phase === 'expand' ? 'ripple-active' : ''}`}
                 style={{ left: origin.x, top: origin.y }}
             />
 
-            {/* 2. ICON HOẠT HỌA GIỮA MÀN HÌNH */}
+            {/* TEXT & ICON (Dùng class mới: animate-pop-spin) */}
             {phase === 'expand' && (
-                <div className="relative z-[9999] flex flex-col items-center justify-center animate-spin-morph text-white">
-                    <span className="text-9xl font-['Klee_One'] mb-4">{label}</span>
-                    <span className="text-2xl font-black tracking-[0.5em] uppercase">{subLabel}</span>
+                <div className="relative z-[9999] flex flex-col items-center justify-center animate-pop-spin text-white">
+                    <span className="text-9xl font-['Klee_One'] mb-4 shadow-xl">{label}</span>
+                    <span className="text-2xl font-black tracking-[0.5em] uppercase drop-shadow-md">{subLabel}</span>
                 </div>
             )}
         </div>
