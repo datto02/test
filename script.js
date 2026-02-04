@@ -1242,7 +1242,7 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
     }
 
   // =================================================================
-    // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (CÓ ÂM HÁN VIỆT - KHÔNG KẺ MỜ)
+    // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (ĐÃ SỬA LỖI LẶP VÀ NGOẶC THỪA)
     // =================================================================
     else {
         const word = char.trim();
@@ -1253,11 +1253,11 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
         // 1. Tạo mảng 12 ô trống
         for(let i=0; i<totalBoxes; i++) boxes.push(null);
 
-        // 2. Logic điền từ (Đơn giản, không tính toán vạch kẻ mờ)
+        // 2. Logic điền từ
         let currentIndex = 0;
         while (currentIndex + wordLen <= totalBoxes) {
             for (let i = 0; i < wordLen; i++) {
-                boxes[currentIndex + i] = word[i]; // Chỉ lưu ký tự
+                boxes[currentIndex + i] = word[i]; 
             }
             currentIndex += wordLen; 
         }
@@ -1265,44 +1265,57 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
         const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
         const vocabInfo = dbData?.TUVUNG_DB?.[word] || {};
 
-        // --- MỚI: TẠO CHUỖI ÂM HÁN VIỆT ---
-        // Tách từ thành từng ký tự -> Tra cứu trong KANJI_DB -> Gộp lại
+        // --- XỬ LÝ ÂM HÁN VIỆT ---
         const hanviet = word.split('').map(c => {
             return dbData?.KANJI_DB?.[c]?.sound || ''; 
         }).filter(s => s).join(' '); 
-        // ----------------------------------
+
+        // --- XỬ LÝ LOGIC HIỂN THỊ (MỚI) ---
+        
+        // 1. Kiểm tra nếu cách đọc giống hệt mặt chữ (trường hợp Hiragana/Katakana)
+        // Ví dụ: word="わたし", reading="わたし" => isReadingRedundant = true
+        const isReadingRedundant = vocabInfo.reading === word;
+        
+        // Biến này chứa reading nếu cần hiển thị, hoặc null nếu bị trùng
+        const displayReading = (!isReadingRedundant && vocabInfo.reading) ? vocabInfo.reading : null;
+
+        // 2. Kiểm tra xem có thông tin nào để hiển thị trong ngoặc không?
+        // Có ít nhất 1 trong 3: (Reading khác word) HOẶC (Hán Việt) HOẶC (Nghĩa)
+        const hasInfo = displayReading || hanviet || vocabInfo.meaning;
 
         return (
             <div className="flex flex-col w-full px-[8mm]">
-                {/* HEADER TỪ VỰNG: CẬP NHẬT HIỂN THỊ HÁN VIỆT */}
+                {/* HEADER TỪ VỰNG */}
                 <div className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" style={{ width: '184mm' }}>
                     <div className="flex-shrink-0 mr-4 flex items-baseline gap-2 mb-[3px]">
                         {/* Từ vựng chính */}
                         <span className="font-bold text-sm leading-none text-black whitespace-nowrap">{word}</span>
                         
-                        {/* Phần thông tin trong ngoặc */}
-                        <span className="text-[13px] font-normal text-black leading-none whitespace-nowrap">
-                            (
-                            {/* 1. Cách đọc (Hiragana/Katakana) */}
-                            {vocabInfo.reading && <span>{vocabInfo.reading}</span>}
+                        {/* CHỈ HIỂN THỊ CẶP NGOẶC NẾU CÓ THÔNG TIN (hasInfo) */}
+                        {hasInfo && (
+                            <span className="text-[13px] font-normal text-black leading-none whitespace-nowrap">
+                                (
+                                {/* 1. Cách đọc (Chỉ hiện nếu không trùng với mặt chữ) */}
+                                {displayReading && <span>{displayReading}</span>}
 
-                            {/* Gạch nối 1: Nếu có cách đọc VÀ (có Hán Việt hoặc có Nghĩa) */}
-                            {vocabInfo.reading && (hanviet || vocabInfo.meaning) && <span> - </span>}
+                                {/* Gạch nối 1: Giữa Reading và (Hán Việt hoặc Nghĩa) */}
+                                {displayReading && (hanviet || vocabInfo.meaning) && <span> - </span>}
 
-                            {/* 2. Âm Hán Việt (MỚI THÊM - IN ĐẬM NHẸ) */}
-                            {hanviet && <span className="font-bold text-black">{hanviet}</span>}
+                                {/* 2. Âm Hán Việt */}
+                                {hanviet && <span className="font-bold text-gray-700">{hanviet}</span>}
 
-                            {/* Gạch nối 2: Nếu có Hán Việt VÀ có Nghĩa */}
-                            {hanviet && vocabInfo.meaning && <span> - </span>}
+                                {/* Gạch nối 2: Giữa Hán Việt và Nghĩa */}
+                                {hanviet && vocabInfo.meaning && <span> - </span>}
 
-                            {/* 3. Nghĩa tiếng Việt */}
-                            {vocabInfo.meaning && <span>{vocabInfo.meaning}</span>}
-                            )
-                        </span>
+                                {/* 3. Nghĩa tiếng Việt */}
+                                {vocabInfo.meaning && <span>{vocabInfo.meaning}</span>}
+                                )
+                            </span>
+                        )}
                     </div>
                 </div>
 
-                {/* GRID TỪ VỰNG: QUAY VỀ MẶC ĐỊNH (KHÔNG KẺ MỜ) */}
+                {/* GRID TỪ VỰNG */}
                 <div className="flex border-l border-t w-fit" style={{ borderColor: gridBorderColor }}>
                     {boxes.map((charInBox, i) => (
                         <GridBox
@@ -1312,7 +1325,6 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
                             config={config} 
                             svgData={null}
                             failed={false}
-                            // Không truyền isInternal nữa -> GridBox sẽ tự dùng nét liền mặc định
                         />
                     ))}
                 </div>
