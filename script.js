@@ -1697,8 +1697,9 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
     }, [queue, currentIndex, dbData, text, mode]); // Thêm mode
     
       
-  // 3. SINH DỮ LIỆU MATCH (GHÉP THẺ)
+// 3. SINH DỮ LIỆU MATCH (GHÉP THẺ) - ĐÃ SỬA LỖI LẶP CODE
     useEffect(() => {
+        // Chỉ chạy khi game state là match
         if (queue[currentIndex]?.type === 'match') {
             const items = queue[currentIndex].items;
             let cards = [];
@@ -1706,43 +1707,42 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
 
             items.forEach((item, idx) => {
                 if (isVocabMode) {
-                    // TỪ VỰNG: Ghép [Mặt chữ] <-> [Cách đọc]
-                    const info = dbData.TUVUNG_DB[item];
+                    // === LOGIC TỪ VỰNG: Ghép [Mặt chữ] <-> [Nghĩa] ===
+                    // Kiểm tra dbData.TUVUNG_DB tồn tại trước khi truy cập
+                    const info = dbData.TUVUNG_DB ? dbData.TUVUNG_DB[item] : null;
+                    
                     if (info) {
-                        cards.push({ id: `w-${idx}`, content: item, type: 'word', matchId: idx });
-                        // Nếu không có reading (ví dụ rỗng), dùng meaning làm fallback, hoặc dùng chính nó
-                       // 3. SINH DỮ LIỆU MATCH (GHÉP THẺ)
-        useEffect(() => {
-        if (queue[currentIndex]?.type === 'match') {
-            const items = queue[currentIndex].items;
-            let cards = [];
-            const isVocabMode = mode === 'vocab';
-
-            items.forEach((item, idx) => {
-                if (isVocabMode) {
-                    // TỪ VỰNG: Ghép [Mặt chữ] <-> [Ý NGHĨA] (Đã sửa theo yêu cầu)
-                    const info = dbData.TUVUNG_DB[item];
-                    if (info) {
+                        // Thẻ 1: Mặt chữ
                         cards.push({ id: `w-${idx}`, content: item, type: 'word', matchId: idx });
                         
-                        // SỬA Ở ĐÂY: Ưu tiên lấy meaning (nghĩa) trước
-                        const content2 = info.meaning || info.reading || item;
-                        
+                        // Thẻ 2: Ưu tiên Nghĩa -> Cách đọc -> Fallback
+                        const content2 = info.meaning || info.reading || '...';
                         cards.push({ id: `m-${idx}`, content: content2, type: 'meaning', matchId: idx });
                     }
                 } else {
-                    // KANJI: Ghép [Chữ] <-> [Âm Hán] (Giữ nguyên)
+                    // === LOGIC KANJI: Ghép [Chữ Hán] <-> [Âm Hán] ===
                     const info = getCharInfo(item);
                     if (info) {
+                        // Thẻ 1: Chữ Kanji
                         cards.push({ id: `k-${idx}`, content: item, type: 'kanji', matchId: idx });
+                        // Thẻ 2: Âm Hán Việt
                         cards.push({ id: `m-${idx}`, content: info.sound, type: 'meaning', matchId: idx });
                     }
                 }
             });
+
+            // Trộn ngẫu nhiên thẻ sau khi sinh xong
             cards.sort(() => Math.random() - 0.5);
-            setMatchCards(cards); setMatchedIds([]); setSelectedCardId(null); setWrongPairIds([]);
+            
+            // Cập nhật State
+            setMatchCards(cards);
+            setMatchedIds([]);
+            setSelectedCardId(null);
+            setWrongPairIds([]);
         }
     }, [queue, currentIndex, dbData, mode]);
+
+    
                         cards.push({ id: `r-${idx}`, content: content2, type: 'reading', matchId: idx });
                     }
                 } else {
