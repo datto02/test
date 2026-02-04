@@ -2356,16 +2356,7 @@ try {
             onChange({ ...config, text: finalResult });
             setIsLoading(false);
         }, 500);
-            
-            setProgress(30);
-            setTimeout(() => setProgress(100), 300);
-
-            setTimeout(() => {
-                setLocalText(selectedChars);
-                onChange({ ...config, text: selectedChars });
-                setIsLoading(false);
-            }, 500);
-
+         
         } catch (error) {
             console.error(error);
             alert(`Không tải được dữ liệu ${level}. Kiểm tra lại mạng hoặc link GitHub.`);
