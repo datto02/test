@@ -2,7 +2,7 @@ const removeAccents = (str) => {
 return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
 };
     const { useState, useEffect, useMemo, useRef } = React;
- 
+
 const calculateSRS = (currentData, quality) => {
   let { level = 0, easeFactor = 2.5, nextReview } = currentData || {};
   const now = Date.now();
@@ -3667,57 +3667,7 @@ TÀI LIỆU HỌC TẬP
     );
     };
 
-// --- COMPONENT HIỆU ỨNG CHUYỂN CẢNH ---
-const ModeTransition = ({ isVisible, origin, targetMode, onMiddle, onEnd }) => {
-    const [phase, setPhase] = useState('idle');
-
-    useEffect(() => {
-        if (isVisible) {
-            // 1. Vòng tròn màu mở rộng
-            setTimeout(() => setPhase('expand'), 50);
-
-            // 2. Đổi dữ liệu ngầm (sớm hơn chút để khớp với lúc chữ hiện ra)
-            setTimeout(() => {
-                if (onMiddle) onMiddle();
-            }, 600); 
-
-            // 3. Vòng tròn màu thu về
-            setTimeout(() => {
-                setPhase('contract');
-            }, 1400); // Đợi chữ biến mất xong mới thu màu
-
-            // 4. Kết thúc toàn bộ
-            setTimeout(() => {
-                if (onEnd) onEnd();
-                setPhase('idle');
-            }, 1800);
-        }
-    }, [isVisible, onMiddle, onEnd]);
-
-    if (!isVisible) return null;
-
-    const bgColor = targetMode === 'vocab' ? 'bg-emerald-600' : 'bg-indigo-600';
-    const label = targetMode === 'vocab' ? '語' : '字';
-    const subLabel = targetMode === 'vocab' ? 'TỪ VỰNG' : 'KANJI';
-
-    return (
-        <div className="fixed inset-0 z-[9999] pointer-events-none overflow-hidden flex items-center justify-center">
-            {/* VÒNG TRÒN MÀU */}
-            <div 
-                className={`ripple-circle ${bgColor} ${phase === 'expand' ? 'ripple-active' : ''}`}
-                style={{ left: origin.x, top: origin.y }}
-            />
-
-            {/* TEXT & ICON (Dùng class mới: animate-pop-spin) */}
-            {phase === 'expand' && (
-                <div className="relative z-[9999] flex flex-col items-center justify-center animate-pop-spin text-white">
-                    <span className="text-9xl font-['Klee_One'] mb-4 shadow-xl">{label}</span>
-                    <span className="text-2xl font-black tracking-[0.5em] uppercase drop-shadow-md">{subLabel}</span>
-                </div>
-            )}
-        </div>
-    );
-};
+    
     const App = () => {
 // --- Các state cũ giữ nguyên ---
 const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
@@ -3728,26 +3678,6 @@ const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
         const [isLearnGameOpen, setIsLearnGameOpen] = useState(false);
         const [isReviewListOpen, setIsReviewListOpen] = useState(false);
          const [practiceMode, setPracticeMode] = useState('kanji');
-        // --- STATE CHO HIỆU ỨNG CHUYỂN CẢNH ---
-        const [transitionState, setTransitionState] = useState({
-            isActive: false,
-            origin: { x: 0, y: 0 },
-            targetMode: 'kanji'
-        });
-
-        // Hàm kích hoạt hiệu ứng
-        const triggerTransition = (e, newMode) => {
-            // Lấy tọa độ chuột
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = rect.left + rect.width / 2;
-            const y = rect.top + rect.height / 2;
-
-            setTransitionState({
-                isActive: true,
-                origin: { x, y },
-                targetMode: newMode
-            });
-        };
         const [srsData, setSrsData] = useState(() => {
            
     // Tự động lấy dữ liệu cũ từ máy người dùng khi mở web
@@ -3854,25 +3784,6 @@ if (!isDbLoaded) {
 // --- GIAO DIỆN CHÍNH (Khi đã có dữ liệu) ---
 return (
     <div className="min-h-screen flex flex-col md:flex-row print-layout-reset">
-    {/* --- COMPONENT HIỆU ỨNG (LUÔN NẰM TRÊN CÙNG) --- */}
-            <ModeTransition 
-                isVisible={transitionState.isActive}
-                origin={transitionState.origin}
-                targetMode={transitionState.targetMode}
-                onMiddle={() => {
-                    // LÚC NÀY MÀN HÌNH ĐANG BỊ CHE KÍN -> ĐỔI DỮ LIỆU NGẦM
-                    setPracticeMode(transitionState.targetMode);
-                    // Reset text mẫu và cài đặt cho chế độ mới
-                    setConfig(prev => ({ 
-                        ...prev, 
-                        text: '', 
-                        traceCount: transitionState.targetMode === 'vocab' ? 12 : 9 
-                    }));
-                }}
-                onEnd={() => {
-                    setTransitionState(prev => ({ ...prev, isActive: false }));
-                }}
-            />
     <div className="no-print z-50">
     <Sidebar 
         config={config} onChange={setConfig} onPrint={handlePrint} 
@@ -3963,12 +3874,17 @@ return (
                     {/* 4. NÚT CHUYỂN CHẾ ĐỘ (GÓC DƯỚI BÊN PHẢI) */}
 <div className="fixed bottom-6 right-6 z-[100] no-print">
     <button
-        onClick={(e) => {
-            // Xác định chế độ tiếp theo
-            const nextMode = practiceMode === 'kanji' ? 'vocab' : 'kanji';
-            
-            // Kích hoạt hiệu ứng (Truyền sự kiện e để lấy tọa độ)
-            triggerTransition(e, nextMode);
+        onClick={() => {
+            const newMode = practiceMode === 'kanji' ? 'vocab' : 'kanji';
+            setPracticeMode(newMode);
+            // Reset text mẫu để tránh rối mắt
+            setConfig(prev => ({ 
+            ...prev, 
+            text: '', // Reset văn bản
+            // Nếu là Vocab -> traceCount = 12 (full dòng nét mờ)
+            // Nếu là Kanji -> traceCount = 9 (mặc định cũ)
+            traceCount: newMode === 'vocab' ? 12 : 9 
+        })); 
         }}
         className={`h-12 pl-4 pr-6 rounded-full font-black text-[11px] uppercase tracking-widest shadow-2xl border-2 transition-all active:scale-95 flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-300 ${
             practiceMode === 'kanji' 
