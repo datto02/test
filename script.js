@@ -1966,7 +1966,7 @@ const visualPercent = queue.length > 0 ? (currentIndex / queue.length) * 100 : 0
     );
 };
 // 5. Sidebar (Phiên bản: Final)
-   const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen }) => {
+   const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen, mode }) => {
    
 
 // 1. Logic bộ lọc mới
@@ -2952,14 +2952,16 @@ LÀM SẠCH
 {isConfigOpen && (
 <div className="absolute bottom-full right-0 mb-2 z-50 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-3.5 animate-in fade-in zoom-in-95 duration-200">
 
-    {/* MỤC 1: SỐ CHỮ MẪU */}
-    <div className="space-y-1">
-        <div className="flex justify-between items-center">
-            <label className="text-[11px] font-bold text-gray-600">Số chữ mẫu</label>
-            <span className="text-[11px] font-black text-indigo-600 bg-indigo-50 px-1.5 rounded">{config.traceCount} chữ</span>
-        </div>
-        <input type="range" min="0" max="12" step="1" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.traceCount} onChange={(e) => handleChange('traceCount', parseInt(e.target.value))} />
-    </div>
+   {/* MỤC 1: SỐ CHỮ MẪU (CHỈ HIỆN Ở KANJI) */}
+        {mode === 'kanji' && (
+            <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                    <label className="text-[11px] font-bold text-gray-600">Số chữ mẫu</label>
+                    <span className="text-[11px] font-black text-indigo-600 bg-indigo-50 px-1.5 rounded">{config.traceCount} chữ</span>
+                </div>
+                <input type="range" min="0" max="12" step="1" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.traceCount} onChange={(e) => handleChange('traceCount', parseInt(e.target.value))} />
+            </div>
+        )}
 
     {/* MỤC 2: ĐỘ ĐẬM CHỮ */}
     <div className="space-y-1">
@@ -2989,58 +2991,59 @@ LÀM SẠCH
     </div>
 
 
-{/* MỤC 5: CHẾ ĐỘ HIỂN THỊ (RADIO BUTTONS - GỌN GÀNG) */}
-<div className="pt-0"> 
-    <div className="space-y-2">
-        
-        {/* Hàng chứa 3 nút Radio */}
-        <div className="flex items-center justify-between px-1">
-            
-            {/* 1. Nét viết */}
-            <label className="flex items-center gap-1.5 cursor-pointer group select-none">
-                <input 
-                    type="radio" 
-                    name="display_mode" 
-                    checked={config.displayMode === 'strokes'}
-                    onChange={() => handleChange('displayMode', 'strokes')}
-                    className="w-3.5 h-3.5 accent-indigo-600 cursor-pointer"
-                />
-                <span className={`text-[11px] font-bold transition-colors ${config.displayMode === 'strokes' ? 'text-indigo-700' : 'text-gray-500 group-hover:text-indigo-600'}`}>
-                    Nét viết
-                </span>
-            </label>
+{/* MỤC 5: CHẾ ĐỘ HIỂN THỊ (CHỈ HIỆN Ở KANJI) */}
+        {mode === 'kanji' && (
+            <div className="pt-0"> 
+                <div className="space-y-2">
+                    {/* Hàng chứa 3 nút Radio */}
+                    <div className="flex items-center justify-between px-1">
+                        
+                        {/* 1. Nét viết */}
+                        <label className="flex items-center gap-1.5 cursor-pointer group select-none">
+                            <input 
+                                type="radio" 
+                                name="display_mode" 
+                                checked={config.displayMode === 'strokes'}
+                                onChange={() => handleChange('displayMode', 'strokes')}
+                                className="w-3.5 h-3.5 accent-indigo-600 cursor-pointer"
+                            />
+                            <span className={`text-[11px] font-bold transition-colors ${config.displayMode === 'strokes' ? 'text-indigo-700' : 'text-gray-500 group-hover:text-indigo-600'}`}>
+                                Nét viết
+                            </span>
+                        </label>
 
-            {/* 2. On/Kun */}
-            <label className="flex items-center gap-1.5 cursor-pointer group select-none">
-                <input 
-                    type="radio" 
-                    name="display_mode" 
-                    checked={config.displayMode === 'readings'}
-                    onChange={() => handleChange('displayMode', 'readings')}
-                    className="w-3.5 h-3.5 accent-indigo-600 cursor-pointer"
-                />
-                <span className={`text-[11px] font-bold transition-colors ${config.displayMode === 'readings' ? 'text-indigo-700' : 'text-gray-500 group-hover:text-indigo-600'}`}>
-                    On/Kun
-                </span>
-            </label>
+                        {/* 2. On/Kun */}
+                        <label className="flex items-center gap-1.5 cursor-pointer group select-none">
+                            <input 
+                                type="radio" 
+                                name="display_mode" 
+                                checked={config.displayMode === 'readings'}
+                                onChange={() => handleChange('displayMode', 'readings')}
+                                className="w-3.5 h-3.5 accent-indigo-600 cursor-pointer"
+                            />
+                            <span className={`text-[11px] font-bold transition-colors ${config.displayMode === 'readings' ? 'text-indigo-700' : 'text-gray-500 group-hover:text-indigo-600'}`}>
+                                On/Kun
+                            </span>
+                        </label>
 
-            {/* 3. Từ vựng */}
-            <label className="flex items-center gap-1.5 cursor-pointer group select-none">
-                <input 
-                    type="radio" 
-                    name="display_mode" 
-                    checked={config.displayMode === 'vocab'}
-                    onChange={() => handleChange('displayMode', 'vocab')}
-                    className="w-3.5 h-3.5 accent-indigo-600 cursor-pointer"
-                />
-                <span className={`text-[11px] font-bold transition-colors ${config.displayMode === 'vocab' ? 'text-indigo-700' : 'text-gray-500 group-hover:text-indigo-600'}`}>
-                    Từ vựng
-                </span>
-            </label>
+                        {/* 3. Từ vựng */}
+                        <label className="flex items-center gap-1.5 cursor-pointer group select-none">
+                            <input 
+                                type="radio" 
+                                name="display_mode" 
+                                checked={config.displayMode === 'vocab'}
+                                onChange={() => handleChange('displayMode', 'vocab')}
+                                className="w-3.5 h-3.5 accent-indigo-600 cursor-pointer"
+                            />
+                            <span className={`text-[11px] font-bold transition-colors ${config.displayMode === 'vocab' ? 'text-indigo-700' : 'text-gray-500 group-hover:text-indigo-600'}`}>
+                                Từ vựng
+                            </span>
+                        </label>
 
-        </div>
-    </div>
-</div>
+                    </div>
+                </div>
+            </div>
+        )}
 {/* NÚT ĐẶT LẠI MẶC ĐỊNH - Đã thu gọn */}
 <div className="pt-2 mt-1 border-t border-gray-200"> {/* Giảm padding top từ pt-1 về pt-0 */}
 <button 
@@ -3549,6 +3552,7 @@ return (
         dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống Sidebar
             srsData={srsData}
          onOpenReviewList={() => setIsReviewListOpen(true)}
+             mode={practiceMode}
       
     />
     </div>
@@ -3628,7 +3632,13 @@ return (
             const newMode = practiceMode === 'kanji' ? 'vocab' : 'kanji';
             setPracticeMode(newMode);
             // Reset text mẫu để tránh rối mắt
-            setConfig(prev => ({ ...prev, text: '' })); 
+            setConfig(prev => ({ 
+            ...prev, 
+            text: '', // Reset văn bản
+            // Nếu là Vocab -> traceCount = 12 (full dòng nét mờ)
+            // Nếu là Kanji -> traceCount = 9 (mặc định cũ)
+            traceCount: newMode === 'vocab' ? 12 : 9 
+        })); 
         }}
         className={`h-12 pl-4 pr-6 rounded-full font-black text-[11px] uppercase tracking-widest shadow-2xl border-2 transition-all active:scale-95 flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-300 ${
             practiceMode === 'kanji' 
