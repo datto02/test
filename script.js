@@ -59,7 +59,7 @@ const fetchDataFromGithub = async () => {
       fetch('./data/kanji_db.json'),
       fetch('./data/onkun.json'),
       fetch('./data/vocab.json'),
-      fetch('./data/tuvungg.json') // <--- File mới
+      fetch(`./data/tuvungg.json?v=${timestamp}`)
     ]);
 
     // 2. Tải thêm 5 file danh sách cấp độ (N5 -> N1)
