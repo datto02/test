@@ -2632,9 +2632,30 @@ try {
     };
 
 
-    const handleShuffleCurrent = () => {
+   const handleShuffleCurrent = () => {
         if (!config.text) { alert("Chưa có nội dung!"); return; }
-        handleSmartLoad(shuffleString(config.text));
+        
+        let newContent = "";
+
+        if (mode === 'vocab') {
+            // === CHẾ ĐỘ TỪ VỰNG: Xáo trộn thứ tự dòng ===
+            // 1. Tách văn bản thành mảng các từ (theo dòng)
+            const lines = config.text.split('\n').filter(line => line.trim() !== '');
+            
+            // 2. Xáo trộn mảng (Thuật toán Fisher-Yates)
+            for (let i = lines.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [lines[i], lines[j]] = [lines[j], lines[i]];
+            }
+            
+            // 3. Gộp lại thành chuỗi
+            newContent = lines.join('\n');
+        } else {
+            // === CHẾ ĐỘ KANJI: Xáo trộn ký tự (Như cũ) ===
+            newContent = shuffleString(config.text);
+        }
+
+        handleSmartLoad(newContent);
     };
 
     // Hàm xử lý tìm kiếm thời gian thực
