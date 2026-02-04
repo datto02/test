@@ -1508,21 +1508,20 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
 
         // 1. DÀNH CHO TIÊU ĐỀ LỚN (Phần câu hỏi)
         if (type === 'title') {
-             if (len > 25) return 'text-xl leading-tight';      // > 25 ký tự: Cỡ rất nhỏ
-             if (len > 15) return 'text-2xl leading-tight';     // > 15 ký tự: Cỡ nhỏ
-             if (len > 10) return 'text-4xl leading-tight';     // > 10 ký tự: Cỡ vừa
-             if (len > 6) return 'text-5xl';                    // > 6 ký tự: Cỡ to
-             return 'text-6xl';                                 // Mặc định: Cỡ đại
+            if (len > 15) return 'text-xl leading-tight break-words';      // Cực dài
+             if (len > 8) return 'text-2xl leading-tight break-words';      // Dài
+             if (len > 5) return 'text-4xl leading-tight break-words';      // Trung bình (6-8 chữ)
+             if (len > 3) return 'text-5xl whitespace-nowrap';              // 4-5 chữ (Sửa cho "America")
+             return 'text-7xl whitespace-nowrap';                              // Mặc định: Cỡ đại
         }
 
         // 2. DÀNH CHO NÚT BẤM & THẺ GHÉP (Button & Match Card)
-        if (type === 'button') {
-            // Logic: Giảm size trước, nếu quá dài mới cho break-words (xuống dòng)
-            if (len > 50) return 'text-[8px] leading-tight break-words whitespace-normal px-1'; // Siêu dài (Giải nghĩa chi tiết)
-            if (len > 30) return 'text-[9px] leading-tight break-words whitespace-normal px-1'; // Rất dài
-            if (len > 20) return 'text-[10px] leading-snug whitespace-nowrap'; // Dài vừa -> Ép 1 dòng
-            if (len > 12) return 'text-xs leading-snug whitespace-nowrap';     // Hơi dài -> Ép 1 dòng
-            return 'text-sm font-bold whitespace-nowrap';                      // Ngắn -> Giữ nguyên
+       if (type === 'button') {
+            if (len > 40) return 'text-[9px] leading-tight px-1 break-words'; 
+            if (len > 20) return 'text-[10px] leading-tight px-1 break-words'; 
+            if (len > 12) return 'text-xs leading-snug break-words'; 
+            if (len > 8)  return 'text-xs whitespace-nowrap'; // Ép 1 dòng
+            return 'text-sm font-bold whitespace-nowrap';     // Ngắn
         }
         return '';
     };
