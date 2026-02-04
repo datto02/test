@@ -56,9 +56,9 @@ const fetchDataFromGithub = async () => {
   try { 
     // 1. Tải các file cơ sở dữ liệu chính (THÊM tuvungg.json)
     const [dbResponse, onkunResponse, vocabResponse, tuvungResponse] = await Promise.all([
-      fetch('./data/kanji_db.json'),
-      fetch('./data/onkun.json'),
-      fetch('./data/vocab.json'),
+      fetch(`./data/kanji_db.json?v=${timestamp}`),
+      fetch(`./data/onkun.json?v=${timestamp}`),
+      fetch(`./data/vocab.json?v=${timestamp}`),
       fetch(`./data/tuvungg.json?v=${timestamp}`)
     ]);
 
