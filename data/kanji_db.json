@@ -1,6 +1,6 @@
 {
   "ALPHABETS": {
-    "hiragana": {
+    "hiragana": { 
       "あ": { "sound": "a" }, "い": { "sound": "i" }, "う": { "sound": "u" }, "え": { "sound": "e" }, "お": { "sound": "o" },
 "か": { "sound": "ka" }, "き": { "sound": "ki" }, "く": { "sound": "ku" }, "け": { "sound": "ke" }, "こ": { "sound": "ko" },
 "さ": { "sound": "sa" }, "し": { "sound": "shi" }, "す": { "sound": "su" }, "せ": { "sound": "se" }, "そ": { "sound": "so" },
