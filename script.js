@@ -640,7 +640,42 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
     const [isConfigOpen, setIsConfigOpen] = React.useState(false);
     const [frontOptions, setFrontOptions] = React.useState({ word: true, reading: false, hanviet: false, meaning: false });
     const [backOptions, setBackOptions] = React.useState({ word: false, reading: true, hanviet: true, meaning: true });
+// --- LOGIC XỬ LÝ CHECKBOX (MỚI) ---
+    const handleOptionCheck = (side, key) => {
+        const isFront = side === 'front';
+        const currentOpts = isFront ? frontOptions : backOptions;
+        const otherOpts = isFront ? backOptions : frontOptions;
+        const limit = isFront ? 2 : 3; // Giới hạn: Trước 2, Sau 3
 
+        // 1. Nếu đang chọn -> Bỏ chọn (Luôn cho phép)
+        if (currentOpts[key]) {
+            const newOpts = { ...currentOpts, [key]: false };
+            if (isFront) setFrontOptions(newOpts);
+            else setBackOptions(newOpts);
+            return;
+        }
+
+        // 2. Nếu chưa chọn -> Muốn chọn
+        // 2a. Kiểm tra trùng lặp: Nếu mặt kia đang chọn cái này rồi -> Không cho chọn (hoặc tự bỏ mặt kia?)
+        // Theo yêu cầu: "nút đó sẽ bị mờ không ấn được" -> Logic UI sẽ chặn, nhưng thêm check ở đây cho chắc.
+        if (otherOpts[key]) return;
+
+        // 2b. Kiểm tra số lượng: Nếu đã đủ limit -> Bỏ bớt cái đầu tiên tìm thấy -> Chọn cái mới
+        const activeKeys = Object.keys(currentOpts).filter(k => currentOpts[k]);
+        if (activeKeys.length >= limit) {
+            // Lấy cái key đang active đầu tiên để bỏ đi
+            const keyToRemove = activeKeys[0];
+            const newOpts = { ...currentOpts, [keyToRemove]: false, [key]: true };
+            
+            if (isFront) setFrontOptions(newOpts);
+            else setBackOptions(newOpts);
+        } else {
+            // Chưa đủ limit -> Chọn bình thường
+            const newOpts = { ...currentOpts, [key]: true };
+            if (isFront) setFrontOptions(newOpts);
+            else setBackOptions(newOpts);
+        }
+    };
     // --- HÀM TÍNH CỠ CHỮ ĐỘNG (ĐÃ GIẢM KÍCH THƯỚC CHO VỪA KHUNG) ---
     const getFlashcardFontSize = (text) => {
         if (!text) return 'text-3xl';
@@ -850,28 +885,60 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                                     </button>
+                                {/* MENU POPUP CẤU HÌNH (ĐÃ SỬA LOGIC) */}
                                     {isConfigOpen && (
-                                        <div className="absolute bottom-full right-0 mb-3 bg-white rounded-xl shadow-2xl p-3 w-48 animate-in fade-in zoom-in-95 z-[60] text-gray-800 border border-gray-100">
-                                            <div className="mb-3">
-                                                <p className="text-[10px] font-bold text-indigo-600 mb-1 uppercase">Mặt trước</p>
+                                        <div className="absolute bottom-full right-0 mb-3 bg-white rounded-xl shadow-2xl p-3 w-56 animate-in fade-in zoom-in-95 z-[60] text-gray-800 border border-gray-100">
+                                            <div className="mb-3 border-b border-gray-100 pb-2">
+                                                <p className="text-[10px] font-black text-indigo-600 mb-1.5 uppercase flex justify-between">
+                                                    <span>Mặt trước (Câu hỏi)</span>
+                                                    <span className="text-gray-400 font-normal">Max: 2</span>
+                                                </p>
                                                 <div className="space-y-1">
-                                                    {['word', 'reading', 'hanviet', 'meaning'].map(opt => (
-                                                        <label key={`f-${opt}`} className="flex items-center gap-2 text-[10px] cursor-pointer hover:bg-gray-50 p-1 rounded">
-                                                            <input type="checkbox" checked={frontOptions[opt]} onChange={() => setFrontOptions(p => ({...p, [opt]: !p[opt]}))} className="accent-indigo-600"/>
-                                                            {opt === 'word' ? 'Mặt chữ' : opt === 'reading' ? 'Cách đọc' : opt === 'hanviet' ? 'Hán Việt' : 'Nghĩa'}
-                                                        </label>
-                                                    ))}
+                                                    {/* Chỉ hiện: Mặt chữ, Cách đọc, Ý nghĩa */}
+                                                    {['word', 'reading', 'meaning'].map(opt => {
+                                                        const isDisabled = backOptions[opt]; // Mờ nếu mặt sau đã chọn
+                                                        return (
+                                                            <label key={`f-${opt}`} className={`flex items-center gap-2 text-[11px] p-1.5 rounded transition-all ${isDisabled ? 'opacity-40 cursor-not-allowed bg-gray-50' : 'cursor-pointer hover:bg-indigo-50'}`}>
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    checked={frontOptions[opt]} 
+                                                                    disabled={isDisabled}
+                                                                    onChange={() => handleOptionCheck('front', opt)} 
+                                                                    className="accent-indigo-600 w-3.5 h-3.5"
+                                                                />
+                                                                <span className="font-medium">
+                                                                    {opt === 'word' ? 'Mặt chữ' : opt === 'reading' ? 'Cách đọc' : 'Ý nghĩa'}
+                                                                </span>
+                                                            </label>
+                                                        )
+                                                    })}
                                                 </div>
                                             </div>
+                                            
                                             <div>
-                                                <p className="text-[10px] font-bold text-indigo-600 mb-1 uppercase">Mặt sau</p>
+                                                <p className="text-[10px] font-black text-indigo-600 mb-1.5 uppercase flex justify-between">
+                                                    <span>Mặt sau (Đáp án)</span>
+                                                    <span className="text-gray-400 font-normal">Max: 3</span>
+                                                </p>
                                                 <div className="space-y-1">
-                                                    {['word', 'reading', 'hanviet', 'meaning'].map(opt => (
-                                                        <label key={`b-${opt}`} className="flex items-center gap-2 text-[10px] cursor-pointer hover:bg-gray-50 p-1 rounded">
-                                                            <input type="checkbox" checked={backOptions[opt]} onChange={() => setBackOptions(p => ({...p, [opt]: !p[opt]}))} className="accent-indigo-600"/>
-                                                            {opt === 'word' ? 'Mặt chữ' : opt === 'reading' ? 'Cách đọc' : opt === 'hanviet' ? 'Hán Việt' : 'Nghĩa'}
-                                                        </label>
-                                                    ))}
+                                                    {/* Hiện đủ 4 cái: Mặt chữ, Cách đọc, Hán Việt, Ý nghĩa */}
+                                                    {['word', 'reading', 'hanviet', 'meaning'].map(opt => {
+                                                        const isDisabled = frontOptions[opt]; // Mờ nếu mặt trước đã chọn
+                                                        return (
+                                                            <label key={`b-${opt}`} className={`flex items-center gap-2 text-[11px] p-1.5 rounded transition-all ${isDisabled ? 'opacity-40 cursor-not-allowed bg-gray-50' : 'cursor-pointer hover:bg-indigo-50'}`}>
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    checked={backOptions[opt]} 
+                                                                    disabled={isDisabled}
+                                                                    onChange={() => handleOptionCheck('back', opt)} 
+                                                                    className="accent-indigo-600 w-3.5 h-3.5"
+                                                                />
+                                                                <span className="font-medium">
+                                                                    {opt === 'word' ? 'Mặt chữ' : opt === 'reading' ? 'Cách đọc' : opt === 'hanviet' ? 'Hán Việt' : 'Ý nghĩa'}
+                                                                </span>
+                                                            </label>
+                                                        )
+                                                    })}
                                                 </div>
                                             </div>
                                         </div>
