@@ -1,8 +1,8 @@
 {
   "私": { "reading": "わたし", "meaning": "Tôi" },
   "味方": { "reading": "みかた", "meaning": "Đồng minh, bạn bè" },
-  "うそ": { "reading": "うそ", "meaning": "Nói đùa" },
+  "うそ": { "reading": "", "meaning": "Nói đùa" },
   "うわさ": { "reading": "", "meaning": "Tin đồn" },
-  "アメリカ": { "reading": "アメリカ", "meaning": "Mỹ" },
+  "アメリカ": { "reading": "", "meaning": "Mỹ" },
   "イギリス": { "reading": "", "meaning": "Anh" }
 }
