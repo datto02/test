@@ -640,7 +640,17 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
     const [isConfigOpen, setIsConfigOpen] = React.useState(false);
     const [frontOptions, setFrontOptions] = React.useState({ word: true, reading: false, hanviet: false, meaning: false });
     const [backOptions, setBackOptions] = React.useState({ word: false, reading: true, hanviet: true, meaning: true });
-
+// --- HÀM TÍNH CỠ CHỮ ĐỘNG (MỚI) ---
+    const getFlashcardFontSize = (text) => {
+        if (!text) return 'text-3xl';
+        const len = text.length;
+        if (len <= 2) return "text-8xl";      // 1-2 chữ: Rất to
+        if (len <= 4) return "text-6xl";      // 3-4 chữ: To
+        if (len <= 8) return "text-5xl";      // 5-8 chữ: Vừa
+        if (len <= 15) return "text-4xl";     // Dài
+        if (len <= 25) return "text-3xl";     // Rất dài
+        return "text-xl";                     // Cực dài
+    };
     const triggerConfetti = React.useCallback(() => { if (typeof confetti === 'undefined') return; const count = 200; const defaults = { origin: { y: 0.6 }, zIndex: 1500 }; function fire(particleRatio, opts) { confetti({ ...defaults, ...opts, particleCount: Math.floor(count * particleRatio) }); } fire(0.25, { spread: 26, startVelocity: 55 }); fire(0.2, { spread: 60 }); fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 }); fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 }); fire(0.1, { spread: 120, startVelocity: 45 }); }, []);
     React.useEffect(() => { if (isFinished && isOpen) { triggerConfetti(); } }, [isFinished, triggerConfetti]);
     const shuffleArray = React.useCallback((array) => { const newArr = [...array]; for (let i = newArr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [newArr[i], newArr[j]] = [newArr[j], newArr[i]]; } return newArr; }, []);
@@ -860,17 +870,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
             </div>
         );
     }
-// --- HÀM TÍNH CỠ CHỮ ĐỘNG (MỚI) ---
-    const getFlashcardFontSize = (text) => {
-        if (!text) return 'text-3xl';
-        const len = text.length;
-        if (len <= 2) return "text-8xl";      // 1-2 chữ: Rất to
-        if (len <= 4) return "text-6xl";      // 3-4 chữ: To
-        if (len <= 8) return "text-5xl";      // 5-8 chữ: Vừa
-        if (len <= 15) return "text-4xl";     // Dài
-        if (len <= 25) return "text-3xl";     // Rất dài
-        return "text-xl";                     // Cực dài
-    };
+
     return (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-gray-900/95 backdrop-blur-xl animate-in fade-in duration-200 select-none touch-none" style={{ touchAction: 'none' }} onClick={(e) => e.stopPropagation()}>
             <div className="w-full max-w-sm flex flex-col items-center relative">
