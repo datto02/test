@@ -2743,12 +2743,12 @@ else setFilterOptions(p => ({...p, katakana: true}));
         <div className="w-full md:w-96 bg-white shadow-xl p-6 flex flex-col gap-6 h-auto md:h-screen md:overflow-y-auto relative md:sticky top-0 border-r border-gray-200 z-50 hide-scrollbar">
         
         {/* HEADER */}
-        <div className="mb-4 pb-3 border-b border-gray-100"> 
-            <h1 className="text-xl font-bold text-gray-800 flex items-center gap-1.5 mb-1">
-            <span className="text-2xl leading-none -mt-1">⛩️</span>
-            TẠO FILE LUYỆN VIẾT KANJI
-            </h1>
-        </div>
+<div className="mb-4 pb-3 border-b border-gray-100"> 
+    <h1 className="text-xl font-bold text-gray-800 flex items-center gap-1.5 mb-1">
+        <span className="text-2xl leading-none -mt-1">⛩️</span>
+        {mode === 'kanji' ? 'TẠO FILE TẬP VIẾT KANJI' : 'TẠO FILE TẬP VIẾT TỪ VỰNG'}
+    </h1>
+</div>
 
         <div className="space-y-6 flex-1">
             
