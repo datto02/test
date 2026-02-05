@@ -1221,7 +1221,7 @@
   },
   "全然": {
     "reading": "ぜんぜん",
-    "meaning": "hoàn toàn～không (phủ định)"
+    "meaning": "hoàn toàn～không"
   },
   "早く": {
     "reading": "はやく",
@@ -3818,5 +3818,89 @@
   "そして": {
     "reading": "そして",
     "meaning": "và, thêm nữa"
+  },
+  "あります": {
+    "reading": "あります",
+    "meaning": "có, ở (dùng cho đồ vật)"
+  },
+  "ある": {
+    "reading": "ある",
+    "meaning": "có, ở (thể ngắn của あります)"
+  },
+  "スポーツ": {
+    "reading": "スポーツ",
+    "meaning": "thể thao"
+  },
+  "ダンス": {
+    "reading": "ダンス",
+    "meaning": "khiêu vũ, nhảy"
+  },
+  "クラシック": {
+    "reading": "クラシック",
+    "meaning": "nhạc cổ điển"
+  },
+  "ジャズ": {
+    "reading": "ジャズ",
+    "meaning": "nhạc jazz"
+  },
+  "コンサート": {
+    "reading": "コンサート",
+    "meaning": "buổi hòa nhạc"
+  },
+  "カラオケ": {
+    "reading": "カラオケ",
+    "meaning": "karaoke"
+  },
+  "ひらがな": {
+    "reading": "ひらがな",
+    "meaning": "chữ Hiragana"
+  },
+  "かたかな": {
+    "reading": "かたかな",
+    "meaning": "chữ Katakana"
+  },
+  "ローマ字": {
+    "reading": "ローマじ",
+    "meaning": "chữ La Mã (Romaji)"
+  },
+  "チケット": {
+    "reading": "チケット",
+    "meaning": "vé"
+  },
+  "アルバイト": {
+    "reading": "アルバイト",
+    "meaning": "việc làm thêm"
+  },
+  "主人": {
+    "reading": "しゅじん",
+    "meaning": "chồng (của mình)"
+  },
+  "奥": {
+    "reading": "おく",
+    "meaning": "vợ (người khác) / bên trong"
+  },
+  "家内": {
+    "reading": "かない",
+    "meaning": "vợ (của mình)"
+  },
+  "よく": {
+    "reading": "よく",
+    "meaning": "tốt, rõ, hay"
+  },
+  "だいたい": {
+    "reading": "だいたい",
+    "meaning": "đại khái"
+  },
+  "たくさん": {
+    "reading": "たくさん",
+    "meaning": "nhiều"
+  },
+  "から": {
+    "reading": "から",
+    "meaning": "vì, từ"
+  },
+  "どうして": {
+    "reading": "どうして",
+    "meaning": "tại sao"
   }
 }
