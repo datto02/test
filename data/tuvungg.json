@@ -85,7 +85,7 @@
   },
   "韓国": {
     "reading": "かんこく",
-    "meaning": "Hàn Quốc"
+    "meaning": "Nước Hàn Quốc"
   },
   "中国": {
     "reading": "ちゅうごく",
@@ -3349,7 +3349,7 @@
   },
   "じん": {
     "reading": "じん",
-    "meaning": "người (nước ~)"
+    "meaning": "người nước ~"
   },
   "だれ": {
     "reading": "だれ",
@@ -3436,6 +3436,10 @@
     "meaning": "bút chì kim"
   },
   "鞄": {
+    "reading": "かばん",
+    "meaning": "cặp, túi sách"
+  },
+   "かばん": {
     "reading": "かばん",
     "meaning": "cặp, túi sách"
   },
@@ -7295,10 +7299,6 @@
     "reading": "こ",
     "meaning": "cái, cục, viên (đếm vật nhỏ)"
   },
-  "本": {
-    "reading": "ほん",
-    "meaning": "cái, cây (đếm vật tròn, dài)"
-  },
   "杯": {
     "reading": "はい",
     "meaning": "chén, cốc (đếm)"
@@ -8362,10 +8362,6 @@
   "婚約": {
     "reading": "こんやく",
     "meaning": "sự đính ước"
-  },
-  "どうも": {
-    "reading": "どうも",
-    "meaning": "có vẻ như"
   },
   "相手": {
     "reading": "あいて",
