@@ -4430,5 +4430,177 @@
   "チャンス": {
     "reading": "チャンス",
     "meaning": "cơ hội"
+  },
+  "診る": {
+    "reading": "みる",
+    "meaning": "kiểm tra, khám bệnh"
+  },
+  "探す": {
+    "reading": "さがす",
+    "meaning": "tìm, tìm kiếm"
+  },
+  "遅れる": {
+    "reading": "おくれる",
+    "meaning": "chậm, muộn (giờ)"
+  },
+  "間に合う": {
+    "reading": "まにあう",
+    "meaning": "kịp (giờ)"
+  },
+  "やる": {
+    "reading": "やる",
+    "meaning": "làm"
+  },
+  "拾う": {
+    "reading": "ひろう",
+    "meaning": "nhặt, lượm"
+  },
+  "連絡する": {
+    "reading": "れんらくする",
+    "meaning": "liên lạc"
+  },
+  "連絡": {
+    "reading": "れんらく",
+    "meaning": "việc liên lạc"
+  },
+  "気分がいい": {
+    "reading": "きぶんがいい",
+    "meaning": "thoải mái, khỏe"
+  },
+  "気分が悪い": {
+    "reading": "きぶんがわるい",
+    "meaning": "không thoải mái, mệt"
+  },
+  "運動会": {
+    "reading": "うんどうかい",
+    "meaning": "hội thi thể thao"
+  },
+  "フリーマーケット": {
+    "reading": "フリーマーケット",
+    "meaning": "chợ đồ cũ, chợ trời"
+  },
+  "場所": {
+    "reading": "ばしょ",
+    "meaning": "địa điểm, nơi"
+  },
+  "ボランティア": {
+    "reading": "ボランティア",
+    "meaning": "tình nguyện viên"
+  },
+  "財布": {
+    "reading": "さいふ",
+    "meaning": "ví"
+  },
+  "ごみ": {
+    "reading": "ごみ",
+    "meaning": "rác"
+  },
+  "国会議事堂": {
+    "reading": "こっかいぎじどう",
+    "meaning": "tòa nhà quốc hội"
+  },
+  "平日": {
+    "reading": "へいじつ",
+    "meaning": "ngày thường"
+  },
+  "べん": {
+    "reading": "べん",
+    "meaning": "tiếng ~, giọng ~"
+  },
+  "今度": {
+    "reading": "こんど",
+    "meaning": "lần tới"
+  },
+  "ずいぶん": {
+    "reading": "ずいぶん",
+    "meaning": "khá, tương đối"
+  },
+  "直接": {
+    "reading": "ちょくせつ",
+    "meaning": "trực tiếp"
+  },
+  "いつでも": {
+    "reading": "いつでも",
+    "meaning": "lúc nào cũng"
+  },
+  "どこでも": {
+    "reading": "どこでも",
+    "meaning": "ở đâu cũng"
+  },
+  "誰でも": {
+    "reading": "だれでも",
+    "meaning": "ai cũng"
+  },
+  "何でも": {
+    "reading": "なんでも",
+    "meaning": "cái gì cũng"
+  },
+  "こんな": {
+    "reading": "こんな",
+    "meaning": "~ như thế này"
+  },
+  "そんな": {
+    "reading": "そんな",
+    "meaning": "~ như thế đó"
+  },
+  "あんな": {
+    "reading": "あんな",
+    "meaning": "~ như thế kia"
+  },
+  "片付く": {
+    "reading": "かたづく",
+    "meaning": "sắp xếp (hành lý)"
+  },
+  "出す": {
+    "reading": "だす",
+    "meaning": "đổ (rác)"
+  },
+  "置き場": {
+    "reading": "おきば",
+    "meaning": "nơi để"
+  },
+  "横": {
+    "reading": "よこ",
+    "meaning": "ngang, cạnh"
+  },
+  "瓶": {
+    "reading": "びん",
+    "meaning": "chai"
+  },
+  "缶": {
+    "reading": "かん",
+    "meaning": "lon"
+  },
+  "ガス": {
+    "reading": "ガス",
+    "meaning": "ga"
+  },
+  "会社": {
+    "reading": "かいしゃ",
+    "meaning": "công ty ~ (hậu tố)"
+  },
+  "宇宙": {
+    "reading": "うちゅう",
+    "meaning": "vũ trụ"
+  },
+  "様": {
+    "reading": "さま",
+    "meaning": "ông/bà/ngài (kính ngữ)"
+  },
+  "宇宙船": {
+    "reading": "うちゅうせん",
+    "meaning": "tàu vũ trụ"
+  },
+  "怖い": {
+    "reading": "こわい",
+    "meaning": "sợ"
+  },
+  "宇宙ステーション": {
+    "reading": "うちゅうステーション",
+    "meaning": "trạm vũ trụ"
+  },
+  "宇宙飛行士": {
+    "reading": "うちゅうひこうし",
+    "meaning": "nhà du hành vũ trụ"
   }
 }
