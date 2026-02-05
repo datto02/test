@@ -845,11 +845,11 @@
   },
   "送ります": {
     "reading": "おくります",
-    "meaning": "gửi"
+    "meaning": "gửi, tiễn (người)"
   },
     "送る": {
     "reading": "おくる",
-    "meaning": "gửi"
+    "meaning": "gửi, tiễn (người)"
   },
   "貰います": {
     "reading": "もらいます",
@@ -3135,15 +3135,15 @@
     "reading": "しょうとくたいし",
     "meaning": "Thái tử Shotoku"
   },
-  "引越しします": {
+  "引っ越しします": {
     "reading": "ひっこしします",
     "meaning": "chuyển nhà"
   },
-  "引越しする": {
+  "引っ越しする": {
     "reading": "ひっこしする",
     "meaning": "chuyển nhà"
   },
-  "引越し": {
+  "引っ越し": {
     "reading": "ひっこし",
     "meaning": "việc chuyển nhà"
   },
@@ -3170,14 +3170,6 @@
   "連れて来る": {
     "reading": "つれてくる",
     "meaning": "dẫn đến"
-  },
-  "送ります": {
-    "reading": "おくります",
-    "meaning": "tiễn (người)"
-  },
-  "送る": {
-    "reading": "おくる",
-    "meaning": "tiễn (người)"
   },
   "紹介します": {
     "reading": "しょうかいします",
@@ -4398,5 +4390,45 @@
   "パリ": {
     "reading": "パリ",
     "meaning": "Paris"
+  },
+  "お湯": {
+    "reading": "おゆ",
+    "meaning": "nước nóng"
+  },
+  "サイズ": {
+    "reading": "サイズ",
+    "meaning": "kích cỡ, size"
+  },
+  "くれます": {
+    "reading": "くれます",
+    "meaning": "cho, tặng (tôi)"
+  },
+  "連れていきます": {
+    "reading": "つれていきます",
+    "meaning": "dẫn đi"
+  },
+  "連れてきます": {
+    "reading": "つれてきます",
+    "meaning": "dẫn đến"
+  },
+  "おじいさん": {
+    "reading": "おじいさん",
+    "meaning": "ông"
+  },
+  "おばあさん": {
+    "reading": "おばあさん",
+    "meaning": "bà"
+  },
+  "ホームステイ": {
+    "reading": "ホームステイ",
+    "meaning": "homestay"
+  },
+  "グループ": {
+    "reading": "グループ",
+    "meaning": "nhóm, đoàn"
+  },
+  "チャンス": {
+    "reading": "チャンス",
+    "meaning": "cơ hội"
   }
 }
