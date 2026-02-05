@@ -831,7 +831,7 @@
     "reading": "いっしょに",
     "meaning": "cùng nhau"
   },
-  "時々": {
+  "ときどき": {
     "reading": "ときどき",
     "meaning": "thỉnh thoảng"
   },
@@ -3902,5 +3902,65 @@
   "どうして": {
     "reading": "どうして",
     "meaning": "tại sao"
+  },
+  "います": {
+    "reading": "います",
+    "meaning": "ở, có (người, động vật)"
+  },
+  "いろいろ": {
+    "reading": "いろいろ",
+    "meaning": "nhiều, đa dạng"
+  },
+  "パンダ": {
+    "reading": "パンダ",
+    "meaning": "gấu trúc"
+  },
+  "スイッチ": {
+    "reading": "スイッチ",
+    "meaning": "công tắc"
+  },
+  "テーブル": {
+    "reading": "テーブル",
+    "meaning": "bàn"
+  },
+  "ベッド": {
+    "reading": "ベッド",
+    "meaning": "giường"
+  },
+  "ドア": {
+    "reading": "ドア",
+    "meaning": "cửa"
+  },
+  "ポスト": {
+    "reading": "ポスト",
+    "meaning": "hộp thư, hòm thư"
+  },
+  "ビル": {
+    "reading": "ビル",
+    "meaning": "tòa nhà"
+  },
+  "エイーティーエム": {
+    "reading": "エイーティーエム",
+    "meaning": "máy rút tiền tự động ATM"
+  },
+  "コンビニ": {
+    "reading": "コンビニ",
+    "meaning": "cửa hàng tiện lợi"
+  },
+  "ナンプラー": {
+    "reading": "ナンプラー",
+    "meaning": "nampla, nước mắm"
+  },
+  "コーナー": {
+    "reading": "コーナー",
+    "meaning": "góc, khu vực"
+  },
+  "パスポート": {
+    "reading": "パスポート",
+    "meaning": "hộ chiếu"
+  },
+  "チリソー": {
+    "reading": "チリソー",
+    "meaning": "tương ớt"
   }
 }
