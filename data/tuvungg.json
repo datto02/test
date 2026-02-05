@@ -4142,5 +4142,57 @@
   "後で": {
     "reading": "あとで",
     "meaning": "sau, để sau"
+  },
+  "カタログ": {
+    "reading": "カタログ",
+    "meaning": "ca-ta-lô"
+  },
+  "ソフト": {
+    "reading": "ソフト",
+    "meaning": "phần mềm"
+  },
+  "サービス": {
+    "reading": "サービス",
+    "meaning": "dịch vụ, khuyến mãi"
+  },
+  "ジョギング": {
+    "reading": "ジョギング",
+    "meaning": "việc chạy bộ"
+  },
+  "シャワー": {
+    "reading": "シャワー",
+    "meaning": "vòi hoa sen"
+  },
+  "どうやって": {
+    "reading": "どうやって",
+    "meaning": "làm thế nào, bằng cách nào"
+  },
+  "まず": {
+    "reading": "まず",
+    "meaning": "trước hết, đầu tiên"
+  },
+  "キャッシュカード": {
+    "reading": "キャッシュカード",
+    "meaning": "thẻ ngân hàng, thẻ ATM"
+  },
+  "次に": {
+    "reading": "つぎに",
+    "meaning": "tiếp theo"
+  },
+  "ボタン": {
+    "reading": "ボタン",
+    "meaning": "nút, khuy"
+  },
+  "アジア": {
+    "reading": "アジア",
+    "meaning": "Châu Á"
+  },
+  "ベトナム": {
+    "reading": "ベトナム",
+    "meaning": "Việt Nam"
+  },
+  "フエ": {
+    "reading": "フエ",
+    "meaning": "Huế"
   }
 }
