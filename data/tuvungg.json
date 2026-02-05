@@ -3962,5 +3962,61 @@
   "チリソー": {
     "reading": "チリソー",
     "meaning": "tương ớt"
+  },
+  "かかります": {
+    "reading": "かかります",
+    "meaning": "mất, tốn (thời gian, tiền bạc)"
+  },
+  "いくつ": {
+    "reading": "いくつ",
+    "meaning": "mấy cái, bao nhiêu cái"
+  },
+  "りんご": {
+    "reading": "りんご",
+    "meaning": "táo"
+  },
+  "みかん": {
+    "reading": "みかん",
+    "meaning": "quýt"
+  },
+  "サンドイッチ": {
+    "reading": "サンドイッチ",
+    "meaning": "bánh sandwich"
+  },
+  "カレーライス": {
+    "reading": "カレーライス",
+    "meaning": "cơm cà ri"
+  },
+  "アイスクリーム": {
+    "reading": "アイスクリーム",
+    "meaning": "kem"
+  },
+  "クラス": {
+    "reading": "クラス",
+    "meaning": "lớp học"
+  },
+  "ぐらい": {
+    "reading": "ぐらい",
+    "meaning": "khoảng"
+  },
+  "どのくらい": {
+    "reading": "どのくらい",
+    "meaning": "bao lâu, bao nhiêu"
+  },
+  "全部で": {
+    "reading": "ぜんぶで",
+    "meaning": "tổng cộng"
+  },
+  "だけ": {
+    "reading": "だけ",
+    "meaning": "chỉ"
+  },
+  "エアメール": {
+    "reading": "エアメール",
+    "meaning": "thư gửi đường hàng không"
+  },
+  "オーストラリア": {
+    "reading": "オーストラリア",
+    "meaning": "Úc"
   }
 }
