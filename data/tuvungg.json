@@ -4814,5 +4814,221 @@
   "ドラえもん": {
     "reading": "ドラえもん",
     "meaning": "Doraemon"
+  },
+  "売れる": {
+    "reading": "うれる",
+    "meaning": "bán chạy (bánh mì)"
+  },
+  "踊る": {
+    "reading": "おどる",
+    "meaning": "múa, nhảy"
+  },
+  "かむ": {
+    "reading": "かむ",
+    "meaning": "nhai, cắn"
+  },
+  "選ぶ": {
+    "reading": "えらぶ",
+    "meaning": "lựa, chọn lựa"
+  },
+  "通う": {
+    "reading": "かよう",
+    "meaning": "đi học, đi làm (đều đặn)"
+  },
+  "メモする": {
+    "reading": "メモする",
+    "meaning": "ghi lại, memo"
+  },
+  "メモ": {
+    "reading": "メモ",
+    "meaning": "ghi chú"
+  },
+  "まじめ": {
+    "reading": "まじめ",
+    "meaning": "nghiêm túc, ngoan"
+  },
+  "熱心": {
+    "reading": "ねっしん",
+    "meaning": "nhiệt tình"
+  },
+  "偉い": {
+    "reading": "えらい",
+    "meaning": "vĩ đại, tuyệt vời, giỏi"
+  },
+  "丁度いい": {
+    "reading": "ちょうどいい",
+    "meaning": "vừa vặn"
+  },
+  "景色": {
+    "reading": "けしき",
+    "meaning": "phong cảnh"
+  },
+  "美容院": {
+    "reading": "びよういん",
+    "meaning": "thẩm mĩ viện"
+  },
+  "台所": {
+    "reading": "だいどころ",
+    "meaning": "nhà bếp"
+  },
+  "経験": {
+    "reading": "けいけん",
+    "meaning": "kinh nghiệm"
+  },
+  "力": {
+    "reading": "ちから",
+    "meaning": "sức mạnh"
+  },
+  "人気": {
+    "reading": "にんき",
+    "meaning": "được yêu thích, hâm mộ"
+  },
+  "形": {
+    "reading": "かたち",
+    "meaning": "hình dạng"
+  },
+  "色": {
+    "reading": "いろ",
+    "meaning": "màu sắc"
+  },
+  "味": {
+    "reading": "あじ",
+    "meaning": "vị"
+  },
+  "ガム": {
+    "reading": "ガム",
+    "meaning": "kẹo cao su"
+  },
+  "品物": {
+    "reading": "しなもの",
+    "meaning": "hàng hóa"
+  },
+  "値段": {
+    "reading": "ねだん",
+    "meaning": "giá cả"
+  },
+  "給料": {
+    "reading": "きゅうりょう",
+    "meaning": "lương"
+  },
+  "ボーナス": {
+    "reading": "ボーナス",
+    "meaning": "thưởng"
+  },
+  "ゲーム": {
+    "reading": "ゲーム",
+    "meaning": "trò chơi, game"
+  },
+  "番組": {
+    "reading": "ばんぐみ",
+    "meaning": "chương trình"
+  },
+  "ドラマ": {
+    "reading": "ドラマ",
+    "meaning": "phim truyền hình"
+  },
+  "歌手": {
+    "reading": "かしゅ",
+    "meaning": "ca sĩ"
+  },
+  "小説": {
+    "reading": "しょうせつ",
+    "meaning": "tiểu thuyết"
+  },
+  "小説家": {
+    "reading": "しょうせつか",
+    "meaning": "nhà văn, tiểu thuyết gia"
+  },
+  "家": {
+    "reading": "か",
+    "meaning": "nhà ~ (hậu tố)"
+  },
+  "機": {
+    "reading": "き",
+    "meaning": "máy ~ (hậu tố)"
+  },
+  "息子": {
+    "reading": "むすこ",
+    "meaning": "con trai mình"
+  },
+  "息子さん": {
+    "reading": "むすこさん",
+    "meaning": "con trai người khác"
+  },
+  "娘": {
+    "reading": "むすめ",
+    "meaning": "con gái mình"
+  },
+  "娘さん": {
+    "reading": "むすめさん",
+    "meaning": "con gái người khác"
+  },
+  "自分": {
+    "reading": "じぶん",
+    "meaning": "bản thân, mình"
+  },
+  "将来": {
+    "reading": "しょうらい",
+    "meaning": "tương lai"
+  },
+  "しばらく": {
+    "reading": "しばらく",
+    "meaning": "một lúc"
+  },
+  "たいてい": {
+    "reading": "たいてい",
+    "meaning": "thường thì"
+  },
+  "それに": {
+    "reading": "それに",
+    "meaning": "hơn nữa"
+  },
+  "それで": {
+    "reading": "それで",
+    "meaning": "vì thế"
+  },
+  "実は": {
+    "reading": "じつは",
+    "meaning": "thực ra"
+  },
+  "会話": {
+    "reading": "かいわ",
+    "meaning": "hội thoại"
+  },
+  "お知らせ": {
+    "reading": "おしらせ",
+    "meaning": "thông báo"
+  },
+  "参加する": {
+    "reading": "さんかする",
+    "meaning": "tham gia"
+  },
+  "参加": {
+    "reading": "さんか",
+    "meaning": "sự tham gia"
+  },
+  "日にち": {
+    "reading": "ひにち",
+    "meaning": "ngày tháng"
+  },
+  "土": {
+    "reading": "ど",
+    "meaning": "thứ 7"
+  },
+  "体育館": {
+    "reading": "たいいくかん",
+    "meaning": "nhà thi đấu thể thao"
+  },
+  "無料": {
+    "reading": "むりょう",
+    "meaning": "miễn phí"
+  },
+  "誘う": {
+    "reading": "さそう",
+    "meaning": "mời, rủ"
+  },
+  "イベント": {
+    "reading": "イベント",
+    "meaning": "sự kiện"
   }
 }
