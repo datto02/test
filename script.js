@@ -3138,55 +3138,66 @@ LÀM SẠCH
         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-5 animate-in fade-in zoom-in-95 duration-200">
             
             {/* 1. CÔNG CỤ XÁO TRỘN */}
-            <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Công cụ</p>
-                <button onClick={handleShuffleCurrent} className="w-full py-2.5 text-xs font-bold bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-lg hover:bg-indigo-600 hover:text-white transition flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                    Xáo trộn danh sách hiện tại
-                </button>
-            </div>
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Công cụ</p>
+                                <button 
+                                    onClick={handleShuffleCurrent} 
+                                    className={`w-full py-2.5 text-xs font-bold border rounded-lg transition flex items-center justify-center gap-2 ${
+                                        mode === 'vocab' 
+                                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-600 hover:text-white' 
+                                        : 'bg-indigo-50 text-indigo-600 border-indigo-100 hover:bg-indigo-600 hover:text-white'
+                                    }`}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                                    Xáo trộn danh sách hiện tại
+                                </button>
+                            </div>
 
-            {/* 2. PHẦN HỌC & ÔN TẬP */}
-            <div className="pt-0">
-                <div className="flex items-center gap-2 mb-3">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">HỌC & ÔN TẬP</p>
-                    <span className="flex-1 border-b border-gray-50"></span>
-                </div>
+                            {/* 2. PHẦN HỌC & ÔN TẬP */}
+                            <div className="pt-0">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">HỌC & ÔN TẬP</p>
+                                    <span className="flex-1 border-b border-gray-50"></span>
+                                </div>
 
-                <div className="space-y-2">
-                    {/* NÚT HỌC (GAME) - Đưa lên trên */}
-                    <button 
-                        onClick={() => {
-                            if (!config.text) return alert("Vui lòng nhập chữ để học!");
-                            setIsLearnGameOpen(true); 
-                            setIsUtilsOpen(false);
-                        }}
-                        className="w-full py-3 bg-[#4255ff] md:hover:bg-[#3243cc] text-white rounded-xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 group"
-                    >
-                        <span className="bg-white p-0.5 rounded flex items-center justify-center group-hover:rotate-12 transition-transform">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4255ff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4M15 13v.01M18 11v.01"/>
-                            </svg>
-                        </span>
-                        <span className="text-xs font-black tracking-wide uppercase">HỌC</span>
-                    </button>
+                                <div className="space-y-2">
+                                    {/* NÚT HỌC (GAME) */}
+                                    <button 
+                                        onClick={() => {
+                                            if (!config.text) return alert("Vui lòng nhập chữ để học!");
+                                            setIsLearnGameOpen(true); 
+                                            setIsUtilsOpen(false);
+                                        }}
+                                        className={`w-full py-3 text-white rounded-xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 group ${
+                                            mode === 'vocab' ? 'bg-emerald-600 md:hover:bg-emerald-700' : 'bg-[#4255ff] md:hover:bg-[#3243cc]'
+                                        }`}
+                                    >
+                                        <span className="bg-white p-0.5 rounded flex items-center justify-center group-hover:rotate-12 transition-transform">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={mode === 'vocab' ? '#059669' : '#4255ff'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                <rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4M15 13v.01M18 11v.01"/>
+                                            </svg>
+                                        </span>
+                                        <span className="text-xs font-black tracking-wide uppercase">HỌC</span>
+                                    </button>
 
-                    {/* NÚT FLASHCARD - Nằm dưới nút Học */}
-                    <button 
-                        onClick={() => {
-                            if (!config.text) return alert("Vui lòng nhập chữ vào ô để học flashcard!");
-                            setIsFlashcardOpen(true);
-                            setIsUtilsOpen(false);
-                        }}
-                        className="w-full py-3 bg-[#4255ff] md:hover:bg-[#3243cc] text-white rounded-xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 group"
-                    >
-                        <span className="bg-white p-0.5 rounded flex items-center justify-center group-hover:rotate-12 transition-transform">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4255ff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                        </span>
-                        <span className="text-xs font-black tracking-wide uppercase">Flashcard</span>
-                    </button>
-                </div>
-            </div>
+                                    {/* NÚT FLASHCARD */}
+                                    <button 
+                                        onClick={() => {
+                                            if (!config.text) return alert("Vui lòng nhập chữ vào ô để học flashcard!");
+                                            setIsFlashcardOpen(true);
+                                            setIsUtilsOpen(false);
+                                        }}
+                                        className={`w-full py-3 text-white rounded-xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 group ${
+                                            mode === 'vocab' ? 'bg-emerald-600 md:hover:bg-emerald-700' : 'bg-[#4255ff] md:hover:bg-[#3243cc]'
+                                        }`}
+                                    >
+                                        <span className="bg-white p-0.5 rounded flex items-center justify-center group-hover:rotate-12 transition-transform">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={mode === 'vocab' ? '#059669' : '#4255ff'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                                        </span>
+                                        <span className="text-xs font-black tracking-wide uppercase">Flashcard</span>
+                                    </button>
+                                </div>
+                            </div>
 
             {/* 3. DANH SÁCH ÔN TẬP (MÀU CAM) */}
      {mode !== 'vocab' && (
@@ -3333,17 +3344,20 @@ LÀM SẠCH
 {/* --- PHẦN CUỐI CỦA SIDEBAR (CẬP NHẬT THÊM NÚT TÀI LIỆU) --- */}
     <div className="w-full mt-auto pt-4 flex flex-col gap-4"> 
     
-    {/* 1. NÚT IN (ĐÃ SỬA: CHẶN KHI RỖNG) */}
+   {/* 1. NÚT IN (ĐÃ SỬA: ĐỔI MÀU THEO CHẾ ĐỘ) */}
     <button 
         onClick={() => {
-        // --- LOGIC KIỂM TRA MỚI ---
         if (!config.text || config.text.trim().length === 0) {
             alert("Vui lòng nhập nội dung để tạo file"); 
-            return; // Dừng lại, không mở modal in
+            return; 
         }
         setIsPrintModalOpen(true); 
         }} 
-        className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 flex items-center justify-center gap-2 transition-all active:scale-95 group"
+        className={`w-full py-3.5 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 group ${
+            mode === 'vocab' 
+            ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200' 
+            : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200'
+        }`}
     >
         <svg className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg> 
         IN / LƯU PDF
