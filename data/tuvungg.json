@@ -3490,5 +3490,89 @@
   "違う": {
     "reading": "ちがう",
     "meaning": "sai, khác"
+  },
+  "ここ": {
+    "reading": "ここ",
+    "meaning": "chỗ này, đây"
+  },
+  "そこ": {
+    "reading": "そこ",
+    "meaning": "chỗ đó, đó"
+  },
+  "あそこ": {
+    "reading": "あそこ",
+    "meaning": "chỗ kia, kia"
+  },
+  "どこ": {
+    "reading": "どこ",
+    "meaning": "chỗ nào, đâu"
+  },
+  "こちら": {
+    "reading": "こちら",
+    "meaning": "phía này, lối này (lịch sự)"
+  },
+  "そちら": {
+    "reading": "そちら",
+    "meaning": "phía đó, lối đó (lịch sự)"
+  },
+  "あちら": {
+    "reading": "あちら",
+    "meaning": "phía kia, lối kia (lịch sự)"
+  },
+  "どちら": {
+    "reading": "どちら",
+    "meaning": "phía nào, lối nào (lịch sự)"
+  },
+  "ロビー": {
+    "reading": "ロビー",
+    "meaning": "hành lang, đại sảnh (lobby)"
+  },
+  "トイレ": {
+    "reading": "トイレ",
+    "meaning": "nhà vệ sinh"
+  },
+  "エレベーター": {
+    "reading": "エレベーター",
+    "meaning": "thang máy"
+  },
+  "エスカレーター": {
+    "reading": "エスカレーター",
+    "meaning": "thang cuốn"
+  },
+  "自動販売機": {
+    "reading": "じどうはんばいき",
+    "meaning": "máy bán hàng tự động"
+  },
+  "ネクタイ": {
+    "reading": "ネクタイ",
+    "meaning": "cà vạt"
+  },
+  "ワイン": {
+    "reading": "ワイン",
+    "meaning": "rượu vang"
+  },
+  "幾ら": {
+    "reading": "いくら",
+    "meaning": "bao nhiêu tiền"
+  },
+  "イタリア": {
+    "reading": "イタリア",
+    "meaning": "Ý"
+  },
+  "スイス": {
+    "reading": "スイス",
+    "meaning": "Thụy Sĩ"
+  },
+  "フランス": {
+    "reading": "フランス",
+    "meaning": "Pháp"
+  },
+  "バンコク": {
+    "reading": "バンコク",
+    "meaning": "Bangkok (Thái Lan)"
+  },
+  "ベルリン": {
+    "reading": "ベルリン",
+    "meaning": "Berlin (Đức)"
   }
 }
