@@ -3350,5 +3350,65 @@
   "頑張る": {
     "reading": "がんばる",
     "meaning": "cố gắng"
+  },
+  "さん": {
+    "reading": "さん",
+    "meaning": "anh, chị, ông, bà (hậu tố kính ngữ)"
+  },
+  "ちゃん": {
+    "reading": "ちゃん",
+    "meaning": "bé (hậu tố dùng cho bé gái)"
+  },
+  "くん": {
+    "reading": "くん",
+    "meaning": "cậu, bé (hậu tố dùng cho bé trai)"
+  },
+  "じん": {
+    "reading": "じん",
+    "meaning": "người (nước ~)"
+  },
+  "だれ": {
+    "reading": "だれ",
+    "meaning": "ai"
+  },
+  "どなた": {
+    "reading": "どなた",
+    "meaning": "vị nào"
+  },
+  "はい": {
+    "reading": "はい",
+    "meaning": "vâng, dạ"
+  },
+  "いいえ": {
+    "reading": "いいえ",
+    "meaning": "không"
+  },
+  "アメリカ": {
+    "reading": "アメリカ",
+    "meaning": "Mỹ"
+  },
+  "イギリス": {
+    "reading": "イギリス",
+    "meaning": "Anh"
+  },
+  "インド": {
+    "reading": "インド",
+    "meaning": "Ấn Độ"
+  },
+  "インドネシア": {
+    "reading": "インドネシア",
+    "meaning": "Indonesia"
+  },
+  "タイ": {
+    "reading": "タイ",
+    "meaning": "Thái Lan"
+  },
+  "ドイツ": {
+    "reading": "ドイツ",
+    "meaning": "Đức"
+  },
+  "ブラジル": {
+    "reading": "ブラジル",
+    "meaning": "Brazil"
   }
 }
