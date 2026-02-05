@@ -3574,5 +3574,41 @@
   "ベルリン": {
     "reading": "ベルリン",
     "meaning": "Berlin (Đức)"
+  },
+  "勉強": {
+    "reading": "べんきょう",
+    "meaning": "việc học"
+  },
+  "デパート": {
+    "reading": "デパート",
+    "meaning": "cửa hàng bách hóa"
+  },
+  "夜": {
+    "reading": "よる",
+    "meaning": "buổi tối, đêm"
+  },
+  "休み": {
+    "reading": "やすみ",
+    "meaning": "kỳ nghỉ, nghỉ ngơi"
+  },
+  "試験": {
+    "reading": "しけん",
+    "meaning": "kỳ thi"
+  },
+  "ニューヨーク": {
+    "reading": "ニューヨーク",
+    "meaning": "New York"
+  },
+  "ペキン": {
+    "reading": "ペキン",
+    "meaning": "Bắc Kinh"
+  },
+  "ロサンゼルス": {
+    "reading": "ロサンゼルス",
+    "meaning": "Los Angeles"
+  },
+  "ロンドン": {
+    "reading": "ロンドン",
+    "meaning": "Luân Đôn (London)"
   }
 }
