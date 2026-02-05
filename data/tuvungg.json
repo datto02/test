@@ -3770,5 +3770,53 @@
   "スペイン": {
     "reading": "スペイン",
     "meaning": "Tây Ban Nha"
+  },
+  "ハンサム": {
+    "reading": "ハンサム",
+    "meaning": "đẹp trai"
+  },
+  "きれい": {
+    "reading": "きれい",
+    "meaning": "đẹp, sạch"
+  },
+  "にぎやか": {
+    "reading": "にぎやか",
+    "meaning": "náo nhiệt"
+  },
+  "いい": {
+    "reading": "いい",
+    "meaning": "tốt"
+  },
+  "よい": {
+    "reading": "よい",
+    "meaning": "tốt"
+  },
+  "やさしい": {
+    "reading": "やさしい",
+    "meaning": "dễ, hiền lành"
+  },
+  "レストラン": {
+    "reading": "レストラン",
+    "meaning": "nhà hàng"
+  },
+  "どう": {
+    "reading": "どう",
+    "meaning": "thế nào"
+  },
+  "どんな": {
+    "reading": "どんな",
+    "meaning": "~ như thế nào"
+  },
+  "とても": {
+    "reading": "とても",
+    "meaning": "rất, lắm"
+  },
+  "あまり": {
+    "reading": "あまり",
+    "meaning": "không ~ lắm"
+  },
+  "そして": {
+    "reading": "そして",
+    "meaning": "và, thêm nữa"
   }
 }
