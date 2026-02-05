@@ -3,11 +3,11 @@
     "reading": "わたし",
     "meaning": "Tôi"
   },
-  "わたしたち": {
+  "私達": {
     "reading": "わたしたち",
     "meaning": "chúng tôi, chúng ta"
   },
-  "あなた": {
+  "貴方": {
     "reading": "あなた",
     "meaning": "bạn"
   },
@@ -19,25 +19,13 @@
     "reading": "あのかた",
     "meaning": "Vị đó, vị kia"
   },
-  "みなさん": {
+  "皆さん": {
     "reading": "みなさん",
     "meaning": "Mọi người"
-  },
-  "さん": {
-    "reading": "さん",
-    "meaning": "anh, chị, ông, bà"
-  },
-  "ちゃん": {
-    "reading": "ちゃん",
-    "meaning": "hậu tố sau tên bé gái"
   },
   "君": {
     "reading": "くん",
     "meaning": "hậu tố sau tên bé nam"
-  },
-  "じん": {
-    "reading": "じん",
-    "meaning": "người nước～"
   },
   "先生": {
     "reading": "せんせい",
@@ -71,10 +59,6 @@
     "reading": "けんきゅうしゃ",
     "meaning": "nhà nghiên cứu"
   },
-  "エンジニア": {
-    "reading": "エンジニア",
-    "meaning": "kỹ sư"
-  },
   "大学": {
     "reading": "だいがく",
     "meaning": "đại học"
@@ -83,11 +67,11 @@
     "reading": "びょういん",
     "meaning": "bệnh viện"
   },
-  "でんき": {
+  "電気": {
     "reading": "でんき",
     "meaning": "điện, đèn điện"
   },
-  "だれ": {
+  "誰": {
     "reading": "だれ",
     "meaning": "ai"
   },
@@ -99,69 +83,17 @@
     "reading": "なんさい",
     "meaning": "mấy tuổi"
   },
-  "はい": {
-    "reading": "はい",
-    "meaning": "vâng, dạ"
-  },
-  "いいえ": {
-    "reading": "いいえ",
-    "meaning": "không"
-  },
-  "アメリカ": {
-    "reading": "アメリカ",
-    "meaning": "Mỹ"
-  },
-  "イギリス": {
-    "reading": "イギリス",
-    "meaning": "nước Anh"
-  },
-  "インド": {
-    "reading": "インド",
-    "meaning": "Ấn Độ"
-  },
-  "インドネシア": {
-    "reading": "インドネシア",
-    "meaning": "nước Indonesia"
-  },
   "韓国": {
     "reading": "かんこく",
     "meaning": "Hàn Quốc"
-  },
-  "タイ": {
-    "reading": "タイ",
-    "meaning": "Thái Lan"
   },
   "中国": {
     "reading": "ちゅうごく",
     "meaning": "Trung Quốc"
   },
-  "ドイツ": {
-    "reading": "ドイツ",
-    "meaning": "Đức"
-  },
   "日本": {
     "reading": "にほん",
     "meaning": "Nhật Bản"
-  },
-  "フランス": {
-    "reading": "フランス",
-    "meaning": "Pháp"
-  },
-  "ブラジル": {
-    "reading": "ブラジル",
-    "meaning": "Braxin"
-  },
-  "これ": {
-    "reading": "これ",
-    "meaning": "cái này"
-  },
-  "それ": {
-    "reading": "それ",
-    "meaning": "cái đó"
-  },
-  "あれ": {
-    "reading": "あれ",
-    "meaning": "cái kia"
   },
   "本": {
     "reading": "ほん",
@@ -179,10 +111,6 @@
     "reading": "しんぶん",
     "meaning": "báo"
   },
-  "ノート": {
-    "reading": "ノート",
-    "meaning": "vở"
-  },
   "手帳": {
     "reading": "てちょう",
     "meaning": "sổ tay"
@@ -191,27 +119,11 @@
     "reading": "めいし",
     "meaning": "danh thiếp"
   },
-  "カード": {
-    "reading": "カード",
-    "meaning": "card, thẻ"
-  },
-  "テレホンカード": {
-    "reading": "テレホンカード",
-    "meaning": "thẻ điện thoại"
-  },
   "鉛筆": {
     "reading": "えんぴつ",
     "meaning": "bút chì"
   },
-  "ボールペン": {
-    "reading": "ボールペン",
-    "meaning": "bút bi"
-  },
-  "シャープペンシル": {
-    "reading": "シャープペンシル",
-    "meaning": "bút chì kim"
-  },
-  "かぎ": {
+  "鍵": {
     "reading": "かぎ",
     "meaning": "Chìa khoá"
   },
@@ -223,33 +135,9 @@
     "reading": "かさ",
     "meaning": "ô, dù"
   },
-  "かばん": {
+  "鞄": {
     "reading": "かばん",
     "meaning": "cặp sách, túi sách"
-  },
-  "カセットテープ": {
-    "reading": "カセットテープ",
-    "meaning": "băng [cát-xét]"
-  },
-  "テープレコーダー": {
-    "reading": "テープレコーダー",
-    "meaning": "máy ghi âm"
-  },
-  "テレビ": {
-    "reading": "テレビ",
-    "meaning": "tivi"
-  },
-  "ラジオ": {
-    "reading": "ラジオ",
-    "meaning": "radio"
-  },
-  "カメラ": {
-    "reading": "カメラ",
-    "meaning": "máy ảnh"
-  },
-  "コンピューター": {
-    "reading": "コンピューター",
-    "meaning": "máy vi tính"
   },
   "自動車": {
     "reading": "じどうしゃ",
@@ -259,17 +147,9 @@
     "reading": "つくえ",
     "meaning": "bàn"
   },
-  "いす": {
+  "椅子": {
     "reading": "いす",
     "meaning": "cái ghế"
-  },
-  "チョコレート": {
-    "reading": "チョコレート",
-    "meaning": "sô cô la"
-  },
-  "コーヒー": {
-    "reading": "コーヒー",
-    "meaning": "cà phê"
   },
   "英語": {
     "reading": "えいご",
@@ -286,38 +166,6 @@
   "何": {
     "reading": "なん",
     "meaning": "cái gì"
-  },
-  "ここ": {
-    "reading": "ここ",
-    "meaning": "chỗ này"
-  },
-  "そこ": {
-    "reading": "そこ",
-    "meaning": "chỗ đó"
-  },
-  "あそこ": {
-    "reading": "あそこ",
-    "meaning": "chỗ kia"
-  },
-  "どこ": {
-    "reading": "どこ",
-    "meaning": "chỗ nào"
-  },
-  "こちら": {
-    "reading": "こちら",
-    "meaning": "phía này"
-  },
-  "そちら": {
-    "reading": "そちら",
-    "meaning": "phía đó"
-  },
-  "あちら": {
-    "reading": "あちら",
-    "meaning": "phía kia"
-  },
-  "どちら": {
-    "reading": "どちら",
-    "meaning": "phía nào"
   },
   "教室": {
     "reading": "きょうしつ",
@@ -339,17 +187,9 @@
     "reading": "へや",
     "meaning": "Căn phòng"
   },
-  "ロビー": {
-    "reading": "ロビー",
-    "meaning": "hành lang, đại sảnh"
-  },
   "受付": {
     "reading": "うけつけ",
     "meaning": "Bộ phận tiếp tân"
-  },
-  "トイレ": {
-    "reading": "トイレ",
-    "meaning": "nhà vệ sinh"
   },
   "お手洗い": {
     "reading": "おてあらい",
@@ -359,16 +199,12 @@
     "reading": "かいだん",
     "meaning": "Cầu thang"
   },
-  "エレベーター": {
-    "reading": "エレベーター",
-    "meaning": "Thang máy"
-  },
   "会社": {
     "reading": "かいしゃ",
     "meaning": "công ty"
   },
-  "お国": {
-    "reading": "おくに",
+  "国": {
+    "reading": "くに",
     "meaning": "đất nước"
   },
   "売り場": {
@@ -378,14 +214,6 @@
   "靴": {
     "reading": "くつ",
     "meaning": "Giày"
-  },
-  "ネクタイ": {
-    "reading": "ネクタイ",
-    "meaning": "cà vạt"
-  },
-  "ワイン": {
-    "reading": "ワイン",
-    "meaning": "rượu vang"
   },
   "地下": {
     "reading": "ちか",
@@ -415,61 +243,61 @@
     "reading": "えん",
     "meaning": "Yên"
   },
-  "いくら": {
-    "reading": "いくら",
-    "meaning": "Bao nhiêu tiền"
-  },
   "電話": {
     "reading": "でんわ",
     "meaning": "điện thoại"
   },
   "家": {
-    "reading": "うち",
+    "reading": "うち/いえ",
     "meaning": "nhà"
-  },
-  "エスカレーター": {
-    "reading": "エスカレーター",
-    "meaning": "thang cuốn"
-  },
-  "たばこ": {
-    "reading": "たばこ",
-    "meaning": "thuốc lá"
-  },
-  "イタリア": {
-    "reading": "イタリア",
-    "meaning": "Ý"
-  },
-  "スイス": {
-    "reading": "スイス",
-    "meaning": "Thụy Sĩ"
   },
   "起きます": {
     "reading": "おきます",
+    "meaning": "Thức dậy"
+  },
+    "起きる": {
+    "reading": "おきる",
     "meaning": "Thức dậy"
   },
   "寝ます": {
     "reading": "ねます",
     "meaning": "Ngủ"
   },
+   "寝る": {
+    "reading": "ねる",
+    "meaning": "Ngủ"
+  },
   "働きます": {
     "reading": "はたらきます",
+    "meaning": "Làm việc"
+  },
+   "働く": {
+    "reading": "はたらく",
     "meaning": "Làm việc"
   },
   "休みます": {
     "reading": "やすみます",
     "meaning": "Nghỉ"
   },
+    "休む": {
+    "reading": "やすむ",
+    "meaning": "Nghỉ"
+  },
   "勉強します": {
     "reading": "べんきょうします",
+    "meaning": "Học"
+  },
+    "勉強する": {
+    "reading": "べんきょうする",
     "meaning": "Học"
   },
   "終わります": {
     "reading": "おわります",
     "meaning": "Xong, kết thúc"
   },
-  "デパート": {
-    "reading": "デパート",
-    "meaning": "Cửa hàng bách hóa"
+    "終わる": {
+    "reading": "おわる",
+    "meaning": "Xong, kết thúc"
   },
   "銀行": {
     "reading": "ぎんこう",
@@ -531,27 +359,27 @@
     "reading": "ばん",
     "meaning": "Tối"
   },
-  "おととい": {
+  "一昨日": {
     "reading": "おととい",
     "meaning": "Hôm kia"
   },
-  "きのう": {
+  "昨日": {
     "reading": "きのう",
     "meaning": "Hôm qua"
   },
-  "きょう": {
+  "今日": {
     "reading": "きょう",
     "meaning": "Hôm nay"
   },
-  "あした": {
+  "明日": {
     "reading": "あした",
     "meaning": "Ngày mai"
   },
-  "あさって": {
+  "明後日": {
     "reading": "あさって",
     "meaning": "Ngày kia"
   },
-  "けさ": {
+  "今朝": {
     "reading": "けさ",
     "meaning": "Sáng nay"
   },
@@ -619,25 +447,33 @@
     "reading": "いきます",
     "meaning": "đi"
   },
+    "行く": {
+    "reading": "いく",
+    "meaning": "đi"
+  },
   "来ます": {
     "reading": "きます",
+    "meaning": "đến"
+  },
+   "来る": {
+    "reading": "くる",
     "meaning": "đến"
   },
   "帰ります": {
     "reading": "かえります",
     "meaning": "về"
   },
+    "帰る": {
+    "reading": "かえる",
+    "meaning": "về"
+  },
   "学校": {
     "reading": "がっこう",
-    "meaning": "trường học (nói chung)"
-  },
-  "スーパー": {
-    "reading": "スーパー",
-    "meaning": "siêu thị (super market)"
+    "meaning": "trường học"
   },
   "駅": {
     "reading": "えき",
-    "meaning": "ga, nhà ga"
+    "meaning": "nhà ga"
   },
   "飛行機": {
     "reading": "ひこうき",
@@ -658,14 +494,6 @@
   "新幹線": {
     "reading": "しんかんせん",
     "meaning": "tàu Shinkansen"
-  },
-  "バス": {
-    "reading": "バス",
-    "meaning": "xe buýt"
-  },
-  "タクシー": {
-    "reading": "タクシー",
-    "meaning": "tắc-xi"
   },
   "自転車": {
     "reading": "じてんしゃ",
@@ -803,10 +631,6 @@
     "reading": "なんにち",
     "meaning": "ngày mấy"
   },
-  "いつ": {
-    "reading": "いつ",
-    "meaning": "bao giờ"
-  },
   "誕生日": {
     "reading": "たんじょうび",
     "meaning": "sinh nhật"
@@ -823,15 +647,15 @@
     "reading": "とっきゅう",
     "meaning": "tàu tốc hành đặc biệt"
   },
-  "次の": {
-    "reading": "つぎの",
+  "次": {
+    "reading": "つぎ",
     "meaning": "tiếp theo"
   },
   "番線": {
     "reading": "ばんせん",
     "meaning": "sân ga số~"
   },
-  "こいびと": {
+  "恋人": {
     "reading": "こいびと",
     "meaning": "người yêu"
   },
@@ -843,65 +667,97 @@
     "reading": "たべます",
     "meaning": "ăn"
   },
+    "食べる": {
+    "reading": "たべる",
+    "meaning": "ăn"
+  },
   "飲みます": {
     "reading": "のみます",
+    "meaning": "uống"
+  },
+    "飲む": {
+    "reading": "のむ",
     "meaning": "uống"
   },
   "吸います": {
     "reading": "すいます",
     "meaning": "hút [thuốc lá]"
   },
+  "吸う": {
+    "reading": "すう",
+    "meaning": "hút [thuốc lá]"
+  },
   "見ます": {
     "reading": "みます",
+    "meaning": "xem, nhìn"
+  },
+    "見る": {
+    "reading": "みる",
     "meaning": "xem, nhìn"
   },
   "聞きます": {
     "reading": "ききます",
     "meaning": "nghe"
   },
+  "聞く": {
+    "reading": "きく",
+    "meaning": "nghe"
+  },
   "読みます": {
     "reading": "よみます",
+    "meaning": "đọc"
+  },
+    "読む": {
+    "reading": "よむ",
     "meaning": "đọc"
   },
   "書きます": {
     "reading": "かきます",
     "meaning": "viết, vẽ"
   },
+    "書く": {
+    "reading": "かく",
+    "meaning": "viết, vẽ"
+  },
   "買います": {
     "reading": "かいます",
     "meaning": "mua"
   },
-  "します": {
-    "reading": "します",
-    "meaning": "làm"
+    "買う": {
+    "reading": "かう",
+    "meaning": "mua"
   },
   "撮ります": {
     "reading": "とります",
     "meaning": "chụp [ảnh]"
   },
+    "撮る": {
+    "reading": "とる",
+    "meaning": "chụp [ảnh]"
+  },
   "会います": {
     "reading": "あいます",
-    "meaning": "gặp [bạn]"
+    "meaning": "gặp"
   },
-  "ごはん": {
+    "会う": {
+    "reading": "あう",
+    "meaning": "gặp"
+  },
+  "ご飯": {
     "reading": "ごはん",
     "meaning": "cơm, bữa ăn"
   },
-  "朝ごはん": {
+  "朝ご飯": {
     "reading": "あさごはん",
     "meaning": "cơm sáng"
   },
-  "昼ごはん": {
+  "昼ご飯": {
     "reading": "ひるごはん",
     "meaning": "cơm trưa"
   },
-  "晩ごはん": {
+  "晩ご飯": {
     "reading": "ばんごはん",
     "meaning": "cơm tối"
-  },
-  "パン": {
-    "reading": "パン",
-    "meaning": "bánh mì"
   },
   "卵": {
     "reading": "たまご",
@@ -939,21 +795,9 @@
     "reading": "ぎゅうにゅう",
     "meaning": "sữa bò"
   },
-  "ジュース": {
-    "reading": "ジュース",
-    "meaning": "nước hoa quả"
-  },
-  "ビール": {
-    "reading": "ビール",
-    "meaning": "bia"
-  },
   "お酒": {
     "reading": "おさけ",
     "meaning": "rượu, rượu sake"
-  },
-  "ビデオ": {
-    "reading": "ビデオ",
-    "meaning": "video, băng video, đầu video"
   },
   "映画": {
     "reading": "えいが",
@@ -963,10 +807,6 @@
     "reading": "てがみ",
     "meaning": "bức thư, lá thư"
   },
-  "レポート": {
-    "reading": "レポート",
-    "meaning": "báo cáo"
-  },
   "写真": {
     "reading": "しゃしん",
     "meaning": "ảnh"
@@ -974,10 +814,6 @@
   "店": {
     "reading": "みせ",
     "meaning": "cửa hàng, cửa hiệu"
-  },
-  "レストラン": {
-    "reading": "レストラン",
-    "meaning": "nhà hàng"
   },
   "庭": {
     "reading": "にわ",
@@ -987,85 +823,73 @@
     "reading": "しゅくだい",
     "meaning": "bài tập về nhà"
   },
-  "テニス": {
-    "reading": "テニス",
-    "meaning": "quần vợt"
-  },
-  "サッカー": {
-    "reading": "サッカー",
-    "meaning": "bóng đá"
-  },
-  "お花見": {
-    "reading": "おはなみ",
+  "花見": {
+    "reading": "はなみ",
     "meaning": "ngắm hoa"
   },
-  "なに": {
-    "reading": "なに",
-    "meaning": "cái gì, gì"
-  },
-  "いっしょに": {
+  "一緒に": {
     "reading": "いっしょに",
     "meaning": "cùng nhau"
-  },
-  "ちょっと": {
-    "reading": "ちょっと",
-    "meaning": "một chút"
-  },
-  "いつも": {
-    "reading": "いつも",
-    "meaning": "luôn luôn"
   },
   "時々": {
     "reading": "ときどき",
     "meaning": "thỉnh thoảng"
   },
-  "それから": {
-    "reading": "それから",
-    "meaning": "sau đó, tiếp theo"
-  },
-  "ええ": {
-    "reading": "ええ",
-    "meaning": "vâng, được"
-  },
-  "メキシコ": {
-    "reading": "メキシコ",
-    "meaning": "Mexico"
-  },
   "切ります": {
     "reading": "きります",
+    "meaning": "cắt"
+  },
+    "切る": {
+    "reading": "きる",
     "meaning": "cắt"
   },
   "送ります": {
     "reading": "おくります",
     "meaning": "gửi"
   },
-  "上げます": {
-    "reading": "あげます",
-    "meaning": "cho, tặng"
+    "送る": {
+    "reading": "おくる",
+    "meaning": "gửi"
   },
-  "もらいます": {
+  "貰います": {
     "reading": "もらいます",
+    "meaning": "nhận"
+  },
+    "貰う": {
+    "reading": "もらう",
     "meaning": "nhận"
   },
   "貸します": {
     "reading": "かします",
     "meaning": "cho mượn"
   },
+    "貸す": {
+    "reading": "かす",
+    "meaning": "cho mượn"
+  },
   "借ります": {
     "reading": "かります",
+    "meaning": "mượn, vay"
+  },
+    "借りる": {
+    "reading": "かりる",
     "meaning": "mượn, vay"
   },
   "教えます": {
     "reading": "おしえます",
     "meaning": "dạy"
   },
+    "教える": {
+    "reading": "おしえる",
+    "meaning": "dạy"
+  },
   "習います": {
     "reading": "ならいます",
     "meaning": "học, tập"
   },
-  "かけます": {
-    "reading": "かけます",
-    "meaning": "gọi (điện thoại)"
+    "習う": {
+    "reading": "ならう",
+    "meaning": "học, tập"
   },
   "手": {
     "reading": "て",
@@ -1075,39 +899,7 @@
     "reading": "はし",
     "meaning": "đũa"
   },
-  "スプーン": {
-    "reading": "スプーン",
-    "meaning": "thìa"
-  },
-  "ナイフ": {
-    "reading": "ナイフ",
-    "meaning": "dao"
-  },
-  "フォーク": {
-    "reading": "フォーク",
-    "meaning": "dĩa"
-  },
-  "はさみ": {
-    "reading": "はさみ",
-    "meaning": "kéo"
-  },
-  "パソコン": {
-    "reading": "パソコン",
-    "meaning": "máy vi tính cá nhân"
-  },
-  "パンチ": {
-    "reading": "パンチ",
-    "meaning": "cái đục lỗ"
-  },
-  "ホッチキス": {
-    "reading": "ホッチキス",
-    "meaning": "cái dập ghim"
-  },
-  "セロテープ": {
-    "reading": "セロテープ",
-    "meaning": "băng dính"
-  },
-  "けしゴム": {
+  "消しゴム": {
     "reading": "けしゴム",
     "meaning": "cái tẩy"
   },
@@ -1118,14 +910,6 @@
   "花": {
     "reading": "はな",
     "meaning": "hoa"
-  },
-  "シャツ": {
-    "reading": "シャツ",
-    "meaning": "áo sơ mi"
-  },
-  "プレゼント": {
-    "reading": "プレゼント",
-    "meaning": "quà tặng"
   },
   "荷物": {
     "reading": "にもつ",
@@ -1138,10 +922,6 @@
   "切符": {
     "reading": "きっぷ",
     "meaning": "vé"
-  },
-  "クリスマス": {
-    "reading": "クリスマス",
-    "meaning": "Giáng sinh"
   },
   "父": {
     "reading": "ちち",
@@ -1159,47 +939,15 @@
     "reading": "おかあさん",
     "meaning": "mẹ (của người khác)"
   },
-  "もう": {
-    "reading": "もう",
-    "meaning": "đã, rồi"
-  },
-  "まだ": {
-    "reading": "まだ",
-    "meaning": "chưa"
-  },
-  "これから": {
-    "reading": "これから",
-    "meaning": "từ bây giờ, sau đây"
-  },
   "お土産": {
     "reading": "おみやげ",
     "meaning": "quà đặc sản, lưu niệm"
-  },
-  "ヨーロッパ": {
-    "reading": "ヨーロッパ",
-    "meaning": "châu Âu"
-  },
-  "スペイン": {
-    "reading": "スペイン",
-    "meaning": "Tây Ban Nha"
-  },
-  "ケータイ": {
-    "reading": "ケータイ",
-    "meaning": "điện thoại di động"
-  },
-  "メール": {
-    "reading": "メール",
-    "meaning": "email"
   },
   "年賀状": {
     "reading": "ねんがじょう",
     "meaning": "thiệp mừng năm mới"
   },
-  "ハンサム": {
-    "reading": "ハンサム",
-    "meaning": "đẹp trai"
-  },
-  "きれい": {
+  "綺麗": {
     "reading": "きれい",
     "meaning": "đẹp, sạch"
   },
@@ -1207,7 +955,7 @@
     "reading": "しずか",
     "meaning": "yên tĩnh"
   },
-  "にぎやか": {
+  "賑やか": {
     "reading": "にぎやか",
     "meaning": "náo nhiệt"
   },
@@ -1231,7 +979,7 @@
     "reading": "べんり",
     "meaning": "tiện lợi"
   },
-  "すてき": {
+  "素敵": {
     "reading": "すてき",
     "meaning": "đẹp, hay"
   },
@@ -1250,10 +998,6 @@
   "古い": {
     "reading": "ふるい",
     "meaning": "cũ (đồ vật)"
-  },
-  "いい": {
-    "reading": "いい（よい）",
-    "meaning": "tốt"
   },
   "悪い": {
     "reading": "わるい",
@@ -1295,11 +1039,11 @@
     "reading": "ひくい",
     "meaning": "thấp"
   },
-  "おもしろい": {
+  "面白い": {
     "reading": "おもしろい",
     "meaning": "thú vị, hay"
   },
-  "おいしい": {
+  "美味しい": {
     "reading": "おいしい",
     "meaning": "ngon"
   },
@@ -1359,41 +1103,17 @@
     "reading": "しごと",
     "meaning": "công việc"
   },
-  "どう": {
-    "reading": "どう",
-    "meaning": "thế nào"
-  },
-  "どんな": {
-    "reading": "どんな",
-    "meaning": "～như thế nào"
-  },
-  "とても": {
-    "reading": "とても",
-    "meaning": "rất, lắm"
-  },
-  "あまり": {
-    "reading": "あまり",
-    "meaning": "không～lắm"
-  },
-  "そして": {
-    "reading": "そして",
-    "meaning": "và, thêm nữa"
-  },
   "富士山": {
     "reading": "ふじさん",
     "meaning": "Núi Phú Sĩ"
   },
-  "わかります": {
+  "分かります": {
     "reading": "わかります",
     "meaning": "hiểu, nắm được"
   },
-  "あります": {
-    "reading": "あります",
-    "meaning": "có (sở hữu) / ở (tồn tại vật)"
-  },
-  "います": {
-    "reading": "います",
-    "meaning": "ở (tồn tại người, động vật)"
+    "分かる": {
+    "reading": "わかる",
+    "meaning": "hiểu, nắm được"
   },
   "好き": {
     "reading": "すき",
@@ -1401,7 +1121,7 @@
   },
   "嫌い": {
     "reading": "きらい",
-    "meaning": "ghét, không thích"
+    "meaning": "ghét"
   },
   "上手": {
     "reading": "じょうず",
@@ -1419,17 +1139,9 @@
     "reading": "りょうり",
     "meaning": "món ăn, việc nấu ăn"
   },
-  "スポーツ": {
-    "reading": "スポーツ",
-    "meaning": "thể thao"
-  },
   "野球": {
     "reading": "やきゅう",
     "meaning": "bóng chày"
-  },
-  "ダンス": {
-    "reading": "ダンス",
-    "meaning": "nhảy, khiêu vũ"
   },
   "旅行": {
     "reading": "りょこう",
@@ -1442,22 +1154,6 @@
   "歌": {
     "reading": "うた",
     "meaning": "bài hát"
-  },
-  "クラシック": {
-    "reading": "クラシック",
-    "meaning": "nhạc cổ điển"
-  },
-  "ジャズ": {
-    "reading": "ジャズ",
-    "meaning": "nhạc jazz"
-  },
-  "コンサート": {
-    "reading": "コンサート",
-    "meaning": "buổi hòa nhạc"
-  },
-  "カラオケ": {
-    "reading": "カラオケ",
-    "meaning": "karaoke"
   },
   "歌舞伎": {
     "reading": "かぶき",
@@ -1475,25 +1171,17 @@
     "reading": "かんじ",
     "meaning": "chữ Kanji"
   },
-  "ひらがな": {
+  "平仮名": {
     "reading": "ひらがな",
     "meaning": "chữ Hiragana"
   },
-  "かたかな": {
+  "片仮名": {
     "reading": "かたかな",
     "meaning": "chữ Katakana"
-  },
-  "ローマ字": {
-    "reading": "ローマじ",
-    "meaning": "chữ La Mã"
   },
   "細かいお金": {
     "reading": "こまかいおかね",
     "meaning": "tiền lẻ"
-  },
-  "チケット": {
-    "reading": "チケット",
-    "meaning": "vé"
   },
   "時間": {
     "reading": "じかん",
@@ -1507,41 +1195,25 @@
     "reading": "やくそく",
     "meaning": "cuộc hẹn, lời hứa"
   },
-  "アルバイト": {
-    "reading": "アルバイト",
-    "meaning": "việc làm thêm"
-  },
   "ご主人": {
     "reading": "ごしゅじん",
     "meaning": "chồng (của người khác)"
   },
-  "夫・主人": {
-    "reading": "おっと・しゅじん",
+  "夫": {
+    "reading": "おっと",
     "meaning": "chồng (của mình)"
   },
   "奥さん": {
     "reading": "おくさん",
     "meaning": "vợ (của người khác)"
   },
-  "妻・家内": {
-    "reading": "つま・かない",
+  "妻": {
+    "reading": "つま",
     "meaning": "vợ (của mình)"
   },
-  "子ども": {
+  "子供": {
     "reading": "こども",
     "meaning": "con cái"
-  },
-  "よく": {
-    "reading": "よく",
-    "meaning": "tốt, rõ (chỉ mức độ)"
-  },
-  "だいたい": {
-    "reading": "だいたい",
-    "meaning": "đại khái, đại thể"
-  },
-  "たくさん": {
-    "reading": "たくさん",
-    "meaning": "nhiều"
   },
   "少し": {
     "reading": "すこし",
@@ -1554,18 +1226,6 @@
   "早く": {
     "reading": "はやく",
     "meaning": "sớm, nhanh"
-  },
-  "～から": {
-    "reading": "～から",
-    "meaning": "vì～ / từ～"
-  },
-  "どうして": {
-    "reading": "どうして",
-    "meaning": "tại sao"
-  },
-  "いろいろ": {
-    "reading": "いろいろ",
-    "meaning": "nhiều, đa dạng"
   },
   "男の人": {
     "reading": "おとこのひと",
@@ -1591,10 +1251,6 @@
     "reading": "ねこ",
     "meaning": "mèo"
   },
-  "パンダ": {
-    "reading": "パンダ",
-    "meaning": "gấu trúc"
-  },
   "象": {
     "reading": "ぞう",
     "meaning": "voi"
@@ -1615,49 +1271,17 @@
     "reading": "はこ",
     "meaning": "cái hộp"
   },
-  "スイッチ": {
-    "reading": "スイッチ",
-    "meaning": "công tắc"
-  },
   "冷蔵庫": {
     "reading": "れいぞうこ",
     "meaning": "tủ lạnh"
-  },
-  "テーブル": {
-    "reading": "テーブル",
-    "meaning": "bàn"
-  },
-  "ベッド": {
-    "reading": "ベッド",
-    "meaning": "giường"
   },
   "棚": {
     "reading": "たな",
     "meaning": "giá sách, kệ sách"
   },
-  "ドア": {
-    "reading": "ドア",
-    "meaning": "cửa"
-  },
   "窓": {
     "reading": "まど",
     "meaning": "cửa sổ"
-  },
-  "ポスト": {
-    "reading": "ポスト",
-    "meaning": "hộp thư, hòm thư"
-  },
-  "ビル": {
-    "reading": "ビル",
-    "meaning": "tòa nhà"
-  },
-  "エイーティーエム": {
-    "reading": "エイーティーエム",
-    "meaning": "máy rút tiền tự động ATM"
-  },
-  "コンビニ": {
-    "reading": "コンビニ",
-    "meaning": "cửa hàng tiện lợi"
   },
   "公園": {
     "reading": "こうえん",
@@ -1667,12 +1291,12 @@
     "reading": "きっさてん",
     "meaning": "quán giải khát, quán cà phê"
   },
-  "～や": {
-    "reading": "～や",
+  "屋": {
+    "reading": "や",
     "meaning": "hiệu～, cửa hàng～"
   },
-  "～乗り場": {
-    "reading": "～のりば",
+  "乗り場": {
+    "reading": "のりば",
     "meaning": "điểm đón taxi, tàu,..."
   },
   "大使館": {
@@ -1727,32 +1351,8 @@
     "reading": "あいだ",
     "meaning": "giữa, ở giữa"
   },
-  "～や～「など」": {
-    "reading": "～や～「など」",
-    "meaning": "～và～,[...]"
-  },
-  "ナンプラー": {
-    "reading": "ナンプラー",
-    "meaning": "nampla, nước mắm"
-  },
-  "コーナー": {
-    "reading": "コーナー",
-    "meaning": "góc, khu vực"
-  },
-  "いちばん～": {
-    "reading": "いちばん～",
+  "一番": {
+    "reading": "いちばん",
     "meaning": "~ nhất"
-  },
-  "東京ディズニーランド": {
-    "reading": "とうきょうディズニーランド",
-    "meaning": "Công viên Tokyo Disneyland"
-  },
-  "パスポート": {
-    "reading": "パスポート",
-    "meaning": "hộ chiếu"
-  },
-  "チリソース": {
-    "reading": "チリソース",
-    "meaning": "tương ớt (chili sauce)"
   }
 }
