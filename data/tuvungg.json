@@ -4602,5 +4602,217 @@
   "宇宙飛行士": {
     "reading": "うちゅうひこうし",
     "meaning": "nhà du hành vũ trụ"
+  },
+  "飼う": {
+    "reading": "かう",
+    "meaning": "nuôi"
+  },
+  "建てる": {
+    "reading": "たてる",
+    "meaning": "xây dựng"
+  },
+  "走る": {
+    "reading": "はしる",
+    "meaning": "chạy (trên đường)"
+  },
+  "取る": {
+    "reading": "とる",
+    "meaning": "xin (nghỉ)"
+  },
+  "見える": {
+    "reading": "みえる",
+    "meaning": "nhìn thấy (núi)"
+  },
+  "聞こえる": {
+    "reading": "きこえる",
+    "meaning": "nghe thấy (âm thanh)"
+  },
+  "できる": {
+    "reading": "できる",
+    "meaning": "được làm, hoàn thành (con đường)"
+  },
+  "開く": {
+    "reading": "ひらく",
+    "meaning": "mở, tổ chức (lớp)"
+  },
+  "心配": {
+    "reading": "しんぱい",
+    "meaning": "lo lắng"
+  },
+  "ペット": {
+    "reading": "ペット",
+    "meaning": "thú cưng, động vật nuôi"
+  },
+  "鳥": {
+    "reading": "とり",
+    "meaning": "chim"
+  },
+  "声": {
+    "reading": "こえ",
+    "meaning": "tiếng, giọng nói"
+  },
+  "波": {
+    "reading": "なみ",
+    "meaning": "sóng"
+  },
+  "花火": {
+    "reading": "はなび",
+    "meaning": "pháo hoa"
+  },
+  "景色": {
+    "reading": "けしき",
+    "meaning": "phong cảnh"
+  },
+  "昼間": {
+    "reading": "ひるま",
+    "meaning": "thời gian ban ngày"
+  },
+  "昔": {
+    "reading": "むかし",
+    "meaning": "ngày xưa"
+  },
+  "道具": {
+    "reading": "どうぐ",
+    "meaning": "dụng cụ"
+  },
+  "自動販売機": {
+    "reading": "じどうはんばいき",
+    "meaning": "máy bán hàng tự động"
+  },
+  "通信販売": {
+    "reading": "つうしんはんばい",
+    "meaning": "thương mại viễn thông"
+  },
+  "クリーニング": {
+    "reading": "クリーニング",
+    "meaning": "giặt là"
+  },
+  "マンション": {
+    "reading": "マンション",
+    "meaning": "chung cư"
+  },
+  "家": {
+    "reading": "いえ",
+    "meaning": "nhà"
+  },
+  "キッチン": {
+    "reading": "キッチン",
+    "meaning": "bếp"
+  },
+  "教室": {
+    "reading": "きょうしつ",
+    "meaning": "lớp học"
+  },
+  "パーティールーム": {
+    "reading": "パーティールーム",
+    "meaning": "phòng tổ chức tiệc"
+  },
+  "後": {
+    "reading": "ご",
+    "meaning": "sau (về mặt thời gian)"
+  },
+  "しか": {
+    "reading": "しか",
+    "meaning": "chỉ (được dùng với thể phủ định)"
+  },
+  "他": {
+    "reading": "ほか",
+    "meaning": "khác"
+  },
+  "はっきり": {
+    "reading": "はっきり",
+    "meaning": "rõ ràng"
+  },
+  "ほとんど": {
+    "reading": "ほとんど",
+    "meaning": "hầu hết"
+  },
+  "関西空港": {
+    "reading": "かんさいくうこう",
+    "meaning": "sân bay quốc tế Kansai"
+  },
+  "家具": {
+    "reading": "かぐ",
+    "meaning": "đồ gỗ trong nhà"
+  },
+  "本棚": {
+    "reading": "ほんだな",
+    "meaning": "giá sách"
+  },
+  "夢": {
+    "reading": "ゆめ",
+    "meaning": "giấc mơ, ước mơ"
+  },
+  "いつか": {
+    "reading": "いつか",
+    "meaning": "lúc nào đó"
+  },
+  "素晴らしい": {
+    "reading": "すばらしい",
+    "meaning": "tuyệt vời"
+  },
+  "子供達": {
+    "reading": "こどもたち",
+    "meaning": "bọn trẻ"
+  },
+  "漫画": {
+    "reading": "まんが",
+    "meaning": "truyện tranh"
+  },
+  "大好き": {
+    "reading": "だいすき",
+    "meaning": "rất thích"
+  },
+  "主人公": {
+    "reading": "しゅじんこう",
+    "meaning": "nhân vật chính"
+  },
+  "形": {
+    "reading": "かたち",
+    "meaning": "hình dạng"
+  },
+  "ロボット": {
+    "reading": "ロボット",
+    "meaning": "người máy"
+  },
+  "不思議": {
+    "reading": "ふしぎ",
+    "meaning": "bí ẩn, kì thú"
+  },
+  "ポケット": {
+    "reading": "ポケット",
+    "meaning": "túi áo, túi quần"
+  },
+  "例えば": {
+    "reading": "たとえば",
+    "meaning": "ví dụ"
+  },
+  "付ける": {
+    "reading": "つける",
+    "meaning": "lắp, ghép thêm"
+  },
+  "自由に": {
+    "reading": "じゆうに",
+    "meaning": "một cách tự do, thoải mái"
+  },
+  "空": {
+    "reading": "そら",
+    "meaning": "bầu trời"
+  },
+  "飛ぶ": {
+    "reading": "とぶ",
+    "meaning": "bay"
+  },
+  "自分": {
+    "reading": "じぶん",
+    "meaning": "tự mình"
+  },
+  "将来": {
+    "reading": "しょうらい",
+    "meaning": "tương lai"
+  },
+  "ドラえもん": {
+    "reading": "ドラえもん",
+    "meaning": "Doraemon"
   }
 }
