@@ -3410,5 +3410,85 @@
   "ブラジル": {
     "reading": "ブラジル",
     "meaning": "Brazil"
+  },
+  "これ": {
+    "reading": "これ",
+    "meaning": "cái này"
+  },
+  "それ": {
+    "reading": "それ",
+    "meaning": "cái đó"
+  },
+  "あれ": {
+    "reading": "あれ",
+    "meaning": "cái kia"
+  },
+  "この": {
+    "reading": "この",
+    "meaning": "~ này"
+  },
+  "その": {
+    "reading": "その",
+    "meaning": "~ đó"
+  },
+  "あの": {
+    "reading": "あの",
+    "meaning": "~ kia"
+  },
+  "ノート": {
+    "reading": "ノート",
+    "meaning": "vở"
+  },
+  "カード": {
+    "reading": "カード",
+    "meaning": "thẻ, card"
+  },
+  "ボールペン": {
+    "reading": "ボールペン",
+    "meaning": "bút bi"
+  },
+  "シャープペンシル": {
+    "reading": "シャープペンシル",
+    "meaning": "bút chì kim"
+  },
+  "鞄": {
+    "reading": "かばん",
+    "meaning": "cặp, túi sách"
+  },
+  "テレビ": {
+    "reading": "テレビ",
+    "meaning": "tivi"
+  },
+  "ラジオ": {
+    "reading": "ラジオ",
+    "meaning": "đài radio"
+  },
+  "カメラ": {
+    "reading": "カメラ",
+    "meaning": "máy ảnh"
+  },
+  "コンピューター": {
+    "reading": "コンピューター",
+    "meaning": "máy vi tính"
+  },
+  "車": {
+    "reading": "くるま",
+    "meaning": "ô tô, xe hơi"
+  },
+  "チョコレート": {
+    "reading": "チョコレート",
+    "meaning": "sô cô la"
+  },
+  "コーヒー": {
+    "reading": "コーヒー",
+    "meaning": "cà phê"
+  },
+  "違います": {
+    "reading": "ちがいます",
+    "meaning": "sai, khác"
+  },
+  "違う": {
+    "reading": "ちがう",
+    "meaning": "sai, khác"
   }
 }
