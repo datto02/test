@@ -3218,12 +3218,13 @@ LÀM SẠCH
         <hr className="border-gray-100 my-1"/>
 
         {/* DÒNG 3: NÚT CHỌN */}
-        <button 
+       <button 
             onClick={handleLoadMinna}
             className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-md active:scale-95 transition-all uppercase tracking-wide flex items-center justify-center gap-2"
         >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            CHỌN BÀI {minnaLesson || '...'}
+            {/* Hiển thị logic trên nút: Nếu đang nhập dở (rỗng) thì hiện '...', nếu quá 50 thì hiện 50 (dự báo trước kết quả) */}
+            CHỌN BÀI {minnaLesson === '' ? '...' : (minnaLesson > 50 ? 50 : (minnaLesson < 1 ? 1 : minnaLesson))}
         </button>
 
     </div>
