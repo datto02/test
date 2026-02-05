@@ -2623,9 +2623,12 @@ try {
     };
        // --- HÀM MỚI: TẢI TỪ VỰNG MINNA ---
 const handleLoadMinna = async () => {
-    // 1. Validate số bài
-    if (minnaLesson < 1 || minnaLesson > 50) {
+    // 1. Kiểm tra nếu để trống hoặc nhập sai
+    if (minnaLesson === '' || minnaLesson < 1 || minnaLesson > 50) {
         alert("Vui lòng nhập bài từ 1 đến 50!");
+        // Reset về 1 nếu sai để người dùng biết
+        if (minnaLesson === '' || minnaLesson < 1) setMinnaLesson(1);
+        if (minnaLesson > 50) setMinnaLesson(50);
         return;
     }
 
@@ -3174,38 +3177,55 @@ LÀM SẠCH
                             </div>
                           </>
             ) : (
-                // === GIAO DIỆN TỪ VỰNG MỚI (MINNA NO NIHONGO) ===
-                <div className="space-y-4">
-                    <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
-                        <div className="flex items-center justify-between mb-2">
-                            <label className="text-[11px] font-bold text-emerald-700 uppercase">TỪ VỰNG MINNA</label>
-                        </div>
-                        
-                        <div className="flex gap-2">
-                            {/* Ô NHẬP SỐ */}
-                            <input 
-                                type="number" 
-                                min="1" 
-                                max="50" 
-                                value={minnaLesson}
-                                onChange={(e) => {
-                                    const val = parseInt(e.target.value);
-                                    if(!isNaN(val)) setMinnaLesson(val);
-                                }}
-                                className="w-16 text-center font-black text-lg text-emerald-700 bg-white border-2 border-emerald-200 rounded-lg focus:outline-none focus:border-emerald-500 h-10"
-                            />
-                            
-                            {/* NÚT CHỌN */}
-                            <button 
-                                onClick={handleLoadMinna}
-                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-md active:scale-95 transition-all uppercase tracking-wide"
-                            >
-                                CHỌN BÀI {minnaLesson}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+              <div className="space-y-3 p-1">
+        
+        {/* DÒNG 1: MINNA NO NIHONGO */}
+        <div className="flex justify-between items-center">
+            <span className="text-[10px] font-bold text-gray-500 uppercase">TỪ VỰNG MINNA BÀI</span>
+            
+            <div className="flex items-center gap-1.5">
+                <input 
+                    type="number" 
+                    min="0" 
+                    max="50" 
+                    value={minnaLesson}
+                    onChange={(e) => { 
+                        const val = e.target.value; 
+                        if (val === '') setMinnaLesson(''); 
+                        else setMinnaLesson(parseInt(val)); 
+                    }} 
+                    onKeyDown={(e) => { 
+                        // Bấm Enter tự động sửa số nếu quá giới hạn
+                        if (e.key === 'Enter') {
+                            if (minnaLesson > 50) setMinnaLesson(50);
+                            if (minnaLesson < 1 && minnaLesson !== '') setMinnaLesson(1);
+                            handleLoadMinna(); // Tải luôn nếu thích
+                        }
+                    }} 
+                    onBlur={() => { 
+                        // Click ra ngoài thì tự sửa số
+                        if (minnaLesson === '' || minnaLesson < 1) setMinnaLesson(1);
+                        if (minnaLesson > 50) setMinnaLesson(50);
+                    }} 
+                    className="w-10 h-6 text-[16px] text-center font-bold bg-gray-50 border border-gray-200 text-gray-700 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                />
+            </div>
+        </div>
+
+        {/* ĐƯỜNG KẺ MỜ */}
+        <hr className="border-gray-100 my-1"/>
+
+        {/* DÒNG 3: NÚT CHỌN */}
+        <button 
+            onClick={handleLoadMinna}
+            className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-md active:scale-95 transition-all uppercase tracking-wide flex items-center justify-center gap-2"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            CHỌN BÀI {minnaLesson || '...'}
+        </button>
+
+    </div>
+)}
             
         </div>
     )}
