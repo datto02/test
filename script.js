@@ -3176,17 +3176,9 @@ LÀM SẠCH
             ) : (
                 // === GIAO DIỆN TỪ VỰNG MỚI (MINNA NO NIHONGO) ===
                 <div className="space-y-4">
-                    <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
-                        <span className="text-xl">📘</span>
-                        <div>
-                            <p className="text-xs font-black text-gray-800 uppercase">GIÁO TRÌNH MINNA</p>
-                            <p className="text-[10px] text-gray-400">Chọn bài để nạp từ vựng</p>
-                        </div>
-                    </div>
-
                     <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
                         <div className="flex items-center justify-between mb-2">
-                            <label className="text-[11px] font-bold text-emerald-700 uppercase">Nhập số bài (1-50)</label>
+                            <label className="text-[11px] font-bold text-emerald-700 uppercase">TỪ VỰNG MINNA</label>
                         </div>
                         
                         <div className="flex gap-2">
@@ -3211,10 +3203,6 @@ LÀM SẠCH
                                 CHỌN BÀI {minnaLesson}
                             </button>
                         </div>
-                    </div>
-
-                    <div className="text-[10px] text-gray-400 italic text-center px-2">
-                        *Dữ liệu được lấy từ file data/tuvung/minna/minna{minnaLesson}.json
                     </div>
                 </div>
             )}
