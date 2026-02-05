@@ -2624,28 +2624,31 @@ try {
             setIsLoading(false);
         }
     };
-       // --- HÀM MỚI: TẢI TỪ VỰNG MINNA ---
+      // --- SỬA LẠI HÀM handleLoadMinna ---
 const handleLoadMinna = async () => {
-    // 1. Kiểm tra nếu để trống hoặc nhập sai
-    if (minnaLesson === '' || minnaLesson < 1 || minnaLesson > 50) {
-        alert("Vui lòng nhập bài từ 1 đến 50!");
-        // Reset về 1 nếu sai để người dùng biết
-        if (minnaLesson === '' || minnaLesson < 1) setMinnaLesson(1);
-        if (minnaLesson > 50) setMinnaLesson(50);
-        return;
-    }
+    // 1. Tính toán số bài hợp lệ ngay lập tức
+    let validLesson = minnaLesson;
+    
+    // Nếu để trống hoặc nhỏ hơn 1 -> Về 1
+    if (validLesson === '' || validLesson < 1) validLesson = 1;
+    // Nếu lớn hơn 50 -> Về 50
+    if (validLesson > 50) validLesson = 50;
 
+    // 2. Cập nhật lại giao diện cho đúng số đã sửa
+    setMinnaLesson(validLesson);
+
+    // 3. Bắt đầu tải dữ liệu với số hợp lệ (validLesson)
     setProgress(0);
     setIsLoading(true);
-    setIsMenuOpen(false); // Đóng menu
+    setIsMenuOpen(false);
 
-    const url = `./data/tuvung/minna/minna${minnaLesson}.json`;
+    const url = `./data/tuvung/minna/minna${validLesson}.json`;
 
     try {
         const response = await fetch(url);
         if (!response.ok) throw new Error("Không tìm thấy file bài học này");
 
-        const data = await response.json(); // File json là mảng ["từ 1", "từ 2"]
+        const data = await response.json();
         
         if (!Array.isArray(data) || data.length === 0) {
             alert("File dữ liệu bị lỗi hoặc rỗng!");
@@ -2653,23 +2656,19 @@ const handleLoadMinna = async () => {
             return;
         }
 
-        // Chuyển mảng thành chuỗi, cách nhau bằng xuống dòng
         const textContent = data.join('\n');
-
         setProgress(50);
 
         setTimeout(() => {
             setLocalText(textContent);
             onChange({ ...config, text: textContent });
-            // Tự động bật bộ lọc 'Từ vựng' nếu cần, hoặc tắt lọc Kanji để hiện Hiragana
-            // Ở đây giữ nguyên logic nhập liệu
             setProgress(100);
             setTimeout(() => setIsLoading(false), 200);
         }, 300);
 
     } catch (error) {
         console.error(error);
-        alert(`Lỗi: Chưa có dữ liệu cho Bài ${minnaLesson} (hoặc đường dẫn sai).`);
+        alert(`Lỗi: Chưa có dữ liệu cho Bài ${validLesson} `);
         setIsLoading(false);
     }
 };
