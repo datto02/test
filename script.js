@@ -1448,7 +1448,8 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
                                <span>
                                 {vocabInfo.meaning.charAt(0).toLowerCase() + vocabInfo.meaning.slice(1)}
                                 </span>
-)}
+                                )}
+                             )
                             </span>
                         )}
                     </div>
