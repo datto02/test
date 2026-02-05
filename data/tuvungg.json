@@ -4018,5 +4018,65 @@
   "オーストラリア": {
     "reading": "オーストラリア",
     "meaning": "Úc"
+  },
+  "ホテル": {
+    "reading": "ホテル",
+    "meaning": "khách sạn"
+  },
+  "パーティー": {
+    "reading": "パーティー",
+    "meaning": "tiệc, buổi tiệc"
+  },
+  "お祭り": {
+    "reading": "おまつり",
+    "meaning": "lễ hội"
+  },
+  "すき焼き": {
+    "reading": "すきやき",
+    "meaning": "Sukiyaki (món lẩu thịt bò)"
+  },
+  "刺身": {
+    "reading": "さしみ",
+    "meaning": "Sashimi (gỏi cá sống)"
+  },
+  "おすし": {
+    "reading": "おすし",
+    "meaning": "Sushi (cơm nắm cá sống)"
+  },
+  "てんぷら": {
+    "reading": "てんぷら",
+    "meaning": "Tempura (đồ chiên tẩm bột)"
+  },
+  "とり肉": {
+    "reading": "とりにく",
+    "meaning": "thịt gà"
+  },
+  "レモン": {
+    "reading": "レモン",
+    "meaning": "chanh"
+  },
+  "どちらも": {
+    "reading": "どちらも",
+    "meaning": "cả hai"
+  },
+  "いちばん": {
+    "reading": "いちばん",
+    "meaning": "nhất, số một"
+  },
+  "ずっと": {
+    "reading": "ずっと",
+    "meaning": "hơn hẳn, suốt"
+  },
+  "ホンコン": {
+    "reading": "ホンコン",
+    "meaning": "Hồng Kông"
+  },
+  "香港": {
+    "reading": "ホンコン",
+    "meaning": "Hồng Kông"
+  },
+  "シンガポール": {
+    "reading": "シンガポール",
+    "meaning": "Singapore"
   }
 }
