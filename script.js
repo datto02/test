@@ -1529,24 +1529,49 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
                 <h2 className="text-xl font-black text-gray-600 uppercase mb-3 font-sans tracking-wide">
                     HƯỚNG DẪN
                 </h2>
-                <div className="text-sm text-gray-500 font-medium space-y-1.5 font-sans">
-                   <p className="flex items-center gap-2">
-                        <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">1</span>
-                        <span><span className="font-bold">Nhập dữ liệu</span> để tạo file luyện viết.</span>
-                    </p>
-                    <p className="flex items-center gap-2">
-                        <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">2</span>
-                        <span>Ấn vào <span className="font-bold">chữ mẫu đầu tiên</span> để xem họa hoạt cách viết.</span>
-                    </p>
-                    <p className="flex items-center gap-2">
-                        <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">3</span>
-                        <span>Chế độ <span className="font-bold">HỌC, FLASHCARD</span> trong phần "tiện ích".</span>
-                    </p>
-                    <p className="flex items-center gap-2">
-                        <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">4</span>
-                        <span>Chế độ <span className="font-bold">ÔN TẬP THÔNG MINH</span> (lặp lại ngắt quãng) được tích hợp vào Flashcard.</span>
-                    </p>
-                </div>
+                
+                {/* LOGIC HIỂN THỊ HƯỚNG DẪN THEO CHẾ ĐỘ */}
+                {mode === 'vocab' ? (
+                    // === HƯỚNG DẪN TỪ VỰNG ===
+                    <div className="text-sm text-gray-500 font-medium space-y-1.5 font-sans">
+                        <p className="flex items-center gap-2">
+                            <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">1</span>
+                            <span><span className="font-bold">Nhập từ vựng</span> để tạo file luyện viết.</span>
+                        </p>
+                        <p className="flex items-center gap-2">
+                            <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">2</span>
+                            <span>Từ vựng phân cách nhau bằng dấu <span className="font-bold">xuống dòng</span> hoặc <span className="font-bold">chấm phẩy ;</span></span>
+                        </p>
+                        <p className="flex items-center gap-2">
+                            <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">3</span>
+                            <span>Chế độ <span className="font-bold">HỌC, FLASHCARD</span> trong phần "tiện ích".</span>
+                        </p>
+                        <p className="flex items-center gap-2">
+                            <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">4</span>
+                            <span><span className="font-bold">Tìm kiếm từ vựng</span> đi kèm kanji ở thanh tìm kiếm.</span>
+                        </p>
+                    </div>
+                ) : (
+                    // === HƯỚNG DẪN KANJI (GIỮ NGUYÊN) ===
+                    <div className="text-sm text-gray-500 font-medium space-y-1.5 font-sans">
+                        <p className="flex items-center gap-2">
+                            <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">1</span>
+                            <span><span className="font-bold">Nhập Kanji</span> để tạo file luyện viết.</span>
+                        </p>
+                        <p className="flex items-center gap-2">
+                            <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">2</span>
+                            <span>Ấn vào <span className="font-bold">chữ mẫu đầu tiên</span> để xem họa hoạt cách viết.</span>
+                        </p>
+                        <p className="flex items-center gap-2">
+                            <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">3</span>
+                            <span>Chế độ <span className="font-bold">HỌC, FLASHCARD</span> trong phần "tiện ích".</span>
+                        </p>
+                        <p className="flex items-center gap-2">
+                            <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">4</span>
+                            <span>Chế độ <span className="font-bold">ÔN TẬP THÔNG MINH</span> (lặp lại ngắt quãng) được tích hợp vào Flashcard.</span>
+                        </p>
+                    </div>
+                )}
             </div>
         )}
 
