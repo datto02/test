@@ -164,7 +164,7 @@
     "meaning": "tiếng~ "
   },
   "何": {
-    "reading": "なん",
+    "reading": "なん/なに",
     "meaning": "cái gì"
   },
   "教室": {
@@ -3622,5 +3622,73 @@
   "いつ": {
     "reading": "いつ",
     "meaning": "bao giờ, khi nào"
+  },
+  "します": {
+    "reading": "します",
+    "meaning": "làm"
+  },
+  "する": {
+    "reading": "する",
+    "meaning": "làm"
+  },
+  "パン": {
+    "reading": "パン",
+    "meaning": "bánh mì"
+  },
+  "ミルク": {
+    "reading": "ミルク",
+    "meaning": "sữa"
+  },
+  "ジュース": {
+    "reading": "ジュース",
+    "meaning": "nước ép"
+  },
+  "ビール": {
+    "reading": "ビール",
+    "meaning": "bia"
+  },
+  "たばこ": {
+    "reading": "たばこ",
+    "meaning": "thuốc lá"
+  },
+  "レポート": {
+    "reading": "レポート",
+    "meaning": "báo cáo"
+  },
+  "ビデオ": {
+    "reading": "ビデオ",
+    "meaning": "video"
+  },
+  "テニス": {
+    "reading": "テニス",
+    "meaning": "quần vợt"
+  },
+  "サッカー": {
+    "reading": "サッカー",
+    "meaning": "bóng đá"
+  },
+  "お花見": {
+    "reading": "おはなみ",
+    "meaning": "việc ngắm hoa"
+  },
+  "ちょっと": {
+    "reading": "ちょっと",
+    "meaning": "một chút"
+  },
+  "いつも": {
+    "reading": "いつも",
+    "meaning": "luôn luôn"
+  },
+  "それから": {
+    "reading": "それから",
+    "meaning": "sau đó, tiếp theo"
+  },
+  "ええ": {
+    "reading": "ええ",
+    "meaning": "vâng, ừ"
+  },
+  "メキシコ": {
+    "reading": "メキシコ",
+    "meaning": "Mexico"
   }
 }
