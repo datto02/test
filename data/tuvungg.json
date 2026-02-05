@@ -1,8 +1,154 @@
 {
-  "私": { "reading": "わたし", "meaning": "Tôi" },
-  "味方": { "reading": "みかた", "meaning": "Đồng minh, bạn bè" },
-  "うそ": { "reading": "", "meaning": "Nói đùa" },
-  "うわさ": { "reading": "", "meaning": "Tin đồn" },
-  "アメリカ": { "reading": "", "meaning": "Mỹ" },
-  "イギリス": { "reading": "", "meaning": "Anh" }
+  "私": {
+    "reading": "わたし",
+    "meaning": "Tôi"
+  },
+  "わたしたち": {
+    "reading": "わたしたち",
+    "meaning": "chúng tôi, chúng ta"
+  },
+  "あなた": {
+    "reading": "あなた",
+    "meaning": "bạn"
+  },
+  "あの人": {
+    "reading": "あのひと",
+    "meaning": "người đó, người kia"
+  },
+  "あの方": {
+    "reading": "あのかた",
+    "meaning": "Vị đó, vị kia"
+  },
+  "みなさん": {
+    "reading": "みなさん",
+    "meaning": "Mọi người"
+  },
+  "さん": {
+    "reading": "～さん",
+    "meaning": "anh, chị, ông, bà"
+  },
+  "ちゃん": {
+    "reading": "～ちゃん",
+    "meaning": "hậu tố sau tên bé gái"
+  },
+  "君": {
+    "reading": "～くん",
+    "meaning": "bé (dùng cho nam) hoặc gọi thân mật"
+  },
+  "じん": {
+    "reading": "～じん",
+    "meaning": "người nước～"
+  },
+  "先生": {
+    "reading": "せんせい",
+    "meaning": "thầy, cô"
+  },
+  "教師": {
+    "reading": "きょうし",
+    "meaning": "giáo viên"
+  },
+  "学生": {
+    "reading": "がくせい",
+    "meaning": "học sinh, sinh viên"
+  },
+  "会社員": {
+    "reading": "かいしゃいん",
+    "meaning": "nhân viên công ty"
+  },
+  "社員": {
+    "reading": "しゃいん",
+    "meaning": "nhân viên công ty"
+  },
+  "銀行員": {
+    "reading": "ぎんこういん",
+    "meaning": "nhân viên ngân hàng"
+  },
+  "医者": {
+    "reading": "いしゃ",
+    "meaning": "bác sĩ"
+  },
+  "研究者": {
+    "reading": "けんきゅうしゃ",
+    "meaning": "nhà nghiên cứu"
+  },
+  "エンジニア": {
+    "reading": "エンジニア",
+    "meaning": "kỹ sư"
+  },
+  "大学": {
+    "reading": "だいがく",
+    "meaning": "đại học"
+  },
+  "病院": {
+    "reading": "びょういん",
+    "meaning": "bệnh viện"
+  },
+  "でんき": {
+    "reading": "でんき",
+    "meaning": "điện, đèn điện"
+  },
+  "だれ": {
+    "reading": "だれ",
+    "meaning": "ai"
+  },
+  "歳": {
+    "reading": "さい",
+    "meaning": "tuổi"
+  },
+  "何歳": {
+    "reading": "なんさい",
+    "meaning": "mấy tuổi"
+  },
+  "はい": {
+    "reading": "はい",
+    "meaning": "vâng, dạ"
+  },
+  "いいえ": {
+    "reading": "いいえ",
+    "meaning": "không"
+  },
+  "アメリカ": {
+    "reading": "アメリカ",
+    "meaning": "Mỹ"
+  },
+  "イギリス": {
+    "reading": "イギリス",
+    "meaning": "nước Anh"
+  },
+  "インド": {
+    "reading": "インド",
+    "meaning": "Ấn Độ"
+  },
+  "インドネシア": {
+    "reading": "インドネシア",
+    "meaning": "nước Indonesia"
+  },
+  "韓国": {
+    "reading": "かんこく",
+    "meaning": "Hàn Quốc"
+  },
+  "タイ": {
+    "reading": "タイ",
+    "meaning": "Thái Lan"
+  },
+  "中国": {
+    "reading": "ちゅうごく",
+    "meaning": "Trung Quốc"
+  },
+  "ドイツ": {
+    "reading": "ドイツ",
+    "meaning": "Đức"
+  },
+  "日本": {
+    "reading": "にほん",
+    "meaning": "Nhật Bản"
+  },
+  "フランス": {
+    "reading": "フランス",
+    "meaning": "Pháp"
+  },
+  "ブラジル": {
+    "reading": "ブラジル",
+    "meaning": "Braxin"
+  }
 }
