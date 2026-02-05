@@ -625,7 +625,7 @@
   },
   "日": {
     "reading": "にち",
-    "meaning": "ngày~"
+    "meaning": "ngày"
   },
   "何日": {
     "reading": "なんにち",
@@ -2711,10 +2711,6 @@
     "reading": "すもう",
     "meaning": "vật Sumo"
   },
-  "日": {
-    "reading": "ひ",
-    "meaning": "ngày, mặt trời"
-  },
   "調子": {
     "reading": "ちょうし",
     "meaning": "tình trạng"
@@ -3610,5 +3606,21 @@
   "ロンドン": {
     "reading": "ロンドン",
     "meaning": "Luân Đôn (London)"
+  },
+  "スーパー": {
+    "reading": "スーパー",
+    "meaning": "siêu thị"
+  },
+  "バス": {
+    "reading": "バス",
+    "meaning": "xe buýt"
+  },
+  "タクシー": {
+    "reading": "タクシー",
+    "meaning": "taxi"
+  },
+  "いつ": {
+    "reading": "いつ",
+    "meaning": "bao giờ, khi nào"
   }
 }
