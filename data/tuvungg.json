@@ -3690,5 +3690,85 @@
   "メキシコ": {
     "reading": "メキシコ",
     "meaning": "Mexico"
+  },
+  "あげます": {
+    "reading": "あげます",
+    "meaning": "cho, tặng"
+  },
+  "もらいます": {
+    "reading": "もらいます",
+    "meaning": "nhận"
+  },
+  "かけます": {
+    "reading": "かけます",
+    "meaning": "gọi (điện thoại)"
+  },
+  "スプーン": {
+    "reading": "スプーン",
+    "meaning": "thìa"
+  },
+  "ナイフ": {
+    "reading": "ナイフ",
+    "meaning": "dao"
+  },
+  "フォーク": {
+    "reading": "フォーク",
+    "meaning": "dĩa"
+  },
+  "はさみ": {
+    "reading": "はさみ",
+    "meaning": "kéo"
+  },
+  "パソコン": {
+    "reading": "パソコン",
+    "meaning": "máy vi tính cá nhân"
+  },
+  "ケータイ": {
+    "reading": "ケータイ",
+    "meaning": "điện thoại di động"
+  },
+  "メール": {
+    "reading": "メール",
+    "meaning": "thư điện tử, email"
+  },
+  "パンチ": {
+    "reading": "パンチ",
+    "meaning": "cái đục lỗ"
+  },
+  "ホッチキス": {
+    "reading": "ホッチキス",
+    "meaning": "cái dập ghim"
+  },
+  "セロテープ": {
+    "reading": "セロテープ",
+    "meaning": "băng dính"
+  },
+  "シャツ": {
+    "reading": "シャツ",
+    "meaning": "áo sơ mi"
+  },
+  "プレゼント": {
+    "reading": "プレゼント",
+    "meaning": "quà tặng"
+  },
+  "クリスマス": {
+    "reading": "クリスマス",
+    "meaning": "Giáng sinh"
+  },
+  "もう": {
+    "reading": "もう",
+    "meaning": "đã, rồi"
+  },
+  "まだ": {
+    "reading": "まだ",
+    "meaning": "chưa"
+  },
+  "これから": {
+    "reading": "これから",
+    "meaning": "từ bây giờ, sau đây"
+  },
+  "スペイン": {
+    "reading": "スペイン",
+    "meaning": "Tây Ban Nha"
   }
 }
