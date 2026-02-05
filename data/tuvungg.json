@@ -4298,5 +4298,105 @@
   "みんなで": {
     "reading": "みんなで",
     "meaning": "mọi người cùng"
+  },
+  "お祭り": {
+    "reading": "おまつり",
+    "meaning": "lễ hội"
+  },
+  "むだ": {
+    "reading": "むだ",
+    "meaning": "lãng phí, vô ích"
+  },
+  "すごい": {
+    "reading": "すごい",
+    "meaning": "ghê quá, giỏi quá"
+  },
+  "ニュース": {
+    "reading": "ニュース",
+    "meaning": "tin tức"
+  },
+  "スピーチ": {
+    "reading": "スピーチ",
+    "meaning": "bài diễn thuyết"
+  },
+  "ユーモア": {
+    "reading": "ユーモア",
+    "meaning": "sự hài hước"
+  },
+  "デザイン": {
+    "reading": "デザイン",
+    "meaning": "thiết kế"
+  },
+  "ラッシュ": {
+    "reading": "ラッシュ",
+    "meaning": "giờ cao điểm"
+  },
+  "たぶん": {
+    "reading": "たぶん",
+    "meaning": "chắc, có thể"
+  },
+  "きっと": {
+    "reading": "きっと",
+    "meaning": "chắc chắn, nhất định"
+  },
+  "ほんとうに": {
+    "reading": "ほんとうに",
+    "meaning": "thật sự"
+  },
+  "そんなに": {
+    "reading": "そんなに",
+    "meaning": "Như thế đó"
+  },
+  "について": {
+    "reading": "について",
+    "meaning": "về ~"
+  },
+  "もちろん": {
+    "reading": "もちろん",
+    "meaning": "tất nhiên"
+  },
+  "カンガルー": {
+    "reading": "カンガルー",
+    "meaning": "con chuột túi"
+  },
+  "はきます": {
+    "reading": "はきます",
+    "meaning": "mặc (quần), đi (giày)"
+  },
+  "かぶります": {
+    "reading": "かぶります",
+    "meaning": "đội (mũ)"
+  },
+  "コート": {
+    "reading": "コート",
+    "meaning": "áo khoác"
+  },
+  "セーター": {
+    "reading": "セーター",
+    "meaning": "áo len"
+  },
+  "スーツ": {
+    "reading": "スーツ",
+    "meaning": "com-lê"
+  },
+  "ケーキ": {
+    "reading": "ケーキ",
+    "meaning": "bánh ngọt"
+  },
+  "お弁当": {
+    "reading": "おべんとう",
+    "meaning": "cơm hộp"
+  },
+  "ロボット": {
+    "reading": "ロボット",
+    "meaning": "người máy "
+  },
+  "えーと": {
+    "reading": "えーと",
+    "meaning": "à, ờ"
+  },
+  "パリ": {
+    "reading": "パリ",
+    "meaning": "Paris"
   }
 }
