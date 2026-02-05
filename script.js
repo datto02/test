@@ -3679,11 +3679,13 @@ TÀI LIỆU HỌC TẬP
                                             href="https://drive.google.com/drive/folders/1J8psBuUeV8VBUC90gxw5tTNPy050FDha?usp=sharing" 
                                             target="_blank" 
                                             rel="noopener noreferrer"
-                                            // LINK "Ở ĐÂY": ĐỔI MÀU THEO CHẾ ĐỘ
+                                            // LOGIC ĐẢO NGƯỢC MÀU:
+                                            // - Nếu là Vocab (Theme Xanh lá) -> Link màu Xanh dương (Blue)
+                                            // - Nếu là Kanji (Theme Xanh dương) -> Link màu Xanh lá (Emerald)
                                             className={`ml-1 font-bold underline transition-colors ${
                                                 mode === 'vocab' 
-                                                ? 'text-emerald-700 hover:text-emerald-500' 
-                                                : 'text-blue-700 hover:text-blue-500'
+                                                ? 'text-blue-700 hover:text-blue-500' 
+                                                : 'text-emerald-700 hover:text-emerald-500'
                                             }`}
                                         >
                                             ở đây
