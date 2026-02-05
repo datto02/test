@@ -89,11 +89,11 @@
   },
   "中国": {
     "reading": "ちゅうごく",
-    "meaning": "Trung Quốc"
+    "meaning": "Nước Trung Quốc"
   },
   "日本": {
     "reading": "にほん",
-    "meaning": "Nhật Bản"
+    "meaning": "Nước Nhật Bản"
   },
   "本": {
     "reading": "ほん",
@@ -3336,19 +3336,19 @@
     "meaning": "cố gắng"
   },
   "さん": {
-    "reading": "さん",
-    "meaning": "anh, chị, ông, bà (hậu tố kính ngữ)"
+    "reading": "～さん",
+    "meaning": "anh, chị, ông, bà"
   },
   "ちゃん": {
-    "reading": "ちゃん",
-    "meaning": "bé (hậu tố dùng cho bé gái)"
+    "reading": "～ちゃん",
+    "meaning": "bé～ (bé gái)"
   },
   "くん": {
-    "reading": "くん",
-    "meaning": "cậu, bé (hậu tố dùng cho bé trai)"
+    "reading": "～くん",
+    "meaning": "cậu, bé～ (bé trai)"
   },
   "じん": {
-    "reading": "じん",
+    "reading": "～じん",
     "meaning": "người (nước ~)"
   },
   "だれ": {
@@ -3369,31 +3369,31 @@
   },
   "アメリカ": {
     "reading": "アメリカ",
-    "meaning": "Mỹ"
+    "meaning": "Nước Mỹ"
   },
   "イギリス": {
     "reading": "イギリス",
-    "meaning": "Anh"
+    "meaning": "Nước Anh"
   },
   "インド": {
     "reading": "インド",
-    "meaning": "Ấn Độ"
+    "meaning": "Nước Ấn Độ"
   },
   "インドネシア": {
     "reading": "インドネシア",
-    "meaning": "Indonesia"
+    "meaning": "Nước Indonesia"
   },
   "タイ": {
     "reading": "タイ",
-    "meaning": "Thái Lan"
+    "meaning": "Nước Thái Lan"
   },
   "ドイツ": {
     "reading": "ドイツ",
-    "meaning": "Đức"
+    "meaning": "Nước Đức"
   },
   "ブラジル": {
     "reading": "ブラジル",
-    "meaning": "Brazil"
+    "meaning": "Nước Brazil"
   },
   "これ": {
     "reading": "これ",
@@ -5670,10 +5670,6 @@
   "うるさい": {
     "reading": "うるさい",
     "meaning": "ồn ào"
-  },
-  "先生": {
-    "reading": "せんせい",
-    "meaning": "bác sĩ (cách gọi)"
   },
   "火傷": {
     "reading": "やけど",
