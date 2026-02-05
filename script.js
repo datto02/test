@@ -2283,6 +2283,7 @@ if (scrollRef.current) {
     const [isLoading, setIsLoading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
+       const [minnaLesson, setMinnaLesson] = useState(1);
 
     // --- HÀM KIỂM TRA CẤP ĐỘ JLPT ---
 const getJLPTLevel = (char) => {
@@ -2620,6 +2621,52 @@ try {
             setIsLoading(false);
         }
     };
+       // --- HÀM MỚI: TẢI TỪ VỰNG MINNA ---
+const handleLoadMinna = async () => {
+    // 1. Validate số bài
+    if (minnaLesson < 1 || minnaLesson > 50) {
+        alert("Vui lòng nhập bài từ 1 đến 50!");
+        return;
+    }
+
+    setProgress(0);
+    setIsLoading(true);
+    setIsMenuOpen(false); // Đóng menu
+
+    const url = `./data/tuvung/minna/minna${minnaLesson}.json`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Không tìm thấy file bài học này");
+
+        const data = await response.json(); // File json là mảng ["từ 1", "từ 2"]
+        
+        if (!Array.isArray(data) || data.length === 0) {
+            alert("File dữ liệu bị lỗi hoặc rỗng!");
+            setIsLoading(false);
+            return;
+        }
+
+        // Chuyển mảng thành chuỗi, cách nhau bằng xuống dòng
+        const textContent = data.join('\n');
+
+        setProgress(50);
+
+        setTimeout(() => {
+            setLocalText(textContent);
+            onChange({ ...config, text: textContent });
+            // Tự động bật bộ lọc 'Từ vựng' nếu cần, hoặc tắt lọc Kanji để hiện Hiragana
+            // Ở đây giữ nguyên logic nhập liệu
+            setProgress(100);
+            setTimeout(() => setIsLoading(false), 200);
+        }, 300);
+
+    } catch (error) {
+        console.error(error);
+        alert(`Lỗi: Chưa có dữ liệu cho Bài ${minnaLesson} (hoặc đường dẫn sai).`);
+        setIsLoading(false);
+    }
+};
     // --- 6. XỬ LÝ RỜI TAY ---
     const handleBlurText = () => {
         if (!localText) return;
@@ -3018,7 +3065,9 @@ LÀM SẠCH
                     </button>
                     {isMenuOpen && (
                         <div className="absolute bottom-full left-0 mb-2 z-50 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-4 animate-in fade-in zoom-in-95 duration-200">
-                            
+        {mode === 'kanji' ? (
+                // === GIAO DIỆN KANJI CŨ (GIỮ NGUYÊN 100%) ===
+                <>  
                          {/* --- PHẦN GỘP: BẢNG CHỮ CÁI & BỘ THỦ --- */}
                             <div>
                                 <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Bảng chữ cái & Bộ thủ</p>
@@ -3123,9 +3172,56 @@ LÀM SẠCH
                                     ))}
                                 </div>
                             </div>
+                          </>
+            ) : (
+                // === GIAO DIỆN TỪ VỰNG MỚI (MINNA NO NIHONGO) ===
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
+                        <span className="text-xl">📘</span>
+                        <div>
+                            <p className="text-xs font-black text-gray-800 uppercase">GIÁO TRÌNH MINNA</p>
+                            <p className="text-[10px] text-gray-400">Chọn bài để nạp từ vựng</p>
                         </div>
-                    )}
+                    </div>
+
+                    <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+                        <div className="flex items-center justify-between mb-2">
+                            <label className="text-[11px] font-bold text-emerald-700 uppercase">Nhập số bài (1-50)</label>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                            {/* Ô NHẬP SỐ */}
+                            <input 
+                                type="number" 
+                                min="1" 
+                                max="50" 
+                                value={minnaLesson}
+                                onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    if(!isNaN(val)) setMinnaLesson(val);
+                                }}
+                                className="w-16 text-center font-black text-lg text-emerald-700 bg-white border-2 border-emerald-200 rounded-lg focus:outline-none focus:border-emerald-500 h-10"
+                            />
+                            
+                            {/* NÚT CHỌN */}
+                            <button 
+                                onClick={handleLoadMinna}
+                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-md active:scale-95 transition-all uppercase tracking-wide"
+                            >
+                                CHỌN BÀI {minnaLesson}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="text-[10px] text-gray-400 italic text-center px-2">
+                        *Dữ liệu được lấy từ file data/tuvung/minna/minna{minnaLesson}.json
+                    </div>
                 </div>
+            )}
+            
+        </div>
+    )}
+</div>
 
 
 {/* 2. MENU TIỆN ÍCH (Utilities) */}
