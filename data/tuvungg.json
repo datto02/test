@@ -1713,19 +1713,19 @@
   },
   "入ります": {
     "reading": "はいります",
-    "meaning": "vào, nhập"
+    "meaning": "vào"
   },
   "入る": {
     "reading": "はいる",
-    "meaning": "vào, nhập"
+    "meaning": "vào"
   },
   "出ます": {
     "reading": "でます",
-    "meaning": "ra, tốt nghiệp"
+    "meaning": "ra"
   },
   "出る": {
     "reading": "でる",
-    "meaning": "ra, tốt nghiệp"
+    "meaning": "ra"
   },
   "結婚します": {
     "reading": "けっこんします",
@@ -4078,5 +4078,33 @@
   "シンガポール": {
     "reading": "シンガポール",
     "meaning": "Singapore"
+  },
+  "プール": {
+    "reading": "プール",
+    "meaning": "bể bơi"
+  },
+  "スキー": {
+    "reading": "スキー",
+    "meaning": "việc trượt tuyết"
+  },
+  "ごろ": {
+    "reading": "ごろ",
+    "meaning": "khoảng ~ (dùng cho thời gian)"
+  },
+  "どこか": {
+    "reading": "どこか",
+    "meaning": "đâu đó, chỗ nào đó"
+  },
+  "牛どん": {
+    "reading": "ぎゅうどん",
+    "meaning": "món cơm thịt bò"
+  },
+  "べつべつに": {
+    "reading": "べつべつに",
+    "meaning": "riêng ra, để riêng ra"
+  },
+  "ロシア": {
+    "reading": "ロシア",
+    "meaning": "nước Nga"
   }
 }
