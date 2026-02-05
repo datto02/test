@@ -3244,32 +3244,57 @@ LÀM SẠCH
         )}
 
     {/* MỤC 2: ĐỘ ĐẬM CHỮ */}
-    <div className="space-y-1">
-        <div className="flex justify-between items-center">
-            <label className="text-[11px] font-bold text-gray-600">Độ đậm chữ</label>
-            <span className="text-[11px] font-black text-indigo-600 bg-indigo-50 px-1.5 rounded">{Math.round(config.traceOpacity * 100)}%</span>
-        </div>
-        <input type="range" min="0.05" max="0.3" step="0.05" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.traceOpacity} onChange={(e) => handleChange('traceOpacity', parseFloat(e.target.value))} />
-    </div>
+                            <div className="space-y-1">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-[11px] font-bold text-gray-600">Độ đậm chữ</label>
+                                    {/* Đổi màu số % */}
+                                    <span className={`text-[11px] font-black px-1.5 rounded ${mode === 'vocab' ? 'text-emerald-600 bg-emerald-50' : 'text-indigo-600 bg-indigo-50'}`}>
+                                        {Math.round(config.traceOpacity * 100)}%
+                                    </span>
+                                </div>
+                                {/* Đổi màu thanh trượt (accent) */}
+                                <input 
+                                    type="range" min="0.05" max="0.3" step="0.05" 
+                                    className={`w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer ${mode === 'vocab' ? 'accent-emerald-600' : 'accent-indigo-600'}`} 
+                                    value={config.traceOpacity} 
+                                    onChange={(e) => handleChange('traceOpacity', parseFloat(e.target.value))} 
+                                />
+                            </div>
 
-    {/* MỤC 3: CỠ CHỮ */}
-    <div className="space-y-1">
-        <div className="flex justify-between items-center">
-            <label className="text-[11px] font-bold text-gray-600">Cỡ chữ</label>
-            <span className="text-[11px] font-black text-indigo-600 bg-indigo-50 px-1.5 rounded">{config.fontSize} pt</span>
-        </div>
-        <input type="range" min="27" max="37" step="1" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.fontSize} onChange={(e) => handleChange('fontSize', parseInt(e.target.value))} />
-    </div>
-
-    {/* MỤC 4: ĐỘ ĐẬM KHUNG */}
-    <div className="space-y-1">
-        <div className="flex justify-between items-center">
-            <label className="text-[11px] font-bold text-gray-600">Độ đậm khung</label>
-            <span className="text-[11px] font-black text-indigo-600 bg-indigo-50 px-1.5 rounded">{Math.round(config.gridOpacity * 100)}%</span>
-        </div>
-        <input type="range" min="0.1" max="1" step="0.1" className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" value={config.gridOpacity} onChange={(e) => handleChange('gridOpacity', parseFloat(e.target.value))} />
-    </div>
-
+   {/* MỤC 3: CỠ CHỮ */}
+                            <div className="space-y-1">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-[11px] font-bold text-gray-600">Cỡ chữ</label>
+                                    {/* Đổi màu số pt */}
+                                    <span className={`text-[11px] font-black px-1.5 rounded ${mode === 'vocab' ? 'text-emerald-600 bg-emerald-50' : 'text-indigo-600 bg-indigo-50'}`}>
+                                        {config.fontSize} pt
+                                    </span>
+                                </div>
+                                {/* Đổi màu thanh trượt */}
+                                <input 
+                                    type="range" min="27" max="37" step="1" 
+                                    className={`w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer ${mode === 'vocab' ? 'accent-emerald-600' : 'accent-indigo-600'}`} 
+                                    value={config.fontSize} 
+                                    onChange={(e) => handleChange('fontSize', parseInt(e.target.value))} 
+                                />
+                            </div>
+{/* MỤC 4: ĐỘ ĐẬM KHUNG */}
+                            <div className="space-y-1">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-[11px] font-bold text-gray-600">Độ đậm khung</label>
+                                    {/* Đổi màu số % */}
+                                    <span className={`text-[11px] font-black px-1.5 rounded ${mode === 'vocab' ? 'text-emerald-600 bg-emerald-50' : 'text-indigo-600 bg-indigo-50'}`}>
+                                        {Math.round(config.gridOpacity * 100)}%
+                                    </span>
+                                </div>
+                                {/* Đổi màu thanh trượt */}
+                                <input 
+                                    type="range" min="0.1" max="1" step="0.1" 
+                                    className={`w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer ${mode === 'vocab' ? 'accent-emerald-600' : 'accent-indigo-600'}`} 
+                                    value={config.gridOpacity} 
+                                    onChange={(e) => handleChange('gridOpacity', parseFloat(e.target.value))} 
+                                />
+                            </div>
 
 {/* MỤC 5: CHẾ ĐỘ HIỂN THỊ (CHỈ HIỆN Ở KANJI) */}
         {mode === 'kanji' && (
@@ -3610,69 +3635,83 @@ TÀI LIỆU HỌC TẬP
     )}
 
 {/* --- MODAL (POPUP) XÁC NHẬN IN --- */}
-{isPrintModalOpen && (
-<div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-{/* Hộp nội dung chính */}
-<div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200 border border-gray-200">
-    
-    {/* 1. NÚT ĐÓNG (X) MÀU ĐỎ Ở GÓC PHẢI */}
-    <button 
-    onClick={() => setIsPrintModalOpen(false)}
-    className="absolute top-3 right-3 p-2 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 rounded-full transition-colors z-10 group"
-    title="Đóng"
-    >
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:rotate-90 transition-transform"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-    </button>
+            {isPrintModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    {/* Hộp nội dung chính */}
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200 border border-gray-200">
+                        
+                        {/* 1. NÚT ĐÓNG (X) MÀU ĐỎ Ở GÓC PHẢI */}
+                        <button 
+                            onClick={() => setIsPrintModalOpen(false)}
+                            className="absolute top-3 right-3 p-2 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 rounded-full transition-colors z-10 group"
+                            title="Đóng"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:rotate-90 transition-transform"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
 
-    {/* 2. NỘI DUNG CẢNH BÁO */}
-    <div className="p-6 flex flex-col items-center text-center">
-    
-    {/* Icon trang trí */}
-    <div className="w-14 h-14 bg-yellow-50 text-yellow-500 rounded-full flex items-center justify-center mb-4 border border-yellow-100">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    </div>
+                        {/* 2. NỘI DUNG CẢNH BÁO */}
+                        <div className="p-6 flex flex-col items-center text-center">
+                        
+                            {/* Icon trang trí (Giữ màu vàng cảnh báo) */}
+                            <div className="w-14 h-14 bg-yellow-50 text-yellow-500 rounded-full flex items-center justify-center mb-4 border border-yellow-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            </div>
 
-    <h3 className="text-xl font-bold text-gray-800 mb-2">LƯU Ý QUAN TRỌNG</h3>
-    
-    <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 text-sm text-blue-800 leading-relaxed text-left w-full">
-        <p className="font-bold mb-2 flex items-center gap-1">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            Để bản in đẹp nhất:
-        </p>
-        <ul className="list-disc list-inside space-y-1.5 ml-1">
-        <li>Nên dùng <b>Máy tính (PC/Laptop)</b>.</li>
-        <li>Trình duyệt khuyên dùng: <b>Google Chrome</b>.</li>
-        <li>Không nên dùng <b>iphone</b>.</li>
-        <li>
-              Hoặc có thể tải file tạo sẵn 
-              <a 
-                href="https://drive.google.com/drive/folders/1J8psBuUeV8VBUC90gxw5tTNPy050FDha?usp=sharing" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="ml-1 font-bold text-green-700 underline hover:text-green-500 transition-colors"
-              >
-                ở đây
-              </a>
-            </li>
-        </ul>
-    </div>
+                            <h3 className="text-xl font-bold text-gray-800 mb-2">LƯU Ý QUAN TRỌNG</h3>
+                            
+                            {/* KHUNG LƯU Ý (ĐỔI MÀU THEO CHẾ ĐỘ) */}
+                            <div className={`border rounded-xl p-4 mb-6 text-sm leading-relaxed text-left w-full ${
+                                mode === 'vocab' 
+                                ? 'bg-emerald-50 border-emerald-100 text-emerald-800' 
+                                : 'bg-blue-50 border-blue-100 text-blue-800'
+                            }`}>
+                                <p className="font-bold mb-2 flex items-center gap-1">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    Để bản in đẹp nhất:
+                                </p>
+                                <ul className="list-disc list-inside space-y-1.5 ml-1">
+                                    <li>Nên dùng <b>Máy tính (PC/Laptop)</b>.</li>
+                                    <li>Trình duyệt khuyên dùng: <b>Google Chrome</b>.</li>
+                                    <li>Không nên dùng <b>iphone</b>.</li>
+                                    <li>
+                                        Hoặc có thể tải file tạo sẵn 
+                                        <a 
+                                            href="https://drive.google.com/drive/folders/1J8psBuUeV8VBUC90gxw5tTNPy050FDha?usp=sharing" 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            // LINK "Ở ĐÂY": ĐỔI MÀU THEO CHẾ ĐỘ
+                                            className={`ml-1 font-bold underline transition-colors ${
+                                                mode === 'vocab' 
+                                                ? 'text-emerald-700 hover:text-emerald-500' 
+                                                : 'text-blue-700 hover:text-blue-500'
+                                            }`}
+                                        >
+                                            ở đây
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
 
-    {/* 3. NÚT IN THẬT SỰ (NẰM TRONG KHUNG) */}
-    <button 
-        onClick={() => {
-        setIsPrintModalOpen(false); // Đóng khung này
-        onPrint(); // Gọi lệnh in của hệ thống
-        }}
-        className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-bold rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
-    >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
-        TIẾN HÀNH IN/LƯU NGAY
-    </button>
+                            {/* 3. NÚT IN THẬT SỰ (ĐỔI MÀU THEO CHẾ ĐỘ) */}
+                            <button 
+                                onClick={() => {
+                                    setIsPrintModalOpen(false); 
+                                    onPrint(); 
+                                }}
+                                className={`w-full py-3.5 text-white text-lg font-bold rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${
+                                    mode === 'vocab'
+                                    ? 'bg-emerald-600 hover:bg-emerald-700'
+                                    : 'bg-indigo-600 hover:bg-indigo-700'
+                                }`}
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                                TIẾN HÀNH IN/LƯU NGAY
+                            </button>
 
-    </div>
-</div>
-</div>
-)}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             </div>
         </div>
