@@ -207,6 +207,10 @@
     "reading": "くに",
     "meaning": "đất nước"
   },
+   "お国": {
+    "reading": "おくに",
+    "meaning": "đất nước"
+  },
   "売り場": {
     "reading": "うりば",
     "meaning": "Quầy bán hàng"
@@ -337,7 +341,7 @@
   },
   "何分": {
     "reading": "なんぷん",
-    "meaning": "Mấy phút?, bao nhiêu phút?"
+    "meaning": "Mấy phút?"
   },
   "午前": {
     "reading": "ごぜん",
@@ -785,7 +789,7 @@
   },
   "お茶": {
     "reading": "おちゃ",
-    "meaning": "trà (nói chung)"
+    "meaning": "trà"
   },
   "紅茶": {
     "reading": "こうちゃ",
@@ -3307,10 +3311,6 @@
     "reading": "もし",
     "meaning": "nếu"
   },
-  "幾ら": {
-    "reading": "いくら",
-    "meaning": "bao nhiêu, cho dù"
-  },
   "転勤します": {
     "reading": "てんきんします",
     "meaning": "chuyển công tác"
@@ -3377,7 +3377,7 @@
   },
   "インド": {
     "reading": "インド",
-    "meaning": "Nước Ấn Độ"
+    "meaning": "Ấn Độ"
   },
   "インドネシア": {
     "reading": "インドネシア",
@@ -3497,23 +3497,23 @@
   },
   "こちら": {
     "reading": "こちら",
-    "meaning": "phía này, lối này (lịch sự)"
+    "meaning": "phía này (lịch sự)"
   },
   "そちら": {
     "reading": "そちら",
-    "meaning": "phía đó, lối đó (lịch sự)"
+    "meaning": "phía đó (lịch sự)"
   },
   "あちら": {
     "reading": "あちら",
-    "meaning": "phía kia, lối kia (lịch sự)"
+    "meaning": "phía kia (lịch sự)"
   },
   "どちら": {
     "reading": "どちら",
-    "meaning": "phía nào, lối nào (lịch sự)"
+    "meaning": "phía nào (lịch sự)"
   },
   "ロビー": {
     "reading": "ロビー",
-    "meaning": "hành lang, đại sảnh (lobby)"
+    "meaning": "hành lang, đại sảnh"
   },
   "トイレ": {
     "reading": "トイレ",
@@ -3539,21 +3539,17 @@
     "reading": "ワイン",
     "meaning": "rượu vang"
   },
-  "幾ら": {
-    "reading": "いくら",
-    "meaning": "bao nhiêu tiền"
-  },
   "イタリア": {
     "reading": "イタリア",
-    "meaning": "Ý"
+    "meaning": "Nước Ý"
   },
   "スイス": {
     "reading": "スイス",
-    "meaning": "Thụy Sĩ"
+    "meaning": "Nước Thụy Sĩ"
   },
   "フランス": {
     "reading": "フランス",
-    "meaning": "Pháp"
+    "meaning": "Nước Pháp"
   },
   "バンコク": {
     "reading": "バンコク",
@@ -3693,7 +3689,7 @@
   },
   "かけます": {
     "reading": "かけます",
-    "meaning": "gọi (điện thoại)"
+    "meaning": "gọi [điện thoại]"
   },
   "スプーン": {
     "reading": "スプーン",
@@ -4575,10 +4571,6 @@
     "reading": "ガス",
     "meaning": "ga"
   },
-  "会社": {
-    "reading": "かいしゃ",
-    "meaning": "công ty ~ (hậu tố)"
-  },
   "宇宙": {
     "reading": "うちゅう",
     "meaning": "vũ trụ"
@@ -4690,10 +4682,6 @@
   "マンション": {
     "reading": "マンション",
     "meaning": "chung cư"
-  },
-  "家": {
-    "reading": "いえ",
-    "meaning": "nhà"
   },
   "キッチン": {
     "reading": "キッチン",
@@ -4938,10 +4926,6 @@
   "小説家": {
     "reading": "しょうせつか",
     "meaning": "nhà văn, tiểu thuyết gia"
-  },
-  "家": {
-    "reading": "か",
-    "meaning": "nhà ~ (hậu tố)"
   },
   "機": {
     "reading": "き",
@@ -5969,11 +5953,7 @@
   },
   "いくら": {
     "reading": "いくら",
-    "meaning": "dù có ~ bao nhiêu đi nữa"
-  },
-  "もう": {
-    "reading": "もう",
-    "meaning": "nữa (dùng với thể phủ định)"
+    "meaning": "bao nhiêu tiền"
   },
   "あと": {
     "reading": "あと",
@@ -6158,10 +6138,6 @@
   "材料": {
     "reading": "ざいりょう",
     "meaning": "nguyên liệu"
-  },
-  "分": {
-    "reading": "ぶん",
-    "meaning": "phần ~ (biểu thị lượng)"
   },
   "グラム": {
     "reading": "グラム",
