@@ -1444,8 +1444,11 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
                                 {hanviet && vocabInfo.meaning && <span> - </span>}
 
                                 {/* 3. Nghĩa tiếng Việt */}
-                                {vocabInfo.meaning && <span>{vocabInfo.meaning}</span>}
-                                )
+                               {vocabInfo.meaning && (
+                               <span>
+                                {vocabInfo.meaning.charAt(0).toLowerCase() + vocabInfo.meaning.slice(1)}
+                                </span>
+)}
                             </span>
                         )}
                     </div>
