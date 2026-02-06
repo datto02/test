@@ -2820,47 +2820,86 @@ if (!query) {
 
 const matches = [];
 
-    if (mode === 'vocab') {
-        let targetKanjis = new Set();
+   if (mode === 'vocab') {
+        // Hàm tính điểm ưu tiên RIÊNG cho từ vựng (6 cấp độ để phân biệt THU vs THÚ)
+        const calculateVocabPriority = (soundStr) => {
+            if (!soundStr) return 100;
+            const sound = soundStr.toLowerCase();
+            const soundNoAccent = removeAccents(sound);
+
+            // MỨC 1: Khớp tuyệt đối (thu -> THU) - XẾP ĐẦU TIÊN
+            if (sound === query) return 1;
+            
+            // MỨC 2: Khớp chữ nhưng lệch dấu (thu -> THÚ, THỨ...) - XẾP THỨ HAI
+            if (soundNoAccent === queryNoAccent) return 2;
+
+            // MỨC 3: Bắt đầu bằng (thu -> THUA)
+            if (sound.startsWith(query)) return 3;
+
+            // MỨC 4: Bắt đầu bằng không dấu (thu -> THUỐC)
+            if (soundNoAccent.startsWith(queryNoAccent)) return 4;
+
+            // MỨC 5: Có chứa (thu -> KỸ THUẬT)
+            if (sound.includes(query)) return 5;
+
+            // MỨC 6: Có chứa không dấu
+            if (soundNoAccent.includes(queryNoAccent)) return 6;
+
+            return 100; 
+        };
+
+        // 1. Tìm Kanji mục tiêu dựa trên điểm ưu tiên mới
+        let targetKanjiScores = {}; 
         const isInputKanji = query.match(/[\u4E00-\u9FAF]/);
 
         if (isInputKanji) {
-            // Người dùng gõ trực tiếp Kanji
-            targetKanjis.add(val.trim());
+            targetKanjiScores[val.trim()] = 1;
         } else {
-            // Người dùng gõ Âm Hán Việt -> Tìm trong KANJI_DB xem có chữ nào khớp không
             Object.entries(dbData.KANJI_DB).forEach(([char, info]) => {
                 if (info.sound) {
-                    const sound = info.sound.toLowerCase();
-                    const soundNoAccent = removeAccents(sound);
-                    // Logic khớp âm: Chính xác hoặc Chính xác không dấu
-                    if (sound === query || soundNoAccent === queryNoAccent) {
-                        targetKanjis.add(char);
+                    const score = calculateVocabPriority(info.sound);
+                    // Chỉ lấy những chữ có liên quan (score < 100)
+                    if (score < 100) {
+                        targetKanjiScores[char] = score;
                     }
                 }
             });
         }
 
-        // BƯỚC 2: Quét TUVUNG_DB để tìm từ chứa Target Kanjis
-        if (dbData.TUVUNG_DB && targetKanjis.size > 0) {
+        // 2. Quét DB từ vựng
+        if (dbData.TUVUNG_DB && Object.keys(targetKanjiScores).length > 0) {
             Object.entries(dbData.TUVUNG_DB).forEach(([word, info]) => {
-                // Kiểm tra xem từ vựng này có chứa bất kỳ Kanji mục tiêu nào không
-                const containsTarget = [...targetKanjis].some(k => word.includes(k));
+                let bestWordScore = 100;
+                let foundMatch = false;
+
+                for (const char of word) {
+                    if (targetKanjiScores[char] !== undefined) {
+                        // Lấy điểm thấp nhất (tốt nhất) trong các chữ Kanji của từ đó
+                        if (targetKanjiScores[char] < bestWordScore) {
+                            bestWordScore = targetKanjiScores[char];
+                        }
+                        foundMatch = true;
+                    }
+                }
                 
-                if (containsTarget) {
+                if (foundMatch) {
                     matches.push({
-                        char: word,             // Hiển thị từ vựng (VD: 日本)
-                        sound: info.reading,    // Hiển thị cách đọc (VD: にほん)
-                        meaning: info.meaning,  // Hiển thị nghĩa
+                        char: word,             
+                        sound: info.reading,    
+                        meaning: info.meaning,  
                         type: 'vocab',
-                        priority: word.length   // Ưu tiên từ ngắn trước
+                        priority: bestWordScore, // Điểm ưu tiên (1 là cao nhất)
+                        length: word.length 
                     });
                 }
             });
         }
         
-        // Sắp xếp: Từ ngắn lên trước
-        matches.sort((a, b) => a.priority - b.priority);
+        // 3. Sắp xếp: Ưu tiên điểm số (THU trước THÚ), sau đó đến độ dài từ
+        matches.sort((a, b) => {
+            if (a.priority !== b.priority) return a.priority - b.priority;
+            return a.length - b.length;
+        });
     }
   else {  
 const processData = (source, type) => {
