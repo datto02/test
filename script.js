@@ -2339,7 +2339,7 @@ N1: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-600 hover:text-white ho
     // --- HÀM TẠO PLACEHOLDER ---
     const getDynamicPlaceholder = () => {
         if (mode === 'vocab') {
-            return "日本語\n先生\n学生";
+            return "漢字\nひらがな\nカタカナ";
         }
         const labels = [];
         if (filterOptions.kanji) labels.push("漢字");        
