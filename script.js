@@ -2819,6 +2819,50 @@ if (!query) {
 }
 
 const matches = [];
+
+    if (mode === 'vocab') {
+        let targetKanjis = new Set();
+        const isInputKanji = query.match(/[\u4E00-\u9FAF]/);
+
+        if (isInputKanji) {
+            // Người dùng gõ trực tiếp Kanji
+            targetKanjis.add(val.trim());
+        } else {
+            // Người dùng gõ Âm Hán Việt -> Tìm trong KANJI_DB xem có chữ nào khớp không
+            Object.entries(dbData.KANJI_DB).forEach(([char, info]) => {
+                if (info.sound) {
+                    const sound = info.sound.toLowerCase();
+                    const soundNoAccent = removeAccents(sound);
+                    // Logic khớp âm: Chính xác hoặc Chính xác không dấu
+                    if (sound === query || soundNoAccent === queryNoAccent) {
+                        targetKanjis.add(char);
+                    }
+                }
+            });
+        }
+
+        // BƯỚC 2: Quét TUVUNG_DB để tìm từ chứa Target Kanjis
+        if (dbData.TUVUNG_DB && targetKanjis.size > 0) {
+            Object.entries(dbData.TUVUNG_DB).forEach(([word, info]) => {
+                // Kiểm tra xem từ vựng này có chứa bất kỳ Kanji mục tiêu nào không
+                const containsTarget = [...targetKanjis].some(k => word.includes(k));
+                
+                if (containsTarget) {
+                    matches.push({
+                        char: word,             // Hiển thị từ vựng (VD: 日本)
+                        sound: info.reading,    // Hiển thị cách đọc (VD: にほん)
+                        meaning: info.meaning,  // Hiển thị nghĩa
+                        type: 'vocab',
+                        priority: word.length   // Ưu tiên từ ngắn trước
+                    });
+                }
+            });
+        }
+        
+        // Sắp xếp: Từ ngắn lên trước
+        matches.sort((a, b) => a.priority - b.priority);
+    }
+  else {  
 const processData = (source, type) => {
     Object.entries(source).forEach(([char, info]) => {
         if (info.sound) {
@@ -2847,34 +2891,52 @@ matches.sort((a, b) => {
     if (a.priority !== b.priority) return a.priority - b.priority;
     return a.sound.localeCompare(b.sound);
 });
-
+}
 setSearchResults(matches.slice(0, 20));
 setActiveIndex(0); // Reset về vị trí đầu tiên
 };
 
-    // --- HÀM CHỌN CHỮ TỪ GỢI Ý (ĐÃ FIX LỖI TRÙNG LẶP) ---
+   // --- HÀM CHỌN KẾT QUẢ (CẬP NHẬT CHO TỪ VỰNG) ---
 const selectResult = (item) => {
-// 1. Tạo chuỗi mới bằng cách cộng chữ vừa chọn vào cuối
-let newText = config.text + item.char;
+    // 1. Tạo chuỗi mới
+    let newText = "";
+    
+    if (mode === 'vocab') {
+        // Chế độ từ vựng: Thêm từ + xuống dòng
+        // Nếu ô đang trống thì không cần xuống dòng ở đầu
+        const separator = config.text.length > 0 && !config.text.endsWith('\n') ? '\n' : '';
+        newText = config.text + separator + item.char + '\n';
+    } else {
+        // Chế độ Kanji: Nối liền
+        newText = config.text + item.char;
+    }
 
-// 2. KIỂM TRA: Nếu đang bật tính năng "Xóa trùng lặp" thì lọc chuỗi ngay
-if (filterOptions.removeDuplicates) {
-    newText = getUniqueChars(newText);
-}
+    // 2. KIỂM TRA: Lọc trùng (nếu đang bật)
+    if (filterOptions.removeDuplicates) {
+        if (mode === 'vocab') {
+             // Lọc trùng theo dòng cho từ vựng
+             const lines = newText.split('\n').map(l=>l.trim()).filter(l=>l);
+             newText = [...new Set(lines)].join('\n') + '\n';
+        } else {
+             // Lọc trùng ký tự cho Kanji
+             newText = getUniqueChars(newText);
+        }
+    }
 
-// 3. Cập nhật vào giao diện và dữ liệu hệ thống
-setLocalText(newText);
-handleChange('text', newText);
+    // 3. Cập nhật State
+    setLocalText(newText);
+    handleChange('text', newText);
 
-// 4. Reset ô tìm kiếm
-setSearchTerm('');
-setSearchResults([]);
-setActiveIndex(0);
+    // 4. Reset tìm kiếm
+    setSearchTerm('');
+    setSearchResults([]);
+    setActiveIndex(0);
 
-// 5. Tự động bật bộ lọc tương ứng 
-if (item.type === 'kanji') setFilterOptions(p => ({...p, kanji: true}));
-else if (item.char.match(/[\u3040-\u309F]/)) setFilterOptions(p => ({...p, hiragana: true}));
-else setFilterOptions(p => ({...p, katakana: true}));
+    // 5. Bật bộ lọc hiển thị (để người dùng thấy ngay kết quả)
+    if (mode === 'kanji') {
+        if (item.type === 'kanji') setFilterOptions(p => ({...p, kanji: true}));
+    }
+    // Với từ vựng thì không cần bật tắt filter Hiragana/Katakana vì từ vựng chứa lộn xộn
 };
     
     const toggleMenu = (menuName) => {
@@ -2953,56 +3015,66 @@ else setFilterOptions(p => ({...p, katakana: true}));
 </div>
 </div>
 
-{/* DROPDOWN KẾT QUẢ GỢI Ý - CHỈ HIỆN KHI CÓ KẾT QUẢ */}
+{/* DROPDOWN KẾT QUẢ GỢI Ý */}
 {searchResults.length > 0 && (
     <div 
-    ref={scrollRef}
-    className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl z-[70] max-h-60 overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200">
-{searchResults.map((item, idx) => {
-const level = getJLPTLevel(item.char); // Kiểm tra cấp độ N1-N5
-
-return (
-    <div 
-        key={idx} 
-        onClick={() => selectResult(item)}
-        className={`flex items-center gap-3 p-3 cursor-pointer border-b border-gray-50 last:border-none transition-colors group ${
-            idx === activeIndex ? 'bg-indigo-100' : 'bg-white hover:bg-indigo-50'
-        }`}
+        ref={scrollRef}
+        className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl z-[70] max-h-60 overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200"
     >
-        {/* Chữ hiển thị */}
-        <span className="text-2xl font-['Klee_One'] text-black group-hover:scale-110 transition-transform">
-            {item.char}
-        </span>
+        {searchResults.map((item, idx) => {
+            // Kiểm tra cấp độ JLPT chỉ khi ở chế độ Kanji
+            const level = item.type === 'kanji' ? getJLPTLevel(item.char) : null; 
 
-        {/* Âm Hán và nghĩa */}
-        <div className="flex flex-col">
-            <span className="text-[11px] font-black text-indigo-600 uppercase leading-tight">
-                {item.sound}
-            </span>
-            {item.meaning && (
-                <span className="text-[10px] text-gray-400 font-medium leading-tight">
-                    {item.meaning}
-                </span>
-            )}
-        </div>
+            return (
+                <div 
+                    key={idx} 
+                    onClick={() => selectResult(item)}
+                    className={`flex items-center gap-3 p-3 cursor-pointer border-b border-gray-50 last:border-none transition-colors group ${
+                        idx === activeIndex ? 'bg-indigo-100' : 'bg-white hover:bg-indigo-50'
+                    }`}
+                >
+                    {/* Chữ hiển thị (Từ vựng hoặc Kanji) */}
+                    <span className={`${mode === 'vocab' ? "text-lg font-bold" : "text-2xl font-['Klee_One']"} text-black group-hover:scale-105 transition-transform`}>
+                        {item.char}
+                    </span>
 
-        {/* NHÃN MÁC (Badge) */}
-        <div className="ml-auto">
-            {level ? (
-                /* Nếu thuộc danh sách Kanji N1-N5 */
-                <div className={`px-1.5 py-0.5 rounded text-[9px] font-black border transition-all duration-200 ${levelColors[level]}`}>
-                    {level}
+                    {/* Thông tin chi tiết */}
+                    <div className="flex flex-col overflow-hidden">
+                        {/* Nếu là Từ vựng -> Hiện cách đọc (reading) */}
+                        {/* Nếu là Kanji -> Hiện Âm Hán (sound) */}
+                        <span className="text-[11px] font-black text-indigo-600 uppercase leading-tight truncate">
+                            {item.sound} 
+                        </span>
+                        {item.meaning && (
+                            <span className="text-[10px] text-gray-400 font-medium leading-tight truncate">
+                                {item.meaning}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* NHÃN MÁC (Badge) */}
+                    <div className="ml-auto flex-shrink-0">
+                        {mode === 'vocab' ? (
+                            // === NHÃN TỪ VỰNG (MỚI) ===
+                            <div className="px-1.5 py-0.5 rounded text-[9px] font-black border bg-emerald-100 text-emerald-700 border-emerald-200 uppercase">
+                                TỪ VỰNG
+                            </div>
+                        ) : (
+                            // === NHÃN KANJI (CŨ) ===
+                            level ? (
+                                <div className={`px-1.5 py-0.5 rounded text-[9px] font-black border ${levelColors[level]}`}>
+                                    {level}
+                                </div>
+                            ) : (
+                                <div className="px-1.5 py-0.5 rounded text-[9px] font-black border bg-gray-100 text-gray-500 border-gray-200 uppercase">
+                                    Bộ thủ
+                                </div>
+                            )
+                        )}
+                    </div>
                 </div>
-            ) : (
-                /* Nếu KHÔNG thuộc N1-N5 -> Mặc định hiện mác BỘ THỦ */
-                <div className="px-1.5 py-0.5 rounded text-[9px] font-black border bg-gray-100 text-gray-500 border-gray-200 uppercase transition-all duration-200 hover:bg-gray-500 hover:text-white hover:border-gray-500 cursor-default">
-                    Bộ thủ
-                </div>
-            )}
-        </div>
-    </div>
-);
-})}
+            );
+        })}
     </div>
 )}
 
