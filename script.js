@@ -3072,16 +3072,14 @@ const selectResult = (item) => {
                         idx === activeIndex ? 'bg-indigo-100' : 'bg-white hover:bg-indigo-50'
                     }`}
                 >
-                    {/* Chữ hiển thị (Từ vựng hoặc Kanji) */}
-                    <span className={`${mode === 'vocab' ? "text-lg font-bold" : "text-2xl font-['Klee_One']"} text-black group-hover:scale-105 transition-transform`}>
+                    {/* 1. SỬA FONT & CỠ CHỮ: Dùng Klee One cho cả 2. Vocab để text-xl cho cân đối */}
+                    <span className={`font-['Klee_One'] text-black group-hover:scale-105 transition-transform ${mode === 'vocab' ? "text-xl" : "text-2xl"}`}>
                         {item.char}
                     </span>
 
-                    {/* Thông tin chi tiết */}
+                    {/* 2. SỬA MÀU SẮC: Vocab màu Emerald (Xanh), Kanji màu Indigo (Tím than) */}
                     <div className="flex flex-col overflow-hidden">
-                        {/* Nếu là Từ vựng -> Hiện cách đọc (reading) */}
-                        {/* Nếu là Kanji -> Hiện Âm Hán (sound) */}
-                        <span className="text-[11px] font-black text-indigo-600 uppercase leading-tight truncate">
+                        <span className={`text-[11px] font-black uppercase leading-tight truncate ${mode === 'vocab' ? 'text-emerald-600' : 'text-indigo-600'}`}>
                             {item.sound} 
                         </span>
                         {item.meaning && (
@@ -3091,15 +3089,9 @@ const selectResult = (item) => {
                         )}
                     </div>
 
-                    {/* NHÃN MÁC (Badge) */}
+                    {/* 3. SỬA NHÃN MÁC: Ẩn hoàn toàn nếu là Vocab, chỉ hiện cho Kanji */}
                     <div className="ml-auto flex-shrink-0">
-                        {mode === 'vocab' ? (
-                            // === NHÃN TỪ VỰNG (MỚI) ===
-                            <div className="px-1.5 py-0.5 rounded text-[9px] font-black border bg-emerald-100 text-emerald-700 border-emerald-200 uppercase">
-                                TỪ VỰNG
-                            </div>
-                        ) : (
-                            // === NHÃN KANJI (CŨ) ===
+                        {mode !== 'vocab' && (
                             level ? (
                                 <div className={`px-1.5 py-0.5 rounded text-[9px] font-black border ${levelColors[level]}`}>
                                     {level}
