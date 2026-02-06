@@ -2743,17 +2743,7 @@ const handleLoadMinna = async () => {
             alert("Vui lòng nhập số bài hoặc số phần cần học!");
         }
     };
-       // --- HÀM TỔNG HỢP: QUYẾT ĐỊNH TẢI MINNA HAY MIMIKARA ---
-    const handleSmartLoadVocabulary = () => {
-        // Ưu tiên: Cái nào có số thì tải cái đó
-        if (minnaLesson !== '' && minnaLesson !== null) {
-            handleLoadMinna();
-        } else if (mimikaraPart !== '' && mimikaraPart !== null) {
-            handleLoadMimikara();
-        } else {
-            alert("Vui lòng nhập số bài Minna hoặc số phần Mimikara!");
-        }
-    };
+
     // --- 6. XỬ LÝ RỜI TAY ---
     const handleBlurText = () => {
         if (!localText) return;
