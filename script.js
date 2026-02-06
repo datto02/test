@@ -3260,7 +3260,7 @@ LÀM SẠCH
                                             <span className="text-emerald-600">📚</span> Minna no Nihongo <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
                                         </label>
                                         <input 
-                                            type="number" min="1" max="50" placeholder="#"
+                                            type="number" min="1" max="50" placeholder="..."
                                             value={minnaLesson}
                                             onChange={(e) => { setMinnaLesson(e.target.value); if(e.target.value) { setMimiN3(''); setMimiN2(''); setMimiN1(''); } }}
                                             onBlur={() => { if (minnaLesson > 50) setMinnaLesson(50); if (minnaLesson < 1 && minnaLesson !== '') setMinnaLesson(1); }}
@@ -3274,7 +3274,7 @@ LÀM SẠCH
                                             <span className="text-amber-500">📙</span> Mimikara N3 <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
                                         </label>
                                         <input 
-                                            type="number" min="1" max="12" placeholder="#"
+                                            type="number" min="1" max="12" placeholder="..."
                                             value={mimiN3}
                                             onChange={(e) => { setMimiN3(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN2(''); setMimiN1(''); } }}
                                             onBlur={() => { if (mimiN3 > 12) setMimiN3(12); if (mimiN3 < 1 && mimiN3 !== '') setMimiN3(1); }}
@@ -3288,7 +3288,7 @@ LÀM SẠCH
                                             <span className="text-blue-500">📘</span> Mimikara N2 <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
                                         </label>
                                         <input 
-                                            type="number" min="1" max="13" placeholder="#"
+                                            type="number" min="1" max="13" placeholder="..."
                                             value={mimiN2}
                                             onChange={(e) => { setMimiN2(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN1(''); } }}
                                             onBlur={() => { if (mimiN2 > 13) setMimiN2(13); if (mimiN2 < 1 && mimiN2 !== '') setMimiN2(1); }}
