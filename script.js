@@ -3252,115 +3252,93 @@ LÀM SẠCH
                           </>
             ) : (
           // === GIAO DIỆN TỪ VỰNG (4 DÒNG) ===
-                <div className="space-y-4 p-1">
-        
-                    {/* 1. MINNA NO NIHONGO */}
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-[10px] font-bold text-gray-500 uppercase whitespace-nowrap w-24 text-right">MINNA BÀI</span>
-                        <input 
-                            type="number" min="1" max="50" placeholder="..."
-                            value={minnaLesson}
-                            onChange={(e) => { 
-                                setMinnaLesson(e.target.value);
-                                // Xóa hết các ô Mimikara
-                                if(e.target.value !== '') { setMimiN3(''); setMimiN2(''); setMimiN1(''); }
-                            }}
-                            onBlur={() => {
-                                if (minnaLesson > 50) setMinnaLesson(50);
-                                if (minnaLesson < 1 && minnaLesson !== '') setMinnaLesson(1);
-                            }}
-                            className={`w-10 h-5 text-[14px] font-bold text-center border-b border-gray-300 focus:border-emerald-500 outline-none p-0 bg-transparent placeholder-gray-300 ${minnaLesson !== '' ? 'text-emerald-700' : ''}`}
-                        />
-                    </div>
+             <div className="space-y-3">
+                                    
+                                    {/* 1. MINNA NO NIHONGO */}
+                                    <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
+                                        <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
+                                            <span className="text-emerald-600">📚</span> Minna no Nihongo <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
+                                        </label>
+                                        <input 
+                                            type="number" min="1" max="50" placeholder="#"
+                                            value={minnaLesson}
+                                            onChange={(e) => { setMinnaLesson(e.target.value); if(e.target.value) { setMimiN3(''); setMimiN2(''); setMimiN1(''); } }}
+                                            onBlur={() => { if (minnaLesson > 50) setMinnaLesson(50); if (minnaLesson < 1 && minnaLesson !== '') setMinnaLesson(1); }}
+                                            className={`w-14 text-center font-bold border-b-2 focus:border-emerald-500 outline-none bg-transparent transition-all text-sm pb-0.5 ${minnaLesson !== '' ? 'text-emerald-600 border-emerald-500' : 'text-gray-400 border-gray-200'}`}
+                                        />
+                                    </div>
 
-                    {/* 2. MIMIKARA N3 */}
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-[10px] font-bold text-gray-500 uppercase whitespace-nowrap w-24 text-right">MIMIKARA N3 PHẦN</span>
-                        <input 
-                            type="number" min="1" max="12" placeholder="..."
-                            value={mimiN3}
-                            onChange={(e) => { 
-                                setMimiN3(e.target.value);
-                                // Xóa Minna và các Mimi khác
-                                if(e.target.value !== '') { setMinnaLesson(''); setMimiN2(''); setMimiN1(''); }
-                            }}
-                            onBlur={() => {
-                                if (mimiN3 > 12) setMimiN3(12);
-                                if (mimiN3 < 1 && mimiN3 !== '') setMimiN3(1);
-                            }}
-                            className={`w-10 h-5 text-[14px] font-bold text-center border-b border-gray-300 focus:border-emerald-500 outline-none p-0 bg-transparent placeholder-gray-300 ${mimiN3 !== '' ? 'text-emerald-700' : ''}`}
-                        />
-                    </div>
+                                    {/* 2. MIMIKARA N3 */}
+                                    <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
+                                        <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
+                                            <span className="text-amber-500">📙</span> Mimikara N3 <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
+                                        </label>
+                                        <input 
+                                            type="number" min="1" max="12" placeholder="#"
+                                            value={mimiN3}
+                                            onChange={(e) => { setMimiN3(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN2(''); setMimiN1(''); } }}
+                                            onBlur={() => { if (mimiN3 > 12) setMimiN3(12); if (mimiN3 < 1 && mimiN3 !== '') setMimiN3(1); }}
+                                            className={`w-14 text-center font-bold border-b-2 focus:border-amber-500 outline-none bg-transparent transition-all text-sm pb-0.5 ${mimiN3 !== '' ? 'text-amber-600 border-amber-500' : 'text-gray-400 border-gray-200'}`}
+                                        />
+                                    </div>
 
-                    {/* 3. MIMIKARA N2 */}
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-[10px] font-bold text-gray-500 uppercase whitespace-nowrap w-24 text-right">MIMIKARA N2 PHẦN</span>
-                        <input 
-                            type="number" min="1" max="13" placeholder="..."
-                            value={mimiN2}
-                            onChange={(e) => { 
-                                setMimiN2(e.target.value);
-                                // Xóa Minna và các Mimi khác
-                                if(e.target.value !== '') { setMinnaLesson(''); setMimiN3(''); setMimiN1(''); }
-                            }}
-                            onBlur={() => {
-                                if (mimiN2 > 13) setMimiN2(13);
-                                if (mimiN2 < 1 && mimiN2 !== '') setMimiN2(1);
-                            }}
-                            className={`w-10 h-5 text-[14px] font-bold text-center border-b border-gray-300 focus:border-emerald-500 outline-none p-0 bg-transparent placeholder-gray-300 ${mimiN2 !== '' ? 'text-emerald-700' : ''}`}
-                        />
-                    </div>
+                                    {/* 3. MIMIKARA N2 */}
+                                    <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
+                                        <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
+                                            <span className="text-blue-500">📘</span> Mimikara N2 <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
+                                        </label>
+                                        <input 
+                                            type="number" min="1" max="13" placeholder="#"
+                                            value={mimiN2}
+                                            onChange={(e) => { setMimiN2(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN1(''); } }}
+                                            onBlur={() => { if (mimiN2 > 13) setMimiN2(13); if (mimiN2 < 1 && mimiN2 !== '') setMimiN2(1); }}
+                                            className={`w-14 text-center font-bold border-b-2 focus:border-blue-500 outline-none bg-transparent transition-all text-sm pb-0.5 ${mimiN2 !== '' ? 'text-blue-600 border-blue-500' : 'text-gray-400 border-gray-200'}`}
+                                        />
+                                    </div>
 
-                    {/* 4. MIMIKARA N1 */}
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-[10px] font-bold text-gray-500 uppercase whitespace-nowrap w-24 text-right">MIMIKARA N1 PHẦN</span>
-                        <input 
-                            type="number" min="1" max="14" placeholder="..."
-                            value={mimiN1}
-                            onChange={(e) => { 
-                                setMimiN1(e.target.value);
-                                // Xóa Minna và các Mimi khác
-                                if(e.target.value !== '') { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); }
-                            }}
-                            onBlur={() => {
-                                if (mimiN1 > 14) setMimiN1(14);
-                                if (mimiN1 < 1 && mimiN1 !== '') setMimiN1(1);
-                            }}
-                            className={`w-10 h-5 text-[14px] font-bold text-center border-b border-gray-300 focus:border-emerald-500 outline-none p-0 bg-transparent placeholder-gray-300 ${mimiN1 !== '' ? 'text-emerald-700' : ''}`}
-                        />
-                    </div>
+                                    {/* 4. MIMIKARA N1 */}
+                                    <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
+                                        <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
+                                            <span className="text-red-500">📕</span> Mimikara N1 <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
+                                        </label>
+                                        <input 
+                                            type="number" min="1" max="14" placeholder="#"
+                                            value={mimiN1}
+                                            onChange={(e) => { setMimiN1(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); } }}
+                                            onBlur={() => { if (mimiN1 > 14) setMimiN1(14); if (mimiN1 < 1 && mimiN1 !== '') setMimiN1(1); }}
+                                            className={`w-14 text-center font-bold border-b-2 focus:border-red-500 outline-none bg-transparent transition-all text-sm pb-0.5 ${mimiN1 !== '' ? 'text-red-600 border-red-500' : 'text-gray-400 border-gray-200'}`}
+                                        />
+                                    </div>
 
-                    <hr className="border-gray-100 my-1"/>
-
-                    {/* NÚT CHỌN THÔNG MINH */}
-                    <button 
-                        onClick={handleSmartLoadVocabulary}
-                        disabled={minnaLesson === '' && mimiN3 === '' && mimiN2 === '' && mimiN1 === ''}
-                        className={`w-full py-2.5 font-bold text-xs rounded-lg shadow-md active:scale-95 transition-all uppercase tracking-wide flex items-center justify-center gap-2 
-                            ${(minnaLesson === '' && mimiN3 === '' && mimiN2 === '' && mimiN1 === '') 
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                            }`}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                        
-                        {/* Logic hiển thị chữ trên nút */}
-                        {(() => {
-                            if (minnaLesson !== '') return `CHỌN BÀI ${minnaLesson}`;
-                            if (mimiN3 !== '') return `CHỌN N3 - PHẦN ${mimiN3}`;
-                            if (mimiN2 !== '') return `CHỌN N2 - PHẦN ${mimiN2}`;
-                            if (mimiN1 !== '') return `CHỌN N1 - PHẦN ${mimiN1}`;
-                            return 'VUI LÒNG NHẬP SỐ...';
-                        })()}
-                    </button>
-
-                </div>
-            )}
-            
-        </div>
-    )}
-</div>
-
+                                    <div className="pt-2">
+                                        <button 
+                                            onClick={handleSmartLoadVocabulary}
+                                            disabled={!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1}
+                                            className={`w-full py-3 font-bold text-xs rounded-xl shadow-lg active:scale-95 transition-all uppercase tracking-wide flex items-center justify-center gap-2 
+                                                ${(!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1) 
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
+                                                    : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
+                                                }`}
+                                        >
+                                            {(!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1) ? (
+                                                <span>Nhập số để chọn...</span>
+                                            ) : (
+                                                <>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                                    <span>
+                                                        {minnaLesson && `TẢI MINNA BÀI ${minnaLesson}`}
+                                                        {mimiN3 && `TẢI MIMI N3 - PHẦN ${mimiN3}`}
+                                                        {mimiN2 && `TẢI MIMI N2 - PHẦN ${mimiN2}`}
+                                                        {mimiN1 && `TẢI MIMI N1 - PHẦN ${mimiN1}`}
+                                                    </span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
 {/* 2. MENU TIỆN ÍCH (Utilities) */}
 <div className="relative flex-1" ref={utilsMenuRef}> 
