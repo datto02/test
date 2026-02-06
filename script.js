@@ -3257,7 +3257,7 @@ LÀM SẠCH
                                     {/* 1. MINNA NO NIHONGO */}
                                     <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
                                         <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
-                                            <span className="text-emerald-600">📚</span> Minna no Nihongo <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
+                                            <span className="text-emerald-600">📚</span> TỪ VỰNG MINNA <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
                                         </label>
                                         <input 
                                             type="number" min="1" max="50" placeholder="..."
@@ -3271,7 +3271,7 @@ LÀM SẠCH
                                     {/* 2. MIMIKARA N3 */}
                                     <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
                                         <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
-                                            <span className="text-amber-500">📙</span> Mimikara N3 <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
+                                            <span className="text-amber-500">📙</span> MIMIKARA N3 <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
                                         </label>
                                         <input 
                                             type="number" min="1" max="12" placeholder="..."
@@ -3285,7 +3285,7 @@ LÀM SẠCH
                                     {/* 3. MIMIKARA N2 */}
                                     <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
                                         <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
-                                            <span className="text-blue-500">📘</span> Mimikara N2 <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
+                                            <span className="text-blue-500">📘</span> MIMIKARA N2 <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
                                         </label>
                                         <input 
                                             type="number" min="1" max="13" placeholder="..."
@@ -3299,7 +3299,7 @@ LÀM SẠCH
                                     {/* 4. MIMIKARA N1 */}
                                     <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
                                         <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
-                                            <span className="text-red-500">📕</span> Mimikara N1 <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
+                                            <span className="text-red-500">📕</span> MIMIKARA N1 <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
                                         </label>
                                         <input 
                                             type="number" min="1" max="14" placeholder="..."
