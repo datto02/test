@@ -3302,7 +3302,7 @@ LÀM SẠCH
                                             <span className="text-red-500">📕</span> Mimikara N1 <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
                                         </label>
                                         <input 
-                                            type="number" min="1" max="14" placeholder="#"
+                                            type="number" min="1" max="14" placeholder="..."
                                             value={mimiN1}
                                             onChange={(e) => { setMimiN1(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); } }}
                                             onBlur={() => { if (mimiN1 > 14) setMimiN1(14); if (mimiN1 < 1 && mimiN1 !== '') setMimiN1(1); }}
