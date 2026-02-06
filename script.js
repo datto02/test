@@ -2997,7 +2997,7 @@ const selectResult = (item) => {
     const isWarningMode = !filterOptions.hiragana && !filterOptions.katakana && !filterOptions.kanji;
 
     return (
-        <div className={`w-full md:w-96 bg-white shadow-xl p-6 flex flex-col gap-6 h-auto md:h-screen md:overflow-y-auto relative md:sticky top-0 border-r border-gray-200 z-50 hide-scrollbar ${mode === 'vocab' ? 'mode-vocab' : 'mode-kanji'}`}>
+        <div className="w-full md:w-96 bg-white shadow-xl p-6 flex flex-col gap-6 h-auto md:h-screen md:overflow-y-auto relative md:sticky top-0 border-r border-gray-200 z-50 hide-scrollbar">
         
         {/* HEADER */}
 <div className="mb-4 pb-3 border-b border-gray-100"> 
