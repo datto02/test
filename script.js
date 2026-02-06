@@ -3317,9 +3317,6 @@ LÀM SẠCH
                             className={`w-10 h-5 text-[14px] font-bold text-center border-b border-gray-300 focus:border-emerald-500 outline-none p-0 transition-colors bg-transparent placeholder-gray-300 ${mimikaraPart !== '' ? 'text-emerald-700' : ''}`}
                         />
                         
-                        <span className="text-[9px] text-gray-300 font-medium ml-auto">
-                            (Max: {MIMI_LIMITS[mimikaraLevel]})
-                        </span>
                     </div>
 
                     {/* ĐƯỜNG KẺ MỜ */}
