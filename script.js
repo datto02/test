@@ -2288,9 +2288,9 @@ if (scrollRef.current) {
     const [progress, setProgress] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
        const [minnaLesson, setMinnaLesson] = useState(1);
-       const [mimikaraLevel, setMimikaraLevel] = useState('N3');
-       const [mimikaraPart, setMimikaraPart] = useState('');
-       const MIMI_LIMITS = { N3: 12, N2: 13, N1: 14 };
+    const [mimiN3, setMimiN3] = useState('');          
+    const [mimiN2, setMimiN2] = useState('');
+    const [mimiN1, setMimiN1] = useState('');
 
     // --- HÀM KIỂM TRA CẤP ĐỘ JLPT ---
 const getJLPTLevel = (char) => {
@@ -2676,43 +2676,42 @@ const handleLoadMinna = async () => {
         setIsLoading(false);
     }
 };
-       // --- HÀM TẢI MIMIKARA (ĐÃ SỬA ĐÚNG ĐƯỜNG DẪN) ---
-    const handleLoadMimikara = async () => {
-        // 1. Validate (Kiểm tra số phần hợp lệ)
-        let validPart = mimikaraPart;
-        const maxPart = MIMI_LIMITS[mimikaraLevel]; // Lấy giới hạn: N3->12, N2->13...
+   // --- HÀM TẢI MIMIKARA (CẬP NHẬT: Nhận Level và Part làm tham số) ---
+    const handleLoadMimikara = async (level, partInput) => {
+        // 1. Cấu hình giới hạn
+        const limits = { N3: 12, N2: 13, N1: 14 };
+        const maxPart = limits[level];
 
-        if (validPart === '' || validPart < 1) validPart = 1;
+        // 2. Validate số phần
+        let validPart = parseInt(partInput);
+        if (isNaN(validPart) || validPart < 1) validPart = 1;
         if (validPart > maxPart) validPart = maxPart;
 
-        setMimikaraPart(validPart); // Cập nhật lại số đẹp vào ô input
+        // Cập nhật lại số đẹp vào ô input tương ứng
+        if (level === 'N3') setMimiN3(validPart);
+        if (level === 'N2') setMimiN2(validPart);
+        if (level === 'N1') setMimiN1(validPart);
         
-        // 2. Hiệu ứng Loading
+        // 3. Hiệu ứng Loading
         setProgress(0);
         setIsLoading(true);
         setIsMenuOpen(false);
 
-        // 3. Xử lý đường dẫn file
-        // Input: Level "N3", Part 1
-        // Output mong muốn: ./data/tuvung/mimikara/n3/mimin3p1.json
-        
-        const lvl = mimikaraLevel.toLowerCase(); // Chuyển "N3" thành "n3"
+        // 4. Đường dẫn file chuẩn: ./data/tuvung/mimikara/n3/mimin3p1.json
+        const lvl = level.toLowerCase();
         const url = `./data/tuvung/mimikara/${lvl}/mimi${lvl}p${validPart}.json`;
 
         try {
             const response = await fetch(url);
-            if (!response.ok) throw new Error("Không tìm thấy file bài học này");
+            if (!response.ok) throw new Error("Không tìm thấy file");
 
             const data = await response.json();
-            
-            // Kiểm tra dữ liệu rỗng
             if (!Array.isArray(data) || data.length === 0) {
                 alert("File dữ liệu bị lỗi hoặc rỗng!");
                 setIsLoading(false);
                 return;
             }
 
-            // Gộp mảng thành chuỗi văn bản
             const textContent = data.join('\n');
             setProgress(50);
 
@@ -2725,9 +2724,23 @@ const handleLoadMinna = async () => {
 
         } catch (error) {
             console.error(error);
-            // Thông báo lỗi chi tiết đường dẫn để dễ debug
-            alert(`Lỗi: Không tìm thấy file dữ liệu!\nĐường dẫn đang tìm: ${url}`);
+            alert(`Lỗi: Không tìm thấy file dữ liệu!\nĐường dẫn: ${url}`);
             setIsLoading(false);
+        }
+    };
+
+    // --- HÀM THÔNG MINH: TỰ KIỂM TRA XEM ĐANG NHẬP Ô NÀO ĐỂ TẢI ---
+    const handleSmartLoadVocabulary = () => {
+        if (minnaLesson !== '' && minnaLesson !== null) {
+            handleLoadMinna();
+        } else if (mimiN3 !== '') {
+            handleLoadMimikara('N3', mimiN3);
+        } else if (mimiN2 !== '') {
+            handleLoadMimikara('N2', mimiN2);
+        } else if (mimiN1 !== '') {
+            handleLoadMimikara('N1', mimiN1);
+        } else {
+            alert("Vui lòng nhập số bài hoặc số phần cần học!");
         }
     };
        // --- HÀM TỔNG HỢP: QUYẾT ĐỊNH TẢI MINNA HAY MIMIKARA ---
@@ -3248,86 +3261,93 @@ LÀM SẠCH
                             </div>
                           </>
             ) : (
-            // === SỬA LẠI PHẦN TỪ VỰNG ===
+          // === GIAO DIỆN TỪ VỰNG (4 DÒNG) ===
                 <div className="space-y-4 p-1">
         
-                    {/* DÒNG 1: MINNA NO NIHONGO */}
+                    {/* 1. MINNA NO NIHONGO */}
                     <div className="flex items-baseline gap-2">
-                        <span className="text-[10px] font-bold text-gray-500 uppercase whitespace-nowrap">MINNA BÀI</span>
-                        
+                        <span className="text-[10px] font-bold text-gray-500 uppercase whitespace-nowrap w-24 text-right">MINNA BÀI</span>
                         <input 
-                            type="number" 
-                            min="1" 
-                            max="50" 
-                            placeholder="..."
+                            type="number" min="1" max="50" placeholder="..."
                             value={minnaLesson}
                             onChange={(e) => { 
-                                const val = e.target.value;
-                                setMinnaLesson(val === '' ? '' : parseInt(val));
-                                if(val !== '') setMimikaraPart(''); // <--- LOGIC QUAN TRỌNG: Xóa Mimikara
-                            }} 
-                            onBlur={() => {
-                                // Logic chặn số quá giới hạn
-                                if (minnaLesson !== '' && minnaLesson > 50) setMinnaLesson(50);
-                                if (minnaLesson !== '' && minnaLesson < 1) setMinnaLesson(1);
+                                setMinnaLesson(e.target.value);
+                                // Xóa hết các ô Mimikara
+                                if(e.target.value !== '') { setMimiN3(''); setMimiN2(''); setMimiN1(''); }
                             }}
-                            className={`w-10 h-5 text-[14px] font-bold text-center border-b border-gray-300 focus:border-emerald-500 outline-none p-0 transition-colors bg-transparent placeholder-gray-300 ${minnaLesson !== '' ? 'text-emerald-700' : ''}`}
+                            onBlur={() => {
+                                if (minnaLesson > 50) setMinnaLesson(50);
+                                if (minnaLesson < 1 && minnaLesson !== '') setMinnaLesson(1);
+                            }}
+                            className={`w-10 h-5 text-[14px] font-bold text-center border-b border-gray-300 focus:border-emerald-500 outline-none p-0 bg-transparent placeholder-gray-300 ${minnaLesson !== '' ? 'text-emerald-700' : ''}`}
                         />
                     </div>
 
-                    {/* DÒNG 2: MIMIKARA OBOERU */}
+                    {/* 2. MIMIKARA N3 */}
                     <div className="flex items-baseline gap-2">
-                        <span className="text-[10px] font-bold text-gray-500 uppercase whitespace-nowrap">MIMIKARA</span>
-                        
-                        {/* Dropdown chọn N3, N2, N1 */}
-                        <select 
-                            value={mimikaraLevel}
-                            onChange={(e) => {
-                                setMimikaraLevel(e.target.value);
-                                setMimikaraPart(''); // Reset phần khi đổi cấp độ
-                                setMinnaLesson('');  // Reset Minna
-                            }}
-                            className="text-[10px] font-bold bg-gray-100 rounded px-1 py-0.5 border-none outline-none cursor-pointer hover:bg-gray-200 text-gray-700"
-                        >
-                            <option value="N3">N3</option>
-                            <option value="N2">N2</option>
-                            <option value="N1">N1</option>
-                        </select>
-
-                        <span className="text-[10px] font-bold text-gray-400 uppercase whitespace-nowrap">- PHẦN</span>
-
-                        {/* Input chọn Phần (Part) */}
+                        <span className="text-[10px] font-bold text-gray-500 uppercase whitespace-nowrap w-24 text-right">MIMIKARA N3 PHẦN</span>
                         <input 
-                            type="number" 
-                            min="1" 
-                            max={MIMI_LIMITS[mimikaraLevel]} 
-                            placeholder="..."
-                            value={mimikaraPart}
+                            type="number" min="1" max="12" placeholder="..."
+                            value={mimiN3}
                             onChange={(e) => { 
-                                const val = e.target.value;
-                                setMimikaraPart(val === '' ? '' : parseInt(val));
-                                if(val !== '') setMinnaLesson(''); // <--- LOGIC QUAN TRỌNG: Xóa Minna
-                            }} 
-                            onBlur={() => {
-                                // Logic chặn số quá giới hạn theo cấp độ
-                                const max = MIMI_LIMITS[mimikaraLevel];
-                                if (mimikaraPart !== '' && mimikaraPart > max) setMimikaraPart(max);
-                                if (mimikaraPart !== '' && mimikaraPart < 1) setMimikaraPart(1);
+                                setMimiN3(e.target.value);
+                                // Xóa Minna và các Mimi khác
+                                if(e.target.value !== '') { setMinnaLesson(''); setMimiN2(''); setMimiN1(''); }
                             }}
-                            className={`w-10 h-5 text-[14px] font-bold text-center border-b border-gray-300 focus:border-emerald-500 outline-none p-0 transition-colors bg-transparent placeholder-gray-300 ${mimikaraPart !== '' ? 'text-emerald-700' : ''}`}
+                            onBlur={() => {
+                                if (mimiN3 > 12) setMimiN3(12);
+                                if (mimiN3 < 1 && mimiN3 !== '') setMimiN3(1);
+                            }}
+                            className={`w-10 h-5 text-[14px] font-bold text-center border-b border-gray-300 focus:border-emerald-500 outline-none p-0 bg-transparent placeholder-gray-300 ${mimiN3 !== '' ? 'text-emerald-700' : ''}`}
                         />
-                        
                     </div>
 
-                    {/* ĐƯỜNG KẺ MỜ */}
+                    {/* 3. MIMIKARA N2 */}
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-[10px] font-bold text-gray-500 uppercase whitespace-nowrap w-24 text-right">MIMIKARA N2 PHẦN</span>
+                        <input 
+                            type="number" min="1" max="13" placeholder="..."
+                            value={mimiN2}
+                            onChange={(e) => { 
+                                setMimiN2(e.target.value);
+                                // Xóa Minna và các Mimi khác
+                                if(e.target.value !== '') { setMinnaLesson(''); setMimiN3(''); setMimiN1(''); }
+                            }}
+                            onBlur={() => {
+                                if (mimiN2 > 13) setMimiN2(13);
+                                if (mimiN2 < 1 && mimiN2 !== '') setMimiN2(1);
+                            }}
+                            className={`w-10 h-5 text-[14px] font-bold text-center border-b border-gray-300 focus:border-emerald-500 outline-none p-0 bg-transparent placeholder-gray-300 ${mimiN2 !== '' ? 'text-emerald-700' : ''}`}
+                        />
+                    </div>
+
+                    {/* 4. MIMIKARA N1 */}
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-[10px] font-bold text-gray-500 uppercase whitespace-nowrap w-24 text-right">MIMIKARA N1 PHẦN</span>
+                        <input 
+                            type="number" min="1" max="14" placeholder="..."
+                            value={mimiN1}
+                            onChange={(e) => { 
+                                setMimiN1(e.target.value);
+                                // Xóa Minna và các Mimi khác
+                                if(e.target.value !== '') { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); }
+                            }}
+                            onBlur={() => {
+                                if (mimiN1 > 14) setMimiN1(14);
+                                if (mimiN1 < 1 && mimiN1 !== '') setMimiN1(1);
+                            }}
+                            className={`w-10 h-5 text-[14px] font-bold text-center border-b border-gray-300 focus:border-emerald-500 outline-none p-0 bg-transparent placeholder-gray-300 ${mimiN1 !== '' ? 'text-emerald-700' : ''}`}
+                        />
+                    </div>
+
                     <hr className="border-gray-100 my-1"/>
 
-                    {/* DÒNG 3: NÚT CHỌN (TỰ ĐỘNG ĐỔI TEXT) */}
+                    {/* NÚT CHỌN THÔNG MINH */}
                     <button 
                         onClick={handleSmartLoadVocabulary}
-                        disabled={minnaLesson === '' && mimikaraPart === ''}
+                        disabled={minnaLesson === '' && mimiN3 === '' && mimiN2 === '' && mimiN1 === ''}
                         className={`w-full py-2.5 font-bold text-xs rounded-lg shadow-md active:scale-95 transition-all uppercase tracking-wide flex items-center justify-center gap-2 
-                            ${(minnaLesson === '' && mimikaraPart === '') 
+                            ${(minnaLesson === '' && mimiN3 === '' && mimiN2 === '' && mimiN1 === '') 
                                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                                 : 'bg-emerald-600 hover:bg-emerald-700 text-white'
                             }`}
@@ -3335,12 +3355,13 @@ LÀM SẠCH
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                         
                         {/* Logic hiển thị chữ trên nút */}
-                        {minnaLesson !== '' 
-                            ? `CHỌN BÀI ${minnaLesson}` 
-                            : (mimikaraPart !== '' 
-                                ? `CHỌN ${mimikaraLevel} - PHẦN ${mimikaraPart}` 
-                                : 'VUI LÒNG NHẬP SỐ...')
-                        }
+                        {(() => {
+                            if (minnaLesson !== '') return `CHỌN BÀI ${minnaLesson}`;
+                            if (mimiN3 !== '') return `CHỌN N3 - PHẦN ${mimiN3}`;
+                            if (mimiN2 !== '') return `CHỌN N2 - PHẦN ${mimiN2}`;
+                            if (mimiN1 !== '') return `CHỌN N1 - PHẦN ${mimiN1}`;
+                            return 'VUI LÒNG NHẬP SỐ...';
+                        })()}
                     </button>
 
                 </div>
