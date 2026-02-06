@@ -2338,6 +2338,9 @@ N1: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-600 hover:text-white ho
 
     // --- HÀM TẠO PLACEHOLDER ---
     const getDynamicPlaceholder = () => {
+        if (mode === 'vocab') {
+            return "日本語 ; 先生\n学生";
+        }
         const labels = [];
         if (filterOptions.kanji) labels.push("漢字");        
         if (filterOptions.hiragana) labels.push("ひらがな"); 
@@ -3266,7 +3269,7 @@ LÀM SẠCH
                 />
             </div>
             
-           {dueChars.length > 0 && (
+           {mode === 'kanji' && dueChars.length > 0 && (
     <div className="mb-6 animate-in slide-in-from-top duration-500">
         <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-4 shadow-sm">
             <div className="flex items-center gap-3 mb-3">
