@@ -3263,7 +3263,7 @@ LÀM SẠCH
     
     {/* BÊN PHẢI: Nhóm chữ "BÀI" và Ô nhập liệu */}
     <div className="flex items-center gap-2">
-        <span className="text-gray-450 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
+        <span className="text-gray-450 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
         <input 
             type="number" min="1" max="50" placeholder="..."
             value={minnaLesson}
@@ -3291,7 +3291,7 @@ LÀM SẠCH
 
     {/* BÊN PHẢI: Nhóm chữ "PHẦN" và Ô nhập liệu */}
     <div className="flex items-center gap-2">
-        <span className="text-gray-450 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
+        <span className="text-gray-450 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
         <input 
             type="number" min="1" max="12" placeholder="..."
             value={mimiN3}
@@ -3320,7 +3320,7 @@ LÀM SẠCH
 
     {/* BÊN PHẢI: Nhóm chữ "PHẦN" và Ô nhập liệu */}
     <div className="flex items-center gap-2">
-        <span className="text-gray-450 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
+        <span className="text-gray-450 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
         <input 
             type="number" min="1" max="13" placeholder="..."
             value={mimiN2}
@@ -3343,7 +3343,7 @@ LÀM SẠCH
                                    {/* 4. MIMIKARA N1 */}
 <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
     {/* BÊN TRÁI */}
-    <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
+    <label className="text-xs font-medium text-gray-700 cursor-pointer flex items-center gap-1.5">
         <span className="text-red-500">📕</span> MIMIKARA N1
     </label>
 
