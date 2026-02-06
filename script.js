@@ -3263,10 +3263,19 @@ LÀM SẠCH
     
     {/* BÊN PHẢI: Nhóm chữ "BÀI" và Ô nhập liệu */}
     <div className="flex items-center gap-2">
-        <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
+        <span className="text-gray-400 font-black text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
         <input 
             type="number" min="1" max="50" placeholder="..."
             value={minnaLesson}
+            onKeyDown={(e) => {
+            // 1. Cho phép Enter để tải
+            if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+            // 2. Cho phép: Số 0-9, Backspace, Delete, Tab, Mũi tên, Ctrl+A/C/V
+            const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+            if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault(); // Chặn ngay lập tức
+            }
+        }}
             onChange={(e) => { setMinnaLesson(e.target.value); if(e.target.value) { setMimiN3(''); setMimiN2(''); setMimiN1(''); } }}
             onBlur={() => { if (minnaLesson > 50) setMinnaLesson(50); if (minnaLesson < 1 && minnaLesson !== '') setMinnaLesson(1); }}
             className={`w-14 text-center font-bold border-b-2 focus:border-emerald-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${minnaLesson !== '' ? 'text-emerald-600 border-emerald-500' : 'text-gray-400 border-gray-200'}`}
@@ -3282,10 +3291,19 @@ LÀM SẠCH
 
     {/* BÊN PHẢI: Nhóm chữ "PHẦN" và Ô nhập liệu */}
     <div className="flex items-center gap-2">
-        <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
+        <span className="text-gray-400 font-black text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
         <input 
             type="number" min="1" max="12" placeholder="..."
             value={mimiN3}
+            onKeyDown={(e) => {
+            // 1. Cho phép Enter để tải
+            if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+            // 2. Cho phép: Số 0-9, Backspace, Delete, Tab, Mũi tên, Ctrl+A/C/V
+            const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+            if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault(); // Chặn ngay lập tức
+            }
+        }}
             onChange={(e) => { setMimiN3(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN2(''); setMimiN1(''); } }}
             onBlur={() => { if (mimiN3 > 12) setMimiN3(12); if (mimiN3 < 1 && mimiN3 !== '') setMimiN3(1); }}
             className={`w-14 text-center font-bold border-b-2 focus:border-amber-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${mimiN3 !== '' ? 'text-amber-600 border-amber-500' : 'text-gray-400 border-gray-200'}`}
@@ -3302,10 +3320,19 @@ LÀM SẠCH
 
     {/* BÊN PHẢI: Nhóm chữ "PHẦN" và Ô nhập liệu */}
     <div className="flex items-center gap-2">
-        <span className="text-gray-400 font-medium text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
+        <span className="text-gray-400 font-black text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
         <input 
             type="number" min="1" max="13" placeholder="..."
             value={mimiN2}
+            onKeyDown={(e) => {
+            // 1. Cho phép Enter để tải
+            if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+            // 2. Cho phép: Số 0-9, Backspace, Delete, Tab, Mũi tên, Ctrl+A/C/V
+            const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+            if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault(); // Chặn ngay lập tức
+            }
+        }}
             onChange={(e) => { setMimiN2(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN1(''); } }}
             onBlur={() => { if (mimiN2 > 13) setMimiN2(13); if (mimiN2 < 1 && mimiN2 !== '') setMimiN2(1); }}
             className={`w-14 text-center font-bold border-b-2 focus:border-blue-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${mimiN2 !== '' ? 'text-blue-600 border-blue-500' : 'text-gray-400 border-gray-200'}`}
@@ -3316,7 +3343,7 @@ LÀM SẠCH
                                    {/* 4. MIMIKARA N1 */}
 <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
     {/* BÊN TRÁI */}
-    <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
+    <label className="text-xs font-black text-gray-700 cursor-pointer flex items-center gap-1.5">
         <span className="text-red-500">📕</span> MIMIKARA N1
     </label>
 
@@ -3326,6 +3353,15 @@ LÀM SẠCH
         <input 
             type="number" min="1" max="14" placeholder="..."
             value={mimiN1}
+            onKeyDown={(e) => {
+            // 1. Cho phép Enter để tải
+            if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+            // 2. Cho phép: Số 0-9, Backspace, Delete, Tab, Mũi tên, Ctrl+A/C/V
+            const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+            if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault(); // Chặn ngay lập tức
+            }
+        }}
             onChange={(e) => { setMimiN1(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); } }}
             onBlur={() => { if (mimiN1 > 14) setMimiN1(14); if (mimiN1 < 1 && mimiN1 !== '') setMimiN1(1); }}
             className={`w-14 text-center font-bold border-b-2 focus:border-red-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${mimiN1 !== '' ? 'text-red-600 border-red-500' : 'text-gray-400 border-gray-200'}`}
@@ -3347,7 +3383,7 @@ LÀM SẠCH
                                                 <span>Nhập số để chọn...</span>
                                             ) : (
                                                 <>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    
                                                     <span>
                                                         {minnaLesson && `TẢI MINNA BÀI ${minnaLesson}`}
                                                         {mimiN3 && `TẢI MIMI N3 - PHẦN ${mimiN3}`}
