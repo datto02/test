@@ -2818,7 +2818,7 @@ if (!query) {
     return;
 }
 
-const matches = [];
+let matches = [];
 
   if (mode === 'vocab') {
         const calculateVocabPriority = (soundStr) => {
@@ -2862,7 +2862,7 @@ const matches = [];
                     matches.push({
                         char: word,             
                         sound: info.reading,    
-                        // meaning: info.meaning, // (Đã xóa ở giao diện, nhưng vẫn giữ trong data nếu cần logic)
+                        // meaning: info.meaning, 
                         type: 'vocab',
                         priority: bestWordScore,
                         length: word.length 
@@ -3068,6 +3068,7 @@ const selectResult = (item) => {
         className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl z-[70] max-h-60 overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200"
     >
         {searchResults.map((item, idx) => {
+            // Kiểm tra cấp độ JLPT chỉ khi ở chế độ Kanji
             const level = item.type === 'kanji' ? getJLPTLevel(item.char) : null; 
 
             return (
@@ -3078,19 +3079,24 @@ const selectResult = (item) => {
                         idx === activeIndex ? 'bg-indigo-100' : 'bg-white hover:bg-indigo-50'
                     }`}
                 >
-                    {/* 1. CHỮ (Kanji/Từ vựng) */}
+                    {/* 1. SỬA FONT & CỠ CHỮ: Dùng Klee One cho cả 2. Vocab để text-xl cho cân đối */}
                     <span className={`font-['Klee_One'] text-black group-hover:scale-105 transition-transform ${mode === 'vocab' ? "text-xl" : "text-2xl"}`}>
                         {item.char}
                     </span>
 
-                    {/* 2. CÁCH ĐỌC (Đã xóa Ý nghĩa) */}
-                    <div className="flex flex-col justify-center">
-                        <span className={`text-sm font-bold uppercase leading-tight truncate ${mode === 'vocab' ? 'text-emerald-600' : 'text-indigo-600'}`}>
+                    {/* 2. SỬA MÀU SẮC: Vocab màu Emerald (Xanh), Kanji màu Indigo (Tím than) */}
+                    <div className="flex flex-col overflow-hidden">
+                        <span className={`text-[11px] font-black uppercase leading-tight truncate ${mode === 'vocab' ? 'text-emerald-600' : 'text-indigo-600'}`}>
                             {item.sound} 
                         </span>
+                        {item.meaning && (
+                            <span className="text-[10px] text-gray-400 font-medium leading-tight truncate">
+                                {item.meaning}
+                            </span>
+                        )}
                     </div>
 
-                    {/* 3. NHÃN MÁC (Chỉ hiện ở Kanji) */}
+                    {/* 3. SỬA NHÃN MÁC: Ẩn hoàn toàn nếu là Vocab, chỉ hiện cho Kanji */}
                     <div className="ml-auto flex-shrink-0">
                         {mode !== 'vocab' && (
                             level ? (
