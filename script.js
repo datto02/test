@@ -3037,7 +3037,7 @@ const selectResult = (item) => {
 
         <div className="space-y-6 flex-1">
             
-  {/* TÌM KIẾM THÔNG MINH (BƯỚC 3) */}
+{/* TÌM KIẾM THÔNG MINH (BƯỚC 3) */}
 <div className="space-y-1.5 pb-2 mb-2 relative">
     <div className="flex gap-2">
         <div className="relative flex-1">
@@ -3050,20 +3050,22 @@ const selectResult = (item) => {
                 </svg>
             </div>
 
-            {/* Ô Input (Đã chỉnh padding-right động để tránh đè nút) */}
+            {/* Ô Input */}
             <input 
                 ref={searchInputRef}
                 type="text" 
                 value={searchTerm} 
                 className={`w-full pl-10 py-2 border rounded-lg text-[16px] focus:outline-none focus:ring-2 font-bold font-sans ${
-                    // Nếu hiện nút Chọn tất -> Padding phải = 28 (112px), nếu không -> 10 (40px)
+                    // Padding động để tránh đè nút Chọn tất
                     (mode === 'vocab' && searchResults.length > 0) ? 'pr-28' : 'pr-10'
                 } ${
                     mode === 'vocab' 
                     ? 'border-emerald-200 bg-emerald-50 text-emerald-900 placeholder-emerald-400 focus:ring-emerald-500' 
                     : 'border-indigo-200 bg-indigo-50 text-indigo-900 placeholder-indigo-400 focus:ring-indigo-500'
                 }`}
-                placeholder="Tìm Kanji theo âm Hán Việt" 
+                // --- THAY ĐỔI PLACEHOLDER Ở ĐÂY ---
+                placeholder={mode === 'vocab' ? "Tìm từ vựng đi kèm kanji" : "Tìm Kanji theo âm Hán Việt"}
+                // -----------------------------------
                 onChange={(e) => handleSearchRealtime(e.target.value)} 
                 onKeyDown={(e) => {
                     if (searchResults.length > 0) {
@@ -3083,8 +3085,7 @@ const selectResult = (item) => {
 
             {/* --- CỤM NÚT BÊN PHẢI (CHỌN TẤT + XÓA) --- */}
             <div className="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
-                
-                {/* 1. NÚT CHỌN TẤT (CHỈ HIỆN Ở VOCAB & CÓ KẾT QUẢ) */}
+                {/* NÚT CHỌN TẤT */}
                 {mode === 'vocab' && searchResults.length > 0 && (
                     <button 
                         onClick={handleSelectAllResults}
@@ -3095,7 +3096,7 @@ const selectResult = (item) => {
                     </button>
                 )}
 
-                {/* 2. NÚT X ĐỂ XÓA (Hiện khi có chữ) */}
+                {/* NÚT X ĐỂ XÓA */}
                 {searchTerm && (
                     <button 
                         onClick={() => {
@@ -3115,7 +3116,14 @@ const selectResult = (item) => {
         </div>
     </div>
 
-    {/* DROPDOWN KẾT QUẢ GỢI Ý (GIỮ NGUYÊN CODE CŨ CỦA BẠN Ở ĐÂY) */}
+    {/* --- CHÚ THÍCH NHỎ DƯỚI THANH TÌM KIẾM (MỚI) --- */}
+    {mode === 'vocab' && (
+        <p className="text-[10px] text-emerald-500/70 italic ml-1 -mt-1 font-medium animate-in fade-in slide-in-from-top-1">
+            *nhập 1 chữ kanji để tìm từ vựng đi kèm
+        </p>
+    )}
+
+    {/* DROPDOWN KẾT QUẢ GỢI Ý */}
     {searchResults.length > 0 && (
         <div 
             ref={scrollRef}
