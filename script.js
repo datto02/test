@@ -2941,7 +2941,35 @@ matches.sort((a, b) => {
 setSearchResults(matches.slice(0, 20));
 setActiveIndex(0); // Reset về vị trí đầu tiên
 };
+// --- HÀM CHỌN TẤT CẢ KẾT QUẢ TÌM KIẾM (MỚI) ---
+    const handleSelectAllResults = () => {
+        if (searchResults.length === 0) return;
 
+        // 1. Lấy tất cả các từ trong danh sách kết quả
+        const wordsToAdd = searchResults.map(item => item.char).join('\n');
+
+        // 2. Nối vào nội dung hiện tại
+        let currentText = localText || "";
+        // Nếu cuối chuỗi chưa có xuống dòng thì thêm vào để không bị dính
+        if (currentText.length > 0 && !currentText.endsWith('\n')) {
+            currentText += '\n';
+        }
+        
+        let newText = currentText + wordsToAdd + '\n';
+
+        // 3. Kiểm tra lọc trùng (nếu đang bật option)
+        if (filterOptions.removeDuplicates) {
+             const lines = newText.split(/[\n;]+/).map(l => l.trim()).filter(l => l);
+             newText = [...new Set(lines)].join('\n') + '\n';
+        }
+
+        // 4. Cập nhật dữ liệu & Reset tìm kiếm
+        setLocalText(newText);
+        handleChange('text', newText);
+        setSearchTerm('');
+        setSearchResults([]);
+        searchInputRef.current.focus();
+    };
    // --- HÀM CHỌN KẾT QUẢ (CẬP NHẬT CHO TỪ VỰNG) ---
 const selectResult = (item) => {
     // 1. Tạo chuỗi mới
@@ -3009,11 +3037,11 @@ const selectResult = (item) => {
 
         <div className="space-y-6 flex-1">
             
-      {/* TÌM KIẾM THÔNG MINH (BƯỚC 3) */}
+  {/* TÌM KIẾM THÔNG MINH (BƯỚC 3) */}
 <div className="space-y-1.5 pb-2 mb-2 relative">
     <div className="flex gap-2">
         <div className="relative flex-1">
-            {/* Icon Kính lúp (Đổi màu theo chế độ) */}
+            {/* Icon Kính lúp */}
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
                     className={mode === 'vocab' ? 'text-emerald-500' : 'text-indigo-500'}
@@ -3022,12 +3050,15 @@ const selectResult = (item) => {
                 </svg>
             </div>
 
-            {/* Ô Input (Đổi màu nền, viền, chữ, focus) */}
+            {/* Ô Input (Đã chỉnh padding-right động để tránh đè nút) */}
             <input 
                 ref={searchInputRef}
                 type="text" 
                 value={searchTerm} 
-                className={`w-full pl-10 pr-10 py-2 border rounded-lg text-[16px] focus:outline-none focus:ring-2 font-bold font-sans ${
+                className={`w-full pl-10 py-2 border rounded-lg text-[16px] focus:outline-none focus:ring-2 font-bold font-sans ${
+                    // Nếu hiện nút Chọn tất -> Padding phải = 28 (112px), nếu không -> 10 (40px)
+                    (mode === 'vocab' && searchResults.length > 0) ? 'pr-28' : 'pr-10'
+                } ${
                     mode === 'vocab' 
                     ? 'border-emerald-200 bg-emerald-50 text-emerald-900 placeholder-emerald-400 focus:ring-emerald-500' 
                     : 'border-indigo-200 bg-indigo-50 text-indigo-900 placeholder-indigo-400 focus:ring-indigo-500'
@@ -3050,26 +3081,41 @@ const selectResult = (item) => {
                 }}
             />
 
-            {/* NÚT X ĐỂ XÓA */}
-            {searchTerm && (
-                <button 
-                    onClick={() => {
-                        setSearchTerm('');    
-                        setSearchResults([]); 
-                        searchInputRef.current.focus();
-                    }}
-                    className={`absolute inset-y-0 right-0 pr-3 flex items-center transition-colors ${
-                        mode === 'vocab' ? 'text-gray-400 hover:text-emerald-600' : 'text-gray-400 hover:text-indigo-600'
-                    }`}
-                    title="Xóa tìm kiếm"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            )}
+            {/* --- CỤM NÚT BÊN PHẢI (CHỌN TẤT + XÓA) --- */}
+            <div className="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
+                
+                {/* 1. NÚT CHỌN TẤT (CHỈ HIỆN Ở VOCAB & CÓ KẾT QUẢ) */}
+                {mode === 'vocab' && searchResults.length > 0 && (
+                    <button 
+                        onClick={handleSelectAllResults}
+                        className="text-[9px] font-black text-white bg-emerald-500 hover:bg-emerald-600 px-2 py-1 rounded shadow-sm transition-all active:scale-95 animate-in fade-in zoom-in duration-200 whitespace-nowrap"
+                        title={`Thêm toàn bộ ${searchResults.length} từ vào danh sách`}
+                    >
+                        CHỌN TẤT ({searchResults.length})
+                    </button>
+                )}
+
+                {/* 2. NÚT X ĐỂ XÓA (Hiện khi có chữ) */}
+                {searchTerm && (
+                    <button 
+                        onClick={() => {
+                            setSearchTerm('');    
+                            setSearchResults([]); 
+                            searchInputRef.current.focus();
+                        }}
+                        className={`p-1 rounded-full transition-colors ${
+                            mode === 'vocab' ? 'text-gray-400 hover:text-emerald-600 hover:bg-emerald-100' : 'text-gray-400 hover:text-indigo-600 hover:bg-indigo-100'
+                        }`}
+                        title="Xóa tìm kiếm"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                )}
+            </div>
         </div>
     </div>
 
-    {/* DROPDOWN KẾT QUẢ GỢI Ý */}
+    {/* DROPDOWN KẾT QUẢ GỢI Ý (GIỮ NGUYÊN CODE CŨ CỦA BẠN Ở ĐÂY) */}
     {searchResults.length > 0 && (
         <div 
             ref={scrollRef}
@@ -3078,33 +3124,24 @@ const selectResult = (item) => {
             {searchResults.map((item, idx) => {
                 const level = item.type === 'kanji' ? getJLPTLevel(item.char) : null; 
 
-                // Xử lý màu nền khi hover hoặc active (phím mũi tên)
-                let bgClass = '';
-                if (idx === activeIndex) {
-                    bgClass = mode === 'vocab' ? 'bg-emerald-100' : 'bg-indigo-100';
-                } else {
-                    bgClass = mode === 'vocab' ? 'bg-white hover:bg-emerald-50' : 'bg-white hover:bg-indigo-50';
-                }
-
                 return (
                     <div 
                         key={idx} 
                         onClick={() => selectResult(item)}
-                        className={`flex items-center gap-3 p-3 cursor-pointer border-b border-gray-50 last:border-none transition-colors group ${bgClass}`}
+                        className={`flex items-center gap-3 p-3 cursor-pointer border-b border-gray-50 last:border-none transition-colors group ${
+                            idx === activeIndex ? 'bg-indigo-100' : 'bg-white hover:bg-indigo-50'
+                        }`}
                     >
-                        {/* 1. CHỮ (Kanji/Từ vựng) */}
                         <span className={`font-['Klee_One'] text-black group-hover:scale-105 transition-transform ${mode === 'vocab' ? "text-xl" : "text-2xl"}`}>
                             {item.char}
                         </span>
 
-                        {/* 2. CÁCH ĐỌC */}
                         <div className="flex flex-col justify-center">
                             <span className={`text-sm font-bold uppercase leading-tight truncate ${mode === 'vocab' ? 'text-emerald-600' : 'text-indigo-600'}`}>
                                 {item.sound} 
                             </span>
                         </div>
 
-                        {/* 3. NHÃN MÁC (Chỉ hiện ở Kanji) */}
                         <div className="ml-auto flex-shrink-0">
                             {mode !== 'vocab' && (
                                 level ? (
@@ -3124,7 +3161,6 @@ const selectResult = (item) => {
         </div>
     )}
 </div>
-
             {/* KHUNG NHẬP LIỆU */}
             <div className="space-y-2 pt-2">
                 {/* --- TIÊU ĐỀ & CÁC NÚT (ĐÃ CHỈNH SỬA GIAO DIỆN) --- */}
