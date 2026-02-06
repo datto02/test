@@ -3251,8 +3251,8 @@ LÀM SẠCH
                             </div>
                           </>
             ) : (
-          // === GIAO DIỆN TỪ VỰNG (4 DÒNG) ===
-             <div className="space-y-3">
+         // === GIAO DIỆN TỪ VỰNG (ĐÃ SỬA ĐẸP) ===
+                                <div className="space-y-3">
                                     
                                     {/* 1. MINNA NO NIHONGO */}
                                     <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
@@ -3337,8 +3337,11 @@ LÀM SẠCH
                                     </div>
                                 </div>
                             )}
-                        </div>
-                    )}
+            
+        </div>
+    )}
+</div>
+
 
 {/* 2. MENU TIỆN ÍCH (Utilities) */}
 <div className="relative flex-1" ref={utilsMenuRef}> 
