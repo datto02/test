@@ -11571,11 +11571,6 @@
     "reading": "さす",
     "meaning": "giương (ô), chiếu (nắng), nhỏ (thuốc)"
   },
-  Tuân thủ yêu cầu của bạn: Giữ nguyên từ gốc (Katakana/Ký hiệu) như dữ liệu đầu vào, bỏ phần tiếng Anh trong ngoặc đơn.
-
-1. File tuvungg.json
-JSON
-{
   "パートナー": {
     "reading": "パートナー",
     "meaning": "đối tác"
