@@ -3118,8 +3118,8 @@ const selectResult = (item) => {
 
     {/* --- CHÚ THÍCH NHỎ DƯỚI THANH TÌM KIẾM (MỚI) --- */}
     {mode === 'vocab' && (
-        <p className="text-[10px] text-emerald-500/70 italic ml-1 -mt-1 font-medium animate-in fade-in slide-in-from-top-1">
-            *nhập 1 chữ kanji để tìm từ vựng đi kèm
+        <p className="text-[9px] text-gray-400 italic ml-1 -mt-1 font-medium animate-in fade-in slide-in-from-top-1">
+            *Nhập 1 chữ Kanji để tìm từ vựng đi kèm
         </p>
     )}
 
