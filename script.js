@@ -2820,35 +2820,20 @@ if (!query) {
 
 const matches = [];
 
-   if (mode === 'vocab') {
-        // Hàm tính điểm ưu tiên RIÊNG cho từ vựng (6 cấp độ để phân biệt THU vs THÚ)
+  if (mode === 'vocab') {
         const calculateVocabPriority = (soundStr) => {
             if (!soundStr) return 100;
             const sound = soundStr.toLowerCase();
             const soundNoAccent = removeAccents(sound);
-
-            // MỨC 1: Khớp tuyệt đối (thu -> THU) - XẾP ĐẦU TIÊN
             if (sound === query) return 1;
-            
-            // MỨC 2: Khớp chữ nhưng lệch dấu (thu -> THÚ, THỨ...) - XẾP THỨ HAI
             if (soundNoAccent === queryNoAccent) return 2;
-
-            // MỨC 3: Bắt đầu bằng (thu -> THUA)
             if (sound.startsWith(query)) return 3;
-
-            // MỨC 4: Bắt đầu bằng không dấu (thu -> THUỐC)
             if (soundNoAccent.startsWith(queryNoAccent)) return 4;
-
-            // MỨC 5: Có chứa (thu -> KỸ THUẬT)
             if (sound.includes(query)) return 5;
-
-            // MỨC 6: Có chứa không dấu
             if (soundNoAccent.includes(queryNoAccent)) return 6;
-
             return 100; 
         };
 
-        // 1. Tìm Kanji mục tiêu dựa trên điểm ưu tiên mới
         let targetKanjiScores = {}; 
         const isInputKanji = query.match(/[\u4E00-\u9FAF]/);
 
@@ -2858,44 +2843,66 @@ const matches = [];
             Object.entries(dbData.KANJI_DB).forEach(([char, info]) => {
                 if (info.sound) {
                     const score = calculateVocabPriority(info.sound);
-                    // Chỉ lấy những chữ có liên quan (score < 100)
-                    if (score < 100) {
-                        targetKanjiScores[char] = score;
-                    }
+                    if (score < 100) targetKanjiScores[char] = score;
                 }
             });
         }
 
-        // 2. Quét DB từ vựng
         if (dbData.TUVUNG_DB && Object.keys(targetKanjiScores).length > 0) {
             Object.entries(dbData.TUVUNG_DB).forEach(([word, info]) => {
                 let bestWordScore = 100;
                 let foundMatch = false;
-
                 for (const char of word) {
                     if (targetKanjiScores[char] !== undefined) {
-                        // Lấy điểm thấp nhất (tốt nhất) trong các chữ Kanji của từ đó
-                        if (targetKanjiScores[char] < bestWordScore) {
-                            bestWordScore = targetKanjiScores[char];
-                        }
+                        if (targetKanjiScores[char] < bestWordScore) bestWordScore = targetKanjiScores[char];
                         foundMatch = true;
                     }
                 }
-                
                 if (foundMatch) {
                     matches.push({
                         char: word,             
                         sound: info.reading,    
-                        meaning: info.meaning,  
+                        // meaning: info.meaning, // (Đã xóa ở giao diện, nhưng vẫn giữ trong data nếu cần logic)
                         type: 'vocab',
-                        priority: bestWordScore, // Điểm ưu tiên (1 là cao nhất)
+                        priority: bestWordScore,
                         length: word.length 
                     });
                 }
             });
         }
-        
-        // 3. Sắp xếp: Ưu tiên điểm số (THU trước THÚ), sau đó đến độ dài từ
+
+        // --- BƯỚC LỌC THÔNG MINH (FIX LỖI HIỂN THỊ DƯ THỪA) ---
+        // 1. Sắp xếp sơ bộ theo độ dài để ưu tiên từ ngắn (từ gốc) trước
+        matches.sort((a, b) => a.length - b.length);
+
+        const uniqueMatches = [];
+        matches.forEach(current => {
+            // Kiểm tra xem từ này có phải là bản sao dài dòng của từ đã có không
+            const isRedundant = uniqueMatches.some(base => {
+                // Case 1: Chứa hoàn toàn (VD: Có '食事' rồi thì bỏ '食事する')
+                if (current.char.startsWith(base.char)) return true;
+
+                // Case 2: Cùng gốc Kanji nhưng đuôi Masu (VD: Có '食べる' rồi thì bỏ '食べます')
+                // Lấy phần Kanji của 2 từ để so sánh
+                const baseKanji = base.char.replace(/[ぁ-んァ-ン]/g, '');
+                const currentKanji = current.char.replace(/[ぁ-んァ-ン]/g, '');
+                
+                if (baseKanji === currentKanji && baseKanji.length > 0) {
+                     // Nếu từ hiện tại đuôi 'masu' hoặc 'shimasu' -> Bỏ
+                     if (current.char.endsWith('ます') || current.char.endsWith('します')) {
+                         return true; 
+                     }
+                }
+                return false;
+            });
+
+            if (!isRedundant) {
+                uniqueMatches.push(current);
+            }
+        });
+        matches = uniqueMatches; // Gán lại danh sách đã lọc
+
+        // Sắp xếp lại lần cuối theo Priority
         matches.sort((a, b) => {
             if (a.priority !== b.priority) return a.priority - b.priority;
             return a.length - b.length;
@@ -3061,7 +3068,6 @@ const selectResult = (item) => {
         className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl z-[70] max-h-60 overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200"
     >
         {searchResults.map((item, idx) => {
-            // Kiểm tra cấp độ JLPT chỉ khi ở chế độ Kanji
             const level = item.type === 'kanji' ? getJLPTLevel(item.char) : null; 
 
             return (
@@ -3072,24 +3078,19 @@ const selectResult = (item) => {
                         idx === activeIndex ? 'bg-indigo-100' : 'bg-white hover:bg-indigo-50'
                     }`}
                 >
-                    {/* 1. SỬA FONT & CỠ CHỮ: Dùng Klee One cho cả 2. Vocab để text-xl cho cân đối */}
+                    {/* 1. CHỮ (Kanji/Từ vựng) */}
                     <span className={`font-['Klee_One'] text-black group-hover:scale-105 transition-transform ${mode === 'vocab' ? "text-xl" : "text-2xl"}`}>
                         {item.char}
                     </span>
 
-                    {/* 2. SỬA MÀU SẮC: Vocab màu Emerald (Xanh), Kanji màu Indigo (Tím than) */}
-                    <div className="flex flex-col overflow-hidden">
-                        <span className={`text-[11px] font-black uppercase leading-tight truncate ${mode === 'vocab' ? 'text-emerald-600' : 'text-indigo-600'}`}>
+                    {/* 2. CÁCH ĐỌC (Đã xóa Ý nghĩa) */}
+                    <div className="flex flex-col justify-center">
+                        <span className={`text-sm font-bold uppercase leading-tight truncate ${mode === 'vocab' ? 'text-emerald-600' : 'text-indigo-600'}`}>
                             {item.sound} 
                         </span>
-                        {item.meaning && (
-                            <span className="text-[10px] text-gray-400 font-medium leading-tight truncate">
-                                {item.meaning}
-                            </span>
-                        )}
                     </div>
 
-                    {/* 3. SỬA NHÃN MÁC: Ẩn hoàn toàn nếu là Vocab, chỉ hiện cho Kanji */}
+                    {/* 3. NHÃN MÁC (Chỉ hiện ở Kanji) */}
                     <div className="ml-auto flex-shrink-0">
                         {mode !== 'vocab' && (
                             level ? (
