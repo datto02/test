@@ -3363,10 +3363,6 @@
     "reading": "シャープペンシル",
     "meaning": "bút chì kim"
   },
-  "鞄": {
-    "reading": "かばん",
-    "meaning": "cặp, túi sách"
-  },
    "かばん": {
     "reading": "かばん",
     "meaning": "cặp, túi sách"
@@ -3847,8 +3843,8 @@
     "reading": "ビル",
     "meaning": "tòa nhà"
   },
-  "エイーティーエム": {
-    "reading": "エイーティーエム",
+  "エーティーエム": {
+    "reading": "エーティーエム",
     "meaning": "máy ATM"
   },
   "コンビニ": {
@@ -3867,8 +3863,8 @@
     "reading": "パスポート",
     "meaning": "hộ chiếu"
   },
-  "チリソー": {
-    "reading": "チリソー",
+  "チリソース": {
+    "reading": "チリソース",
     "meaning": "tương ớt"
   },
   "かかります": {
@@ -6301,7 +6297,7 @@
   },
   "汽車": {
     "reading": "きしゃ",
-    "meaning": "tàu hỏa"
+    "meaning": "tàu chạy bằng hơi nước"
   },
   "汽船": {
     "reading": "きせん",
@@ -6868,7 +6864,7 @@
     "meaning": "vừa, hợp"
   },
   "今では": {
-    "reading": "いでは",
+    "reading": "いまでは",
     "meaning": "bây giờ (thì)"
   },
   "成人式": {
@@ -13716,7 +13712,7 @@
     "meaning": "lưu lại, tạm trú"
   },
   "便": {
-    "reading": "べん/びｎ",
+    "reading": "べん/びん",
     "meaning": "thuận tiện/chuyến bay, kiện hàng"
   },
   "設備": {
