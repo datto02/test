@@ -1593,11 +1593,11 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
         </div>
 
         {/* Branding Footer */}
-        <div className="absolute bottom-[5mm] left-[12.5mm] text-gray-600 text-xs font-sans">
+        <div className="absolute bottom-[5mm] left-[12.5mm] text-black text-xs font-sans">
             {/* Dòng 1 */}
             <div className="text-[10px]">
-                © Bản quyền thuộc <span className="font-bold text-gray-700">Phá Đảo Tiếng Nhật</span> 
-                <span> (<span className="font-bold italic text-gray-700">phadaotiengnhat.com</span>)</span>
+                © Bản quyền thuộc <span className="font-bold text-black">Phá Đảo Tiếng Nhật</span> 
+                <span> (<span className="font-bold italic text-black">phadaotiengnhat.com</span>)</span>
             </div>
             
             {/* Dòng 2 */}
