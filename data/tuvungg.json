@@ -9665,7 +9665,7 @@
   },
   "利用": {
     "reading": "りよう",
-    "meaning": "sử dụng, lợi dụng"
+    "meaning": "sử dụng, tận dụng"
   },
   "理解": {
     "reading": "りかい",
@@ -9965,7 +9965,7 @@
   },
   "刺さる": {
     "reading": "ささる",
-    "meaning": "mắc, hóc, đâm"
+    "meaning": "Bị đâm, bị găm vào"
   },
   "刺す": {
     "reading": "さす",
@@ -10017,7 +10017,7 @@
   },
   "振る": {
     "reading": "ふる",
-    "meaning": "vẫy, lắc, rắc; từ chối"
+    "meaning": "Vẫy, rắc, "đá" (người yêu)"
   },
   "めくる": {
     "reading": "めくる",
@@ -10529,7 +10529,7 @@
   },
   "ばらばら": {
     "reading": "ばらばら",
-    "meaning": "chia rẽ, phân tán"
+    "meaning": "Rời rạc, lung tung"
   },
   "ぼろぼろ": {
     "reading": "ぼろぼろ",
@@ -10689,7 +10689,7 @@
   },
   "いらいら": {
     "reading": "いらいら",
-    "meaning": "nóng lòng, sốt ruột"
+    "meaning": "Bực bội, cáu kỉnh"
   },
   "のんびり": {
     "reading": "のんびり",
@@ -11233,11 +11233,11 @@
   },
   "載る": {
     "reading": "のる",
-    "meaning": "lên, vừa"
+    "meaning": "Được đăng, được in"
   },
   "載せる": {
     "reading": "のせる",
-    "meaning": "cho lên, đăng tải"
+    "meaning": "Đăng tải, đèo/chở (người)"
   },
   "そろう": {
     "reading": "そろう",
@@ -11297,15 +11297,15 @@
   },
   "解く": {
     "reading": "とく",
-    "meaning": "giải quyết, tan"
+    "meaning": "Gỡ, tháo, giải (đố)"
   },
    "溶く": {
     "reading": "とく",
-    "meaning": "giải quyết, tan"
+    "meaning": "Đánh (trứng), hòa tan"
   },
    "溶かす": {
     "reading": "とかす",
-    "meaning": "giải quyết, tan"
+    "meaning": "Làm nóng chảy"
   },
   "含む": {
     "reading": "ふくむ",
@@ -11489,7 +11489,7 @@
   },
   "セット": {
     "reading": "セット",
-    "meaning": "bộ, đặt (đồng hồ)"
+    "meaning": "Suất (ăn), chỉnh (tóc)"
   },
   "ウイルス": {
     "reading": "ウイルス",
@@ -11529,7 +11529,7 @@
   },
   "きちんと": {
     "reading": "きちんと",
-    "meaning": "nghiêm chỉnh, cẩn thận"
+    "meaning": "Chỉn chu, đàng hoàng"
   },
   "しっかり": {
     "reading": "しっかり",
@@ -11541,11 +11541,11 @@
   },
   "じっと": {
     "reading": "じっと",
-    "meaning": "kiên nhẫn, lặng im"
+    "meaning": "Chăm chú, im phăng phắc"
   },
   "そっと": {
     "reading": "そっと",
-    "meaning": "lặng lẽ, nhẹ nhàng, lén lút"
+    "meaning": "Nhẹ nhàng, rón rén"
   },
   "それぞれ": {
     "reading": "それぞれ",
@@ -11685,7 +11685,7 @@
   },
   "主人": {
     "reading": "しゅじん",
-    "meaning": "ông chủ, chủ nhân, chồng"
+    "meaning": "Chồng (mình), ông chủ"
   },
   "双子": {
     "reading": "ふたご",
@@ -12525,7 +12525,7 @@
   },
   "持てる": {
     "reading": "もてる",
-    "meaning": "có (năng lực), đào hoa"
+    "meaning": "Đào hoa, được hâm mộ"
   },
   "例える": {
     "reading": "たとえる",
@@ -12609,7 +12609,7 @@
   },
   "仕方がない": {
     "reading": "しかたがない",
-    "meaning": "không còn cách nào khác"
+    "meaning": "Đành chịu, hết cách"
   },
   "やむを得ない": {
     "reading": "やむをえない",
@@ -12629,7 +12629,7 @@
   },
   "煙い": {
     "reading": "けむい",
-    "meaning": "khói mù mịt, ngột ngạt"
+    "meaning": "Khói, cay mắt (do khói)"
   },
   "邪魔": {
     "reading": "じゃま",
@@ -12661,7 +12661,7 @@
   },
   "とんでもない": {
     "reading": "とんでもない",
-    "meaning": "quá đáng, không có chi"
+    "meaning": "vớ vẩn/ không có chi"
   },
   "くだらない": {
     "reading": "くだらない",
@@ -12685,7 +12685,7 @@
   },
   "ずるい": {
     "reading": "ずるい",
-    "meaning": "gian xảo, bất công"
+    "meaning": "Khôn lỏi, ăn gian"
   },
   "憎らしい": {
     "reading": "にくらしい",
@@ -12729,11 +12729,11 @@
   },
   "強引": {
     "reading": "ごういん",
-    "meaning": "bắt buộc, cưỡng ép"
+    "meaning": "Cưỡng ép, cậy quyền"
   },
   "勝手": {
     "reading": "かって",
-    "meaning": "tự ý, ích kỉ"
+    "meaning": "Tự tiện, tùy ý"
   },
   "強気": {
     "reading": "つよき",
@@ -12941,7 +12941,7 @@
   },
   "差別": {
     "reading": "さべつ",
-    "meaning": "khác biệt, phân biệt"
+    "meaning": "Phân biệt đối xử"
   },
   "中間": {
     "reading": "ちゅうかん",
@@ -12997,7 +12997,7 @@
   },
   "きっかけ": {
     "reading": "きっかけ",
-    "meaning": "cơ hội, thời cơ, lúc"
+    "meaning": "Cớ, dịp, lý do bắt đầu"
   },
   "行動": {
     "reading": "こうどう",
@@ -13385,7 +13385,7 @@
   },
   "割に": {
     "reading": "わりに",
-    "meaning": "tương đối"
+    "meaning": "Khá là"
   },
   "割と": {
     "reading": "わりと",
@@ -13429,7 +13429,7 @@
   },
   "一層": {
     "reading": "いっそう",
-    "meaning": "thêm nữa, hơn nữa"
+    "meaning": "Hơn hẳn"
   },
   "一段と": {
     "reading": "いちだんと",
@@ -13545,7 +13545,7 @@
   },
   "しょっちゅう": {
     "reading": "しょっちゅう",
-    "meaning": "luôn luôn, thường xuyên"
+    "meaning": "Hay, thường xuyên"
   },
   "たまに": {
     "reading": "たまに",
@@ -13609,7 +13609,7 @@
   },
   "ぶらぶら": {
     "reading": "ぶらぶら",
-    "meaning": "đung đưa, lang thang"
+    "meaning": "Lang thang, lông bông"
   },
   "したがって": {
     "reading": "したがって",
@@ -14493,7 +14493,7 @@
   },
   "メディア": {
     "reading": "メディア",
-    "meaning": "phương tiện truyền thông"
+    "meaning": "Truyền thông đại chúng"
   },
   "コメント": {
     "reading": "コメント",
@@ -14685,7 +14685,7 @@
   },
   "素直": {
     "reading": "すなお",
-    "meaning": "nhẹ nhàng, hòa nhã, ngoan ngoãn"
+    "meaning": "Ngoan ngoãn, chân thành"
   },
   "率直": {
     "reading": "そっちょく",
@@ -14929,7 +14929,7 @@
   },
   "皮肉": {
     "reading": "ひにく",
-    "meaning": "giễu cợt, châm chọc"
+    "meaning": "Mỉa mai"
   },
   "意義": {
     "reading": "いぎ",
@@ -15057,7 +15057,7 @@
   },
   "処置": {
     "reading": "しょち",
-    "meaning": "cách cư xử, xử lý (vết thương)"
+    "meaning": "Xử lý, sơ cứu"
   },
   "処分": {
     "reading": "しょぶん",
@@ -15081,7 +15081,7 @@
   },
   "手間": {
     "reading": "てま",
-    "meaning": "thời gian, rủi ro"
+    "meaning": "Công sức, phiền hà"
   },
   "能率": {
     "reading": "のうりつ",
@@ -15525,7 +15525,7 @@
   },
   "頂戴する": {
     "reading": "ちょうだいする",
-    "meaning": "nhận, chấp nhận, cho"
+    "meaning": "Xin, nhận, hãy (làm giúp)"
   },
   "学ぶ": {
     "reading": "まなぶ",
@@ -15569,7 +15569,7 @@
   },
   "濁す": {
     "reading": "にごす",
-    "meaning": "ngập ngừng (nói)"
+    "meaning": "Nói lập lờ, nói tránh"
   },
   "生じる": {
     "reading": "しょうじる",
@@ -16069,7 +16069,7 @@
   },
   "下取り": {
     "reading": "したどり",
-    "meaning": "mua đổi, trao đổi, đổi cũ lấy mới"
+    "meaning": "Thu mua lại (đồ cũ)"
   },
   "倹約": {
     "reading": "けんやく",
@@ -16121,7 +16121,7 @@
   },
   "指図": {
     "reading": "さしず",
-    "meaning": "hướng dẫn, mệnh lệnh, ra lệnh, chỉ huy"
+    "meaning": "Ra lệnh, sai khiến"
   },
   "操縦": {
     "reading": "そうじゅう",
@@ -16177,11 +16177,11 @@
   },
   "塊": {
     "reading": "かたまり",
-    "meaning": "cục, tảng, miếng, đàn, lũ"
+    "meaning": "Cục, tảng, khối"
   },
   "固まり": {
     "reading": "かたまり",
-    "meaning": "cục, tảng, miếng, đàn, lũ"
+    "meaning": "Cục, tảng, khối"
   },
   "丈": {
     "reading": "たけ",
@@ -16313,7 +16313,7 @@
   },
   "権威": {
     "reading": "けんい",
-    "meaning": "quyền uy, quyền hành, sức ảnh hưởng"
+    "meaning": "quyền uy, quyền hành"
   },
   "圧迫": {
     "reading": "あっぱく",
@@ -16353,7 +16353,7 @@
   },
   "中継": {
     "reading": "ちゅうけい",
-    "meaning": "trực tiếp, truyền hình trực tiếp"
+    "meaning": "Truyền hình, phát sóng"
   },
   "規模": {
     "reading": "きぼ",
@@ -16385,7 +16385,7 @@
   },
   "つまむ": {
     "reading": "つまむ",
-    "meaning": "bịt, gắp, tóm gọn"
+    "meaning": "Bịt (mũi), bốc/gắp (ăn)"
   },
   "つかむ": {
     "reading": "つかむ",
@@ -16441,7 +16441,7 @@
   },
   "くぐる": {
     "reading": "くぐる",
-    "meaning": "bước qua, băng qua"
+    "meaning": "Chui qua, lọt qua"
   },
   "ささやく": {
     "reading": "ささやく",
@@ -16449,7 +16449,7 @@
   },
   "わめく": {
     "reading": "わめく",
-    "meaning": "la hét, quát"
+    "meaning": "Gào thét"
   },
   "言いつける": {
     "reading": "いいつける",
@@ -16457,7 +16457,7 @@
   },
   "打ち明ける": {
     "reading": "うちあける",
-    "meaning": "thú nhận"
+    "meaning": "Bộc bạch, tâm sự"
   },
   "見かける": {
     "reading": "みかける",
@@ -16477,7 +16477,7 @@
   },
   "乗り過ごす": {
     "reading": "のりすごす",
-    "meaning": "lỡ, bỏ lỡ (tàu, xe)"
+    "meaning": "Đi quá trạm, lỡ trạm"
   },
   "乗り越える": {
     "reading": "のりこえる",
@@ -16521,7 +16521,7 @@
   },
   "下る": {
     "reading": "くだる",
-    "meaning": "đưa ra, trôi qua, bị tiêu chảy"
+    "meaning": "Xuống (dốc), tiêu chảy, được ban hành"
   },
   "下す": {
     "reading": "くだす",
@@ -16529,7 +16529,7 @@
   },
   "垂れる": {
     "reading": "たれる",
-    "meaning": "treo, rủ"
+    "meaning": "Chảy (máu), rũ xuống"
   },
   "茂る": {
     "reading": "しげる",
@@ -16537,7 +16537,7 @@
   },
   "耕す": {
     "reading": "たがやす",
-    "meaning": "bón"
+    "meaning": "Cày, xới (đất)"
   },
   "生かす": {
     "reading": "いかす",
@@ -16565,7 +16565,7 @@
   },
   "やっつける": {
     "reading": "やっつける",
-    "meaning": "tấn công, giải quyết xong"
+    "meaning": "Hạ gục, xử lý xong"
   },
   "励む": {
     "reading": "はげむ",
@@ -16633,7 +16633,7 @@
   },
   "むっとする": {
     "reading": "むっとする",
-    "meaning": "tức giận, nổi đóa"
+    "meaning": "Hậm hực, sưng sỉa"
   },
   "ぞっとする": {
     "reading": "ぞっとする",
@@ -16749,7 +16749,7 @@
   },
   "渋い": {
     "reading": "しぶい",
-    "meaning": "đắng, sẫm"
+    "meaning": "Chát"
   },
   "香ばしい": {
     "reading": "こうばしい",
@@ -16821,7 +16821,7 @@
   },
   "微妙": {
     "reading": "びみょう",
-    "meaning": "phức tạp, không rõ ràng"
+    "meaning": "phức tạp, khó nói"
   },
   "急激": {
     "reading": "きゅうげき",
@@ -16949,7 +16949,7 @@
   },
   "大ざっぱ": {
     "reading": "おおざっぱ",
-    "meaning": "đại khái, sơ sài"
+    "meaning": "Qua loa, đại khái"
   },
   "大げさ": {
     "reading": "おおげさ",
@@ -17009,7 +17009,7 @@
   },
   "生意気": {
     "reading": "なまいき",
-    "meaning": "nóng tính, xấc xược"
+    "meaning": "Xấc xược, hỗn láo"
   },
   "厚かましい": {
     "reading": "あつかましい",
@@ -17281,7 +17281,7 @@
   },
   "精算": {
     "reading": "せいさん",
-    "meaning": "thanh toán"
+    "meaning": "Quyết toán"
   },
   "損害": {
     "reading": "そんがい",
@@ -17573,7 +17573,7 @@
   },
   "取り次ぐ": {
     "reading": "とりつぐ",
-    "meaning": "truyền đạt, chuyển lời"
+    "meaning": "Chuyển (điện thoại), nối máy"
   },
   "取り巻く": {
     "reading": "とりまく",
@@ -17917,11 +17917,11 @@
   },
   "ゼミ": {
     "reading": "ゼミ",
-    "meaning": "dạy kèm, hướng dẫn"
+    "meaning": "Giờ học chuyên đề, hội thảo"
   },
    "ゼミナール": {
     "reading": "ゼミナール",
-    "meaning": "dạy kèm, hướng dẫn"
+    "meaning": "Giờ học chuyên đề, hội thảo"
   },
   "レジュメ": {
     "reading": "レジュメ",
@@ -17941,11 +17941,11 @@
   },
   "リストラ": {
     "reading": "リストラ",
-    "meaning": "tái cấu trúc"
+    "meaning": "Sa thải, cắt giảm biên chế"
   },
   "リストラクション": {
     "reading": "リストラクション",
-    "meaning": "tái cấu trúc"
+    "meaning": "Sa thải, cắt giảm biên chế"
   },
   "フリーター": {
     "reading": "フリーター",
@@ -18013,7 +18013,7 @@
   },
   "近々": {
     "reading": "ちかぢか",
-    "meaning": "sớm"
+    "meaning": "Sắp tới, trong tương lai gần"
   },
   "じきに": {
     "reading": "じきに",
@@ -18037,7 +18037,7 @@
   },
   "今さら": {
     "reading": "いまさら",
-    "meaning": "đến bây giờ"
+    "meaning": "Đến nước này, chuyện đã rồi"
   },
   "今や": {
     "reading": "いまや",
@@ -18081,7 +18081,7 @@
   },
   "一通り": {
     "reading": "ひととおり",
-    "meaning": "khoảng, nhìn chung"
+    "meaning": "Đại khái, qua một lượt"
   },
   "やや": {
     "reading": "やや",
@@ -18105,7 +18105,7 @@
   },
   "さんざん": {
     "reading": "さんざん",
-    "meaning": "khốc liệt, dữ dội"
+    "meaning": "Te tua, tơi tả, dữ dội"
   },
   "ぐっと": {
     "reading": "ぐっと",
@@ -18141,7 +18141,7 @@
   },
   "ぐったり": {
     "reading": "ぐったり",
-    "meaning": "mệt lả, yếu ớt"
+    "meaning": "Mệt lử, rũ rượi"
   },
   "げっそり": {
     "reading": "げっそり",
@@ -18153,7 +18153,7 @@
   },
   "ごたごた": {
     "reading": "ごたごた",
-    "meaning": "hỗn loạn, bối rối"
+    "meaning": "Lộn xộn, lục đục"
   },
   "ごちゃごちゃ": {
     "reading": "ごちゃごちゃ",
@@ -18165,7 +18165,7 @@
   },
   "さも": {
     "reading": "さも",
-    "meaning": "rõ ràng, thực sự"
+    "meaning": "Cứ như thể là"
   },
   "さぞ": {
     "reading": "さぞ",
@@ -18177,7 +18177,7 @@
   },
   "何なりと": {
     "reading": "なんなりと",
-    "meaning": "bất cứ chuyện gì, bất cứ cái gì"
+    "meaning": "Bất cứ điều gì"
   },
   "どうやら": {
     "reading": "どうやら",
@@ -18209,7 +18209,7 @@
   },
   "ろくに": {
     "reading": "ろくに",
-    "meaning": "không đủ"
+    "meaning": "Kha khá, ra hồn"
   },
   "及び": {
     "reading": "および",
@@ -18265,7 +18265,7 @@
   },
   "相席": {
     "reading": "あいせき",
-    "meaning": "ngồi chung bàn (với người không quen)"
+    "meaning": "Ghép bàn"
   },
   "褒美": {
     "reading": "ほうび",
@@ -18277,7 +18277,7 @@
   },
   "台無し": {
     "reading": "だいなし",
-    "meaning": "hỗn độn, rối tung"
+    "meaning": "Công cốc, hỏng bét"
   },
   "心構え": {
     "reading": "こころがまえ",
@@ -18365,7 +18365,7 @@
   },
   "差し入れ": {
     "reading": "さしいれ",
-    "meaning": "đồ đựng (đồ ăn, vật dụng cần thiết)"
+    "meaning": "Đồ tiếp tế, quà thăm hỏi"
   },
   "声援": {
     "reading": "せいえん",
@@ -18665,7 +18665,7 @@
   },
   "ばらす": {
     "reading": "ばらす",
-    "meaning": "làm lộ, tiết lộ, tháo ra"
+    "meaning": "Tháo rời, tiết lộ (bí mật)"
   },
   "すり替える": {
     "reading": "すりかえる",
@@ -18773,7 +18773,7 @@
   },
   "冷やかす": {
     "reading": "ひやかす",
-    "meaning": "chế giễu, trêu chọc"
+    "meaning": "Chọc ghẹo; Hỏi giá không mua"
   },
   "もてなす": {
     "reading": "もてなす",
@@ -19417,15 +19417,15 @@
   },
   "思わしい": {
     "reading": "おもわしい",
-    "meaning": "thích hợp, vừa ý, hài lòng"
+    "meaning": "Khả quan"
   },
   "悩ましい": {
     "reading": "なやましい",
-    "meaning": "khó khăn, quyến rũ"
+    "meaning": "U sầu; Gợi cảm/Quyến rũ"
   },
   "手持ち無沙汰": {
     "reading": "てもちぶさた",
-    "meaning": "không có gì để làm"
+    "meaning": "Buồn tay buồn chân"
   },
   "淡い": {
     "reading": "あわい",
@@ -19445,7 +19445,7 @@
   },
   "あっけない": {
     "reading": "あっけない",
-    "meaning": "chóng vánh, quá nhanh chóng"
+    "meaning": "Chóng vánh, nhạt nhẽo"
   },
   "むなしい": {
     "reading": "むなしい",
@@ -19521,7 +19521,7 @@
   },
   "まちまち": {
     "reading": "まちまち",
-    "meaning": "khác nhau, đa dạng"
+    "meaning": "Muôn hình vạn trạng"
   },
   "生々しい": {
     "reading": "なまなましい",
@@ -19577,7 +19577,7 @@
   },
   "おびただしい": {
     "reading": "おびただしい",
-    "meaning": "nhiều, vô số"
+    "meaning": "Vô số (tiêu cực)"
   },
   "甚だしい": {
     "reading": "はなはだしい",
@@ -19589,7 +19589,7 @@
   },
   "堪能": {
     "reading": "たんのう",
-    "meaning": "thành thạo, giỏi"
+    "meaning": "Thưởng thức; Thành thạo"
   },
   "主催": {
     "reading": "しゅさい",
@@ -20481,7 +20481,7 @@
   },
   "一旦": {
     "reading": "いったん",
-    "meaning": "tạm thời, một lúc, một khi"
+    "meaning": "tạm thời, một khi"
   },
   "ひとまず": {
     "reading": "ひとまず",
