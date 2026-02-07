@@ -655,10 +655,6 @@
     "reading": "こいびと",
     "meaning": "người yêu"
   },
-  "週末": {
-    "reading": "しゅうまつ",
-    "meaning": "Cuối tuần"
-  },
   "食べます": {
     "reading": "たべます",
     "meaning": "ăn"
@@ -1175,10 +1171,6 @@
     "reading": "こまかいおかね",
     "meaning": "tiền lẻ"
   },
-  "時間": {
-    "reading": "じかん",
-    "meaning": "thời gian"
-  },
   "用事": {
     "reading": "ようじ",
     "meaning": "việc bận"
@@ -1490,10 +1482,6 @@
   "週間": {
     "reading": "～しゅうかん",
     "meaning": "～tuần"
-  },
-  "全部": {
-    "reading": "ぜんぶ",
-    "meaning": "tổng cộng, toàn bộ"
   },
   "皆": {
     "reading": "みんな",
@@ -6007,10 +5995,6 @@
     "reading": "なおる",
     "meaning": "khỏi [bệnh]"
   },
-  "直る": {
-    "reading": "なおる",
-    "meaning": "được sửa [hỏng hóc]"
-  },
   "クリックする": {
     "reading": "クリックする",
     "meaning": "click chuột"
@@ -10013,7 +9997,7 @@
   },
   "振る": {
     "reading": "ふる",
-    "meaning": "Vẫy, rắc, "đá" (người yêu)"
+    "meaning": "Vẫy, rắc, đá (người yêu)"
   },
   "めくる": {
     "reading": "めくる",
