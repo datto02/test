@@ -2259,15 +2259,16 @@ const handleLoadDueCards = () => {
     
 // --- CHẶN CUỘN TRANG KHI MỞ MODAL ---
 useEffect(() => {
-// Nếu khung In hoặc khung Tài liệu đang mở
-if (isPrintModalOpen || isDocsModalOpen) {
-    document.body.style.overflow = 'hidden'; // Khóa cuộn
-} else {
-    document.body.style.overflow = 'unset';  // Mở lại cuộn bình thường
-}
-// Dọn dẹp khi tắt
-return () => { document.body.style.overflow = 'unset'; };
-}, [isPrintModalOpen, isDocsModalOpen]);
+    // Logic: Nếu khung In HOẶC khung Tài liệu HOẶC Menu Chọn Nhanh (ở chế độ Từ vựng) đang mở
+    if (isPrintModalOpen || isDocsModalOpen || (isMenuOpen && mode === 'vocab')) {
+        document.body.style.overflow = 'hidden'; // -> KHÓA CUỘN NỀN
+    } else {
+        document.body.style.overflow = 'unset';  // -> Mở lại bình thường
+    }
+    
+    // Dọn dẹp khi tắt component
+    return () => { document.body.style.overflow = 'unset'; };
+}, [isPrintModalOpen, isDocsModalOpen, isMenuOpen, mode]); 
 
 
     useEffect(() => {
