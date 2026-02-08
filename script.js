@@ -4220,7 +4220,76 @@ TÀI LIỆU HỌC TẬP
         </div>
     );
     };
+// --- COMPONENT MỚI: MODAL CHỈNH SỬA TỪ VỰNG ---
+const EditVocabModal = ({ isOpen, onClose, data, onSave }) => {
+    const [reading, setReading] = useState('');
+    const [meaning, setMeaning] = useState('');
 
+    // Load dữ liệu khi mở modal
+    useEffect(() => {
+        if (isOpen && data) {
+            setReading(data.reading || '');
+            setMeaning(data.meaning || '');
+        }
+    }, [isOpen, data]);
+
+    if (!isOpen || !data) return null;
+
+    return (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200" onClick={e => e.stopPropagation()}>
+                
+                <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                    <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2">
+                        ✏️ CHỈNH SỬA TỪ VỰNG
+                    </h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-red-500">✕</button>
+                </div>
+
+                <div className="p-5 space-y-4">
+                    {/* Hiển thị từ gốc (Không cho sửa) */}
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Từ vựng (Gốc)</label>
+                        <div className="text-2xl font-black text-gray-800 font-sans border-b border-gray-200 pb-2">
+                            {data.word}
+                        </div>
+                    </div>
+
+                    {/* Nhập cách đọc */}
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cách đọc (Furigana)</label>
+                        <input 
+                            type="text" 
+                            value={reading}
+                            onChange={(e) => setReading(e.target.value)}
+                            placeholder="Ví dụ: わたし"
+                            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 font-medium"
+                        />
+                    </div>
+
+                    {/* Nhập ý nghĩa */}
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Ý nghĩa (Tiếng Việt)</label>
+                        <textarea 
+                            value={meaning}
+                            onChange={(e) => setMeaning(e.target.value)}
+                            placeholder="Ví dụ: Tôi, tớ, mình..."
+                            rows={3}
+                            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 font-medium resize-none"
+                        />
+                    </div>
+
+                    <button 
+                        onClick={() => onSave(data.word, reading, meaning)}
+                        className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95"
+                    >
+                        LƯU THAY ĐỔI
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
     
     const App = () => {
 // --- Các state cũ giữ nguyên ---
@@ -4239,7 +4308,17 @@ const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
             
     return saved ? JSON.parse(saved) : {};
 });
+const [customVocabData, setCustomVocabData] = useState({}); 
+    const [editingVocab, setEditingVocab] = useState(null); // Từ đang được sửa
 
+    // --- 2. HÀM LƯU DỮ LIỆU ---
+    const handleSaveVocab = (word, newReading, newMeaning) => {
+        setCustomVocabData(prev => ({
+            ...prev,
+            [word]: { reading: newReading, meaning: newMeaning }
+        }));
+        setEditingVocab(null); // Đóng modal
+    };
 // Hàm để lưu kết quả học tập
 const updateSRSProgress = (char, quality) => {
     const newProgress = calculateSRS(srsData[char], quality);
@@ -4362,7 +4441,9 @@ return (
         chars={pageChars} 
         config={config} 
         mode={practiceMode}
-        dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống page 
+        dbData={dbData}
+            customVocabData={customVocabData}
+                onEditVocab={(word, currentData) => setEditingVocab({ word, ...currentData })}
         /> 
     ))}
     </div>
@@ -4413,6 +4494,12 @@ return (
         setIsFlashcardOpen(true);  // Mở Flashcard ngay lập tức
     }}
 />
+        <EditVocabModal 
+                isOpen={!!editingVocab}
+                onClose={() => setEditingVocab(null)}
+                data={editingVocab}
+                onSave={handleSaveVocab}
+            />
        {/* 3. RENDER MODAL MỚI */}
             <ReviewListModal 
                 isOpen={isReviewListOpen}
