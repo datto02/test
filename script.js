@@ -2281,17 +2281,19 @@ if (scrollRef.current) {
         });
     }
 }
-}, [activeIndex]); // Chạy lại mỗi khi activeIndex thay đổi
+}, [activeIndex]); 
 
     // --- STATE QUẢN LÝ ---
     const [isLoading, setIsLoading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
-       const [minnaLesson, setMinnaLesson] = useState(1);
+    const [minnaLesson, setMinnaLesson] = useState(1);
     const [mimiN3, setMimiN3] = useState('');          
     const [mimiN2, setMimiN2] = useState('');
     const [mimiN1, setMimiN1] = useState('');
-
+    const [tangoN3, setTangoN3] = useState('');
+    const [tangoN2, setTangoN2] = useState('');
+    const [tangoN1, setTangoN1] = useState('');
     // --- HÀM KIỂM TRA CẤP ĐỘ JLPT ---
 const getJLPTLevel = (char) => {
 if (dbData.KANJI_LEVELS.N5.includes(char)) return 'N5';
@@ -2731,22 +2733,84 @@ const handleLoadMinna = async () => {
             setIsLoading(false);
         }
     };
+// --- HÀM TẢI TANGO (MỚI THÊM) ---
+    const handleLoadTango = async (level, partInput) => {
+        // 1. Cấu hình giới hạn số bài (N3, N2: 12 bài | N1: 14 bài)
+        const limits = { N3: 12, N2: 12, N1: 14 };
+        const maxPart = limits[level];
 
-    // --- HÀM THÔNG MINH: TỰ KIỂM TRA XEM ĐANG NHẬP Ô NÀO ĐỂ TẢI ---
+        // 2. Kiểm tra số hợp lệ
+        let validPart = parseInt(partInput);
+        if (isNaN(validPart) || validPart < 1) validPart = 1;
+        if (validPart > maxPart) validPart = maxPart;
+
+        // 3. Cập nhật lại số đẹp vào ô input
+        if (level === 'N3') setTangoN3(validPart);
+        if (level === 'N2') setTangoN2(validPart);
+        if (level === 'N1') setTangoN1(validPart);
+
+        // 4. Hiệu ứng Loading
+        setProgress(0);
+        setIsLoading(true);
+        setIsMenuOpen(false);
+
+        // 5. Đường dẫn file: data/tuvung/tango/n3/tangon3p1.json
+        const lvl = level.toLowerCase();
+        const url = `./data/tuvung/tango/${lvl}/tango${lvl}p${validPart}.json`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Không tìm thấy file");
+
+            const data = await response.json();
+            if (!Array.isArray(data) || data.length === 0) {
+                alert("File dữ liệu bị lỗi hoặc rỗng!");
+                setIsLoading(false);
+                return;
+            }
+
+            const textContent = data.join('\n');
+            setProgress(50);
+
+            setTimeout(() => {
+                setLocalText(textContent);
+                onChange({ ...config, text: textContent });
+                setProgress(100);
+                setTimeout(() => setIsLoading(false), 200);
+            }, 300);
+
+        } catch (error) {
+            console.error(error);
+            alert(`Lỗi: Không tìm thấy file dữ liệu!\nĐường dẫn: ${url}`);
+            setIsLoading(false);
+        }
+    };
+ // --- HÀM THÔNG MINH: TỰ KIỂM TRA XEM ĐANG NHẬP Ô NÀO ĐỂ TẢI ---
     const handleSmartLoadVocabulary = () => {
+        // 1. Kiểm tra Minna
         if (minnaLesson !== '' && minnaLesson !== null) {
             handleLoadMinna();
-        } else if (mimiN3 !== '') {
+        } 
+        // 2. Kiểm tra Mimikara
+        else if (mimiN3 !== '') {
             handleLoadMimikara('N3', mimiN3);
         } else if (mimiN2 !== '') {
             handleLoadMimikara('N2', mimiN2);
         } else if (mimiN1 !== '') {
             handleLoadMimikara('N1', mimiN1);
-        } else {
+        } 
+        // 3. Kiểm tra Tango (MỚI)
+        else if (tangoN3 !== '') {
+            handleLoadTango('N3', tangoN3);
+        } else if (tangoN2 !== '') {
+            handleLoadTango('N2', tangoN2);
+        } else if (tangoN1 !== '') {
+            handleLoadTango('N1', tangoN1);
+        } 
+        else {
             alert("Vui lòng nhập số bài hoặc số phần cần học!");
         }
     };
-
     // --- 6. XỬ LÝ RỜI TAY ---
     const handleBlurText = () => {
         if (!localText) return;
@@ -3401,7 +3465,13 @@ LÀM SẠCH
                     e.preventDefault(); 
                 }
             }}
-            onChange={(e) => { setMinnaLesson(e.target.value); if(e.target.value) { setMimiN3(''); setMimiN2(''); setMimiN1(''); } }}
+            onChange={(e) => { 
+    setMinnaLesson(e.target.value); 
+    if(e.target.value) { 
+        setMimiN3(''); setMimiN2(''); setMimiN1(''); 
+        setTangoN3(''); setTangoN2(''); setTangoN1(''); 
+    } 
+}}
             onBlur={() => { if (minnaLesson > 50) setMinnaLesson(50); if (minnaLesson < 1 && minnaLesson !== '') setMinnaLesson(1); }}
             // Input số: Dùng text-lg cho số to rõ, font-bold để số đậm nét
             className={`w-14 text-center font-bold border-b-2 focus:border-emerald-500 outline-none bg-transparent transition-all text-lg pb-0.5 ${minnaLesson !== '' ? 'text-emerald-600 border-emerald-500' : 'text-gray-400 border-gray-200'}`}
@@ -3428,7 +3498,13 @@ LÀM SẠCH
                     e.preventDefault(); 
                 }
             }}
-            onChange={(e) => { setMimiN3(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN2(''); setMimiN1(''); } }}
+           onChange={(e) => { 
+    setMimiN3(e.target.value); 
+    if(e.target.value) { 
+        setMinnaLesson(''); setMimiN2(''); setMimiN1(''); 
+        setTangoN3(''); setTangoN2(''); setTangoN1(''); 
+    } 
+}}
             onBlur={() => { if (mimiN3 > 12) setMimiN3(12); if (mimiN3 < 1 && mimiN3 !== '') setMimiN3(1); }}
             className={`w-14 text-center font-bold border-b-2 focus:border-amber-500 outline-none bg-transparent transition-all text-lg pb-0.5 ${mimiN3 !== '' ? 'text-amber-600 border-amber-500' : 'text-gray-400 border-gray-200'}`}
         />
@@ -3454,7 +3530,13 @@ LÀM SẠCH
                     e.preventDefault(); 
                 }
             }}
-            onChange={(e) => { setMimiN2(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN1(''); } }}
+            onChange={(e) => { 
+    setMimiN2(e.target.value); 
+    if(e.target.value) { 
+        setMinnaLesson(''); setMimiN3(''); setMimiN1(''); 
+        setTangoN3(''); setTangoN2(''); setTangoN1(''); 
+    } 
+}}
             onBlur={() => { if (mimiN2 > 13) setMimiN2(13); if (mimiN2 < 1 && mimiN2 !== '') setMimiN2(1); }}
             className={`w-14 text-center font-bold border-b-2 focus:border-blue-500 outline-none bg-transparent transition-all text-lg pb-0.5 ${mimiN2 !== '' ? 'text-blue-600 border-blue-500' : 'text-gray-400 border-gray-200'}`}
         />
@@ -3480,38 +3562,127 @@ LÀM SẠCH
                     e.preventDefault(); 
                 }
             }}
-            onChange={(e) => { setMimiN1(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); } }}
+           onChange={(e) => { 
+    setMimiN1(e.target.value); 
+    if(e.target.value) { 
+        setMinnaLesson(''); setMimiN3(''); setMimiN2(''); 
+        setTangoN3(''); setTangoN2(''); setTangoN1(''); 
+    } 
+}}
             onBlur={() => { if (mimiN1 > 14) setMimiN1(14); if (mimiN1 < 1 && mimiN1 !== '') setMimiN1(1); }}
             className={`w-14 text-center font-bold border-b-2 focus:border-red-500 outline-none bg-transparent transition-all text-lg pb-0.5 ${mimiN1 !== '' ? 'text-red-600 border-red-500' : 'text-gray-400 border-gray-200'}`}
         />
     </div>
 </div>
+            {/* 5. TANGO N3 */}
+<div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5 border-t border-dashed border-gray-100 mt-1 pt-2">
+    <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
+        <span className="text-pink-500">🌸</span> TANGO N3
+    </label>
+    <div className="flex items-center gap-2">
+        <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
+        <input 
+            type="number" min="1" max="12" placeholder="..." 
+            value={tangoN3}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                if (!/[0-9]/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+            }}
+            onChange={(e) => { 
+                setTangoN3(e.target.value); 
+                if(e.target.value) { 
+                    setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); 
+                    setTangoN2(''); setTangoN1('');
+                } 
+            }}
+            onBlur={() => { if (tangoN3 > 12) setTangoN3(12); if (tangoN3 < 1 && tangoN3 !== '') setTangoN3(1); }}
+            className={`w-14 text-center font-bold border-b-2 focus:border-pink-500 outline-none bg-transparent transition-all text-lg pb-0.5 ${tangoN3 !== '' ? 'text-pink-600 border-pink-500' : 'text-gray-400 border-gray-200'}`}
+        />
+    </div>
+</div>
 
-                                    <div className="pt-2">
-                                        <button 
-                                            onClick={handleSmartLoadVocabulary}
-                                            disabled={!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1}
-                                            className={`w-full py-3 font-bold text-xs rounded-xl shadow-lg active:scale-95 transition-all uppercase tracking-wide flex items-center justify-center gap-2 
-                                                ${(!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1) 
-                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
-                                                    : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
-                                                }`}
-                                        >
-                                            {(!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1) ? (
-                                                <span>Nhập số để chọn...</span>
-                                            ) : (
-                                                <>
-                    
-                                                    <span>
-                                                        {minnaLesson && `TẢI MINNA BÀI ${minnaLesson}`}
-                                                        {mimiN3 && `TẢI MIMI N3 - PHẦN ${mimiN3}`}
-                                                        {mimiN2 && `TẢI MIMI N2 - PHẦN ${mimiN2}`}
-                                                        {mimiN1 && `TẢI MIMI N1 - PHẦN ${mimiN1}`}
-                                                    </span>
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
+{/* 6. TANGO N2 */}
+<div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
+    <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
+        <span className="text-rose-500">🌺</span> TANGO N2
+    </label>
+    <div className="flex items-center gap-2">
+        <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
+        <input 
+            type="number" min="1" max="12" placeholder="..." 
+            value={tangoN2}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                if (!/[0-9]/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+            }}
+            onChange={(e) => { 
+                setTangoN2(e.target.value); 
+                if(e.target.value) { 
+                    setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); 
+                    setTangoN3(''); setTangoN1('');
+                } 
+            }}
+            onBlur={() => { if (tangoN2 > 12) setTangoN2(12); if (tangoN2 < 1 && tangoN2 !== '') setTangoN2(1); }}
+            className={`w-14 text-center font-bold border-b-2 focus:border-rose-500 outline-none bg-transparent transition-all text-lg pb-0.5 ${tangoN2 !== '' ? 'text-rose-600 border-rose-500' : 'text-gray-400 border-gray-200'}`}
+        />
+    </div>
+</div>
+
+{/* 7. TANGO N1 */}
+<div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
+    <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
+        <span className="text-purple-500">🍇</span> TANGO N1
+    </label>
+    <div className="flex items-center gap-2">
+        <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
+        <input 
+            type="number" min="1" max="14" placeholder="..." 
+            value={tangoN1}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                if (!/[0-9]/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+            }}
+            onChange={(e) => { 
+                setTangoN1(e.target.value); 
+                if(e.target.value) { 
+                    setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); 
+                    setTangoN3(''); setTangoN2('');
+                } 
+            }}
+            onBlur={() => { if (tangoN1 > 14) setTangoN1(14); if (tangoN1 < 1 && tangoN1 !== '') setTangoN1(1); }}
+            className={`w-14 text-center font-bold border-b-2 focus:border-purple-500 outline-none bg-transparent transition-all text-lg pb-0.5 ${tangoN1 !== '' ? 'text-purple-600 border-purple-500' : 'text-gray-400 border-gray-200'}`}
+        />
+    </div>
+</div>
+
+                                   <div className="pt-2">
+    <button 
+        onClick={handleSmartLoadVocabulary}
+        // Disabled nếu tất cả các ô đều trống
+        disabled={!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1 && !tangoN3 && !tangoN2 && !tangoN1}
+        className={`w-full py-3 font-bold text-xs rounded-xl shadow-lg active:scale-95 transition-all uppercase tracking-wide flex items-center justify-center gap-2 
+            ${(!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1 && !tangoN3 && !tangoN2 && !tangoN1) 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
+                : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
+            }`}
+    >
+        {(!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1 && !tangoN3 && !tangoN2 && !tangoN1) ? (
+            <span>Nhập số để chọn...</span>
+        ) : (
+            <>
+                <span>
+                    {minnaLesson && `TẢI MINNA BÀI ${minnaLesson}`}
+                    {mimiN3 && `TẢI MIMI N3 - PHẦN ${mimiN3}`}
+                    {mimiN2 && `TẢI MIMI N2 - PHẦN ${mimiN2}`}
+                    {mimiN1 && `TẢI MIMI N1 - PHẦN ${mimiN1}`}
+                    {tangoN3 && `TẢI TANGO N3 - BÀI ${tangoN3}`}
+                    {tangoN2 && `TẢI TANGO N2 - BÀI ${tangoN2}`}
+                    {tangoN1 && `TẢI TANGO N1 - BÀI ${tangoN1}`}
+                </span>
+            </>
+        )}
+    </button>
+</div>
                                 </div>
                             )}
             
