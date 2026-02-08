@@ -29094,5 +29094,237 @@
   "無言": {
     "reading": "むごん",
     "meaning": "Im lặng/Không nói gì"
+  },
+  "顔から火が出る": {
+    "reading": "かおからひがでる",
+    "meaning": "Xấu hổ đỏ mặt"
+  },
+  "顔を立てる": {
+    "reading": "かおをたてる",
+    "meaning": "Giữ thể diện"
+  },
+  "目が届く": {
+    "reading": "めがとどく",
+    "meaning": "Trong tầm mắt/Giám sát kỹ"
+  },
+  "目が高い": {
+    "reading": "めがたかい",
+    "meaning": "Có con mắt tinh đời"
+  },
+  "目が肥える": {
+    "reading": "めがこえる",
+    "meaning": "Sành sỏi/Có mắt nhìn"
+  },
+  "目を盗む": {
+    "reading": "めをぬすむ",
+    "meaning": "Lén lút/Giấu giếm"
+  },
+  "目を引く": {
+    "reading": "めをひく",
+    "meaning": "Thu hút sự chú ý"
+  },
+  "目を丸くする": {
+    "reading": "めをまるくする",
+    "meaning": "Tròn mắt ngạc nhiên"
+  },
+  "目をつぶる": {
+    "reading": "めをつぶる",
+    "meaning": "Nhắm mắt cho qua"
+  },
+  "鼻が高い": {
+    "reading": "はながたかい",
+    "meaning": "Phổng mũi/Tự hào"
+  },
+  "鼻にかける": {
+    "reading": "はなにかける",
+    "meaning": "Khoe khoang/Tự đắc"
+  },
+  "鼻につく": {
+    "reading": "はなにつく",
+    "meaning": "Chán ghét/Khó chịu"
+  },
+  "目と鼻の先": {
+    "reading": "めとはなのさき",
+    "meaning": "Ngay trước mũi/Rất gần"
+  },
+  "耳につく": {
+    "reading": "みみにつく",
+    "meaning": "Lọt vào tai (khó chịu)"
+  },
+  "耳に挟む": {
+    "reading": "みみにはさむ",
+    "meaning": "Nghe thoáng qua"
+  },
+  "耳にたこができる": {
+    "reading": "みみにたこができる",
+    "meaning": "Nghe mòn cả tai"
+  },
+  "耳を澄ます": {
+    "reading": "みみをすます",
+    "meaning": "Lắng tai nghe"
+  },
+  "耳を貸す": {
+    "reading": "みみをかす",
+    "meaning": "Chịu lắng nghe"
+  },
+  "耳をふさぐ": {
+    "reading": "みみをふさぐ",
+    "meaning": "Bịt tai/Lờ đi"
+  },
+  "口数が少ない": {
+    "reading": "くちかずがすくない",
+    "meaning": "Ít nói"
+  },
+  "口を挟む": {
+    "reading": "くちをはさむ",
+    "meaning": "Chen ngang/Xen vào"
+  },
+  "頭が切れる": {
+    "reading": "あたまがきれる",
+    "meaning": "Sắc sảo/Thông minh"
+  },
+  "頭が上がらない": {
+    "reading": "あたまがあがらない",
+    "meaning": "Kính nể/Không ngẩng mặt lên được"
+  },
+  "頭を抱える": {
+    "reading": "あたまをかかえる",
+    "meaning": "Vò đầu bứt tai/Đau đầu"
+  },
+  "頭を冷やす": {
+    "reading": "あたまをひやす",
+    "meaning": "Bình tĩnh lại"
+  },
+  "首を突っ込む": {
+    "reading": "くびをつっこむ",
+    "meaning": "Chĩa mũi vào/Can thiệp"
+  },
+  "首を長くする": {
+    "reading": "くびをながくする",
+    "meaning": "Đợi dài cổ"
+  },
+  "首を縦に振る": {
+    "reading": "くびをたてにふる",
+    "meaning": "Gật đầu đồng ý"
+  },
+  "肩を並べる": {
+    "reading": "かたをならべる",
+    "meaning": "Sánh vai/Ngang hàng"
+  },
+  "肩を持つ": {
+    "reading": "かたをもつ",
+    "meaning": "Về phe/Ủng hộ"
+  },
+  "のどから手が出る": {
+    "reading": "のどからてがでる",
+    "meaning": "Thèm muốn tột độ"
+  },
+  "手が足りない": {
+    "reading": "てがたりない",
+    "meaning": "Thiếu nhân lực"
+  },
+  "手が回らない": {
+    "reading": "てがまわらない",
+    "meaning": "Không xoay sở kịp"
+  },
+  "手を切る": {
+    "reading": "てをきる",
+    "meaning": "Cắt đứt quan hệ"
+  },
+  "手に余る": {
+    "reading": "てにあまる",
+    "meaning": "Quá sức"
+  },
+  "手に負えない": {
+    "reading": "てにおえない",
+    "meaning": "Không trị nổi/Bó tay"
+  },
+  "手も足も出ない": {
+    "reading": "てもあしもでない",
+    "meaning": "Không làm gì được/Bó tay chịu trói"
+  },
+  "手を焼く": {
+    "reading": "てをやく",
+    "meaning": "Khốn đốn/Gặp rắc rối"
+  },
+  "足が早い": {
+    "reading": "あしがはやい",
+    "meaning": "Mau hỏng (thực phẩm)/Đi nhanh"
+  },
+  "足が出る": {
+    "reading": "あしがでる",
+    "meaning": "Vượt ngân sách/Lỗ"
+  },
+  "足が棒になる": {
+    "reading": "あしがぼうになる",
+    "meaning": "Chân cứng đờ (mỏi)"
+  },
+  "息が切れる": {
+    "reading": "いきがきれる",
+    "meaning": "Hết hơi/Đứt hơi"
+  },
+  "息が詰まる": {
+    "reading": "いきがつまる",
+    "meaning": "Nghẹt thở/Ngột ngạt"
+  },
+  "息が長い": {
+    "reading": "いきがながい",
+    "meaning": "Kéo dài lâu năm/Trường kỳ"
+  },
+  "息を抜く": {
+    "reading": "いきをぬく",
+    "meaning": "Nghỉ xả hơi"
+  },
+  "息をつく": {
+    "reading": "いきをつく",
+    "meaning": "Thở phào/Nghỉ ngơi"
+  },
+  "息をのむ": {
+    "reading": "いきをのむ",
+    "meaning": "Nín thở (ngạc nhiên)"
+  },
+  "気が気でない": {
+    "reading": "きがきでない",
+    "meaning": "Bứt rứt/Lo sốt vó"
+  },
+  "気が済む": {
+    "reading": "きがすむ",
+    "meaning": "Thỏa lòng/An tâm"
+  },
+  "馬が合う": {
+    "reading": "うまがあう",
+    "meaning": "Hợp tính/Hợp cạ"
+  },
+  "うなぎ登り": {
+    "reading": "うなぎのぼり",
+    "meaning": "Tăng vùn vụt"
+  },
+  "猫に小判": {
+    "reading": "ねこにこばん",
+    "meaning": "Đàn gảy tai trâu/Lãng phí"
+  },
+  "猫をかぶる": {
+    "reading": "ねこをかぶる",
+    "meaning": "Giả nai"
+  },
+  "猫の手も借りたい": {
+    "reading": "ねこのてもかりたい",
+    "meaning": "Bận tối mắt tối mũi"
+  },
+  "猿も木から落ちる": {
+    "reading": "さるもきからおちる",
+    "meaning": "Chuyên gia cũng sai"
+  },
+  "犬猿の仲": {
+    "reading": "けんえんのなか",
+    "meaning": "Ghét nhau như chó với mèo"
+  },
+  "一長一短": {
+    "reading": "いっちょういったん",
+    "meaning": "Có mặt tốt mặt xấu"
+  },
+  "一石二鳥": {
+    "reading": "いっせきにちょう",
+    "meaning": "Một mũi tên trúng hai đích"
   }
 }
