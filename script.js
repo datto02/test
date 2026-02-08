@@ -304,11 +304,15 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars, db
         e.target.value = '';
     };
     
-    React.useEffect(() => {
-        if (isOpen) document.body.style.overflow = 'hidden';
-        else document.body.style.overflow = 'unset';
-        return () => { document.body.style.overflow = 'unset'; };
-    }, [isOpen]);
+   // BƯỚC 1: Thêm đoạn này để khóa cuộn trang khi mở bảng chọn từ vựng
+    useEffect(() => {
+        if (isMenuOpen && mode === 'vocab') {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => { document.body.style.overflow = ''; };
+    }, [isMenuOpen, mode]);
 
     
     React.useEffect(() => {
