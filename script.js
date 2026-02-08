@@ -1378,7 +1378,7 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
     }
 
    // =================================================================
-    // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (CÓ CHỨC NĂNG EDIT)
+    // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (CÓ CHỨC NĂNG EDIT - GIAO DIỆN CHUẨN)
     // =================================================================
     else {
         const word = char.trim();
@@ -1417,60 +1417,57 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
         // Kiểm tra reading có trùng word không
         const isReadingRedundant = finalReading === word;
         const displayReading = (!isReadingRedundant && finalReading) ? finalReading : null;
+        
+        // Kiểm tra xem có thông tin nào để hiển thị trong ngoặc không?
+        const hasInfo = displayReading || hanviet || finalMeaning;
 
         return (
             <div className="flex flex-col w-full px-[8mm]">
-                {/* HEADER TỪ VỰNG */}
-               <div className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" style={{ width: '184mm' }}>
-                    <div className="flex-shrink-0 mr-4 flex items-baseline gap-2 mb-[3px] w-full">
-                        {/* 1. TỪ VỰNG CHÍNH (Không click sửa) */}
-                       <span className="font-bold text-sm leading-none text-black whitespace-nowrap">{word}</span>
+                {/* HEADER TỪ VỰNG - GIAO DIỆN CHUẨN + TÍNH NĂNG CLICK EDIT */}
+                <div 
+                    className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent group cursor-pointer" 
+                    style={{ width: '184mm' }}
+                    // Thêm sự kiện click vào toàn bộ header để mở modal edit
+                    onClick={() => onEditVocab && onEditVocab(word, { reading: finalReading, meaning: finalMeaning })}
+                    title="Bấm để chỉnh sửa nghĩa/cách đọc"
+                >
+                    <div className="flex-shrink-0 mr-4 flex items-baseline gap-2 mb-[3px]">
+                        {/* Từ vựng chính */}
+                        <span className="font-bold text-sm leading-none text-black whitespace-nowrap">{word}</span>
                         
-                        {/* 2. KHU VỰC THÔNG TIN (CLICK ĐỂ SỬA) */}
-                        <div 
-                            // Thêm sự kiện Click để mở Modal sửa
-                            onClick={() => onEditVocab && onEditVocab(word, { reading: finalReading, meaning: finalMeaning })}
-                            className="flex-1 cursor-pointer hover:bg-yellow-100/50 rounded px-1 -ml-1 transition-colors group flex items-baseline gap-1 min-w-0"
-                            title="Bấm để chỉnh sửa nghĩa/cách đọc"
-                        >
-                            <span className="text-[13px] font-normal text-black leading-normal whitespace-nowrap flex items-baseline gap-1">
+                        {/* CHỈ HIỂN THỊ CẶP NGOẶC NẾU CÓ THÔNG TIN (hasInfo) */}
+                        {hasInfo && (
+                            <span className="text-[13px] font-normal text-black leading-none whitespace-nowrap">
                                 (
-                                {/* Hán Việt (Không sửa, tự động từ Kanji) */}
+                                {/* 2. Âm Hán Việt */}
                                 {hanviet && <span className="font-bold text-black">{hanviet}</span>}
-                                
-                                {/* Gạch nối 1 */}
-                                {(displayReading || finalMeaning) && hanviet && <span> - </span>}
+                                    
+                                {/* Gạch nối 1: Giữa Reading và (Hán Việt hoặc Nghĩa) */}
+                                {displayReading && (hanviet || finalMeaning) && <span> - </span>}
 
-                                {/* Cách đọc (Có thể sửa) */}
-                                {displayReading ? (
-                                    <span className="text-black group-hover:text-indigo-600 transition-colors">{displayReading}</span>
-                                ) : (
-                                    // Placeholder nếu chưa có (để người dùng biết chỗ mà bấm)
-                                    !finalMeaning && !hanviet && <span className="text-gray-300 text-[10px] italic">Thêm cách đọc...</span>
-                                )}
+                                {/* 1. Cách đọc (Chỉ hiện nếu không trùng với mặt chữ) */}
+                                {displayReading && <span>{displayReading}</span>}
 
-                                {/* Gạch nối 2 */}
-                                {finalMeaning && displayReading && <span> - </span>}
+                                {/* Gạch nối 2: Giữa Hán Việt và Nghĩa */}
+                                {hanviet && finalMeaning && !displayReading && <span> - </span>}
+                                {displayReading && finalMeaning && <span> - </span>}
 
-                                {/* Nghĩa (Có thể sửa) */}
-                                {finalMeaning ? (
-                                    <span className="font-sans font-normal text-black group-hover:text-indigo-600 transition-colors">
+                                {/* 3. Nghĩa tiếng Việt */}
+                                {finalMeaning && (
+                                    <span>
                                         {finalMeaning.toLowerCase()}
                                     </span>
-                                ) : (
-                                    // Placeholder nếu chưa có
-                                    <span className="text-gray-300 text-[10px] italic ml-1">...thêm nghĩa</span>
                                 )}
                                 )
                             </span>
-                            
-                            {/* Icon bút chì nhỏ hiện khi hover */}
-                            <svg className="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                        </div>
+                        )}
+                        
+                        {/* Icon bút chì ẩn hiện khi hover (Chỉ báo hiệu có thể sửa) */}
+                        <svg className="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                     </div>
                 </div>
 
-                {/* GRID TỪ VỰNG (Giữ nguyên) */}
+                {/* GRID TỪ VỰNG */}
                 <div className="flex border-l border-t w-fit" style={{ borderColor: gridBorderColor }}>
                     {boxes.map((charInBox, i) => (
                         <GridBox
@@ -1486,7 +1483,7 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
             </div>
         );
     }
-};
+  };                              
     // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
   const Page = ({ chars, config, dbData, mode, customVocabData, onEditVocab }) => {
 // 1. Hàm Xuất dữ liệu (Tải file về máy)
