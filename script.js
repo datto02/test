@@ -1429,9 +1429,7 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
                     style={{ width: '184mm' }}
                 >
                     {/* WRAPPER TƯƠNG TÁC: 
-                        - w-fit: Giới hạn vùng click chỉ ôm sát nội dung (không kéo dài hết dòng)
-                        - group: Để kích hoạt hiệu ứng hover cho các phần tử con
-                        - hover:text-emerald-600: Đổi màu xanh lá khi di chuột vào vùng này
+                        
                     */}
                     <div 
                         className="flex-shrink-0 flex items-baseline gap-2 mb-[3px] cursor-pointer group w-fit transition-colors hover:text-emerald-600"
@@ -1443,39 +1441,34 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
                             {word}
                         </span>
                         
-                        {/* 2. NỘI DUNG TRONG NGOẶC */}
-                        <span className="text-[13px] font-normal text-black group-hover:text-emerald-600 leading-none whitespace-nowrap transition-colors">
-                            (
-                            {/* --- LOGIC HIỂN THỊ PLACEHOLDER --- */}
-                            {/* Nếu thiếu toàn bộ dữ liệu -> Hiện dòng nhắc nhở (Ẩn khi in) */}
-                            {!hanviet && !displayReading && !finalMeaning && (
-                                <span className="text-gray-400 text-[10px] italic pl-1 print:hidden">
-                                    thêm cách đọc, ý nghĩa
-                                </span>
-                            )}
+                      {/* 2. THÔNG TIN BỔ SUNG (Hán Việt, Cách đọc, Nghĩa) */}
+{hasInfo && (
+    <span className="text-[13px] font-normal text-black group-hover:text-emerald-600 leading-none whitespace-nowrap transition-colors ml-1">
+        (
+        {/* Hiện Hán Việt */}
+        {hanviet && <span className="font-bold text-black group-hover:text-emerald-600">{hanviet}</span>}
+        
+        {/* Gạch nối 1 */}
+        {hanviet && (displayReading || finalMeaning) && <span> - </span>}
 
-                            {/* --- HIỂN THỊ DỮ LIỆU --- */}
-                            {/* Hán Việt */}
-                            {hanviet && <span className="font-bold text-black group-hover:text-emerald-600">{hanviet}</span>}
-                                
-                            {/* Gạch nối 1 */}
-                            {displayReading && (hanviet || finalMeaning) && <span> - </span>}
+        {/* Hiện Cách đọc */}
+        {displayReading && <span>{displayReading}</span>}
 
-                            {/* Cách đọc */}
-                            {displayReading && <span>{displayReading}</span>}
+        {/* Gạch nối 2 */}
+        {displayReading && finalMeaning && <span> - </span>}
 
-                            {/* Gạch nối 2 */}
-                            {hanviet && finalMeaning && !displayReading && <span> - </span>}
-                            {displayReading && finalMeaning && <span> - </span>}
+        {/* Hiện Nghĩa */}
+        {finalMeaning && <span className="font-sans">{finalMeaning.toLowerCase()}</span>}
+        )
+    </span>
+)}
 
-                            {/* Nghĩa */}
-                            {finalMeaning && (
-                                <span className="font-sans">
-                                    {finalMeaning.toLowerCase()}
-                                </span>
-                            )}
-                            )
-                        </span>
+{/* 3. DÒNG NHẮC NHỞ (Nằm ngoài ngoặc và hiện khi thiếu Cách đọc + Nghĩa) */}
+{(!displayReading && !finalMeaning) && (
+    <span className="text-gray-400 text-[10px] italic ml-1 print:hidden">
+        thêm cách đọc, ý nghĩa
+    </span>
+)}
                         
                         {/* Icon bút chì: Chỉ hiện khi hover vào vùng chữ */}
                         <svg className="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
