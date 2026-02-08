@@ -2291,9 +2291,6 @@ if (scrollRef.current) {
     const [mimiN3, setMimiN3] = useState('');          
     const [mimiN2, setMimiN2] = useState('');
     const [mimiN1, setMimiN1] = useState('');
-       const [tangoN3, setTangoN3] = useState('');
-    const [tangoN2, setTangoN2] = useState('');
-    const [tangoN1, setTangoN1] = useState('');
 
     // --- HÀM KIỂM TRA CẤP ĐỘ JLPT ---
 const getJLPTLevel = (char) => {
@@ -2734,59 +2731,8 @@ const handleLoadMinna = async () => {
             setIsLoading(false);
         }
     };
-// --- HÀM TẢI TANGO (MỚI) ---
-    const handleLoadTango = async (level, partInput) => {
-        // 1. Cấu hình giới hạn (N3: 12, N2: 12, N1: 14)
-        const limits = { N3: 12, N2: 12, N1: 14 };
-        const maxPart = limits[level];
 
-        // 2. Validate số phần
-        let validPart = parseInt(partInput);
-        if (isNaN(validPart) || validPart < 1) validPart = 1;
-        if (validPart > maxPart) validPart = maxPart;
-
-        // Cập nhật lại số đẹp vào ô input
-        if (level === 'N3') setTangoN3(validPart);
-        if (level === 'N2') setTangoN2(validPart);
-        if (level === 'N1') setTangoN1(validPart);
-        
-        // 3. Hiệu ứng Loading
-        setProgress(0);
-        setIsLoading(true);
-        setIsMenuOpen(false); // Đóng modal sau khi chọn
-
-        // 4. Đường dẫn file: ./data/tuvung/tango/n3/tangon3p1.json
-        const lvl = level.toLowerCase();
-        const url = `./data/tuvung/tango/${lvl}/tango${lvl}p${validPart}.json`;
-
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error("Không tìm thấy file");
-
-            const data = await response.json();
-            if (!Array.isArray(data) || data.length === 0) {
-                alert("File dữ liệu bị lỗi hoặc rỗng!");
-                setIsLoading(false);
-                return;
-            }
-
-            const textContent = data.join('\n');
-            setProgress(50);
-
-            setTimeout(() => {
-                setLocalText(textContent);
-                onChange({ ...config, text: textContent });
-                setProgress(100);
-                setTimeout(() => setIsLoading(false), 200);
-            }, 300);
-
-        } catch (error) {
-            console.error(error);
-            alert(`Lỗi: Không tìm thấy file dữ liệu Tango!\nĐường dẫn: ${url}`);
-            setIsLoading(false);
-        }
-    };
-    // --- HÀM THÔNG MINH (ĐÃ CẬP NHẬT TANGO) ---
+    // --- HÀM THÔNG MINH: TỰ KIỂM TRA XEM ĐANG NHẬP Ô NÀO ĐỂ TẢI ---
     const handleSmartLoadVocabulary = () => {
         if (minnaLesson !== '' && minnaLesson !== null) {
             handleLoadMinna();
@@ -2796,18 +2742,11 @@ const handleLoadMinna = async () => {
             handleLoadMimikara('N2', mimiN2);
         } else if (mimiN1 !== '') {
             handleLoadMimikara('N1', mimiN1);
-        } 
-        // --- Logic Tango Mới ---
-        else if (tangoN3 !== '') {
-            handleLoadTango('N3', tangoN3);
-        } else if (tangoN2 !== '') {
-            handleLoadTango('N2', tangoN2);
-        } else if (tangoN1 !== '') {
-            handleLoadTango('N1', tangoN1);
         } else {
             alert("Vui lòng nhập số bài hoặc số phần cần học!");
         }
     };
+
     // --- 6. XỬ LÝ RỜI TAY ---
     const handleBlurText = () => {
         if (!localText) return;
@@ -3322,214 +3261,264 @@ LÀM SẠCH
                 {/* HÀNG 3 NÚT */}
                 <div className="flex flex-row gap-4 w-full h-12">
                     
-                 {/* 1. MENU CHỌN NHANH (Quick Select) */}
-<div className="relative flex-1" ref={quickMenuRef}> 
-    <button onClick={() => toggleMenu('quick')} className={`w-full h-full px-1 border rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-[0.98] ${isMenuOpen ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}`}>
-        <span className="font-bold text-xs whitespace-nowrap">CHỌN NHANH</span>
-    </button>
-    
-    {isMenuOpen && (
-        <>
-            {/* ========================================================= */}
-            {/* TRƯỜNG HỢP 1: CHẾ ĐỘ KANJI (GIỮ NGUYÊN 100% GIAO DIỆN CŨ) */}
-            {/* ========================================================= */}
-            {mode === 'kanji' ? (
-                <div className="absolute bottom-full left-0 mb-2 z-50 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-4 animate-in fade-in zoom-in-95 duration-200">
-                     {/* --- PHẦN GỘP: BẢNG CHỮ CÁI & BỘ THỦ --- */}
-                    <div>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Bảng chữ cái & Bộ thủ</p>
-                        <div className="grid grid-cols-3 gap-1.5">
-                            <button onClick={() => handleLoadFromGithub('./data/hiragana.json', 'hiragana')} className="py-2 text-[11px] font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition truncate" title="Hiragana">あ Hira</button>
-                            <button onClick={() => handleLoadFromGithub('./data/katakana.json', 'katakana')} className="py-2 text-[11px] font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition truncate" title="Katakana">ア Kata</button>
-                            <button onClick={() => handleLoadFromGithub('./data/bothu.json')} className="py-2 text-[11px] font-bold bg-gray-100 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-600 hover:text-white transition truncate" title="Bộ thủ cơ bản">Bộ thủ</button>
-                        </div>
-                    </div>
-                    {/* Lấy tất cả Kanji */}
-                    <div>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Lấy tất cả Kanji</p>
-                        <div className="grid grid-cols-5 gap-1.5">
-                            {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
-                                <button key={level} onClick={() => { const fileName = `kanji${level.toLowerCase()}.json`; const url = `./data/${fileName}`; handleLoadFromGithub(url); }} className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 active:scale-95 ${levelColors[level]}`}>{level}</button>
-                            ))}
-                        </div>
-                    </div>
-                    {/* Lấy ngẫu nhiên */}
-                    <div>
-                        <div className="flex justify-start items-center gap-2 mb-2 mt-1">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase">Lấy ngẫu nhiên</p>
-                            <div className="flex items-center gap-1.5">
-                                <input type="number" min="0" max="50" value={randomCount} onChange={(e) => { const val = e.target.value; if (val === '') setRandomCount(''); else setRandomCount(parseInt(val)); }} onKeyDown={(e) => { if (e.key === 'Enter' && randomCount > 50) setRandomCount(50) }} onBlur={() => { if (randomCount > 50) setRandomCount(50) }} className="w-10 h-6 text-[16px] text-center font-bold bg-gray-50 border border-gray-200 text-gray-700 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
-                                <span className="text-[10px] font-bold text-gray-400 uppercase">chữ</span>
-                            </div>
-                            <div className="group relative cursor-help ml-auto">
-                                <div className="text-gray-400 hover:text-indigo-500 border border-gray-300 rounded-full w-3.5 h-3.5 flex items-center justify-center text-[9px] font-serif font-bold bg-gray-50 transition-colors">i</div>
-                                <div className="absolute right-0 bottom-full mb-2 w-56 p-2.5 bg-gray-900 text-white text-[10px] rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none shadow-2xl z-[70] leading-relaxed border border-white/10">
-                                    <div className="font-black text-indigo-400 mb-1 uppercase text-[9px] flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Học tập thông minh</div>
-                                    Hệ thống ưu tiên lấy những chữ bạn <b>chưa học Flashcard bao giờ</b>. Nếu đã hết chữ mới, hệ thống sẽ lấy thêm chữ cũ để đủ số lượng yêu cầu.
-                                    <div className="absolute top-full right-1 -mt-1 w-2 h-2 bg-gray-900 rotate-45 border-r border-b border-white/10"></div>
+                    {/* 1. MENU CHỌN NHANH (Quick Select) */}
+                 <div className="relative flex-1" ref={quickMenuRef}> 
+                    <button onClick={() => toggleMenu('quick')} className={`w-full h-full px-1 border rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-[0.98] ${isMenuOpen ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}`}>
+                        <span className="font-bold text-xs whitespace-nowrap">CHỌN NHANH</span>
+                    </button>
+                    {isMenuOpen && (
+                        <div className="absolute bottom-full left-0 mb-2 z-50 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+        {mode === 'kanji' ? (
+                // === GIAO DIỆN KANJI CŨ (GIỮ NGUYÊN 100%) ===
+                <>  
+                         {/* --- PHẦN GỘP: BẢNG CHỮ CÁI & BỘ THỦ --- */}
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Bảng chữ cái & Bộ thủ</p>
+                                <div className="grid grid-cols-3 gap-1.5">
+                                    {/* Nút 1: Hiragana */}
+                                    <button 
+                                        onClick={() => handleLoadFromGithub('./data/hiragana.json', 'hiragana')} 
+                                        className="py-2 text-[11px] font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition truncate"
+                                        title="Hiragana"
+                                    >
+                                        あ Hira
+                                    </button>
+
+                                    {/* Nút 2: Katakana */}
+                                    <button 
+                                        onClick={() => handleLoadFromGithub('./data/katakana.json', 'katakana')} 
+                                        className="py-2 text-[11px] font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition truncate"
+                                        title="Katakana"
+                                    >
+                                        ア Kata
+                                    </button>
+
+                                    {/* Nút 3: Bộ thủ */}
+                                    <button 
+                                        onClick={() => handleLoadFromGithub('./data/bothu.json')} 
+                                        className="py-2 text-[11px] font-bold bg-gray-100 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-600 hover:text-white transition truncate"
+                                        title="Bộ thủ cơ bản"
+                                    >
+                                        Bộ thủ
+                                    </button>
                                 </div>
-                            </div>      
-                        </div>
-                        <div className="grid grid-cols-5 gap-1.5">
-                            {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
-                                <button key={`rand-${level}`} onClick={() => handleRandomLoadFromGithub(level)} className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 active:scale-95 ${levelColors[level]}`}>{level}</button>
-                            ))}
-                        </div>
-                    </div>
+                            </div>
+
+                           
+                            {/* Lấy tất cả Kanji */}
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Lấy tất cả Kanji</p>
+                                <div className="grid grid-cols-5 gap-1.5">
+                                    {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
+                                        <button 
+                                            key={level} 
+                                            onClick={() => { 
+                                                const fileName = `kanji${level.toLowerCase()}.json`; 
+                                                const url = `./data/${fileName}`; 
+                                                handleLoadFromGithub(url); 
+                                            }} 
+                                            className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 active:scale-95 ${levelColors[level]}`}
+                                        >
+                                            {level}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Lấy ngẫu nhiên (Đã chuyển xuống đây) */}
+                            <div>
+                                <div className="flex justify-start items-center gap-2 mb-2 mt-1">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase">Lấy ngẫu nhiên</p>
+                                    {/* Input số lượng */}
+                                    <div className="flex items-center gap-1.5">
+                                        <input 
+                                            type="number" 
+                                            min="0" 
+                                            max="50" 
+                                            value={randomCount} 
+                                            onChange={(e) => { 
+                                                const val = e.target.value; 
+                                                if (val === '') setRandomCount(''); 
+                                                else setRandomCount(parseInt(val)); 
+                                            }} 
+                                            onKeyDown={(e) => { if (e.key === 'Enter' && randomCount > 50) setRandomCount(50) }} 
+                                            onBlur={() => { if (randomCount > 50) setRandomCount(50) }} 
+                                            className="w-10 h-6 text-[16px] text-center font-bold bg-gray-50 border border-gray-200 text-gray-700 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                                        />
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase">chữ</span>
+                                    </div>
+                                                  {/* BIỂU TƯỢNG (i) NẰM CUỐI CÙNG */}
+        <div className="group relative cursor-help ml-auto">
+            <div className="text-gray-400 hover:text-indigo-500 border border-gray-300 rounded-full w-3.5 h-3.5 flex items-center justify-center text-[9px] font-serif font-bold bg-gray-50 transition-colors">i</div>
+            
+            {/* TOOLTIP GIẢI THÍCH (Hiện lên khi di chuột vào) */}
+            <div className="absolute right-0 bottom-full mb-2 w-56 p-2.5 bg-gray-900 text-white text-[10px] rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none shadow-2xl z-[70] leading-relaxed border border-white/10">
+                <div className="font-black text-indigo-400 mb-1 uppercase text-[9px] flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    Học tập thông minh
                 </div>
+                Hệ thống ưu tiên lấy những chữ bạn <b>chưa học Flashcard bao giờ</b>. Nếu đã hết chữ mới, hệ thống sẽ lấy thêm chữ cũ để đủ số lượng yêu cầu.
+                {/* Mũi tên nhỏ trỏ xuống */}
+                <div className="absolute top-full right-1 -mt-1 w-2 h-2 bg-gray-900 rotate-45 border-r border-b border-white/10"></div>
+            </div>
+        </div>      
+                                </div>
+                                <div className="grid grid-cols-5 gap-1.5">
+                                    {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
+                                        <button 
+                                            key={`rand-${level}`} 
+                                            onClick={() => handleRandomLoadFromGithub(level)} 
+                                            className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 active:scale-95 ${levelColors[level]}`}
+                                        >
+                                            {level}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                          </>
             ) : (
-                // =================================================================
-                // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (MODAL MỚI: GIỮA MÀN HÌNH + TANGO)
-                // =================================================================
-                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-default" onClick={(e) => e.stopPropagation()}>
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-200 flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
-                        
-                        {/* Header Modal */}
-                        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                            <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2">
-                                📚 THƯ VIỆN TỪ VỰNG
-                            </h3>
-                            <button onClick={() => setIsMenuOpen(false)} className="text-gray-400 hover:text-red-500 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                            </button>
-                        </div>
+         // === GIAO DIỆN TỪ VỰNG (ĐÃ SỬA ĐẸP) ===
+                                <div className="space-y-3">
+                                    
+                                {/* 1. MINNA NO NIHONGO */}
+<div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
+    {/* BÊN TRÁI: Chỉ còn Icon và Tên - Dùng font-bold để tiêu đề rõ ràng */}
+    <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
+        <span className="text-emerald-600">📚</span> TỪ VỰNG MINNA
+    </label>
+    
+    {/* BÊN PHẢI: Nhóm chữ "BÀI" và Ô nhập liệu */}
+    <div className="flex items-center gap-2">
+        {/* Nhãn BÀI: Dùng font-bold để dễ nhìn hơn ở size nhỏ */}
+        <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
+        <input 
+            type="number" min="1" max="50" placeholder="..."
+            value={minnaLesson}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
+            onChange={(e) => { setMinnaLesson(e.target.value); if(e.target.value) { setMimiN3(''); setMimiN2(''); setMimiN1(''); } }}
+            onBlur={() => { if (minnaLesson > 50) setMinnaLesson(50); if (minnaLesson < 1 && minnaLesson !== '') setMinnaLesson(1); }}
+            // Input số: Dùng text-lg cho số to rõ, font-bold để số đậm nét
+            className={`w-14 text-center font-bold border-b-2 focus:border-emerald-500 outline-none bg-transparent transition-all text-lg pb-0.5 ${minnaLesson !== '' ? 'text-emerald-600 border-emerald-500' : 'text-gray-400 border-gray-200'}`}
+        />
+    </div>
+</div>
+            {/* 2. MIMIKARA N3 */}
+<div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
+    {/* BÊN TRÁI */}
+    <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
+        <span className="text-amber-500">📙</span> MIMIKARA N3
+    </label>
 
-                        {/* Nội dung cuộn */}
-                        <div className="p-5 overflow-y-auto custom-scrollbar space-y-4">
-                            
-                            {/* --- KHỐI 1: MINNA NO NIHONGO --- */}
-                            <div className="flex items-center justify-between group hover:bg-gray-50 p-2 rounded-xl transition-colors border border-dashed border-gray-200 hover:border-emerald-200">
-                                <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-2">
-                                    <span className="text-lg">🇯🇵</span> TỪ VỰNG MINNA
-                                </label>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-gray-400 font-bold text-[9px] uppercase">Bài 1-50</span>
-                                    <input type="number" min="1" max="50" placeholder="..." value={minnaLesson}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') handleSmartLoadVocabulary(); }}
-                                        onChange={(e) => { 
-                                            setMinnaLesson(e.target.value); 
-                                            if(e.target.value) { setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } 
-                                        }}
-                                        className={`w-12 text-center font-bold border-b-2 focus:border-emerald-500 outline-none bg-transparent text-lg pb-0.5 ${minnaLesson !== '' ? 'text-emerald-600 border-emerald-500' : 'text-gray-300 border-gray-200'}`}
-                                    />
+    {/* BÊN PHẢI */}
+    <div className="flex items-center gap-2">
+        <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
+        <input 
+            type="number" min="1" max="12" placeholder="..."
+            value={mimiN3}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
+            onChange={(e) => { setMimiN3(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN2(''); setMimiN1(''); } }}
+            onBlur={() => { if (mimiN3 > 12) setMimiN3(12); if (mimiN3 < 1 && mimiN3 !== '') setMimiN3(1); }}
+            className={`w-14 text-center font-bold border-b-2 focus:border-amber-500 outline-none bg-transparent transition-all text-lg pb-0.5 ${mimiN3 !== '' ? 'text-amber-600 border-amber-500' : 'text-gray-400 border-gray-200'}`}
+        />
+    </div>
+</div>
+            {/* 3. MIMIKARA N2 */}
+<div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
+    {/* BÊN TRÁI */}
+    <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
+        <span className="text-blue-500">📘</span> MIMIKARA N2
+    </label>
+
+    {/* BÊN PHẢI */}
+    <div className="flex items-center gap-2">
+        <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
+        <input 
+            type="number" min="1" max="13" placeholder="..."
+            value={mimiN2}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
+            onChange={(e) => { setMimiN2(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN1(''); } }}
+            onBlur={() => { if (mimiN2 > 13) setMimiN2(13); if (mimiN2 < 1 && mimiN2 !== '') setMimiN2(1); }}
+            className={`w-14 text-center font-bold border-b-2 focus:border-blue-500 outline-none bg-transparent transition-all text-lg pb-0.5 ${mimiN2 !== '' ? 'text-blue-600 border-blue-500' : 'text-gray-400 border-gray-200'}`}
+        />
+    </div>
+</div>
+            {/* 4. MIMIKARA N1 */}
+<div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
+    {/* BÊN TRÁI */}
+    <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
+        <span className="text-red-500">📕</span> MIMIKARA N1
+    </label>
+
+    {/* BÊN PHẢI */}
+    <div className="flex items-center gap-2">
+        <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
+        <input 
+            type="number" min="1" max="14" placeholder="..."
+            value={mimiN1}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
+            onChange={(e) => { setMimiN1(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); } }}
+            onBlur={() => { if (mimiN1 > 14) setMimiN1(14); if (mimiN1 < 1 && mimiN1 !== '') setMimiN1(1); }}
+            className={`w-14 text-center font-bold border-b-2 focus:border-red-500 outline-none bg-transparent transition-all text-lg pb-0.5 ${mimiN1 !== '' ? 'text-red-600 border-red-500' : 'text-gray-400 border-gray-200'}`}
+        />
+    </div>
+</div>
+
+                                    <div className="pt-2">
+                                        <button 
+                                            onClick={handleSmartLoadVocabulary}
+                                            disabled={!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1}
+                                            className={`w-full py-3 font-bold text-xs rounded-xl shadow-lg active:scale-95 transition-all uppercase tracking-wide flex items-center justify-center gap-2 
+                                                ${(!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1) 
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
+                                                    : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
+                                                }`}
+                                        >
+                                            {(!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1) ? (
+                                                <span>Nhập số để chọn...</span>
+                                            ) : (
+                                                <>
+                    
+                                                    <span>
+                                                        {minnaLesson && `TẢI MINNA BÀI ${minnaLesson}`}
+                                                        {mimiN3 && `TẢI MIMI N3 - PHẦN ${mimiN3}`}
+                                                        {mimiN2 && `TẢI MIMI N2 - PHẦN ${mimiN2}`}
+                                                        {mimiN1 && `TẢI MIMI N1 - PHẦN ${mimiN1}`}
+                                                    </span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-
-                            {/* --- KHỐI 2: MIMIKARA OBOERU --- */}
-                            <div>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 pl-1">Mimikara Oboeru</p>
-                                <div className="space-y-2">
-                                    {/* MIMI N3 */}
-                                    <div className="flex items-center justify-between p-2 rounded-xl border border-gray-100 hover:border-amber-200 hover:bg-amber-50 transition-all">
-                                        <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-amber-500">📙</span> MIMIKARA N3</label>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-gray-400 font-bold text-[9px]">1-12</span>
-                                            <input type="number" min="1" max="12" placeholder="..." value={mimiN3}
-                                                onKeyDown={(e) => { if (e.key === 'Enter') handleSmartLoadVocabulary(); }}
-                                                onChange={(e) => { setMimiN3(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }}
-                                                className={`w-12 text-center font-bold border-b-2 focus:border-amber-500 outline-none bg-transparent text-lg pb-0.5 ${mimiN3 !== '' ? 'text-amber-600 border-amber-500' : 'text-gray-300 border-gray-200'}`}
-                                            />
-                                        </div>
-                                    </div>
-                                    {/* MIMI N2 */}
-                                    <div className="flex items-center justify-between p-2 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-all">
-                                        <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-blue-500">📘</span> MIMIKARA N2</label>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-gray-400 font-bold text-[9px]">1-13</span>
-                                            <input type="number" min="1" max="13" placeholder="..." value={mimiN2}
-                                                onKeyDown={(e) => { if (e.key === 'Enter') handleSmartLoadVocabulary(); }}
-                                                onChange={(e) => { setMimiN2(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }}
-                                                className={`w-12 text-center font-bold border-b-2 focus:border-blue-500 outline-none bg-transparent text-lg pb-0.5 ${mimiN2 !== '' ? 'text-blue-600 border-blue-500' : 'text-gray-300 border-gray-200'}`}
-                                            />
-                                        </div>
-                                    </div>
-                                    {/* MIMI N1 */}
-                                    <div className="flex items-center justify-between p-2 rounded-xl border border-gray-100 hover:border-red-200 hover:bg-red-50 transition-all">
-                                        <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-red-500">📕</span> MIMIKARA N1</label>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-gray-400 font-bold text-[9px]">1-14</span>
-                                            <input type="number" min="1" max="14" placeholder="..." value={mimiN1}
-                                                onKeyDown={(e) => { if (e.key === 'Enter') handleSmartLoadVocabulary(); }}
-                                                onChange={(e) => { setMimiN1(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }}
-                                                className={`w-12 text-center font-bold border-b-2 focus:border-red-500 outline-none bg-transparent text-lg pb-0.5 ${mimiN1 !== '' ? 'text-red-600 border-red-500' : 'text-gray-300 border-gray-200'}`}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* --- KHỐI 3: TANGO (MỚI THÊM - TƯƠNG TỰ MIMIKARA) --- */}
-                            <div>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 pl-1">Tango (1000/2000/3000)</p>
-                                <div className="space-y-2">
-                                    {/* TANGO N3 */}
-                                    <div className="flex items-center justify-between p-2 rounded-xl border border-gray-100 hover:border-pink-300 hover:bg-pink-50 transition-all">
-                                        <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-pink-500">🌸</span> TANGO N3</label>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-gray-400 font-bold text-[9px]">1-12</span>
-                                            <input type="number" min="1" max="12" placeholder="..." value={tangoN3}
-                                                onKeyDown={(e) => { if (e.key === 'Enter') handleSmartLoadVocabulary(); }}
-                                                onChange={(e) => { setTangoN3(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN2(''); setTangoN1(''); } }}
-                                                className={`w-12 text-center font-bold border-b-2 focus:border-pink-500 outline-none bg-transparent text-lg pb-0.5 ${tangoN3 !== '' ? 'text-pink-600 border-pink-500' : 'text-gray-300 border-gray-200'}`}
-                                            />
-                                        </div>
-                                    </div>
-                                    {/* TANGO N2 */}
-                                    <div className="flex items-center justify-between p-2 rounded-xl border border-gray-100 hover:border-teal-300 hover:bg-teal-50 transition-all">
-                                        <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-teal-500">🌲</span> TANGO N2</label>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-gray-400 font-bold text-[9px]">1-12</span>
-                                            <input type="number" min="1" max="12" placeholder="..." value={tangoN2}
-                                                onKeyDown={(e) => { if (e.key === 'Enter') handleSmartLoadVocabulary(); }}
-                                                onChange={(e) => { setTangoN2(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN1(''); } }}
-                                                className={`w-12 text-center font-bold border-b-2 focus:border-teal-500 outline-none bg-transparent text-lg pb-0.5 ${tangoN2 !== '' ? 'text-teal-600 border-teal-500' : 'text-gray-300 border-gray-200'}`}
-                                            />
-                                        </div>
-                                    </div>
-                                    {/* TANGO N1 */}
-                                    <div className="flex items-center justify-between p-2 rounded-xl border border-gray-100 hover:border-violet-300 hover:bg-violet-50 transition-all">
-                                        <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-violet-500">🔮</span> TANGO N1</label>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-gray-400 font-bold text-[9px]">1-14</span>
-                                            <input type="number" min="1" max="14" placeholder="..." value={tangoN1}
-                                                onKeyDown={(e) => { if (e.key === 'Enter') handleSmartLoadVocabulary(); }}
-                                                onChange={(e) => { setTangoN1(e.target.value); if(e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); } }}
-                                                className={`w-12 text-center font-bold border-b-2 focus:border-violet-500 outline-none bg-transparent text-lg pb-0.5 ${tangoN1 !== '' ? 'text-violet-600 border-violet-500' : 'text-gray-300 border-gray-200'}`}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        {/* Nút hành động */}
-                        <div className="p-4 bg-gray-50 border-t border-gray-100">
-                            <button 
-                                onClick={handleSmartLoadVocabulary}
-                                disabled={!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1 && !tangoN3 && !tangoN2 && !tangoN1}
-                                className={`w-full py-3.5 font-black text-sm rounded-xl shadow-lg active:scale-95 transition-all uppercase tracking-wide flex items-center justify-center gap-2 
-                                    ${(!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1 && !tangoN3 && !tangoN2 && !tangoN1) 
-                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                                        : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200'
-                                    }`}
-                            >
-                                {(!minnaLesson && !mimiN3 && !mimiN2 && !mimiN1 && !tangoN3 && !tangoN2 && !tangoN1) ? (
-                                    <span>Vui lòng chọn bài...</span>
-                                ) : (
-                                    <>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                        <span>TẢI DỮ LIỆU NGAY</span>
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
+                            )}
+            
+        </div>
     )}
 </div>
+
 
 {/* 2. MENU TIỆN ÍCH (Utilities) */}
 <div className="relative flex-1" ref={utilsMenuRef}> 
