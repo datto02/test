@@ -1420,11 +1420,6 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
         
         // Kiểm tra xem có thông tin nào để hiển thị trong ngoặc không?
         const hasInfo = displayReading || hanviet || finalMeaning;
-        const isMissingInfo = !displayReading && !finalMeaning;
-
-       // --- LOGIC KIỂM TRA DỮ LIỆU ---
-        const hasData = hanviet || displayReading || finalMeaning;
-        const isMissingInfo = !displayReading && !finalMeaning; // Thiếu thông tin quan trọng
 
         return (
             <div className="flex flex-col w-full px-[8mm]">
@@ -1433,54 +1428,56 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
                     className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" 
                     style={{ width: '184mm' }}
                 >
-                    {/* WRAPPER TƯƠNG TÁC */}
+                    {/* WRAPPER TƯƠNG TÁC: 
+                        - w-fit: Giới hạn vùng click chỉ ôm sát nội dung (không kéo dài hết dòng)
+                        - group: Để kích hoạt hiệu ứng hover cho các phần tử con
+                        - hover:text-emerald-600: Đổi màu xanh lá khi di chuột vào vùng này
+                    */}
                     <div 
-                        className="flex-shrink-0 flex items-baseline gap-2 mb-[3px] cursor-pointer group w-fit transition-colors"
+                        className="flex-shrink-0 flex items-baseline gap-2 mb-[3px] cursor-pointer group w-fit transition-colors hover:text-emerald-600"
                         onClick={() => onEditVocab && onEditVocab(word, { reading: finalReading, meaning: finalMeaning })}
                         title="Bấm để chỉnh sửa"
                     >
                         {/* 1. TỪ VỰNG CHÍNH */}
-                        {/* group-hover: Đổi màu xanh lá khi di chuột vào cụm này */}
                         <span className="font-bold text-sm leading-none text-black group-hover:text-emerald-600 transition-colors whitespace-nowrap">
                             {word}
                         </span>
                         
-                        {/* 2. KHU VỰC THÔNG TIN */}
+                        {/* 2. NỘI DUNG TRONG NGOẶC */}
                         <span className="text-[13px] font-normal text-black group-hover:text-emerald-600 leading-none whitespace-nowrap transition-colors">
-                            
-                            {/* A. DỮ LIỆU TRONG NGOẶC (Chỉ hiện nếu có dữ liệu) */}
-                            {hasData && (
-                                <>
-                                    (
-                                    {hanviet && <span className="font-bold text-black group-hover:text-emerald-600">{hanviet}</span>}
-                                    
-                                    {/* Gạch nối sau Hán Việt */}
-                                    {hanviet && (displayReading || finalMeaning) && <span> - </span>}
-
-                                    {displayReading && <span>{displayReading}</span>}
-
-                                    {/* Gạch nối sau Cách đọc */}
-                                    {displayReading && finalMeaning && <span> - </span>}
-
-                                    {finalMeaning && (
-                                        <span className="font-sans">
-                                            {finalMeaning.toLowerCase()}
-                                        </span>
-                                    )}
-                                    )
-                                </>
-                            )}
-
-                            {/* B. DÒNG NHẮC NHỞ (NẰM NGOÀI NGOẶC) */}
-                            {/* Hiện khi thiếu Cách đọc & Nghĩa (kể cả khi đã có Hán Việt) */}
-                            {isMissingInfo && (
-                                <span className="text-gray-400 text-[10px] italic ml-1 print:hidden group-hover:text-emerald-600">
+                            (
+                            {/* --- LOGIC HIỂN THỊ PLACEHOLDER --- */}
+                            {/* Nếu thiếu toàn bộ dữ liệu -> Hiện dòng nhắc nhở (Ẩn khi in) */}
+                            {!hanviet && !displayReading && !finalMeaning && (
+                                <span className="text-gray-400 text-[10px] italic pl-1 print:hidden">
                                     thêm cách đọc, ý nghĩa
                                 </span>
                             )}
+
+                            {/* --- HIỂN THỊ DỮ LIỆU --- */}
+                            {/* Hán Việt */}
+                            {hanviet && <span className="font-bold text-black group-hover:text-emerald-600">{hanviet}</span>}
+                                
+                            {/* Gạch nối 1 */}
+                            {displayReading && (hanviet || finalMeaning) && <span> - </span>}
+
+                            {/* Cách đọc */}
+                            {displayReading && <span>{displayReading}</span>}
+
+                            {/* Gạch nối 2 */}
+                            {hanviet && finalMeaning && !displayReading && <span> - </span>}
+                            {displayReading && finalMeaning && <span> - </span>}
+
+                            {/* Nghĩa */}
+                            {finalMeaning && (
+                                <span className="font-sans">
+                                    {finalMeaning.toLowerCase()}
+                                </span>
+                            )}
+                            )
                         </span>
                         
-                        {/* Icon bút chì */}
+                        {/* Icon bút chì: Chỉ hiện khi hover vào vùng chữ */}
                         <svg className="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                     </div>
                 </div>
@@ -1500,7 +1497,7 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
                 </div>
             </div>
         );
-      }                        
+    }
   };                              
     // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
   const Page = ({ chars, config, dbData, mode, customVocabData, onEditVocab }) => {
@@ -4252,8 +4249,8 @@ TÀI LIỆU HỌC TẬP
         </div>
     );
     };
-// --- COMPONENT MỚI: MODAL CHỈNH SỬA TỪ VỰNG (ĐÃ CẬP NHẬT) ---
-const EditVocabModal = ({ isOpen, onClose, data, onSave, onRestore }) => {
+// --- COMPONENT MỚI: MODAL CHỈNH SỬA TỪ VỰNG ---
+const EditVocabModal = ({ isOpen, onClose, data, onSave }) => {
     const [reading, setReading] = useState('');
     const [meaning, setMeaning] = useState('');
 
@@ -4268,34 +4265,20 @@ const EditVocabModal = ({ isOpen, onClose, data, onSave, onRestore }) => {
     if (!isOpen || !data) return null;
 
     return (
-        // 1. SỬA: onClick={onClose} ở div ngoài cùng để bấm nền là tắt
-        <div 
-            className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-pointer" 
-            onClick={onClose}
-        >
-            {/* e.stopPropagation() để bấm vào bảng không bị tắt */}
-            <div 
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200 cursor-default" 
-                onClick={e => e.stopPropagation()}
-            >
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200" onClick={e => e.stopPropagation()}>
                 
                 <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                     <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2">
                         ✏️ CHỈNH SỬA TỪ VỰNG
                     </h3>
-                    {/* 2. SỬA: Dấu X to hơn (text-2xl, p-2) */}
-                    <button 
-                        onClick={onClose} 
-                        className="text-gray-400 hover:text-red-500 text-2xl font-bold p-2 leading-none rounded-full hover:bg-gray-100 transition-colors"
-                    >
-                        ✕
-                    </button>
+                    <button onClick={onClose} className="text-gray-400 hover:text-red-500">✕</button>
                 </div>
 
                 <div className="p-5 space-y-4">
-                    {/* Hiển thị từ gốc */}
+                    {/* Hiển thị từ gốc (Không cho sửa) */}
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Từ vựng</label>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Từ vựng (Gốc)</label>
                         <div className="text-2xl font-black text-gray-800 font-sans border-b border-gray-200 pb-2">
                             {data.word}
                         </div>
@@ -4325,22 +4308,12 @@ const EditVocabModal = ({ isOpen, onClose, data, onSave, onRestore }) => {
                         />
                     </div>
 
-                    {/* 3. SỬA: Thêm hàng nút (Khôi phục & Lưu) */}
-                    <div className="flex gap-3 pt-2">
-                        <button 
-                            onClick={() => onRestore(data.word)}
-                            className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition-all active:scale-95 text-[11px] uppercase tracking-wide border border-gray-200"
-                            title="Xóa dữ liệu chỉnh sửa, quay về mặc định"
-                        >
-                            Khôi phục gốc
-                        </button>
-                        <button 
-                            onClick={() => onSave(data.word, reading, meaning)}
-                            className="flex-[2] py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 text-[11px] uppercase tracking-wide"
-                        >
-                            Lưu thay đổi
-                        </button>
-                    </div>
+                    <button 
+                        onClick={() => onSave(data.word, reading, meaning)}
+                        className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95"
+                    >
+                        LƯU THAY ĐỔI
+                    </button>
                 </div>
             </div>
         </div>
@@ -4365,23 +4338,15 @@ const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
     return saved ? JSON.parse(saved) : {};
 });
 const [customVocabData, setCustomVocabData] = useState({}); 
-    const [editingVocab, setEditingVocab] = useState(null); 
-        
+    const [editingVocab, setEditingVocab] = useState(null); // Từ đang được sửa
 
-    const handleRestoreVocab = (word) => {
-        setCustomVocabData(prev => {
-            const newState = { ...prev };
-            delete newState[word]; // Xóa dữ liệu tùy chỉnh của từ này
-            return newState;
-        });
-        setEditingVocab(null); // Đóng modal
-    };
- const handleSaveVocab = (word, newReading, newMeaning) => {
+    // --- 2. HÀM LƯU DỮ LIỆU ---
+    const handleSaveVocab = (word, newReading, newMeaning) => {
         setCustomVocabData(prev => ({
             ...prev,
             [word]: { reading: newReading, meaning: newMeaning }
         }));
-        setEditingVocab(null); 
+        setEditingVocab(null); // Đóng modal
     };
 // Hàm để lưu kết quả học tập
 const updateSRSProgress = (char, quality) => {
@@ -4563,7 +4528,6 @@ return (
                 onClose={() => setEditingVocab(null)}
                 data={editingVocab}
                 onSave={handleSaveVocab}
-                onRestore={handleRestoreVocab}
             />
        {/* 3. RENDER MODAL MỚI */}
             <ReviewListModal 
