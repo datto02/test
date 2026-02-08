@@ -2823,94 +2823,56 @@ if (!query) {
 
 let matches = [];
 
-  if (mode === 'vocab') {
-        const calculateVocabPriority = (soundStr) => {
-            if (!soundStr) return 100;
-            const sound = soundStr.toLowerCase();
-            const soundNoAccent = removeAccents(sound);
-            if (sound === query) return 1;
-            if (soundNoAccent === queryNoAccent) return 2;
-            if (sound.startsWith(query)) return 3;
-            if (soundNoAccent.startsWith(queryNoAccent)) return 4;
-            if (sound.includes(query)) return 5;
-            if (soundNoAccent.includes(queryNoAccent)) return 6;
-            return 100; 
-        };
-
-        let targetKanjiScores = {}; 
-        const isInputKanji = query.match(/[\u4E00-\u9FAF]/);
-
-        if (isInputKanji) {
-            targetKanjiScores[val.trim()] = 1;
-        } else {
-            Object.entries(dbData.KANJI_DB).forEach(([char, info]) => {
-                if (info.sound) {
-                    const score = calculateVocabPriority(info.sound);
-                    if (score < 100) targetKanjiScores[char] = score;
-                }
-            });
-        }
-
-        if (dbData.TUVUNG_DB && Object.keys(targetKanjiScores).length > 0) {
-            Object.entries(dbData.TUVUNG_DB).forEach(([word, info]) => {
-                let bestWordScore = 100;
-                let foundMatch = false;
-                for (const char of word) {
-                    if (targetKanjiScores[char] !== undefined) {
-                        if (targetKanjiScores[char] < bestWordScore) bestWordScore = targetKanjiScores[char];
-                        foundMatch = true;
-                    }
-                }
-                if (foundMatch) {
-                    matches.push({
-                        char: word,             
-                        sound: info.reading,    
-                        // meaning: info.meaning, 
-                        type: 'vocab',
-                        priority: bestWordScore,
-                        length: word.length 
-                    });
-                }
-            });
-        }
-
-        // --- BƯỚC LỌC THÔNG MINH (FIX LỖI HIỂN THỊ DƯ THỪA) ---
-        // 1. Sắp xếp sơ bộ theo độ dài để ưu tiên từ ngắn (từ gốc) trước
-        matches.sort((a, b) => a.length - b.length);
-
-        const uniqueMatches = [];
-        matches.forEach(current => {
-            // Kiểm tra xem từ này có phải là bản sao dài dòng của từ đã có không
-            const isRedundant = uniqueMatches.some(base => {
-                // Case 1: Chứa hoàn toàn (VD: Có '食事' rồi thì bỏ '食事する')
-                if (current.char.startsWith(base.char)) return true;
-
-                // Case 2: Cùng gốc Kanji nhưng đuôi Masu (VD: Có '食べる' rồi thì bỏ '食べます')
-                // Lấy phần Kanji của 2 từ để so sánh
-                const baseKanji = base.char.replace(/[ぁ-んァ-ン]/g, '');
-                const currentKanji = current.char.replace(/[ぁ-んァ-ン]/g, '');
-                
-                if (baseKanji === currentKanji && baseKanji.length > 0) {
-                     // Nếu từ hiện tại đuôi 'masu' hoặc 'shimasu' -> Bỏ
-                     if (current.char.endsWith('ます') || current.char.endsWith('します')) {
-                         return true; 
-                     }
-                }
-                return false;
-            });
-
-            if (!isRedundant) {
-                uniqueMatches.push(current);
+ if (mode === 'vocab') {
+            // 1. KIỂM TRA: Nếu không có chữ Hán nào trong ô nhập -> Dừng ngay lập tức
+            // (Nghĩa là gõ tiếng Việt/Latinh sẽ không ra kết quả gì)
+            const isInputKanji = query.match(/[\u4E00-\u9FAF]/);
+            
+            if (!isInputKanji) {
+                setSearchResults([]);
+                return;
             }
-        });
-        matches = uniqueMatches; // Gán lại danh sách đã lọc
 
-        // Sắp xếp lại lần cuối theo Priority
-        matches.sort((a, b) => {
-            if (a.priority !== b.priority) return a.priority - b.priority;
-            return a.length - b.length;
-        });
-    }
+            // 2. TÌM KIẾM: Quét danh sách từ vựng
+            if (dbData.TUVUNG_DB) {
+                Object.entries(dbData.TUVUNG_DB).forEach(([word, info]) => {
+                    // Kiểm tra: Từ vựng (word) có chứa chữ Hán người dùng vừa nhập không?
+                    if (word.includes(val.trim())) {
+                        matches.push({
+                            char: word,
+                            sound: info.reading,
+                            type: 'vocab',
+                            priority: 1, // Mặc định ưu tiên cao nhất
+                            length: word.length
+                        });
+                    }
+                });
+            }
+
+            // 3. SẮP XẾP: Từ ngắn xếp trước, từ dài xếp sau
+            matches.sort((a, b) => a.length - b.length);
+
+            // 4. LỌC TRÙNG: Loại bỏ các từ quá giống nhau (ví dụ: có 'ăn' rồi thì bỏ 'ăn cơm')
+            const uniqueMatches = [];
+            matches.forEach(current => {
+                const isRedundant = uniqueMatches.some(base => {
+                    // Nếu từ hiện tại bắt đầu bằng từ gốc đã có (VD: 食事 vs 食事する)
+                    if (current.char.startsWith(base.char)) {
+                         // Chỉ loại bỏ nếu đuôi là 'masu' hoặc 'shimasu' (động từ chia thể)
+                         if (current.char.endsWith('ます') || current.char.endsWith('します')) {
+                             return true; 
+                         }
+                    }
+                    return false;
+                });
+
+                if (!isRedundant) {
+                    uniqueMatches.push(current);
+                }
+            });
+            matches = uniqueMatches;
+        }
+     
   else {  
 const processData = (source, type) => {
     Object.entries(source).forEach(([char, info]) => {
