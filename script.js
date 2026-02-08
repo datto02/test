@@ -3425,46 +3425,124 @@ LÀM SẠCH
                                 </div>
                             </div>
 
-                            {/* 2. MIMIKARA (N3, N2, N1) */}
-                            <div className="space-y-2">
-                                {/* MIMI N3 */}
-                                <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors">
-                                    <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-amber-500">📙</span> MIMIKARA N3</label>
-                                    <div className="flex items-center gap-2"><span className="text-gray-400 text-[9px] font-bold">PHẦN</span><input type="number" min="1" max="12" placeholder="..." value={mimiN3} onChange={(e) => { setMimiN3(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }} className={`w-12 text-center font-bold border-b focus:border-amber-500 outline-none bg-transparent text-base ${mimiN3 !== '' ? 'text-amber-600 border-amber-500' : 'text-gray-400 border-gray-200'}`} /></div>
-                                </div>
-                                {/* MIMI N2 */}
-                                <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors">
-                                    <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-blue-500">📘</span> MIMIKARA N2</label>
-                                    <div className="flex items-center gap-2"><span className="text-gray-400 text-[9px] font-bold">PHẦN</span><input type="number" min="1" max="13" placeholder="..." value={mimiN2} onChange={(e) => { setMimiN2(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }} className={`w-12 text-center font-bold border-b focus:border-blue-500 outline-none bg-transparent text-base ${mimiN2 !== '' ? 'text-blue-600 border-blue-500' : 'text-gray-400 border-gray-200'}`} /></div>
-                                </div>
-                                {/* MIMI N1 */}
-                                <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors">
-                                    <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-red-500">📕</span> MIMIKARA N1</label>
-                                    <div className="flex items-center gap-2"><span className="text-gray-400 text-[9px] font-bold">PHẦN</span><input type="number" min="1" max="14" placeholder="..." value={mimiN1} onChange={(e) => { setMimiN1(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }} className={`w-12 text-center font-bold border-b focus:border-red-500 outline-none bg-transparent text-base ${mimiN1 !== '' ? 'text-red-600 border-red-500' : 'text-gray-400 border-gray-200'}`} /></div>
-                                </div>
-                            </div>
+                           {/* 2. MIMIKARA (N3, N2, N1) */}
+<div className="space-y-2">
+    {/* MIMI N3 (Max: 12) */}
+    <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors">
+        <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-amber-500">📙</span> MIMIKARA N3</label>
+        <div className="flex items-center gap-2">
+            <span className="text-gray-400 text-[9px] font-bold">PHẦN</span>
+            <input 
+                type="number" min="1" max="12" placeholder="..." 
+                value={mimiN3} 
+                onChange={(e) => { setMimiN3(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }} 
+                // --- FIX LỖI Ở ĐÂY: Tự động về 12 nếu > 12, về 1 nếu < 1 ---
+                onBlur={() => { 
+                    if (Number(mimiN3) > 12) setMimiN3(12); 
+                    if (Number(mimiN3) < 1 && mimiN3 !== '') setMimiN3(1); 
+                }} 
+                className={`w-12 text-center font-bold border-b focus:border-amber-500 outline-none bg-transparent text-base ${mimiN3 !== '' ? 'text-amber-600 border-amber-500' : 'text-gray-400 border-gray-200'}`} 
+            />
+        </div>
+    </div>
 
-                            <hr className="border-gray-100" />
+    {/* MIMI N2 (Max: 13) */}
+    <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors">
+        <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-blue-500">📘</span> MIMIKARA N2</label>
+        <div className="flex items-center gap-2">
+            <span className="text-gray-400 text-[9px] font-bold">PHẦN</span>
+            <input 
+                type="number" min="1" max="13" placeholder="..." 
+                value={mimiN2} 
+                onChange={(e) => { setMimiN2(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }} 
+                // --- FIX LỖI Ở ĐÂY: Max 13 ---
+                onBlur={() => { 
+                    if (Number(mimiN2) > 13) setMimiN2(13); 
+                    if (Number(mimiN2) < 1 && mimiN2 !== '') setMimiN2(1); 
+                }} 
+                className={`w-12 text-center font-bold border-b focus:border-blue-500 outline-none bg-transparent text-base ${mimiN2 !== '' ? 'text-blue-600 border-blue-500' : 'text-gray-400 border-gray-200'}`} 
+            />
+        </div>
+    </div>
 
-                            {/* 3. TANGO (N3, N2, N1) */}
-                            <div className="space-y-2">
-                                {/* TANGO N3 */}
-                                <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors">
-                                    <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-pink-500">🌸</span> TANGO N3</label>
-                                    <div className="flex items-center gap-2"><span className="text-gray-400 text-[9px] font-bold">BÀI</span><input type="number" min="1" max="12" placeholder="..." value={tangoN3} onChange={(e) => { setTangoN3(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN2(''); setTangoN1(''); } }} className={`w-12 text-center font-bold border-b focus:border-pink-500 outline-none bg-transparent text-base ${tangoN3 !== '' ? 'text-pink-600 border-pink-500' : 'text-gray-400 border-gray-200'}`} /></div>
-                                </div>
-                                {/* TANGO N2 */}
-                                <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors">
-                                    <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-rose-500">🌺</span> TANGO N2</label>
-                                    <div className="flex items-center gap-2"><span className="text-gray-400 text-[9px] font-bold">BÀI</span><input type="number" min="1" max="12" placeholder="..." value={tangoN2} onChange={(e) => { setTangoN2(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN1(''); } }} className={`w-12 text-center font-bold border-b focus:border-rose-500 outline-none bg-transparent text-base ${tangoN2 !== '' ? 'text-rose-600 border-rose-500' : 'text-gray-400 border-gray-200'}`} /></div>
-                                </div>
-                                {/* TANGO N1 */}
-                                <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors">
-                                    <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-purple-500">🍇</span> TANGO N1</label>
-                                    <div className="flex items-center gap-2"><span className="text-gray-400 text-[9px] font-bold">BÀI</span><input type="number" min="1" max="14" placeholder="..." value={tangoN1} onChange={(e) => { setTangoN1(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); } }} className={`w-12 text-center font-bold border-b focus:border-purple-500 outline-none bg-transparent text-base ${tangoN1 !== '' ? 'text-purple-600 border-purple-500' : 'text-gray-400 border-gray-200'}`} /></div>
-                                </div>
-                            </div>
+    {/* MIMI N1 (Max: 14) */}
+    <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors">
+        <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-red-500">📕</span> MIMIKARA N1</label>
+        <div className="flex items-center gap-2">
+            <span className="text-gray-400 text-[9px] font-bold">PHẦN</span>
+            <input 
+                type="number" min="1" max="14" placeholder="..." 
+                value={mimiN1} 
+                onChange={(e) => { setMimiN1(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }} 
+                // --- FIX LỖI Ở ĐÂY: Max 14 ---
+                onBlur={() => { 
+                    if (Number(mimiN1) > 14) setMimiN1(14); 
+                    if (Number(mimiN1) < 1 && mimiN1 !== '') setMimiN1(1); 
+                }} 
+                className={`w-12 text-center font-bold border-b focus:border-red-500 outline-none bg-transparent text-base ${mimiN1 !== '' ? 'text-red-600 border-red-500' : 'text-gray-400 border-gray-200'}`} 
+            />
+        </div>
+    </div>
+</div>
+                           {/* 3. TANGO (N3, N2, N1) */}
+<div className="space-y-2">
+    {/* TANGO N3 (Max: 12) */}
+    <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors">
+        <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-pink-500">🌸</span> TANGO N3</label>
+        <div className="flex items-center gap-2">
+            <span className="text-gray-400 text-[9px] font-bold">BÀI</span>
+            <input 
+                type="number" min="1" max="12" placeholder="..." 
+                value={tangoN3} 
+                onChange={(e) => { setTangoN3(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN2(''); setTangoN1(''); } }} 
+                // --- FIX LỖI Ở ĐÂY: Max 12 ---
+                onBlur={() => { 
+                    if (Number(tangoN3) > 12) setTangoN3(12); 
+                    if (Number(tangoN3) < 1 && tangoN3 !== '') setTangoN3(1); 
+                }} 
+                className={`w-12 text-center font-bold border-b focus:border-pink-500 outline-none bg-transparent text-base ${tangoN3 !== '' ? 'text-pink-600 border-pink-500' : 'text-gray-400 border-gray-200'}`} 
+            />
+        </div>
+    </div>
 
+    {/* TANGO N2 (Max: 12) */}
+    <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors">
+        <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-rose-500">🌺</span> TANGO N2</label>
+        <div className="flex items-center gap-2">
+            <span className="text-gray-400 text-[9px] font-bold">BÀI</span>
+            <input 
+                type="number" min="1" max="12" placeholder="..." 
+                value={tangoN2} 
+                onChange={(e) => { setTangoN2(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN1(''); } }} 
+                // --- FIX LỖI Ở ĐÂY: Max 12 ---
+                onBlur={() => { 
+                    if (Number(tangoN2) > 12) setTangoN2(12); 
+                    if (Number(tangoN2) < 1 && tangoN2 !== '') setTangoN2(1); 
+                }} 
+                className={`w-12 text-center font-bold border-b focus:border-rose-500 outline-none bg-transparent text-base ${tangoN2 !== '' ? 'text-rose-600 border-rose-500' : 'text-gray-400 border-gray-200'}`} 
+            />
+        </div>
+    </div>
+
+    {/* TANGO N1 (Max: 14) */}
+    <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors">
+        <label className="text-xs font-bold text-gray-700 flex items-center gap-2"><span className="text-purple-500">🍇</span> TANGO N1</label>
+        <div className="flex items-center gap-2">
+            <span className="text-gray-400 text-[9px] font-bold">BÀI</span>
+            <input 
+                type="number" min="1" max="14" placeholder="..." 
+                value={tangoN1} 
+                onChange={(e) => { setTangoN1(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); } }} 
+                // --- FIX LỖI Ở ĐÂY: Max 14 ---
+                onBlur={() => { 
+                    if (Number(tangoN1) > 14) setTangoN1(14); 
+                    if (Number(tangoN1) < 1 && tangoN1 !== '') setTangoN1(1); 
+                }} 
+                className={`w-12 text-center font-bold border-b focus:border-purple-500 outline-none bg-transparent text-base ${tangoN1 !== '' ? 'text-purple-600 border-purple-500' : 'text-gray-400 border-gray-200'}`} 
+            />
+        </div>
+    </div>
+</div>
                             {/* NÚT TẢI */}
                             <div className="pt-2">
                                 <button
