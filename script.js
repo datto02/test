@@ -3403,7 +3403,7 @@ LÀM SẠCH
                         {/* --- HEADER CỦA MODAL (CÓ NÚT X) --- */}
                         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                             <h3 className="text-sm font-bold text-gray-700 uppercase flex items-center gap-2">
-                                <span className="text-lg">📚</span> CHỌN NHANH BÀI HỌC
+                                <span className="text-lg">📚</span> CHỌN NHANH TỪ VỰNG
                             </h3>
                             <button 
                                 onClick={() => setIsMenuOpen(false)}
@@ -3420,7 +3420,7 @@ LÀM SẠCH
     
 
     <label className="text-xs font-bold text-gray-700 cursor-pointer flex items-center gap-1.5">
-        TỪ VỰNG MINNA
+        MINNA NO NIHONGO
     </label>
     
     <div className="flex items-center gap-2">
@@ -3460,7 +3460,7 @@ LÀM SẠCH
     <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
         {/* ĐÃ XÓA ICON, CHỈ CÒN TEXT */}
         <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-            MIMIKARA N3
+            MIMIKARA OBOERU N3
         </label>
         <div className="flex items-center gap-2">
             <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
@@ -3471,6 +3471,7 @@ LÀM SẠCH
                 onBlur={() => { if (Number(mimiN3) > 12) setMimiN3(12); if (Number(mimiN3) < 1 && mimiN3 !== '') setMimiN3(1); }} 
                 // --- ĐỔI text-lg THÀNH text-[16px] ---
                 className={`w-14 text-center font-bold border-b-2 focus:border-amber-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${mimiN3 !== '' ? 'text-amber-600 border-amber-500' : 'text-gray-400 border-gray-200'}`} 
+               
             />
         </div>
     </div>
@@ -3478,7 +3479,7 @@ LÀM SẠCH
     {/* MIMI N2 */}
     <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
         <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-            MIMIKARA N2
+            MIMIKARA OBOERU N2
         </label>
         <div className="flex items-center gap-2">
             <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
@@ -3495,7 +3496,7 @@ LÀM SẠCH
     {/* MIMI N1 */}
     <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
         <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-            MIMIKARA N1
+            MIMIKARA OBOERU N1
         </label>
         <div className="flex items-center gap-2">
             <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
@@ -3518,7 +3519,7 @@ LÀM SẠCH
             TANGO N3
         </label>
         <div className="flex items-center gap-2">
-            <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
+            <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
             <input 
                 type="number" min="1" max="12" placeholder="..." 
                 value={tangoN3} 
@@ -3536,7 +3537,7 @@ LÀM SẠCH
             TANGO N2
         </label>
         <div className="flex items-center gap-2">
-            <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
+            <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
             <input 
                 type="number" min="1" max="12" placeholder="..." 
                 value={tangoN2} 
@@ -3553,7 +3554,7 @@ LÀM SẠCH
             TANGO N1
         </label>
         <div className="flex items-center gap-2">
-            <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">BÀI</span>
+            <span className="text-gray-500 font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">PHẦN</span>
             <input 
                 type="number" min="1" max="14" placeholder="..." 
                 value={tangoN1} 
