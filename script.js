@@ -3322,123 +3322,66 @@ LÀM SẠCH
                 {/* HÀNG 3 NÚT */}
                 <div className="flex flex-row gap-4 w-full h-12">
                     
-                    {/* 1. MENU CHỌN NHANH (Quick Select) */}
-                 <div className="relative flex-1" ref={quickMenuRef}> 
-                    <button onClick={() => toggleMenu('quick')} className={`w-full h-full px-1 border rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-[0.98] ${isMenuOpen ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}`}>
-                        <span className="font-bold text-xs whitespace-nowrap">CHỌN NHANH</span>
-                    </button>
-                    {isMenuOpen && (
-                        <div className="absolute bottom-full left-0 mb-2 z-50 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-4 animate-in fade-in zoom-in-95 duration-200">
-        {mode === 'kanji' ? (
-                // === GIAO DIỆN KANJI CŨ (GIỮ NGUYÊN 100%) ===
-                <>  
-                         {/* --- PHẦN GỘP: BẢNG CHỮ CÁI & BỘ THỦ --- */}
-                            <div>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Bảng chữ cái & Bộ thủ</p>
-                                <div className="grid grid-cols-3 gap-1.5">
-                                    {/* Nút 1: Hiragana */}
-                                    <button 
-                                        onClick={() => handleLoadFromGithub('./data/hiragana.json', 'hiragana')} 
-                                        className="py-2 text-[11px] font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition truncate"
-                                        title="Hiragana"
-                                    >
-                                        あ Hira
-                                    </button>
-
-                                    {/* Nút 2: Katakana */}
-                                    <button 
-                                        onClick={() => handleLoadFromGithub('./data/katakana.json', 'katakana')} 
-                                        className="py-2 text-[11px] font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition truncate"
-                                        title="Katakana"
-                                    >
-                                        ア Kata
-                                    </button>
-
-                                    {/* Nút 3: Bộ thủ */}
-                                    <button 
-                                        onClick={() => handleLoadFromGithub('./data/bothu.json')} 
-                                        className="py-2 text-[11px] font-bold bg-gray-100 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-600 hover:text-white transition truncate"
-                                        title="Bộ thủ cơ bản"
-                                    >
-                                        Bộ thủ
-                                    </button>
-                                </div>
+                 {/* 1. MENU CHỌN NHANH (Quick Select) */}
+<div className="relative flex-1" ref={quickMenuRef}> 
+    <button onClick={() => toggleMenu('quick')} className={`w-full h-full px-1 border rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-[0.98] ${isMenuOpen ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}`}>
+        <span className="font-bold text-xs whitespace-nowrap">CHỌN NHANH</span>
+    </button>
+    
+    {isMenuOpen && (
+        <>
+            {/* ========================================================= */}
+            {/* TRƯỜNG HỢP 1: CHẾ ĐỘ KANJI (GIỮ NGUYÊN 100% GIAO DIỆN CŨ) */}
+            {/* ========================================================= */}
+            {mode === 'kanji' ? (
+                <div className="absolute bottom-full left-0 mb-2 z-50 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                     {/* --- PHẦN GỘP: BẢNG CHỮ CÁI & BỘ THỦ --- */}
+                    <div>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Bảng chữ cái & Bộ thủ</p>
+                        <div className="grid grid-cols-3 gap-1.5">
+                            <button onClick={() => handleLoadFromGithub('./data/hiragana.json', 'hiragana')} className="py-2 text-[11px] font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition truncate" title="Hiragana">あ Hira</button>
+                            <button onClick={() => handleLoadFromGithub('./data/katakana.json', 'katakana')} className="py-2 text-[11px] font-bold bg-white text-gray-600 border border-gray-200 rounded-lg hover:bg-black hover:text-white transition truncate" title="Katakana">ア Kata</button>
+                            <button onClick={() => handleLoadFromGithub('./data/bothu.json')} className="py-2 text-[11px] font-bold bg-gray-100 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-600 hover:text-white transition truncate" title="Bộ thủ cơ bản">Bộ thủ</button>
+                        </div>
+                    </div>
+                    {/* Lấy tất cả Kanji */}
+                    <div>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Lấy tất cả Kanji</p>
+                        <div className="grid grid-cols-5 gap-1.5">
+                            {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
+                                <button key={level} onClick={() => { const fileName = `kanji${level.toLowerCase()}.json`; const url = `./data/${fileName}`; handleLoadFromGithub(url); }} className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 active:scale-95 ${levelColors[level]}`}>{level}</button>
+                            ))}
+                        </div>
+                    </div>
+                    {/* Lấy ngẫu nhiên */}
+                    <div>
+                        <div className="flex justify-start items-center gap-2 mb-2 mt-1">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase">Lấy ngẫu nhiên</p>
+                            <div className="flex items-center gap-1.5">
+                                <input type="number" min="0" max="50" value={randomCount} onChange={(e) => { const val = e.target.value; if (val === '') setRandomCount(''); else setRandomCount(parseInt(val)); }} onKeyDown={(e) => { if (e.key === 'Enter' && randomCount > 50) setRandomCount(50) }} onBlur={() => { if (randomCount > 50) setRandomCount(50) }} className="w-10 h-6 text-[16px] text-center font-bold bg-gray-50 border border-gray-200 text-gray-700 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                <span className="text-[10px] font-bold text-gray-400 uppercase">chữ</span>
                             </div>
-
-                           
-                            {/* Lấy tất cả Kanji */}
-                            <div>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Lấy tất cả Kanji</p>
-                                <div className="grid grid-cols-5 gap-1.5">
-                                    {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
-                                        <button 
-                                            key={level} 
-                                            onClick={() => { 
-                                                const fileName = `kanji${level.toLowerCase()}.json`; 
-                                                const url = `./data/${fileName}`; 
-                                                handleLoadFromGithub(url); 
-                                            }} 
-                                            className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 active:scale-95 ${levelColors[level]}`}
-                                        >
-                                            {level}
-                                        </button>
-                                    ))}
+                            <div className="group relative cursor-help ml-auto">
+                                <div className="text-gray-400 hover:text-indigo-500 border border-gray-300 rounded-full w-3.5 h-3.5 flex items-center justify-center text-[9px] font-serif font-bold bg-gray-50 transition-colors">i</div>
+                                <div className="absolute right-0 bottom-full mb-2 w-56 p-2.5 bg-gray-900 text-white text-[10px] rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none shadow-2xl z-[70] leading-relaxed border border-white/10">
+                                    <div className="font-black text-indigo-400 mb-1 uppercase text-[9px] flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Học tập thông minh</div>
+                                    Hệ thống ưu tiên lấy những chữ bạn <b>chưa học Flashcard bao giờ</b>. Nếu đã hết chữ mới, hệ thống sẽ lấy thêm chữ cũ để đủ số lượng yêu cầu.
+                                    <div className="absolute top-full right-1 -mt-1 w-2 h-2 bg-gray-900 rotate-45 border-r border-b border-white/10"></div>
                                 </div>
-                            </div>
-
-                            {/* Lấy ngẫu nhiên (Đã chuyển xuống đây) */}
-                            <div>
-                                <div className="flex justify-start items-center gap-2 mb-2 mt-1">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase">Lấy ngẫu nhiên</p>
-                                    {/* Input số lượng */}
-                                    <div className="flex items-center gap-1.5">
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            max="50" 
-                                            value={randomCount} 
-                                            onChange={(e) => { 
-                                                const val = e.target.value; 
-                                                if (val === '') setRandomCount(''); 
-                                                else setRandomCount(parseInt(val)); 
-                                            }} 
-                                            onKeyDown={(e) => { if (e.key === 'Enter' && randomCount > 50) setRandomCount(50) }} 
-                                            onBlur={() => { if (randomCount > 50) setRandomCount(50) }} 
-                                            className="w-10 h-6 text-[16px] text-center font-bold bg-gray-50 border border-gray-200 text-gray-700 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
-                                        />
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase">chữ</span>
-                                    </div>
-                                                  {/* BIỂU TƯỢNG (i) NẰM CUỐI CÙNG */}
-        <div className="group relative cursor-help ml-auto">
-            <div className="text-gray-400 hover:text-indigo-500 border border-gray-300 rounded-full w-3.5 h-3.5 flex items-center justify-center text-[9px] font-serif font-bold bg-gray-50 transition-colors">i</div>
-            
-            {/* TOOLTIP GIẢI THÍCH (Hiện lên khi di chuột vào) */}
-            <div className="absolute right-0 bottom-full mb-2 w-56 p-2.5 bg-gray-900 text-white text-[10px] rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none shadow-2xl z-[70] leading-relaxed border border-white/10">
-                <div className="font-black text-indigo-400 mb-1 uppercase text-[9px] flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                    Học tập thông minh
+                            </div>      
+                        </div>
+                        <div className="grid grid-cols-5 gap-1.5">
+                            {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
+                                <button key={`rand-${level}`} onClick={() => handleRandomLoadFromGithub(level)} className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 active:scale-95 ${levelColors[level]}`}>{level}</button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
-                Hệ thống ưu tiên lấy những chữ bạn <b>chưa học Flashcard bao giờ</b>. Nếu đã hết chữ mới, hệ thống sẽ lấy thêm chữ cũ để đủ số lượng yêu cầu.
-                {/* Mũi tên nhỏ trỏ xuống */}
-                <div className="absolute top-full right-1 -mt-1 w-2 h-2 bg-gray-900 rotate-45 border-r border-b border-white/10"></div>
-            </div>
-        </div>      
-                                </div>
-                                <div className="grid grid-cols-5 gap-1.5">
-                                    {['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => (
-                                        <button 
-                                            key={`rand-${level}`} 
-                                            onClick={() => handleRandomLoadFromGithub(level)} 
-                                            className={`py-2 text-[11px] font-black border rounded-md transition-all duration-200 active:scale-95 ${levelColors[level]}`}
-                                        >
-                                            {level}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                          </>
             ) : (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-default" onClick={(e) => e.stopPropagation()}>
+                // =================================================================
+                // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (MODAL MỚI: GIỮA MÀN HÌNH + TANGO)
+                // =================================================================
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-default" onClick={(e) => e.stopPropagation()}>
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-200 flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
                         
                         {/* Header Modal */}
@@ -3587,7 +3530,6 @@ LÀM SẠCH
         </>
     )}
 </div>
-
 
 {/* 2. MENU TIỆN ÍCH (Utilities) */}
 <div className="relative flex-1" ref={utilsMenuRef}> 
