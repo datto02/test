@@ -20005,7 +20005,7 @@
   },
   "ごまかす": {
     "reading": "ごまかす",
-    "meaning": "lừa đảo, gian lận, đánh trống lảng, lảng tránh, che đậy"
+    "meaning": "Lấp liếm/Đánh trống lảng/Gian lận"
   },
   "脅かす": {
     "reading": "おびやかす",
@@ -20521,7 +20521,7 @@
   },
   "ひいては": {
     "reading": "ひいては",
-    "meaning": "(không những) ... mà còn"
+    "meaning": "Dẫn đến"
   },
   "おのずから": {
     "reading": "おのずから",
@@ -28122,5 +28122,417 @@
   "見晴らし": {
     "reading": "みはらし",
     "meaning": "Tầm nhìn/Phong cảnh"
-  }  
+  },
+  "搬送": {
+    "reading": "はんそう",
+    "meaning": "Vận chuyển (cấp cứu)"
+  },
+  "無謀": {
+    "reading": "むぼう",
+    "meaning": "Liều lĩnh/Khinh suất"
+  },
+  "ひき逃げ": {
+    "reading": "ひきにげ",
+    "meaning": "Gây tai nạn bỏ trốn"
+  },
+  "立ち去る": {
+    "reading": "たちさる",
+    "meaning": "Rời đi/Bỏ đi"
+  },
+  "通報": {
+    "reading": "つうほう",
+    "meaning": "Thông báo/Báo tin"
+  },
+  "出動": {
+    "reading": "しゅつどう",
+    "meaning": "Xuất quân/Ra quân"
+  },
+  "証拠": {
+    "reading": "しょうこ",
+    "meaning": "Chứng cứ"
+  },
+  "消し去る": {
+    "reading": "けしさる",
+    "meaning": "Xóa sạch/Tiêu hủy"
+  },
+  "別状": {
+    "reading": "べつじょう",
+    "meaning": "Sự bất thường/Nguy hiểm"
+  },
+  "身元": {
+    "reading": "みもと",
+    "meaning": "Danh tính/Lai lịch"
+  },
+  "当人": {
+    "reading": "とうにん",
+    "meaning": "Đương sự/Người trong cuộc"
+  },
+  "痛ましい": {
+    "reading": "いたましい",
+    "meaning": "Đau thương/Thương tâm"
+  },
+  "究明": {
+    "reading": "きゅうめい",
+    "meaning": "Điều tra làm rõ"
+  },
+  "合致": {
+    "reading": "がっち",
+    "meaning": "Thống nhất/Trùng khớp"
+  },
+  "自首": {
+    "reading": "じしゅ",
+    "meaning": "Tự thú"
+  },
+  "手抜き": {
+    "reading": "てぬき",
+    "meaning": "Làm qua loa/Rút ruột công trình"
+  },
+  "再現": {
+    "reading": "さいげん",
+    "meaning": "Tái hiện"
+  },
+  "賠償": {
+    "reading": "ばいしょう",
+    "meaning": "Bồi thường"
+  },
+  "再三": {
+    "reading": "さいさん",
+    "meaning": "Ba lần bảy lượt/Nhiều lần"
+  },
+  "後を絶たない": {
+    "reading": "あとをたたない",
+    "meaning": "Không dứt/Liên miên"
+  },
+  "手口": {
+    "reading": "てぐち",
+    "meaning": "Thủ đoạn/Mánh khóe"
+  },
+  "偽造": {
+    "reading": "ぎぞう",
+    "meaning": "Làm giả"
+  },
+  "もくろむ": {
+    "reading": "もくろむ",
+    "meaning": "Âm mưu/Toan tính"
+  },
+  "あくどい": {
+    "reading": "あくどい",
+    "meaning": "Gian hiểm/Xảo trá"
+  },
+  "浅ましい": {
+    "reading": "あさましい",
+    "meaning": "Đê tiện/Đáng khinh"
+  },
+  "逃げ出す": {
+    "reading": "にげだす",
+    "meaning": "Chạy trốn"
+  },
+  "あがく": {
+    "reading": "あがく",
+    "meaning": "Vùng vẫy/Giãy giụa"
+  },
+  "一連": {
+    "reading": "いちれん",
+    "meaning": "Một loạt/Chuỗi"
+  },
+  "根底": {
+    "reading": "こんてい",
+    "meaning": "Gốc rễ/Nền tảng"
+  },
+  "同一": {
+    "reading": "どういつ",
+    "meaning": "Đồng nhất/Giống hệt"
+  },
+  "真実": {
+    "reading": "しんじつ",
+    "meaning": "Sự thật/Chân lý"
+  },
+  "真相": {
+    "reading": "しんそう",
+    "meaning": "Chân tướng"
+  },
+  "報じる": {
+    "reading": "ほうじる",
+    "meaning": "Đưa tin/Loan tin"
+  },
+  "騒ぎ立てる": {
+    "reading": "さわぎたてる",
+    "meaning": "Làm ầm ĩ"
+  },
+  "揺るがす": {
+    "reading": "ゆるがす",
+    "meaning": "Làm chấn động/Rung chuyển"
+  },
+  "引き起こす": {
+    "reading": "ひきおこす",
+    "meaning": "Gây ra/Dẫn đến"
+  },
+  "さらわれる": {
+    "reading": "さらわれる",
+    "meaning": "Bị bắt cóc/Bị cuốn đi"
+  },
+  "詐欺": {
+    "reading": "さぎ",
+    "meaning": "Lừa đảo"
+  },
+  "あげくの果て": {
+    "reading": "あげくのはて",
+    "meaning": "Kết cục là/Cuối cùng thì"
+  },
+  "断定": {
+    "reading": "だんてい",
+    "meaning": "Khẳng định/Kết luận"
+  },
+  "指差す": {
+    "reading": "ゆびさす",
+    "meaning": "Chỉ trỏ"
+  },
+  "不当": {
+    "reading": "ふとう",
+    "meaning": "Không chính đáng/Bất công"
+  },
+  "ずさん": {
+    "reading": "ずさん",
+    "meaning": "Cẩu thả/Sơ sài"
+  },
+  "手掛かり": {
+    "reading": "てがかり",
+    "meaning": "Manh mối/Đầu mối"
+  },
+  "取り調べ": {
+    "reading": "とりしらべ",
+    "meaning": "Thẩm vấn/Điều tra"
+  },
+  "追い詰める": {
+    "reading": "おいつめる",
+    "meaning": "Dồn vào chân tường"
+  },
+  "裁く": {
+    "reading": "さばく",
+    "meaning": "Xét xử/Định đoạt"
+  },
+  "有罪": {
+    "reading": "ゆうざい",
+    "meaning": "Có tội"
+  },
+  "刑務所": {
+    "reading": "けいむしょ",
+    "meaning": "Nhà tù"
+  },
+  "表向き": {
+    "reading": "おもてむき",
+    "meaning": "Bề ngoài/Công khai"
+  },
+  "優位": {
+    "reading": "ゆうい",
+    "meaning": "Ưu thế/Lợi thế"
+  },
+  "ハンデ": {
+    "reading": "ハンデ",
+    "meaning": "Chấp (trong thể thao)/Bất lợi"
+  },
+  "不服": {
+    "reading": "ふふく",
+    "meaning": "Không phục/Khiếu nại"
+  },
+  "大々的": {
+    "reading": "だいだいてき",
+    "meaning": "Rầm rộ/Quy mô lớn"
+  },
+  "誇大": {
+    "reading": "こだい",
+    "meaning": "Phóng đại"
+  },
+  "デマ": {
+    "reading": "デマ",
+    "meaning": "Tin đồn nhảm"
+  },
+  "速報": {
+    "reading": "そくほう",
+    "meaning": "Tin nhanh"
+  },
+  "行き渡る": {
+    "reading": "いきわたる",
+    "meaning": "Lan rộng/Phổ biến khắp"
+  },
+  "アイデンティティー": {
+    "reading": "アイデンティティー",
+    "meaning": "Bản sắc/Danh tính"
+  },
+  "主体": {
+    "reading": "しゅたい",
+    "meaning": "Chủ thể/Chủ đạo"
+  },
+  "名誉": {
+    "reading": "めいよ",
+    "meaning": "Danh dự"
+  },
+  "恵む": {
+    "reading": "めぐむ",
+    "meaning": "Ban cho/Cứu giúp"
+  },
+  "有する": {
+    "reading": "ゆうする",
+    "meaning": "Có/Sở hữu"
+  },
+  "出直す": {
+    "reading": "でなおす",
+    "meaning": "Làm lại từ đầu"
+  },
+  "カテゴリー": {
+    "reading": "カテゴリー",
+    "meaning": "Hạng mục/Nhóm"
+  },
+  "不穏": {
+    "reading": "ふおん",
+    "meaning": "Bất ổn/Đáng lo ngại"
+  },
+  "よどむ": {
+    "reading": "よどむ",
+    "meaning": "Ùn tắc/Đọng lại"
+  },
+  "なあなあ": {
+    "reading": "なあなあ",
+    "meaning": "Thông đồng/Xuề xòa"
+  },
+  "露呈": {
+    "reading": "ろてい",
+    "meaning": "Phơi bày/Lộ ra"
+  },
+  "朗報": {
+    "reading": "ろうほう",
+    "meaning": "Tin vui"
+  },
+  "出現": {
+    "reading": "しゅつげん",
+    "meaning": "Xuất hiện"
+  },
+  "特有": {
+    "reading": "とくゆう",
+    "meaning": "Đặc trưng/Vốn có"
+  },
+  "予告": {
+    "reading": "よこく",
+    "meaning": "Báo trước (trailer)"
+  },
+  "施行": {
+    "reading": "しこう",
+    "meaning": "Thi hành/Áp dụng (luật)"
+  },
+  "且つ": {
+    "reading": "かつ",
+    "meaning": "Và/Đồng thời"
+  },
+  "内閣": {
+    "reading": "ないかく",
+    "meaning": "Nội các"
+  },
+  "体制": {
+    "reading": "たいせい",
+    "meaning": "Thể chế/Cơ cấu"
+  },
+  "有力": {
+    "reading": "ゆうりょく",
+    "meaning": "Có thế lực/Có triển vọng"
+  },
+  "会見": {
+    "reading": "かいけん",
+    "meaning": "Họp báo/Gặp mặt"
+  },
+  "弁明": {
+    "reading": "べんめい",
+    "meaning": "Biện minh"
+  },
+  "明かす": {
+    "reading": "あかす",
+    "meaning": "Tiết lộ/Làm sáng tỏ"
+  },
+  "率いる": {
+    "reading": "ひきいる",
+    "meaning": "Dẫn đầu/Tiên phong"
+  },
+  "結成": {
+    "reading": "けっせい",
+    "meaning": "Thành lập/Kết thành"
+  },
+  "保守的": {
+    "reading": "ほしゅてき",
+    "meaning": "Bảo thủ"
+  },
+  "思惑": {
+    "reading": "おもわく",
+    "meaning": "Dụng ý/Suy tính"
+  },
+  "うやむやな": {
+    "reading": "うやむやな",
+    "meaning": "Mập mờ/Không rõ ràng"
+  },
+  "可決": {
+    "reading": "かけつ",
+    "meaning": "Thông qua/Phê chuẩn"
+  },
+  "棄権": {
+    "reading": "きけん",
+    "meaning": "Bỏ phiếu trắng/Bỏ cuộc"
+  },
+  "遺憾": {
+    "reading": "いかん",
+    "meaning": "Đáng tiếc"
+  },
+  "賄賂": {
+    "reading": "わいろ",
+    "meaning": "Hối lộ/Đút lót"
+  },
+  "財政": {
+    "reading": "ざいせい",
+    "meaning": "Tài chính"
+  },
+  "金融": {
+    "reading": "きんゆう",
+    "meaning": "Tài chính/Tiền tệ"
+  },
+  "好転": {
+    "reading": "こうてん",
+    "meaning": "Chuyển biến tốt"
+  },
+  "抑制": {
+    "reading": "よくせい",
+    "meaning": "Kiềm chế/Kìm hãm"
+  },
+  "バブル": {
+    "reading": "バブル",
+    "meaning": "Bong bóng kinh tế"
+  },
+  "公表": {
+    "reading": "こうひょう",
+    "meaning": "Công bố"
+  },
+  "推移": {
+    "reading": "すいい",
+    "meaning": "Biến động/Thay đổi"
+  },
+  "飛躍的": {
+    "reading": "ひやくてき",
+    "meaning": "Nhảy vọt/Thần tốc"
+  },
+  "運用": {
+    "reading": "うんよう",
+    "meaning": "Vận hành/Sử dụng vốn"
+  },
+  "融資": {
+    "reading": "ゆうし",
+    "meaning": "Cấp vốn/Cho vay"
+  },
+  "外貨": {
+    "reading": "がいか",
+    "meaning": "Ngoại tệ"
+  },
+  "頭打ち": {
+    "reading": "あたまうち",
+    "meaning": "Đạt đỉnh/Chững lại"
+  },
+  "有益": {
+    "reading": "ゆうえき",
+    "meaning": "Hữu ích"
+  }
 }
