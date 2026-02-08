@@ -1423,51 +1423,66 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
 
         return (
             <div className="flex flex-col w-full px-[8mm]">
-                {/* HEADER TỪ VỰNG - GIAO DIỆN CHUẨN + TÍNH NĂNG CLICK EDIT */}
+                {/* HEADER TỪ VỰNG */}
                 <div 
-                    className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent group cursor-pointer" 
+                    className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" 
                     style={{ width: '184mm' }}
-                    // Thêm sự kiện click vào toàn bộ header để mở modal edit
-                    onClick={() => onEditVocab && onEditVocab(word, { reading: finalReading, meaning: finalMeaning })}
-                    title="Bấm để chỉnh sửa nghĩa/cách đọc"
                 >
-                    <div className="flex-shrink-0 mr-4 flex items-baseline gap-2 mb-[3px]">
-                        {/* Từ vựng chính */}
-                        <span className="font-bold text-sm leading-none text-black whitespace-nowrap">{word}</span>
+                    {/* WRAPPER TƯƠNG TÁC: 
+                        - w-fit: Giới hạn vùng click chỉ ôm sát nội dung (không kéo dài hết dòng)
+                        - group: Để kích hoạt hiệu ứng hover cho các phần tử con
+                        - hover:text-emerald-600: Đổi màu xanh lá khi di chuột vào vùng này
+                    */}
+                    <div 
+                        className="flex-shrink-0 flex items-baseline gap-2 mb-[3px] cursor-pointer group w-fit transition-colors hover:text-emerald-600"
+                        onClick={() => onEditVocab && onEditVocab(word, { reading: finalReading, meaning: finalMeaning })}
+                        title="Bấm để chỉnh sửa"
+                    >
+                        {/* 1. TỪ VỰNG CHÍNH */}
+                        <span className="font-bold text-sm leading-none text-black group-hover:text-emerald-600 transition-colors whitespace-nowrap">
+                            {word}
+                        </span>
                         
-                        {/* CHỈ HIỂN THỊ CẶP NGOẶC NẾU CÓ THÔNG TIN (hasInfo) */}
-                        {hasInfo && (
-                            <span className="text-[13px] font-normal text-black leading-none whitespace-nowrap">
-                                (
-                                {/* 2. Âm Hán Việt */}
-                                {hanviet && <span className="font-bold text-black">{hanviet}</span>}
-                                    
-                                {/* Gạch nối 1: Giữa Reading và (Hán Việt hoặc Nghĩa) */}
-                                {displayReading && (hanviet || finalMeaning) && <span> - </span>}
+                        {/* 2. NỘI DUNG TRONG NGOẶC */}
+                        <span className="text-[13px] font-normal text-black group-hover:text-emerald-600 leading-none whitespace-nowrap transition-colors">
+                            (
+                            {/* --- LOGIC HIỂN THỊ PLACEHOLDER --- */}
+                            {/* Nếu thiếu toàn bộ dữ liệu -> Hiện dòng nhắc nhở (Ẩn khi in) */}
+                            {!hanviet && !displayReading && !finalMeaning && (
+                                <span className="text-gray-400 text-[10px] italic pl-1 print:hidden">
+                                    thêm cách đọc, ý nghĩa
+                                </span>
+                            )}
 
-                                {/* 1. Cách đọc (Chỉ hiện nếu không trùng với mặt chữ) */}
-                                {displayReading && <span>{displayReading}</span>}
+                            {/* --- HIỂN THỊ DỮ LIỆU --- */}
+                            {/* Hán Việt */}
+                            {hanviet && <span className="font-bold text-black group-hover:text-emerald-600">{hanviet}</span>}
+                                
+                            {/* Gạch nối 1 */}
+                            {displayReading && (hanviet || finalMeaning) && <span> - </span>}
 
-                                {/* Gạch nối 2: Giữa Hán Việt và Nghĩa */}
-                                {hanviet && finalMeaning && !displayReading && <span> - </span>}
-                                {displayReading && finalMeaning && <span> - </span>}
+                            {/* Cách đọc */}
+                            {displayReading && <span>{displayReading}</span>}
 
-                                {/* 3. Nghĩa tiếng Việt */}
-                                {finalMeaning && (
-                                    <span>
-                                        {finalMeaning.toLowerCase()}
-                                    </span>
-                                )}
-                                )
-                            </span>
-                        )}
+                            {/* Gạch nối 2 */}
+                            {hanviet && finalMeaning && !displayReading && <span> - </span>}
+                            {displayReading && finalMeaning && <span> - </span>}
+
+                            {/* Nghĩa */}
+                            {finalMeaning && (
+                                <span className="font-sans">
+                                    {finalMeaning.toLowerCase()}
+                                </span>
+                            )}
+                            )
+                        </span>
                         
-                        {/* Icon bút chì ẩn hiện khi hover (Chỉ báo hiệu có thể sửa) */}
+                        {/* Icon bút chì: Chỉ hiện khi hover vào vùng chữ */}
                         <svg className="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                     </div>
                 </div>
 
-                {/* GRID TỪ VỰNG */}
+                {/* GRID TỪ VỰNG (Giữ nguyên) */}
                 <div className="flex border-l border-t w-fit" style={{ borderColor: gridBorderColor }}>
                     {boxes.map((charInBox, i) => (
                         <GridBox
@@ -3982,7 +3997,7 @@ return (
         </a>
 
         {/* Nút Nhóm */}
-        <a href="https://zalo.me/g/ujgais332" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 hover:text-blue-600 transition-colors group">
+        <a href="https://zalo.me/g/jeflei549" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 hover:text-blue-600 transition-colors group">
             <div className="p-2 bg-blue-50 rounded-full text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             </div>
