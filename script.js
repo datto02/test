@@ -2215,7 +2215,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
     );
 };
 // 5. Sidebar (Phiên bản: Final)
-   const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen, mode }) => {
+ const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen, mode, onOverlayChange }) => {        
    
 
 // 1. Logic bộ lọc mới
@@ -2285,6 +2285,14 @@ if (scrollRef.current) {
 }, [activeIndex]); // Chạy lại mỗi khi activeIndex thay đổi
 
     // --- STATE QUẢN LÝ ---
+    useEffect(() => {
+        const isOverlayActive = isLoading || isPrintModalOpen || isDocsModalOpen || (isMenuOpen && mode === 'vocab');
+        
+        if (onOverlayChange) {
+            onOverlayChange(isOverlayActive);
+        }
+    }, [isLoading, isPrintModalOpen, isDocsModalOpen, isMenuOpen, mode, onOverlayChange]);
+     
     const [isLoading, setIsLoading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
@@ -4233,7 +4241,7 @@ const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
         const [isReviewListOpen, setIsReviewListOpen] = useState(false);
          const [practiceMode, setPracticeMode] = useState('kanji');
         const [srsData, setSrsData] = useState(() => {
-           
+           const [isSidebarOverlayOpen, setIsSidebarOverlayOpen] = useState(false); 
     // Tự động lấy dữ liệu cũ từ máy người dùng khi mở web
     const saved = localStorage.getItem('phadao_srs_data');
             
@@ -4351,7 +4359,7 @@ return (
             srsData={srsData}
          onOpenReviewList={() => setIsReviewListOpen(true)}
              mode={practiceMode}
-      
+      onOverlayChange={setIsSidebarOverlayOpen}
     />
     </div>
 
@@ -4426,37 +4434,35 @@ return (
     }}
             />
                     {/* 4. NÚT CHUYỂN CHẾ ĐỘ (GÓC DƯỚI BÊN PHẢI) */}
-<div className="fixed bottom-6 right-6 z-[100] no-print">
-    <button
-        onClick={() => {
-            const newMode = practiceMode === 'kanji' ? 'vocab' : 'kanji';
-            setPracticeMode(newMode);
-            // Reset text mẫu để tránh rối mắt
-            setConfig(prev => ({ 
-            ...prev, 
-            text: '', // Reset văn bản
-            // Nếu là Vocab -> traceCount = 12 (full dòng nét mờ)
-            // Nếu là Kanji -> traceCount = 9 (mặc định cũ)
-            traceCount: newMode === 'vocab' ? 12 : 9 
-        })); 
-        }}
-        className={`h-12 pl-4 pr-6 rounded-full font-black text-[11px] uppercase tracking-widest shadow-2xl border-2 transition-all active:scale-95 flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-300 ${
-            practiceMode === 'kanji' 
-            ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-indigo-700 shadow-indigo-200' 
-            : 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-700 shadow-emerald-200'
-        }`}
-    >
-        {/* Icon chuyển đổi */}
-        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">
-                {practiceMode === 'kanji' ? '字' : '語'}
-        </div>
-        
-        <div className="flex flex-col items-start leading-none gap-0.5">
-            <span className="opacity-70 text-[9px]">Chế độ hiện tại</span>
-            <span>{practiceMode === 'kanji' ? 'LUYỆN KANJI' : 'LUYỆN TỪ VỰNG'}</span>
-        </div>
-    </button>
-</div>
+{!isDbLoaded || showPostPrintDonate || isFlashcardOpen || isLearnGameOpen || isReviewListOpen || isSidebarOverlayOpen ? null : (
+    <div className="fixed bottom-6 right-6 z-[100] no-print animate-in zoom-in duration-300">
+        <button
+            onClick={() => {
+                const newMode = practiceMode === 'kanji' ? 'vocab' : 'kanji';
+                setPracticeMode(newMode);
+                setConfig(prev => ({ 
+                    ...prev, 
+                    text: '', 
+                    traceCount: newMode === 'vocab' ? 12 : 9 
+                })); 
+            }}
+            className={`h-12 pl-4 pr-6 rounded-full font-black text-[11px] uppercase tracking-widest shadow-2xl border-2 transition-all active:scale-95 flex items-center gap-3 ${
+                practiceMode === 'kanji' 
+                ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-indigo-700 shadow-indigo-200' 
+                : 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-700 shadow-emerald-200'
+            }`}
+        >
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">
+                    {practiceMode === 'kanji' ? '字' : '語'}
+            </div>
+            
+            <div className="flex flex-col items-start leading-none gap-0.5">
+                <span className="opacity-70 text-[9px]">Chế độ hiện tại</span>
+                <span>{practiceMode === 'kanji' ? 'LUYỆN KANJI' : 'LUYỆN TỪ VỰNG'}</span>
+            </div>
+        </button>
+    </div>
+)}
         </div>
 );
 };
