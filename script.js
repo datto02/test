@@ -4365,14 +4365,9 @@ const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
     return saved ? JSON.parse(saved) : {};
 });
 const [customVocabData, setCustomVocabData] = useState({}); 
-    const [editingVocab, setEditingVocab] = useState(null); // Từ đang được sửa
-const handleSaveVocab = (word, newReading, newMeaning) => {
-        setCustomVocabData(prev => ({
-            ...prev,
-            [word]: { reading: newReading, meaning: newMeaning }
-        }));
-        setEditingVocab(null); 
-    };
+    const [editingVocab, setEditingVocab] = useState(null); 
+        
+
     const handleRestoreVocab = (word) => {
         setCustomVocabData(prev => {
             const newState = { ...prev };
@@ -4380,6 +4375,13 @@ const handleSaveVocab = (word, newReading, newMeaning) => {
             return newState;
         });
         setEditingVocab(null); // Đóng modal
+    };
+ const handleSaveVocab = (word, newReading, newMeaning) => {
+        setCustomVocabData(prev => ({
+            ...prev,
+            [word]: { reading: newReading, meaning: newMeaning }
+        }));
+        setEditingVocab(null); 
     };
 // Hàm để lưu kết quả học tập
 const updateSRSProgress = (char, quality) => {
