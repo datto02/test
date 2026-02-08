@@ -28870,5 +28870,229 @@
   "どん底": {
     "reading": "どんぞこ",
     "meaning": "Tận đáy/Vực thẳm"
+  },
+  "くすくす": {
+    "reading": "くすくす",
+    "meaning": "Cười khúc khích"
+  },
+  "げらげら": {
+    "reading": "げらげら",
+    "meaning": "Cười ha hả"
+  },
+  "ひしひし": {
+    "reading": "ひしひし",
+    "meaning": "Cảm nhận rõ rệt/Sâu sắc"
+  },
+  "ぱらぱら": {
+    "reading": "ぱらぱら",
+    "meaning": "Lác đác/Tiếng lật sách"
+  },
+  "ぞろぞろ": {
+    "reading": "ぞろぞろ",
+    "meaning": "Nườm nượp/Ùn ùn"
+  },
+  "ぼちぼち": {
+    "reading": "ぼちぼち",
+    "meaning": "Túc tắc/Từ từ"
+  },
+  "ずるずる": {
+    "reading": "ずるずる",
+    "meaning": "Kéo dài lê thê/Xì xụp"
+  },
+  "ちくちく": {
+    "reading": "ちくちく",
+    "meaning": "Châm chích/Ngứa ngáy"
+  },
+  "のこのこ": {
+    "reading": "のこのこ",
+    "meaning": "Thản nhiên/Lớ ngớ"
+  },
+  "くらくら": {
+    "reading": "くらくら",
+    "meaning": "Choáng váng/Hoa mắt"
+  },
+  "ちらほら": {
+    "reading": "ちらほら",
+    "meaning": "Lác đác/Thi thoảng"
+  },
+  "ふらりと": {
+    "reading": "ふらりと",
+    "meaning": "Ngẫu hứng/Tình cờ"
+  },
+  "じっとり": {
+    "reading": "じっとり",
+    "meaning": "Ẩm ướt/Nhớp nháp"
+  },
+  "ずばり": {
+    "reading": "ずばり",
+    "meaning": "Đúng phóc/Thẳng thừng"
+  },
+  "まさしく": {
+    "reading": "まさしく",
+    "meaning": "Chính xác/Đích thị"
+  },
+  "ありあり": {
+    "reading": "ありあり",
+    "meaning": "Rõ mồn một"
+  },
+  "しばし": {
+    "reading": "しばし",
+    "meaning": "Một lúc/Chốc lát"
+  },
+  "まんまと": {
+    "reading": "まんまと",
+    "meaning": "Trót lọt/Bị úp sọt"
+  },
+  "まるっきり": {
+    "reading": "まるっきり",
+    "meaning": "Hoàn toàn (không)"
+  },
+  "てんで": {
+    "reading": "てんで",
+    "meaning": "Toàn bộ/Hoàn toàn (không)"
+  },
+  "努めて": {
+    "reading": "つとめて",
+    "meaning": "Hết sức/Cố gắng"
+  },
+  "ふんだん": {
+    "reading": "ふんだん",
+    "meaning": "Dồi dào/Phong phú"
+  },
+  "切に": {
+    "reading": "せつに",
+    "meaning": "Tha thiết"
+  },
+  "いささか": {
+    "reading": "いささか",
+    "meaning": "Một chút/Hơi"
+  },
+  "何ら": {
+    "reading": "なんら",
+    "meaning": "Bất cứ...nào (dùng với phủ định)"
+  },
+  "無論": {
+    "reading": "むろん",
+    "meaning": "Đương nhiên"
+  },
+  "何やら": {
+    "reading": "なにやら",
+    "meaning": "Cái gì đó/Có vẻ"
+  },
+  "何卒": {
+    "reading": "なにとぞ",
+    "meaning": "Xin vui lòng/Trăm sự nhờ"
+  },
+  "なにぶん": {
+    "reading": "なにぶん",
+    "meaning": "Dù sao thì/Xin hãy"
+  },
+  "とかく": {
+    "reading": "とかく",
+    "meaning": "Có khuynh hướng/Hay"
+  },
+  "とやかく": {
+    "reading": "とやかく",
+    "meaning": "Nói này nói nọ"
+  },
+  "ことのほか": {
+    "reading": "ことのほか",
+    "meaning": "Ngoại lệ/Hơn bình thường"
+  },
+  "いずれにしても": {
+    "reading": "いずれにしても",
+    "meaning": "Dù sao đi nữa"
+  },
+  "なんと": {
+    "reading": "なんと",
+    "meaning": "Thật là/Làm sao"
+  },
+  "ぴりぴり": {
+    "reading": "ぴりぴり",
+    "meaning": "Tê rần/Căng thẳng"
+  },
+  "たいそう": {
+    "reading": "たいそう",
+    "meaning": "Rất/Quá mức"
+  },
+  "断固": {
+    "reading": "だんこ",
+    "meaning": "Kiên quyết"
+  },
+  "なんと言っても": {
+    "reading": "なんといっても",
+    "meaning": "Dù nói gì thì nói"
+  },
+  "なんとしても": {
+    "reading": "なんとしても",
+    "meaning": "Bằng mọi giá"
+  },
+  "ことによると": {
+    "reading": "ことによると",
+    "meaning": "Không chừng/Có lẽ"
+  },
+  "抑える": {
+    "reading": "おさえる",
+    "meaning": "Kìm nén/Hạn chế"
+  },
+  "清算": {
+    "reading": "せいさん",
+    "meaning": "Thanh toán/Thanh trừng"
+  },
+  "終始": {
+    "reading": "しゅうし",
+    "meaning": "Từ đầu đến cuối/Suốt"
+  },
+  "追究": {
+    "reading": "ついきゅう",
+    "meaning": "Nghiên cứu sâu/Tìm tòi"
+  },
+  "追及": {
+    "reading": "ついきゅう",
+    "meaning": "Truy cứu (trách nhiệm)"
+  },
+  "追求": {
+    "reading": "ついきゅう",
+    "meaning": "Mưu cầu/Theo đuổi"
+  },
+  "心中": {
+    "reading": "しんちゅう/しんじゅう",
+    "meaning": "Nội tâm/Tự sát đôi"
+  },
+  "市場": {
+    "reading": "しじょう/いちば",
+    "meaning": "Thị trường/Chợ"
+  },
+  "用品": {
+    "reading": "ようひん",
+    "meaning": "Dụng cụ/Vật dụng"
+  },
+  "洋品": {
+    "reading": "ようひん",
+    "meaning": "Hàng ngoại/Đồ tây"
+  },
+  "見下す": {
+    "reading": "みくだす",
+    "meaning": "Coi thường/Khinh miệt"
+  },
+  "遠回し": {
+    "reading": "とおまわし",
+    "meaning": "Vòng vo/Bóng gió"
+  },
+  "見過ごす": {
+    "reading": "みすごす",
+    "meaning": "Bỏ qua/Làm ngơ"
+  },
+  "越す": {
+    "reading": "こす",
+    "meaning": "Vượt qua/Chuyển nhà"
+  },
+  "超す": {
+    "reading": "こす",
+    "meaning": "Vượt quá (số lượng)"
+  },
+  "無言": {
+    "reading": "むごん",
+    "meaning": "Im lặng/Không nói gì"
   }
 }
