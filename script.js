@@ -4366,7 +4366,13 @@ const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
 });
 const [customVocabData, setCustomVocabData] = useState({}); 
     const [editingVocab, setEditingVocab] = useState(null); // Từ đang được sửa
-
+const handleSaveVocab = (word, newReading, newMeaning) => {
+        setCustomVocabData(prev => ({
+            ...prev,
+            [word]: { reading: newReading, meaning: newMeaning }
+        }));
+        setEditingVocab(null); 
+    };
     const handleRestoreVocab = (word) => {
         setCustomVocabData(prev => {
             const newState = { ...prev };
