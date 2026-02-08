@@ -1421,10 +1421,10 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
         return (
             <div className="flex flex-col w-full px-[8mm]">
                 {/* HEADER TỪ VỰNG */}
-                <div className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" style={{ width: '184mm' }}>
+               <div className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" style={{ width: '184mm' }}>
                     <div className="flex-shrink-0 mr-4 flex items-baseline gap-2 mb-[3px] w-full">
                         {/* 1. TỪ VỰNG CHÍNH (Không click sửa) */}
-                        <span className="font-bold text-sm leading-none text-black whitespace-nowrap">{word}</span>
+                       <span className="font-bold text-sm leading-none text-black whitespace-nowrap">{word}</span>
                         
                         {/* 2. KHU VỰC THÔNG TIN (CLICK ĐỂ SỬA) */}
                         <div 
@@ -1433,7 +1433,7 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
                             className="flex-1 cursor-pointer hover:bg-yellow-100/50 rounded px-1 -ml-1 transition-colors group flex items-baseline gap-1 min-w-0"
                             title="Bấm để chỉnh sửa nghĩa/cách đọc"
                         >
-                            <span className="text-[13px] font-normal text-black leading-none whitespace-nowrap flex items-baseline gap-1 truncate">
+                            <span className="text-[13px] font-normal text-black leading-normal whitespace-nowrap flex items-baseline gap-1">
                                 (
                                 {/* Hán Việt (Không sửa, tự động từ Kanji) */}
                                 {hanviet && <span className="font-bold text-black">{hanviet}</span>}
