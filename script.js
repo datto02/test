@@ -4246,7 +4246,17 @@ TÀI LIỆU HỌC TẬP
 const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
     const [reading, setReading] = useState('');
     const [meaning, setMeaning] = useState('');
-
+useEffect(() => {
+        if (isOpen) {
+            // Khi mở modal: Khóa cuộn
+            document.body.style.overflow = 'hidden';
+        } else {
+            // Khi đóng modal: Mở lại cuộn
+            document.body.style.overflow = 'unset';
+        }
+        // Cleanup: Đảm bảo luôn mở lại cuộn khi component bị hủy
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [isOpen]);
     useEffect(() => {
         if (isOpen && data) {
             setReading(data.reading || '');
@@ -4576,7 +4586,7 @@ return (
     }}
             />
                     {/* 4. NÚT CHUYỂN CHẾ ĐỘ (GÓC DƯỚI BÊN PHẢI) */}
-<div className="fixed bottom-6 right-6 z-[40] no-print print:hidden">
+<div className="fixed bottom-6 right-6 z-[60] no-print print:hidden">
     <button
         onClick={() => {
             const newMode = practiceMode === 'kanji' ? 'vocab' : 'kanji';
