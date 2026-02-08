@@ -4272,12 +4272,12 @@ const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
     if (!isOpen || !data) return null;
 
     return (
-        /* BACKDROP: Thêm onClick={onClose} và cursor-pointer để ấn ra ngoài là đóng */
+       
         <div 
             className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-pointer"
             onClick={onClose}
         >
-            /* NỘI DUNG MODAL: Thêm onClick chặn nổi bọt và cursor-default */
+            
             <div 
                 className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200 cursor-default" 
                 onClick={e => e.stopPropagation()}
@@ -4287,7 +4287,7 @@ const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
                     <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2 font-sans">
                         ✏️ CHỈNH SỬA TỪ VỰNG
                     </h3>
-                    {/* NÚT X: Đã phóng to và thêm icon SVG chuyên nghiệp */}
+            
                     <button 
                         onClick={onClose} 
                         className="text-gray-400 hover:text-red-500 transition-all p-1 hover:bg-red-50 rounded-full group"
@@ -4331,18 +4331,19 @@ const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
 
                     {/* CỤM NÚT BẤM */}
                     <div className="grid grid-cols-2 gap-3 pt-2">
-                        <button 
-                            onClick={handleRestore}
-                            className="flex items-center justify-center gap-1.5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition-all active:scale-95 text-[11px] uppercase tracking-wider"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                            Khôi phục
-                        </button>
+                       
                         <button 
                             onClick={() => onSave(data.word, reading, meaning)}
                             className="py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-100 transition-all active:scale-95 text-[11px] uppercase tracking-wider"
                         >
                             Lưu thay đổi
+                        </button>
+                                 <button 
+                            onClick={handleRestore}
+                            className="flex items-center justify-center gap-1.5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition-all active:scale-95 text-[11px] uppercase tracking-wider"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                            Khôi phục
                         </button>
                     </div>
                 </div>
