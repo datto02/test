@@ -4300,7 +4300,7 @@ useEffect(() => {
                         ✏️ CHỈNH SỬA TỪ VỰNG
                     </h3>
                     {/* NÚT X TO VÀ RÕ RÀNG */}
-                    /* Tìm đến nút X và sửa lại như sau */
+                
 <button 
     onClick={onClose} 
     className="text-gray-400 hover:text-red-500 transition-colors p-1.5 hover:bg-red-50 rounded-full"
