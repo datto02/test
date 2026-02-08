@@ -3321,21 +3321,21 @@ LÀM SẠCH
     </div>
 )}
             <div className="flex flex-col gap-3 w-full">
-                
-                {/* HÀNG 3 NÚT */}
-                <div className="flex flex-row gap-4 w-full h-12">
-                    
-                    {/* 1. MENU CHỌN NHANH (Quick Select) */}
-                 <div className="relative flex-1" ref={quickMenuRef}> 
-                    <button onClick={() => toggleMenu('quick')} className={`w-full h-full px-1 border rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-[0.98] ${isMenuOpen ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}`}>
-                        <span className="font-bold text-xs whitespace-nowrap">CHỌN NHANH</span>
-                    </button>
-                    {isMenuOpen && (
-                        <div className="absolute bottom-full left-0 mb-2 z-50 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-4 animate-in fade-in zoom-in-95 duration-200">
-        {mode === 'kanji' ? (
-                // === GIAO DIỆN KANJI CŨ (GIỮ NGUYÊN 100%) ===
-                <>  
-                         {/* --- PHẦN GỘP: BẢNG CHỮ CÁI & BỘ THỦ --- */}
+
+{/* 1. MENU CHỌN NHANH (Quick Select) */}
+<div className="relative flex-1" ref={quickMenuRef}> 
+    <button onClick={() => toggleMenu('quick')} className={`w-full h-full px-1 border rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-[0.98] ${isMenuOpen ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}`}>
+        <span className="font-bold text-xs whitespace-nowrap">CHỌN NHANH</span>
+    </button>
+
+    {/* LOGIC HIỂN THỊ MENU */}
+    {isMenuOpen && (
+        mode === 'kanji' ? (
+            // =================================================================
+            // TRƯỜNG HỢP 1: KANJI (GIỮ NGUYÊN CODE CŨ 100% - DẠNG DROPDOWN)
+            // =================================================================
+            <div className="absolute bottom-full left-0 mb-2 z-50 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                 {/* --- PHẦN GỘP: BẢNG CHỮ CÁI & BỘ THỦ --- */}
                             <div>
                                 <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Bảng chữ cái & Bộ thủ</p>
                                 <div className="grid grid-cols-3 gap-1.5">
@@ -3368,7 +3368,7 @@ LÀM SẠCH
                                 </div>
                             </div>
 
-                           
+             
                             {/* Lấy tất cả Kanji */}
                             <div>
                                 <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">Lấy tất cả Kanji</p>
@@ -3388,7 +3388,7 @@ LÀM SẠCH
                                     ))}
                                 </div>
                             </div>
-
+                                    
                             {/* Lấy ngẫu nhiên (Đã chuyển xuống đây) */}
                             <div>
                                 <div className="flex justify-start items-center gap-2 mb-2 mt-1">
@@ -3439,11 +3439,37 @@ LÀM SẠCH
                                     ))}
                                 </div>
                             </div>
-                          </>
-            ) : (
-         // === GIAO DIỆN TỪ VỰNG (ĐÃ SỬA ĐẸP) ===
-                                <div className="space-y-3">
-                                    
+            </div>
+        ) : (
+            // =================================================================
+            // TRƯỜNG HỢP 2: TỪ VỰNG (GIAO DIỆN MỚI - MODAL GIỮA MÀN HÌNH)
+            // =================================================================
+            <div 
+                className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-pointer"
+                onClick={() => setIsMenuOpen(false)} // Bấm ra ngoài thì đóng
+            >
+                <div 
+                    className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative animate-in zoom-in-95 duration-200 cursor-default border border-gray-200 max-h-[90vh] overflow-y-auto custom-scrollbar"
+                    onClick={(e) => e.stopPropagation()} // Chặn đóng khi bấm vào hộp
+                >
+                    {/* DẤU X ĐÓNG BẢNG (GÓC TRÊN PHẢI) */}
+                    <button 
+                        onClick={() => setIsMenuOpen(false)}
+                        className="absolute top-3 right-3 p-2 bg-gray-100 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+
+                    {/* TIÊU ĐỀ */}
+                    <div className="mb-4 pb-2 border-b border-gray-100">
+                        <h3 className="text-sm font-black text-gray-800 uppercase flex items-center gap-2">
+                            <span className="text-xl">📚</span> CHỌN BÀI HỌC
+                        </h3>
+                    </div>
+
+                    {/* NỘI DUNG TỪ VỰNG */}
+                    <div className="space-y-3">
+                             
                                 {/* 1. MINNA NO NIHONGO */}
 <div className="flex items-center justify-between group hover:bg-gray-50 p-1.5 rounded-lg transition-colors -mx-1.5">
     {/* BÊN TRÁI: Chỉ còn Icon và Tên - Dùng font-bold để tiêu đề rõ ràng */}
@@ -3654,8 +3680,8 @@ LÀM SẠCH
         />
     </div>
 </div>
-
-                                   <div className="pt-2">
+                        {/* NÚT TẢI */}
+                         <div className="pt-2">
     <button 
         onClick={handleSmartLoadVocabulary}
         // Disabled nếu tất cả các ô đều trống
@@ -3679,17 +3705,17 @@ LÀM SẠCH
                     {tangoN2 && `TẢI TANGO N2 - BÀI ${tangoN2}`}
                     {tangoN1 && `TẢI TANGO N1 - BÀI ${tangoN1}`}
                 </span>
-            </>
-        )}
-    </button>
-</div>
-                                </div>
-                            )}
-            
-        </div>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
     )}
 </div>
-
+        
 
 {/* 2. MENU TIỆN ÍCH (Utilities) */}
 <div className="relative flex-1" ref={utilsMenuRef}> 
