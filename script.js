@@ -1402,7 +1402,7 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
         const vocabInfo = dbData?.TUVUNG_DB?.[word] || {};
 
         // --- XỬ LÝ ÂM HÁN VIỆT ---
-        const hanviet = word.split('').map(c => {
+       const hanviet = word.split('').map(c => {
             return dbData?.KANJI_DB?.[c]?.sound || ''; 
         }).filter(s => s).join(' ').toUpperCase();
 
@@ -1444,8 +1444,7 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
                                 {hanviet && vocabInfo.meaning && <span> - </span>}
 
                                 {/* 3. Nghĩa tiếng Việt */}
-                        
-                               {vocabInfo.meaning && (
+                            {vocabInfo.meaning && (
                                     <span>
                                         {vocabInfo.meaning.toLowerCase()}
                                     </span>
@@ -2824,77 +2823,54 @@ if (!query) {
 
 let matches = [];
 
- if (mode === 'vocab') {
-            // --- LOGIC MỚI: CHỈ TÌM KHI CÓ KANJI ---
-            const isInputKanji = query.match(/[\u4E00-\u9FAF]/);
+  if (mode === 'vocab') {
+        const calculateVocabPriority = (soundStr) => {
+            if (!soundStr) return 100;
+            const sound = soundStr.toLowerCase();
+            const soundNoAccent = removeAccents(sound);
+            if (sound === query) return 1;
+            if (soundNoAccent === queryNoAccent) return 2;
+            if (sound.startsWith(query)) return 3;
+            if (soundNoAccent.startsWith(queryNoAccent)) return 4;
+            if (sound.includes(query)) return 5;
+            if (soundNoAccent.includes(queryNoAccent)) return 6;
+            return 100; 
+        };
 
-            // Nếu không phải là Kanji (tức là gõ latin/tiếng Việt) -> Dừng luôn, trả về rỗng
-            if (!isInputKanji) {
-                setSearchResults([]);
-                return;
-            }
+        let targetKanjiScores = {}; 
+        const isInputKanji = query.match(/[\u4E00-\u9FAF]/);
 
-            let targetKanjiScores = {};
-            // Nếu là Kanji, lấy chính nó làm từ khóa tìm kiếm
+        if (isInputKanji) {
             targetKanjiScores[val.trim()] = 1;
-
-            // --- QUÉT DỮ LIỆU TỪ VỰNG ---
-            if (dbData.TUVUNG_DB) {
-                Object.entries(dbData.TUVUNG_DB).forEach(([word, info]) => {
-                    let bestWordScore = 100;
-                    let foundMatch = false;
-                    
-                    // Kiểm tra xem từ vựng (word) có chứa Kanji người dùng nhập không
-                    for (const char of word) {
-                        // So sánh ký tự trong từ với Kanji người dùng nhập
-                        // Ở đây val.trim() chính là chuỗi Kanji người dùng nhập
-                        if (val.trim().includes(char)) {
-                            bestWordScore = 1; // Gán điểm ưu tiên cao nhất
-                            foundMatch = true;
-                        }
-                    }
-
-                    if (foundMatch) {
-                        matches.push({
-                            char: word,              
-                            sound: info.reading,     
-                            type: 'vocab',
-                            priority: bestWordScore,
-                            length: word.length 
-                        });
-                    }
-                });
-            }
-
-            // --- BƯỚC LỌC THÔNG MINH (GIỮ NGUYÊN LOGIC CŨ CỦA BẠN) ---
-            // 1. Sắp xếp sơ bộ theo độ dài
-            matches.sort((a, b) => a.length - b.length);
-
-            const uniqueMatches = [];
-            matches.forEach(current => {
-                const isRedundant = uniqueMatches.some(base => {
-                    if (current.char.startsWith(base.char)) return true;
-                    const baseKanji = base.char.replace(/[ぁ-んァ-ン]/g, '');
-                    const currentKanji = current.char.replace(/[ぁ-んァ-ン]/g, '');
-                    
-                    if (baseKanji === currentKanji && baseKanji.length > 0) {
-                         if (current.char.endsWith('ます') || current.char.endsWith('します')) {
-                             return true; 
-                         }
-                    }
-                    return false;
-                });
-
-                if (!isRedundant) {
-                    uniqueMatches.push(current);
+        } else {
+            Object.entries(dbData.KANJI_DB).forEach(([char, info]) => {
+                if (info.sound) {
+                    const score = calculateVocabPriority(info.sound);
+                    if (score < 100) targetKanjiScores[char] = score;
                 }
             });
-            matches = uniqueMatches;
+        }
 
-            // Sắp xếp lại lần cuối
-            matches.sort((a, b) => {
-                if (a.priority !== b.priority) return a.priority - b.priority;
-                return a.length - b.length;
+        if (dbData.TUVUNG_DB && Object.keys(targetKanjiScores).length > 0) {
+            Object.entries(dbData.TUVUNG_DB).forEach(([word, info]) => {
+                let bestWordScore = 100;
+                let foundMatch = false;
+                for (const char of word) {
+                    if (targetKanjiScores[char] !== undefined) {
+                        if (targetKanjiScores[char] < bestWordScore) bestWordScore = targetKanjiScores[char];
+                        foundMatch = true;
+                    }
+                }
+                if (foundMatch) {
+                    matches.push({
+                        char: word,             
+                        sound: info.reading,    
+                        // meaning: info.meaning, 
+                        type: 'vocab',
+                        priority: bestWordScore,
+                        length: word.length 
+                    });
+                }
             });
         }
 
