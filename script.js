@@ -3395,7 +3395,7 @@ LÀM SẠCH
                 // =========================================================
                 // TRƯỜNG HỢP 2: TỪ VỰNG - HIỆN MODAL GIỮA MÀN HÌNH (MỚI)
                 // =========================================================
-                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-pointer" onClick={() => setIsMenuOpen(false)}>
+                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-pointer" onClick={() => setIsMenuOpen(false)}>
                     
                     {/* CONTAINER MODAL */}
                     <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in zoom-in-95 duration-200 cursor-default" onClick={(e) => e.stopPropagation()}>
@@ -3992,7 +3992,7 @@ return (
 
     {/* --- POPUP TÀI LIỆU (MỚI THÊM) --- */}
     {isDocsModalOpen && (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200 flex flex-col max-h-[80vh]">
             
             {/* Header của Popup */}
@@ -4110,7 +4110,7 @@ TÀI LIỆU HỌC TẬP
 
 {/* --- MODAL (POPUP) XÁC NHẬN IN --- */}
             {isPrintModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                     {/* Hộp nội dung chính */}
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200 border border-gray-200">
                         
@@ -4194,7 +4194,7 @@ TÀI LIỆU HỌC TẬP
         
         {/* GIAO DIỆN THANH LOADING (Overlay) */}
         {isLoading && (
-            <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
+           <div className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
             <div className="w-72 p-6 bg-white rounded-2xl shadow-2xl border border-indigo-50 animate-in fade-in zoom-in duration-300">
                 <div className="flex justify-between items-end mb-2">
                 <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider animate-pulse">
@@ -4369,7 +4369,7 @@ return (
 
     {/* Popup Donate  */}
     {showPostPrintDonate && (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative animate-in zoom-in-95 duration-300 border border-orange-100">
         <button onClick={() => setShowPostPrintDonate(false)} className="absolute top-3 right-3 p-1.5 bg-gray-100 hover:bg-red-100 hover:text-red-500 rounded-full transition-colors z-10">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -4426,7 +4426,7 @@ return (
     }}
             />
                     {/* 4. NÚT CHUYỂN CHẾ ĐỘ (GÓC DƯỚI BÊN PHẢI) */}
-<div className="fixed bottom-6 right-6 z-[100] no-print">
+<div className="fixed bottom-6 right-6 z-[40] no-print print:hidden">
     <button
         onClick={() => {
             const newMode = practiceMode === 'kanji' ? 'vocab' : 'kanji';
