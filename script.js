@@ -1329,7 +1329,7 @@ return (
 );
 };
 
-const WorkbookRow = ({ char, config, dbData, mode }) => {
+const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab }) => {
     // =================================================================
     // TRƯỜNG HỢP 1: CHẾ ĐỘ KANJI (GIỮ NGUYÊN 100% CODE CŨ CỦA BẠN)
     // =================================================================
@@ -1377,9 +1377,6 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
         );
     }
 
-  // =================================================================
-    // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (ĐÃ SỬA LỖI LẶP VÀ NGOẶC THỪA)
-    // =================================================================
    // =================================================================
     // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (CÓ CHỨC NĂNG EDIT)
     // =================================================================
@@ -1491,7 +1488,7 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
     }
 };
     // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
-    const Page = ({ chars, config, dbData, mode }) => {
+  const Page = ({ chars, config, dbData, mode, customVocabData, onEditVocab }) => {
 // 1. Hàm Xuất dữ liệu (Tải file về máy)
     const handlePageExport = () => {
         const data = localStorage.getItem('phadao_srs_data');
