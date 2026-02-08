@@ -1572,7 +1572,7 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
                         </p>
                         <p className="flex items-center gap-2">
                             <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">4</span>
-                            <span>Tìm kiếm <span className="font-bold">từ vựng đi kèm kanji</span> ở thanh tìm kiếm.</span>
+                            <span>Ấn vào <span className="font-bold">từ vựng</span> ở trang xem trước để chỉnh sửa.</span>
                         </p>
                     </div>
                 ) : (
