@@ -4598,7 +4598,7 @@ return (
     }}
             />
                     {/* 4. NÚT CHUYỂN CHẾ ĐỘ (GÓC DƯỚI BÊN PHẢI) */}
-<div className="fixed bottom-6 right-6 z-[60] no-print print:hidden">
+<div className="fixed bottom-6 right-6 z-[55] no-print print:hidden">
     <button
         onClick={() => {
             const newMode = practiceMode === 'kanji' ? 'vocab' : 'kanji';
