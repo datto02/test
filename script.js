@@ -4269,9 +4269,9 @@ TÀI LIỆU HỌC TẬP
         </div>
         
         <div className="flex flex-col items-start leading-none gap-0.5">
-            <span className="opacity-70 text-[9px]">Chế độ hiện tại</span>
+            <span className="opacity-70 text-[9px]">Chế độ</span>
          
-            <span>{mode === 'kanji' ? 'LUYỆN KANJI' : 'LUYỆN TỪ VỰNG'}</span>
+            <span>{mode === 'kanji' ? 'KANJI' : 'TỪ VỰNG'}</span>
         </div>
     </button>
 </div>
