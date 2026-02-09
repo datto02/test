@@ -716,7 +716,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
         if (isOpen && text) { 
             let chars = [];
             if (mode === 'vocab') {
-                 // CHỈNH SỬA: Chỉ lấy những từ có độ dài > 0 VÀ tồn tại trong TUVUNG_DB
+                 
                  chars = text.split(/[\n;]+/)
                     .map(w => w.trim())
                     .filter(w => w.length > 0 && dbData?.TUVUNG_DB && dbData.TUVUNG_DB[w]);
@@ -3492,7 +3492,7 @@ LÀM SẠCH
                 value={mimiN3} 
                 onChange={(e) => { setMimiN3(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }} 
                 onBlur={() => { if (Number(mimiN3) > 12) setMimiN3(12); if (Number(mimiN3) < 1 && mimiN3 !== '') setMimiN3(1); }} 
-              
+            
                 className={`w-14 text-center font-bold border-b-2 focus:border-amber-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${mimiN3 !== '' ? 'text-amber-600 border-amber-500' : 'text-gray-400 border-gray-200'}`} 
                
             />
@@ -4239,55 +4239,57 @@ TÀI LIỆU HỌC TẬP
             </div>
             </div>
         )}
-        {/* 4. NÚT CHUYỂN CHẾ ĐỘ (ĐÃ CHUYỂN VÀO SIDEBAR) */}
-
-{!isMenuOpen && !isDocsModalOpen && !isPrintModalOpen && !isLoading && (
-    <div className="fixed bottom-6 right-6 z-[60] no-print print:hidden animate-in fade-in duration-300">
-        <button
-            onClick={() => {
-                const newMode = mode === 'kanji' ? 'vocab' : 'kanji'; 
-                setPracticeMode(newMode);
-               
-                onChange({ ...config,
-                    text: '', 
-                    traceCount: newMode === 'vocab' ? 12 : 9 
-                }); 
-            }}
-            className={`h-12 pl-4 pr-6 rounded-full font-black text-[11px] uppercase tracking-widest shadow-2xl border-2 transition-all active:scale-95 flex items-center gap-3 ${
-                mode === 'kanji' 
-                ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-indigo-700 shadow-indigo-200' 
-                : 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-700 shadow-emerald-200'
-            }`}
-        >
+        {/* 4. NÚT CHUYỂN CHẾ ĐỘ */}
+<div className="fixed bottom-6 right-6 z-[60] no-print print:hidden">
+    <button
+        onClick={() => {
          
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">
-                    {mode === 'kanji' ? '字' : '語'} 
-            </div>
+            const newMode = mode === 'kanji' ? 'vocab' : 'kanji';
+            setPracticeMode(newMode);
             
-            <div className="flex flex-col items-start leading-none gap-0.5">
-                <span className="opacity-70 text-[9px]">Chế độ hiện tại</span>
-                <span>{mode === 'kanji' ? 'LUYỆN KANJI' : 'LUYỆN TỪ VỰNG'}</span> 
-            </div>
-        </button>
-    </div>
-)}
+          
+            onChange(prev => ({ 
+                ...prev, 
+                text: '', 
+               
+                traceCount: newMode === 'vocab' ? 12 : 9 
+            })); 
+        }}
+        className={`h-12 pl-4 pr-6 rounded-full font-black text-[11px] uppercase tracking-widest shadow-2xl border-2 transition-all active:scale-95 flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-300 ${
+        
+            mode === 'kanji' 
+            ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-indigo-700 shadow-indigo-200' 
+            : 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-700 shadow-emerald-200'
+        }`}
+    >
+   
+        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">
+            
+                {mode === 'kanji' ? '字' : '語'}
+        </div>
+        
+        <div className="flex flex-col items-start leading-none gap-0.5">
+            <span className="opacity-70 text-[9px]">Chế độ hiện tại</span>
+         
+            <span>{mode === 'kanji' ? 'LUYỆN KANJI' : 'LUYỆN TỪ VỰNG'}</span>
+        </div>
+    </button>
+</div>
         </div>
     );
     };
-
-
 const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
     const [reading, setReading] = useState('');
     const [meaning, setMeaning] = useState('');
 useEffect(() => {
         if (isOpen) {
-           
+            // Khi mở modal: Khóa cuộn
             document.body.style.overflow = 'hidden';
         } else {
-        
+            // Khi đóng modal: Mở lại cuộn
             document.body.style.overflow = 'unset';
         }
-       
+        // Cleanup: Đảm bảo luôn mở lại cuộn khi component bị hủy
         return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
     useEffect(() => {
@@ -4297,28 +4299,29 @@ useEffect(() => {
         }
     }, [isOpen, data]);
 
-
+    // --- SỬA LOGIC KHÔI PHỤC: KHÔI PHỤC -> LƯU -> ĐÓNG ---
     const handleRestore = () => {
         if (!data) return;
         
-      
+        // Tìm dữ liệu gốc, nếu không có (chữ tự thêm) thì mặc định là rỗng
         const originalInfo = dbData?.TUVUNG_DB?.[data.word] || { reading: '', meaning: '' };
         
         const restoredReading = originalInfo.reading || '';
         const restoredMeaning = originalInfo.meaning || '';
 
-    
+        // Cập nhật state để đồng bộ giao diện
         setReading(restoredReading);
         setMeaning(restoredMeaning);
 
-     
+        // THỰC HIỆN LƯU LUÔN VÀ ĐÓNG BẢNG
+        // Lưu ý: hàm handleSaveVocab ở App sẽ tự động setEditingVocab(null) để đóng bảng
         onSave(data.word, restoredReading, restoredMeaning);
     };
 
     if (!isOpen || !data) return null;
 
     return (
-   
+        /* BƯỚC 2: KHÓA NỀN - Xóa onClick={onClose} và xóa cursor-pointer */
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             
             {/* NỘI DUNG BẢNG */}
@@ -4403,7 +4406,6 @@ useEffect(() => {
                     </div>
                 </div>
             </div>
-        
         </div>
     );
 };
@@ -4547,7 +4549,8 @@ return (
             srsData={srsData}
          onOpenReviewList={() => setIsReviewListOpen(true)}
              mode={practiceMode}
-                 setPracticeMode={setPracticeMode}
+                 mode={practiceMode} 
+    setPracticeMode={setPracticeMode}
       
     />
     </div>
@@ -4631,7 +4634,9 @@ return (
         setIsReviewListOpen(false);           
     }}
             />
-                  
+
+        </div>
+);
 };
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
