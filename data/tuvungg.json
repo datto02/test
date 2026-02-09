@@ -20507,8 +20507,8 @@
     "reading": "いぜん",
     "meaning": "như trước, vẫn (chưa)"
   },
-  "漠然と": {
-    "reading": "ばくぜんと",
+  "漠然": {
+    "reading": "ばくぜん",
     "meaning": "mơ hồ, không rõ ràng"
   },
   "まして": {
@@ -25459,8 +25459,8 @@
     "reading": "じゃんけん",
     "meaning": "Oẳn tù tì"
   },
-  "おあいこ": {
-    "reading": "おあいこ",
+  "あいこ": {
+    "reading": "あいこ",
     "meaning": "Hòa nhau (trò chơi)"
   },
   "そもそも": {
@@ -25543,8 +25543,8 @@
     "reading": "かたおもい",
     "meaning": "Yêu đơn phương"
   },
-  "密かな": {
-    "reading": "ひそかな",
+  "密か": {
+    "reading": "ひそか",
     "meaning": "Thầm kín/Bí mật"
   },
   "引かれる": {
@@ -25779,8 +25779,8 @@
     "reading": "のみこむ",
     "meaning": "Nuốt/Hiểu thấu"
   },
-  "ごくごくと": {
-    "reading": "ごくごくと",
+  "ごくごく": {
+    "reading": "ごくごく",
     "meaning": "Ừng ực"
   },
   "残らず": {
@@ -25959,8 +25959,8 @@
     "reading": "さらう",
     "meaning": "Múc/Nạo vét"
   },
-  "ごしごしと": {
-    "reading": "ごしごしと",
+  "ごしごし": {
+    "reading": "ごしごし",
     "meaning": "Cọ mạnh"
   },
   "圧縮": {
@@ -26067,8 +26067,8 @@
     "reading": "うんと",
     "meaning": "Rất nhiều"
   },
-  "濃厚な": {
-    "reading": "のうこうな",
+  "濃厚": {
+    "reading": "のうこう",
     "meaning": "Đậm đà"
   },
   "口が肥える": {
@@ -26211,8 +26211,8 @@
     "reading": "おろそかな",
     "meaning": "Lơ là/Sao nhãng"
   },
-  "自主的な": {
-    "reading": "じしゅてきな",
+  "自主的": {
+    "reading": "じしゅてき",
     "meaning": "Tự chủ"
   },
   "自ずから": {
@@ -26299,8 +26299,8 @@
     "reading": "きじゅつ",
     "meaning": "Viết/Mô tả"
   },
-  "万全な": {
-    "reading": "ばんぜんな",
+  "万全": {
+    "reading": "ばんぜん",
     "meaning": "Vẹn toàn/Chu đáo"
   },
   "難易度": {
@@ -26567,8 +26567,8 @@
     "reading": "こうし",
     "meaning": "Công tư"
   },
-  "あながちない": {
-    "reading": "あながちない",
+  "あながち": {
+    "reading": "あながち",
     "meaning": "Không hẳn là (dùng với phủ định)"
   },
   "いざ知らず": {
@@ -26867,8 +26867,8 @@
     "reading": "じそく",
     "meaning": "Vận tốc (km/h)"
   },
-  "延々と": {
-    "reading": "えんえんと",
+  "延々": {
+    "reading": "えんえん",
     "meaning": "Mãi không dứt/Lê thê"
   },
   "出くわす": {
@@ -27007,8 +27007,8 @@
     "reading": "ひんど",
     "meaning": "Tần suất"
   },
-  "軽々と": {
-    "reading": "かるがると",
+  "軽々": {
+    "reading": "かるがる",
     "meaning": "Nhẹ nhàng/Dễ dàng"
   },
   "老化": {
@@ -27063,8 +27063,8 @@
     "reading": "めっきりと",
     "meaning": "Rõ rệt"
   },
-  "うっすらと": {
-    "reading": "うっすらと",
+  "うっすら": {
+    "reading": "うっすら",
     "meaning": "Mờ ảo/Nhè nhẹ"
   },
   "意識不明": {
@@ -27131,8 +27131,8 @@
     "reading": "むかむか",
     "meaning": "Buồn nôn/Nôn nao"
   },
-  "じわりと": {
-    "reading": "じわりと",
+  "じわり": {
+    "reading": "じわり",
     "meaning": "Từ từ/Dần dần"
   },
   "むせる": {
@@ -27359,8 +27359,8 @@
     "reading": "ひきたてる",
     "meaning": "Làm nổi bật"
   },
-  "粋な": {
-    "reading": "いきな",
+  "粋": {
+    "reading": "いき",
     "meaning": "Sành điệu/Tinh tế"
   },
   "気品": {
@@ -29518,5 +29518,17 @@
   "行き来": {
     "reading": "いきき",
     "meaning": "đi lại"
+  },
+  "丸々": {
+    "reading": "まるまる",
+    "meaning": "nguyên cả"
+  },
+  "しんみり": {
+    "reading": "しんみり",
+    "meaning": "trầm lắng, xúc động"
+  },
+  "疎か": {
+    "reading": "おろそか",
+    "meaning": "lơ là"
   }
 }
