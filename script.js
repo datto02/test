@@ -2437,7 +2437,7 @@ return () => document.removeEventListener("mousedown", handleClickOutside);
 
         if (options.hiragana) ranges += "\\u3040-\\u309F";
         if (options.katakana) ranges += "\\u30A0-\\u30FF";
-        if (options.kanji)    ranges += "\\u4E00-\\u9FAF\\u3400-\\u4DBF\\u2E80-\\u2FDF\\uF900-\\uFAFF"; 
+        if (options.kanji)    ranges += "\\u4E00-\\u9FAF\\u3400-\\u4DBF\\u2E80-\\u2FDF\\uF900-\\uFAFF\\u3005"; 
         return ranges;
     };
     // --- HÀM TRỢ GIÚP: XÓA TRÙNG LẶP ---
