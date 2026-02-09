@@ -3490,6 +3490,13 @@ LÀM SẠCH
             <input 
                 type="number" min="1" max="12" placeholder="..." 
                 value={mimiN3} 
+onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
                 onChange={(e) => { setMimiN3(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }} 
                 onBlur={() => { if (Number(mimiN3) > 12) setMimiN3(12); if (Number(mimiN3) < 1 && mimiN3 !== '') setMimiN3(1); }} 
             
@@ -3509,6 +3516,13 @@ LÀM SẠCH
             <input 
                 type="number" min="1" max="13" placeholder="..." 
                 value={mimiN2} 
+onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
                 onChange={(e) => { setMimiN2(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }} 
                 onBlur={() => { if (Number(mimiN2) > 13) setMimiN2(13); if (Number(mimiN2) < 1 && mimiN2 !== '') setMimiN2(1); }} 
                 className={`w-14 text-center font-bold border-b-2 focus:border-blue-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${mimiN2 !== '' ? 'text-blue-600 border-blue-500' : 'text-gray-400 border-gray-200'}`} 
@@ -3526,6 +3540,13 @@ LÀM SẠCH
             <input 
                 type="number" min="1" max="14" placeholder="..." 
                 value={mimiN1} 
+onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
                 onChange={(e) => { setMimiN1(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }} 
                 onBlur={() => { if (Number(mimiN1) > 14) setMimiN1(14); if (Number(mimiN1) < 1 && mimiN1 !== '') setMimiN1(1); }} 
                 className={`w-14 text-center font-bold border-b-2 focus:border-red-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${mimiN1 !== '' ? 'text-red-600 border-red-500' : 'text-gray-400 border-gray-200'}`} 
@@ -3546,6 +3567,13 @@ LÀM SẠCH
             <input 
                 type="number" min="1" max="12" placeholder="..." 
                 value={tangoN3} 
+onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
                 onChange={(e) => { setTangoN3(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN2(''); setTangoN1(''); } }} 
                 onBlur={() => { if (Number(tangoN3) > 12) setTangoN3(12); if (Number(tangoN3) < 1 && tangoN3 !== '') setTangoN3(1); }} 
                 // --- ĐỔI text-lg THÀNH text-[16px] ---
@@ -3564,6 +3592,13 @@ LÀM SẠCH
             <input 
                 type="number" min="1" max="12" placeholder="..." 
                 value={tangoN2} 
+onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
                 onChange={(e) => { setTangoN2(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN1(''); } }} 
                 onBlur={() => { if (Number(tangoN2) > 12) setTangoN2(12); if (Number(tangoN2) < 1 && tangoN2 !== '') setTangoN2(1); }} 
                 className={`w-14 text-center font-bold border-b-2 focus:border-rose-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${tangoN2 !== '' ? 'text-rose-600 border-rose-500' : 'text-gray-400 border-gray-200'}`} 
@@ -3581,6 +3616,13 @@ LÀM SẠCH
             <input 
                 type="number" min="1" max="14" placeholder="..." 
                 value={tangoN1} 
+onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
                 onChange={(e) => { setTangoN1(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); } }} 
                 onBlur={() => { if (Number(tangoN1) > 14) setTangoN1(14); if (Number(tangoN1) < 1 && tangoN1 !== '') setTangoN1(1); }} 
                 className={`w-14 text-center font-bold border-b-2 focus:border-purple-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${tangoN1 !== '' ? 'text-purple-600 border-purple-500' : 'text-gray-400 border-gray-200'}`} 
