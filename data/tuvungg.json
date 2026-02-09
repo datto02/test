@@ -23635,8 +23635,8 @@
     "reading": "ステップ",
     "meaning": "Bước tiến"
   },
-  "優秀な": {
-    "reading": "ゆうしゅうな",
+  "優秀": {
+    "reading": "ゆうしゅう",
     "meaning": "Xuất sắc"
   },
   "修了": {
@@ -24403,8 +24403,8 @@
     "reading": "こぐ",
     "meaning": "Chèo/Đạp (xe)"
   },
-  "お墓": {
-    "reading": "おはか",
+  "墓": {
+    "reading": "はか",
     "meaning": "Mộ"
   },
   "突っ込む": {
@@ -29514,5 +29514,9 @@
   "恐怖": {
     "reading": "きょうふ",
     "meaning": "nỗi sợ"
+  },
+  "行き来": {
+    "reading": "いきき",
+    "meaning": "đi lại"
   }
 }
