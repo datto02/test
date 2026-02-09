@@ -2238,7 +2238,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
     );
 };
 // 5. Sidebar (Phiên bản: Final)
-   const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen, mode }) => {
+   const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen, mode, setPracticeMode }) => {
    
 
 // 1. Logic bộ lọc mới
@@ -4239,7 +4239,39 @@ TÀI LIỆU HỌC TẬP
             </div>
             </div>
         )}
-        
+        {/* 4. NÚT CHUYỂN CHẾ ĐỘ (ĐÃ CHUYỂN VÀO SIDEBAR) */}
+{/* Điều kiện: Chỉ hiện khi KHÔNG mở Menu, KHÔNG mở Docs, KHÔNG mở In, KHÔNG Load */}
+{!isMenuOpen && !isDocsModalOpen && !isPrintModalOpen && !isLoading && (
+    <div className="fixed bottom-6 right-6 z-[60] no-print print:hidden animate-in fade-in duration-300">
+        <button
+            onClick={() => {
+                const newMode = mode === 'kanji' ? 'vocab' : 'kanji'; // Sửa practiceMode thành mode
+                setPracticeMode(newMode);
+                
+                // Reset text để tránh lỗi hiển thị khi chuyển chế độ
+                onChange({ ...config, // Sửa setConfig thành onChange
+                    text: '', 
+                    traceCount: newMode === 'vocab' ? 12 : 9 
+                }); 
+            }}
+            className={`h-12 pl-4 pr-6 rounded-full font-black text-[11px] uppercase tracking-widest shadow-2xl border-2 transition-all active:scale-95 flex items-center gap-3 ${
+                mode === 'kanji' // Sửa practiceMode thành mode
+                ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-indigo-700 shadow-indigo-200' 
+                : 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-700 shadow-emerald-200'
+            }`}
+        >
+            {/* Icon chuyển đổi */}
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">
+                    {mode === 'kanji' ? '字' : '語'} {/* Sửa practiceMode thành mode */}
+            </div>
+            
+            <div className="flex flex-col items-start leading-none gap-0.5">
+                <span className="opacity-70 text-[9px]">Chế độ hiện tại</span>
+                <span>{mode === 'kanji' ? 'LUYỆN KANJI' : 'LUYỆN TỪ VỰNG'}</span> {/* Sửa practiceMode thành mode */}
+            </div>
+        </button>
+    </div>
+)}
         </div>
     );
     };
@@ -4371,6 +4403,7 @@ useEffect(() => {
                     </div>
                 </div>
             </div>
+        
         </div>
     );
 };
@@ -4514,6 +4547,7 @@ return (
             srsData={srsData}
          onOpenReviewList={() => setIsReviewListOpen(true)}
              mode={practiceMode}
+                 setPracticeMode={setPracticeMode}
       
     />
     </div>
@@ -4597,40 +4631,7 @@ return (
         setIsReviewListOpen(false);           
     }}
             />
-                    {/* 4. NÚT CHUYỂN CHẾ ĐỘ (GÓC DƯỚI BÊN PHẢI) */}
-<div className="fixed bottom-6 right-6 z-[55] no-print print:hidden">
-    <button
-        onClick={() => {
-            const newMode = practiceMode === 'kanji' ? 'vocab' : 'kanji';
-            setPracticeMode(newMode);
-            // Reset text mẫu để tránh rối mắt
-            setConfig(prev => ({ 
-            ...prev, 
-            text: '', // Reset văn bản
-            // Nếu là Vocab -> traceCount = 12 (full dòng nét mờ)
-            // Nếu là Kanji -> traceCount = 9 (mặc định cũ)
-            traceCount: newMode === 'vocab' ? 12 : 9 
-        })); 
-        }}
-        className={`h-12 pl-4 pr-6 rounded-full font-black text-[11px] uppercase tracking-widest shadow-2xl border-2 transition-all active:scale-95 flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-300 ${
-            practiceMode === 'kanji' 
-            ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-indigo-700 shadow-indigo-200' 
-            : 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-700 shadow-emerald-200'
-        }`}
-    >
-        {/* Icon chuyển đổi */}
-        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">
-                {practiceMode === 'kanji' ? '字' : '語'}
-        </div>
-        
-        <div className="flex flex-col items-start leading-none gap-0.5">
-            <span className="opacity-70 text-[9px]">Chế độ hiện tại</span>
-            <span>{practiceMode === 'kanji' ? 'LUYỆN KANJI' : 'LUYỆN TỪ VỰNG'}</span>
-        </div>
-    </button>
-</div>
-        </div>
-);
+                  
 };
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
