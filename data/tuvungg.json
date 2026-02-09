@@ -29326,5 +29326,141 @@
   "一石二鳥": {
     "reading": "いっせきにちょう",
     "meaning": "Một mũi tên trúng hai đích"
+  },
+  "父親": {
+    "reading": "ちちおや",
+    "meaning": "bố"
+  },
+  "母親": {
+    "reading": "ははおや",
+    "meaning": "mẹ"
+  },
+  "長女": {
+    "reading": "ちょうじょ",
+    "meaning": "con gái cả"
+  },
+  "次女": {
+    "reading": "じじょ",
+    "meaning": "con gái thứ"
+  },
+  "次男": {
+    "reading": "じなん",
+    "meaning": "con trai thứ"
+  },
+  "三女": {
+    "reading": "さんじょ",
+    "meaning": "con gái thứ ba"
+  },
+  "三男": {
+    "reading": "さんなん",
+    "meaning": "con trai thứ ba"
+  },
+  "末っ子": {
+    "reading": "すえっこ",
+    "meaning": "con út"
+  },
+  "一人っ子": {
+    "reading": "ひとりっこ",
+    "meaning": "con một"
+  },
+  "姉妹": {
+    "reading": "しまい",
+    "meaning": "chị em gái"
+  },
+  "一人娘": {
+    "reading": "ひとりむすめ",
+    "meaning": "con gái duy nhất"
+  },
+  "親子": {
+    "reading": "おやこ",
+    "meaning": "cha mẹ và con"
+  },
+  "夫妻": {
+    "reading": "ふさい",
+    "meaning": "vợ chồng"
+  },
+  "親類": {
+    "reading": "しんるい",
+    "meaning": "họ hàng"
+  },
+  "先祖": {
+    "reading": "せんぞ",
+    "meaning": "tổ tiên"
+  },
+  "おじ": {
+    "reading": "おじ",
+    "meaning": "chú/bác/cậu"
+  },
+  "おば": {
+    "reading": "おば",
+    "meaning": "cô/dì/mợ"
+  },
+  "いとこ": {
+    "reading": "いとこ",
+    "meaning": "anh em họ"
+  },
+  "おい": {
+    "reading": "おい",
+    "meaning": "cháu trai"
+  },
+  "めい": {
+    "reading": "めい",
+    "meaning": "cháu gái"
+  },
+  "親友": {
+    "reading": "しんゆう",
+    "meaning": "bạn thân"
+  },
+  "仲良し": {
+    "reading": "なかよし",
+    "meaning": "thân thiết"
+  },
+  "幼なじみ": {
+    "reading": "おさななじみ",
+    "meaning": "bạn thuở nhỏ"
+  },
+  "友情": {
+    "reading": "ゆうじょう",
+    "meaning": "tình bạn"
+  },
+  "知人": {
+    "reading": "ちじん",
+    "meaning": "người quen"
+  },
+  "メンバー": {
+    "reading": "メンバー",
+    "meaning": "thành viên"
+  },
+  "別々": {
+    "reading": "べつべつ",
+    "meaning": "riêng biệt"
+  },
+  "愛情": {
+    "reading": "あいじょう",
+    "meaning": "tình yêu"
+  },
+  "出会い": {
+    "reading": "であい",
+    "meaning": "cuộc gặp gỡ"
+  },
+  "交際": {
+    "reading": "こうさい",
+    "meaning": "hẹn hò"
+  },
+  "記念": {
+    "reading": "きねん",
+    "meaning": "kỷ niệm"
+  },
+  "記念日": {
+    "reading": "きねんび",
+    "meaning": "ngày kỷ niệm"
+  },
+  "ひとをふる": {
+    "reading": "ひとをふる",
+    "meaning": "đá người yêu"
+  },
+  "我々": {
+    "reading": "われわれ",
+    "meaning": "chúng tôi"
   }
 }
