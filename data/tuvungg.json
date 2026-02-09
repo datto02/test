@@ -29462,5 +29462,29 @@
   "我々": {
     "reading": "われわれ",
     "meaning": "chúng tôi"
+  },
+  "取り出す": {
+    "reading": "とりだす",
+    "meaning": "lấy ra"
+  },
+  "蒸す": {
+    "reading": "むす",
+    "meaning": "hấp (đồ ăn)"
+  },
+  "少々": {
+    "reading": "しょうしょう",
+    "meaning": "một chút"
+  },
+  "先々週": {
+    "reading": "せんせんしゅう",
+    "meaning": "tuần kia"
+  },
+  "お札": {
+    "reading": "おさつ",
+    "meaning": "tiền giấy"
+  },
+  "一回払い": {
+    "reading": "いっかいばらい",
+    "meaning": "trả một lần"
   }
 }
