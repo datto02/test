@@ -256,3 +256,59 @@
 .progress-thumb-animate {
     transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+/* --- KAKIMASHOU STYLES (COPY 100%) --- */
+.padBackground { fill: #fff; }
+.padLine1 { stroke: #f5f5f5; stroke-width: 1; stroke-dasharray: 4, 4; }
+.padLine2 { stroke: #dfdfdf; stroke-width: 1; stroke-dasharray: 4, 4; }
+.padBorder { stroke: #ccc; stroke-width: 1.5; }
+
+/* Các trạng thái của nét viết */
+.correctStroke { 
+    stroke: #000; 
+    stroke-linecap: round; 
+    stroke-linejoin: round; 
+    stroke-width: 7; /* Đậm như bút lông */
+    transition: all 0.5s ease;
+    filter: url(#glow); /* Hiệu ứng phát sáng */
+}
+.wrongStroke { 
+    stroke: #ff0000; 
+    stroke-width: 7;
+    stroke-linecap: round; 
+    stroke-linejoin: round;
+    opacity: 0; 
+    transition: opacity 0.5s ease; /* Hiệu ứng biến mất dần */
+}
+.warningStroke {
+    stroke: #d4a017; /* Màu vàng nhắc nhở gần đúng */
+    stroke-width: 7;
+    stroke-linecap: round; 
+    stroke-linejoin: round;
+}
+.hintStroke {
+    stroke: #3991d4;
+    stroke-width: 7;
+    stroke-dasharray: 5,5;
+    opacity: 0.5;
+    fill: none;
+}
+
+/* User đang vẽ */
+#userStrokes path {
+    fill: none;
+    stroke: #8040ff; /* Màu tím khi đang vẽ */
+    stroke-width: 7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.8;
+}
+
+/* Ẩn Kanji gốc để người dùng tự viết đè lên */
+#kanjiVG path {
+    stroke: #e0e0e0; /* Màu xám nhạt làm nền */
+    stroke-width: 4;
+    fill: none;
+    stroke-linecap: round; 
+    stroke-linejoin: round;
+}
