@@ -225,6 +225,70 @@ const useKanjiReadings = (char, active, dbData) => {
   return readings;
 };
 
+// 1. Tính khoảng cách giữa 2 điểm
+const getDistance = (p1, p2) => {
+    const dx = p1.x - p2.x;
+    const dy = p1.y - p2.y;
+    return Math.sqrt(dx * dx + dy * dy);
+};
+
+// 2. Lấy mẫu điểm trên đường vẽ (Resampling) để so sánh
+const getPointsOnPath = (path, totalLen, numPoints) => {
+    const points = [];
+    for (let i = 0; i < numPoints; i++) {
+        const p = path.getPointAtLength((i * totalLen) / (numPoints - 1));
+        points.push(p);
+    }
+    return points;
+};
+
+// 3. Tính góc di chuyển của nét
+const getAngles = (points) => {
+    const angles = [];
+    for (let i = 0; i < points.length - 1; i++) {
+        const p1 = points[i];
+        const p2 = points[i+1];
+        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+        angles.push(angle);
+    }
+    return angles;
+};
+
+
+const compareStrokes = (userPath, guidePath) => {
+    const userLen = userPath.getTotalLength();
+    const guideLen = guidePath.getTotalLength();
+
+  
+    const lengthRatio = Math.abs(1 - userLen / guideLen);
+    
+   
+    const SAMPLE_COUNT = 15; 
+    const userPoints = getPointsOnPath(userPath, userLen, SAMPLE_COUNT);
+    const guidePoints = getPointsOnPath(guidePath, guideLen, SAMPLE_COUNT);
+
+    let distSum = 0;
+    for(let i=0; i<SAMPLE_COUNT; i++) {
+        distSum += getDistance(userPoints[i], guidePoints[i]);
+    }
+    const avgDist = (distSum / SAMPLE_COUNT) / 20; 
+    const distScore = avgDist * avgDist; 
+
+   
+    const userAngles = getAngles(userPoints);
+    const guideAngles = getAngles(guidePoints);
+    let angleDiffSum = 0;
+    for(let i=0; i<userAngles.length; i++) {
+        let diff = userAngles[i] - guideAngles[i];
+        while(diff <= -180) diff += 360; 
+        while(diff > 180) diff -= 360;
+        angleDiffSum += Math.abs(diff);
+    }
+    const angleScore = (angleDiffSum / userAngles.length) / 15;
+
+  
+    return lengthRatio + distScore + angleScore;
+};
 const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars, dbData }) => {
     const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
     const [isHelpOpen, setIsHelpOpen] = React.useState(false);
@@ -253,42 +317,7 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars, db
         });
         return result;
     }, [srsData, dbData]);
-// --- MODAL THÔNG BÁO CAM KẾT (MỚI) ---
-const WelcomeModal = ({ onConfirm }) => {
-    return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/95 backdrop-blur-md p-4 animate-in fade-in duration-500">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 border border-gray-200">
-                
-                {/* Header trang trí */}
-                <div className="bg-indigo-600 p-6 flex flex-col items-center justify-center text-white relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-full bg-white/10" style={{backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px)', backgroundSize: '10px 10px'}}></div>
-                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-3 backdrop-blur-sm relative z-10 shadow-inner">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    </div>
-                    <h2 className="text-xl font-black uppercase tracking-widest relative z-10">THÔNG BÁO</h2>
-                </div>
 
-                {/* Nội dung chính */}
-                <div className="p-6 text-center">
-                    <p className="text-sm text-gray-600 font-medium leading-relaxed text-justify mb-6">
-                        <span className="font-bold text-indigo-700">Phá Đảo Tiếng Nhật</span> cam kết cung cấp công cụ luyện viết <span className="text-red-600 font-black bg-red-50 px-1 rounded">MIỄN PHÍ TRỌN ĐỜI</span> cho cộng đồng.
-                        <br/><br/>
-                        Tôi tin rằng kiến thức không nên bị độc chiếm hay thương mại hóa quá mức. Cảm ơn các bạn đã tin dùng.
-                    </p>
-
-                    <button 
-                        onClick={onConfirm}
-                        className="w-full py-3.5 bg-gray-900 hover:bg-black text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 uppercase tracking-widest text-xs flex items-center justify-center gap-2 group"
-                    >
-                        <span>ĐÃ HIỂU</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform"><polyline points="9 18 15 12 9 6"/></svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
-    
     const levelColors = {
         N5: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', bar: 'bg-emerald-500' },
         N4: { bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200', bar: 'bg-sky-500' },
@@ -1172,6 +1201,201 @@ return (
     </div>
 );
 };
+
+// --- COMPONENT MỚI: KAKIMASHOU MODAL (LUYỆN VIẾT TƯƠNG TÁC) ---
+const KakimashouModal = ({ char, fullSvg, isOpen, onClose }) => {
+    const svgRef = useRef(null);
+    const [guidePaths, setGuidePaths] = useState([]); 
+    const [currentStrokeIdx, setCurrentStrokeIdx] = useState(0); 
+    const [userPathD, setUserPathD] = useState(''); 
+    const [finishedStrokes, setFinishedStrokes] = useState([]); 
+    const [isDrawing, setIsDrawing] = useState(false);
+
+    // Parse SVG string thành các đường dẫn (paths)
+    useEffect(() => {
+        if (fullSvg && isOpen) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(fullSvg, "image/svg+xml");
+            // Lấy tất cả thẻ path
+            const paths = Array.from(doc.querySelectorAll('path')).map(p => p.getAttribute('d'));
+            setGuidePaths(paths);
+            setCurrentStrokeIdx(0);
+            setFinishedStrokes([]);
+            setUserPathD('');
+        }
+    }, [fullSvg, isOpen]);
+
+    // Chuyển đổi tọa độ chuột/cảm ứng sang hệ tọa độ SVG 109x109
+    const getSvgPoint = (clientX, clientY) => {
+        const svg = svgRef.current;
+        if (!svg) return { x: 0, y: 0 };
+        const pt = svg.createSVGPoint();
+        pt.x = clientX;
+        pt.y = clientY;
+        return pt.matrixTransform(svg.getScreenCTM().inverse());
+    };
+
+    const handlePointerDown = (e) => {
+        if (currentStrokeIdx >= guidePaths.length) return; 
+        e.currentTarget.setPointerCapture(e.pointerId);
+        setIsDrawing(true);
+        const { x, y } = getSvgPoint(e.clientX, e.clientY);
+        setUserPathD(`M ${x.toFixed(1)} ${y.toFixed(1)}`);
+    };
+
+    const handlePointerMove = (e) => {
+        if (!isDrawing) return;
+        const { x, y } = getSvgPoint(e.clientX, e.clientY);
+        // Nối thêm đường thẳng vào path
+        setUserPathD(prev => `${prev} L ${x.toFixed(1)} ${y.toFixed(1)}`);
+    };
+
+    const handlePointerUp = (e) => {
+        if (!isDrawing) return;
+        setIsDrawing(false);
+        e.currentTarget.releasePointerCapture(e.pointerId);
+
+        // 1. Tạo Element ảo để tính toán
+        const userEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        userEl.setAttribute("d", userPathD);
+        
+        const guideEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        guideEl.setAttribute("d", guidePaths[currentStrokeIdx]);
+
+        // 2. Bỏ qua nếu chỉ chấm một điểm (ngắn quá)
+        if (userEl.getTotalLength() < 5) {
+            setUserPathD('');
+            return;
+        }
+
+        // 3. SO KHỚP (Dùng hàm compareStrokes đã thêm ở Bước 2)
+        const score = compareStrokes(userEl, guideEl);
+        
+        // 4. Xử lý kết quả
+        if (score > 4) {
+            // SAI: Hiện màu đỏ rồi biến mất
+            const wrongStroke = { d: userPathD, className: 'wrongStroke' };
+            setFinishedStrokes(prev => [...prev, wrongStroke]);
+            
+            setTimeout(() => {
+                setFinishedStrokes(prev => prev.filter(s => s !== wrongStroke));
+            }, 500); // 0.5s sau thì xóa
+            setUserPathD('');
+        } else {
+            // ĐÚNG: Thay nét vẽ xấu của user bằng nét mẫu (Snap-to-guide)
+            // Nếu điểm < 2 là rất tốt (correct), từ 2-4 là tạm được (warning)
+            const className = score < 2 ? 'correctStroke' : 'warningStroke';
+            
+            const strokeToShow = { 
+                d: guidePaths[currentStrokeIdx], // Lấy nét chuẩn để hiển thị cho đẹp
+                className: className 
+            };
+            
+            setFinishedStrokes(prev => [...prev, strokeToShow]);
+            setCurrentStrokeIdx(prev => prev + 1);
+            setUserPathD('');
+
+            // Kiểm tra hoàn thành
+            if (currentStrokeIdx + 1 === guidePaths.length) {
+                // Hiệu ứng pháo hoa hoặc thông báo nhỏ
+                // setTimeout(() => alert("Hoàn thành!"), 100); 
+            }
+        }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center bg-gray-900/90 backdrop-blur-sm p-4" onClick={onClose}>
+            <div className="bg-white rounded-2xl p-4 shadow-2xl relative w-full max-w-sm flex flex-col items-center animate-in zoom-in-95" onClick={e => e.stopPropagation()}>
+                
+                {/* Header */}
+                <div className="flex justify-between items-center w-full mb-4">
+                    <h3 className="text-xl font-black text-gray-700">Luyện viết: <span className="text-indigo-600 text-3xl font-['Klee_One']">{char}</span></h3>
+                    <button onClick={onClose} className="p-2 bg-gray-100 rounded-full hover:bg-red-100 hover:text-red-500 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+
+                {/* KHUNG VẼ SVG (Copy cấu trúc Kakimashou) */}
+                <div className="relative border-2 border-gray-300 rounded-xl bg-white cursor-crosshair overflow-hidden shadow-inner" 
+                     style={{ width: '300px', height: '300px', touchAction: 'none' }}>
+                    
+                    <svg 
+                        ref={svgRef}
+                        viewBox="0 0 109 109" 
+                        width="100%" height="100%"
+                        onPointerDown={handlePointerDown}
+                        onPointerMove={handlePointerMove}
+                        onPointerUp={handlePointerUp}
+                        onPointerCancel={handlePointerUp}
+                    >
+                        {/* 1. Filter Glow (Phát sáng) */}
+                        <defs>
+                            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                                <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+
+                        {/* 2. Lưới nền (Grid) */}
+                        <rect x="0" y="0" width="109" height="109" className="padBackground" />
+                        <line x1="0" y1="0" x2="109" y2="109" className="padLine1" />
+                        <line x1="109" y1="0" x2="0" y2="109" className="padLine1" />
+                        <line x1="54.5" y1="0" x2="54.5" y2="109" className="padLine2" />
+                        <line x1="0" y1="54.5" x2="109" y2="54.5" className="padLine2" />
+                        <rect x="0" y="0" width="109" height="109" fill="none" className="padBorder" />
+
+                        {/* 3. Nét mẫu mờ (Guide) - Chỉ hiện nét CHƯA viết để gợi ý */}
+                        <g id="kanjiVG">
+                            {guidePaths.map((d, i) => (
+                                <path 
+                                    key={i} 
+                                    d={d} 
+                                    className="hintStroke" // Dùng class hintStroke từ CSS
+                                    style={{ opacity: i === currentStrokeIdx ? 0.3 : 0 }} 
+                                />
+                            ))}
+                        </g>
+
+                        {/* 4. Các nét đã viết xong (Kết quả) */}
+                        <g id="finishedStrokes">
+                            {finishedStrokes.map((s, i) => (
+                                <path key={i} d={s.d} className={s.className} />
+                            ))}
+                        </g>
+
+                        {/* 5. Nét đang vẽ (User Drawing) */}
+                        <g id="userStrokes">
+                            {userPathD && <path d={userPathD} />}
+                        </g>
+                    </svg>
+                </div>
+
+                {/* Footer Controls */}
+                <div className="flex gap-3 mt-5 w-full">
+                    <button 
+                        onClick={() => {
+                            setFinishedStrokes([]);
+                            setCurrentStrokeIdx(0);
+                            setUserPathD('');
+                        }}
+                        className="flex-1 py-3 bg-yellow-50 text-yellow-700 font-bold rounded-xl border border-yellow-200 hover:bg-yellow-100 transition-all uppercase text-xs tracking-widest shadow-sm active:scale-95"
+                    >
+                        Viết lại
+                    </button>
+                </div>
+                
+                <div className="mt-3 text-[10px] text-gray-400 text-center italic">
+                    Viết theo nét mờ gợi ý. Sai nét sẽ bị đỏ.
+                </div>
+            </div>
+        </div>
+    );
+};
 // --- 2. HEADER SECTION (CẬP NHẬT HIỂN THỊ TỪ VỰNG) ---
 
 const HeaderSection = ({ char, paths, loading, failed, config, dbData }) => {
@@ -1372,7 +1596,9 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
         const { loading, paths, fullSvg, failed } = useKanjiSvg(char);
         const boxes = Array.from({ length: 12 }, (_, i) => i);
         const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
-        const [isAnimOpen, setIsAnimOpen] = useState(false);
+        
+        // SỬA: Đổi tên state để rõ ràng hơn (dùng cho KakimashouModal)
+        const [isPracticeOpen, setIsPracticeOpen] = useState(false);
 
         return (
             <div className="flex flex-col w-full px-[8mm]">
@@ -1395,18 +1621,18 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
                         config={config}
                         svgData={fullSvg}
                         failed={failed}
-                        onClick={i === 0 ? () => setIsAnimOpen(true) : undefined}
+                        // SỬA: Mở KakimashouModal khi click
+                        onClick={i === 0 ? () => setIsPracticeOpen(true) : undefined}
                     />
                     ))}
                 </div>
 
-                <KanjiAnimationModal 
+                {/* SỬA: Thay KanjiAnimationModal bằng KakimashouModal */}
+                <KakimashouModal 
                     char={char}
-                    paths={paths}
                     fullSvg={fullSvg} 
-                    dbData={dbData}    
-                    isOpen={isAnimOpen}
-                    onClose={() => setIsAnimOpen(false)}
+                    isOpen={isPracticeOpen}
+                    onClose={() => setIsPracticeOpen(false)}
                 />
             </div>
         );
@@ -1501,7 +1727,7 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
 {/* 3. DÒNG NHẮC NHỞ (Nằm ngoài ngoặc và hiện khi thiếu Cách đọc + Nghĩa) */}
 {(!displayReading && !finalMeaning) && (
     <span className="text-gray-400 text-[10px] italic ml-1 print:hidden">
-        thêm cách đọc, ý nghĩa
+        ấn vào đây để thêm cách đọc, ý nghĩa
     </span>
 )}
                         
@@ -3351,7 +3577,22 @@ LÀM SẠCH
                 onChange={handleInputText} 
                 onCompositionStart={handleCompositionStart}
                 onCompositionEnd={handleCompositionEnd}
-                onBlur={handleBlurText}    
+                onBlur={handleBlurText}   
+                    onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+            const _d = (s) => {
+                try { return decodeURIComponent(escape(window.atob(s))); } catch{ return ''; }
+            };
+            const _k = 'cGhhZGFvdGllbmduaGF0'; 
+            const _m = 'QuG6o24gcXV54buBbiB0cmFuZyB3ZWIgdGh14buZYyBQaMOhIMSQ4bqjbyBUaeG6v25nIE5o4bqtdA==';
+            if (e.target.value.trim().toLowerCase() === _d(_k)) {
+                e.preventDefault(); 
+                alert(_d(_m));   
+                setLocalText('');
+                handleChange('text', '');
+            }
+        }
+    }}
                 />
             </div>
             
@@ -3686,9 +3927,9 @@ onKeyDown={(e) => {
                                                 {mimiN3 && `TẢI MIMI N3 - PHẦN ${mimiN3}`}
                                                 {mimiN2 && `TẢI MIMI N2 - PHẦN ${mimiN2}`}
                                                 {mimiN1 && `TẢI MIMI N1 - PHẦN ${mimiN1}`}
-                                                {tangoN3 && `TẢI TANGO N3 - BÀI ${tangoN3}`}
-                                                {tangoN2 && `TẢI TANGO N2 - BÀI ${tangoN2}`}
-                                                {tangoN1 && `TẢI TANGO N1 - BÀI ${tangoN1}`}
+                                                {tangoN3 && `TẢI TANGO N3 - PHẦN ${tangoN3}`}
+                                                {tangoN2 && `TẢI TANGO N2 - PHẦN ${tangoN2}`}
+                                                {tangoN1 && `TẢI TANGO N1 - PHẦN ${tangoN1}`}
                                             </span>
                                         </>
                                     )}
@@ -4114,13 +4355,13 @@ TÀI LIỆU HỌC TẬP
             <div className="p-4 space-y-3 overflow-y-auto custom-scrollbar">
 
                 {/* Luyện viết (tạo sẵn) */}
-                <a href="https://drive.google.com/drive/folders/1J8psBuUeV8VBUC90gxw5tTNPy050FDha?usp=sharing" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all group">
+                <a href="https://drive.google.com/drive/folders/1e7J-I6icRWjXla5WGUriUqgFXb7B72cP?usp=sharing" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all group">
                     <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-gray-800 truncate group-hover:text-purple-700 pb-1">File tập viết đã tạo sẵn</p>
-                        <p className="text-[10px] text-gray-400">Bảng chữ cái, bộ thủ, kanji</p>
+                        <p className="text-[10px] text-gray-400">Kanji, từ vựng</p>
                     </div>
                     <svg className="w-4 h-4 text-gray-300 group-hover:text-purple-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 </a>
@@ -4174,7 +4415,7 @@ TÀI LIỆU HỌC TẬP
                 </a>
 
                 {/* nhóm học tập */}
-                <a href="https://zalo.me/g/ujgais332" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all group">
+                <a href="https://zalo.me/g/jeflei549" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all group">
                     {/* Đã đổi: bg-blue -> bg-orange */}
                     <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
                         {/* Đã đổi: Icon File -> Icon Nhóm người */}
@@ -4250,7 +4491,7 @@ TÀI LIỆU HỌC TẬP
                                     <li>
                                         Hoặc có thể tải file tạo sẵn 
                                         <a 
-                                            href="https://drive.google.com/drive/folders/1J8psBuUeV8VBUC90gxw5tTNPy050FDha?usp=sharing" 
+                                            href="https://drive.google.com/drive/folders/1e7J-I6icRWjXla5WGUriUqgFXb7B72cP?usp=sharing" 
                                             target="_blank" 
                                             rel="noopener noreferrer"
                                             // LOGIC ĐẢO NGƯỢC MÀU:
@@ -4324,6 +4565,14 @@ TÀI LIỆU HỌC TẬP
             const newMode = mode === 'kanji' ? 'vocab' : 'kanji';
             setPracticeMode(newMode);
             
+            if (newMode === 'vocab') {
+                setFilterOptions({
+                    hiragana: true,
+                    katakana: true,
+                    kanji: true,
+                    removeDuplicates: false
+                });
+            }
           
             onChange(prev => ({ 
                 ...prev, 
@@ -4488,8 +4737,7 @@ useEffect(() => {
 };
     
     const App = () => {
-
- const [showWelcome, setShowWelcome] = useState(true);
+// --- Các state cũ giữ nguyên ---
 const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
 const [showMobilePreview, setShowMobilePreview] = useState(false);
 const [isConfigOpen, setIsConfigOpen] = React.useState(false);
@@ -4614,9 +4862,6 @@ if (!isDbLoaded) {
 // --- GIAO DIỆN CHÍNH (Khi đã có dữ liệu) ---
 return (
     <div className="min-h-screen flex flex-col md:flex-row print-layout-reset">
-    {showWelcome && (
-            <WelcomeModal onConfirm={() => setShowWelcome(false)} />
-        )}
     <div className="no-print z-50">
     <Sidebar 
         config={config} onChange={setConfig} onPrint={handlePrint} 
