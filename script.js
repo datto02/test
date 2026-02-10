@@ -4487,151 +4487,154 @@ useEffect(() => {
         </div>
     );
 };
-  // --- BƯỚC 1: TRANG HIỂN THỊ ĐỀ THI (THUẬT TOÁN CHIA TRANG THÔNG MINH) ---
+// --- BƯỚC 1: TRANG HIỂN THỊ ĐỀ THI (CĂN LỀ CHUẨN A4 - TỐI ƯU HÓA) ---
 const QuizPage = ({ questions, title = "BÀI KIỂM TRA TỪ VỰNG" }) => {
     
-    // 1. HÀM TÍNH TOÁN CHIỀU CAO (Ước lượng)
-    // Đơn vị: điểm (points). Một trang A4 an toàn khoảng 750-800 điểm.
-    const calculateQuestionHeight = (q) => {
-        let height = 0;
+    // --- THÔNG SỐ CẤU HÌNH (Đơn vị: Pixel ước lượng) ---
+    const A4_HEIGHT = 1120; // Chiều cao thực tế A4 (trừ đi sai số máy in)
+    const PADDING_Y = 110;  // Tổng padding trên + dưới (15mm x 2)
+    const FOOTER_HEIGHT = 40; 
+    const HEADER_HEIGHT_P1 = 140; // Header to trang 1
+    const HEADER_HEIGHT_PN = 50;  // Header nhỏ các trang sau
+    
+    // Tính toán chiều cao khả dụng
+    const CONTENT_HEIGHT_P1 = A4_HEIGHT - PADDING_Y - HEADER_HEIGHT_P1 - FOOTER_HEIGHT;
+    const CONTENT_HEIGHT_PN = A4_HEIGHT - PADDING_Y - HEADER_HEIGHT_PN - FOOTER_HEIGHT;
+
+    // 1. Hàm ước lượng chiều cao câu hỏi (Đã tinh chỉnh chặt chẽ hơn)
+    const estimateQuestionHeight = (q) => {
+        let h = 0;
+        // Chiều cao dòng câu hỏi (Font 18px + line-height) ~ 28px/dòng
+        // Trung bình 1 dòng chứa được khoảng 55 ký tự (vì đã căn lề Justify)
+        const textLen = q.question.length;
+        const lines = Math.ceil(textLen / 55) || 1; 
+        h += lines * 28; 
+
+        // Chiều cao Grid đáp án (4 dòng hoặc 2 dòng tùy độ dài, ở đây lấy trung bình) + margin
+        h += 70; 
+
+        // Margin bottom giữa các câu
+        h += 24; 
         
-        // Chiều cao của câu hỏi: Cứ 45 ký tự tính là 1 dòng (khoảng 30 điểm/dòng)
-        const textLength = q.question.length;
-        const lines = Math.ceil(textLength / 45) || 1; 
-        height += lines * 30; 
-
-        // Chiều cao của phần đáp án (4 đáp án + khoảng cách)
-        // Mặc định khoảng 60 điểm cho khu vực đáp án
-        height += 60; 
-
-        // Khoảng cách bottom margin
-        height += 20; 
-
-        return height;
+        return h;
     };
 
-    // 2. THUẬT TOÁN CHIA TRANG
+    // 2. Thuật toán chia trang (Logic mới: Trang 1 chứa ít hơn, Trang 2 chứa nhiều hơn)
     const paginateQuestions = () => {
         const pages = [];
         let currentPage = [];
         let currentHeight = 0;
-        const MAX_HEIGHT = 750; // Giới hạn chiều cao nội dung 1 trang A4
-
+        
         questions.forEach((q, index) => {
-            const qHeight = calculateQuestionHeight(q);
+            const qHeight = estimateQuestionHeight(q);
+            
+            // Xác định giới hạn chiều cao của trang hiện tại
+            // Nếu là trang đầu tiên (pages.length === 0) thì dùng limit P1, ngược lại dùng limit PN
+            const limit = (pages.length === 0) ? CONTENT_HEIGHT_P1 : CONTENT_HEIGHT_PN;
 
-            // Nếu cộng thêm câu này mà vượt quá chiều cao trang -> Sang trang mới
-            if (currentHeight + qHeight > MAX_HEIGHT) {
-                pages.push(currentPage); // Lưu trang cũ
-                currentPage = [];        // Tạo trang mới
-                currentHeight = 0;       // Reset chiều cao
+            if (currentHeight + qHeight > limit) {
+                pages.push(currentPage); 
+                currentPage = [];        
+                currentHeight = 0;       
             }
 
-            // Thêm câu hỏi vào trang hiện tại
             currentPage.push({ ...q, realIndex: index + 1 });
             currentHeight += qHeight;
         });
 
-        // Đẩy trang cuối cùng vào (nếu có)
-        if (currentPage.length > 0) {
-            pages.push(currentPage);
-        }
-
+        if (currentPage.length > 0) pages.push(currentPage);
         return pages;
     };
 
     const paginatedData = paginateQuestions();
 
     return (
-        <div className="flex flex-col gap-8 bg-gray-200 items-center py-8">
+        <div className="flex flex-col gap-8 bg-gray-300 items-center py-8 font-serif">
             {paginatedData.map((pageQuestions, pageIndex) => (
-                <div key={pageIndex} className="a4-page mx-auto bg-white relative p-[15mm] shadow-2xl">
-                    
-                    {/* Header: Chỉ hiện ở trang 1 */}
-                    {pageIndex === 0 && (
-                        <div className="border-b-2 border-gray-800 pb-4 mb-6">
-                            <h2 className="text-2xl font-black text-center uppercase tracking-widest mb-3 text-gray-800">{title}</h2>
-                            <div className="flex justify-between text-sm font-bold text-gray-600 font-sans uppercase tracking-wide">
-                                <span>Môn thi: TỪ VỰNG / KANJI</span>
-                                <span>Thời gian: 45 phút</span>
-                                <span>Tổng: {questions.length} câu</span>
-                            </div>
-                        </div>
-                    )}
+                <div key={pageIndex} className="a4-page mx-auto bg-white relative shadow-2xl flex flex-col justify-between" 
+                     style={{ padding: '15mm', height: '297mm', width: '210mm' }}> 
+                     {/* Bắt buộc set cứng chiều cao A4 để Flexbox hoạt động chuẩn */}
 
-                    {/* Header phụ cho các trang sau (cho đỡ trống) */}
-                    {pageIndex > 0 && (
-                        <div className="border-b border-gray-300 pb-2 mb-6 flex justify-between text-xs text-gray-400 font-bold uppercase">
-                            <span>{title}</span>
-                            <span>(Tiếp theo)</span>
-                        </div>
-                    )}
-
-                    {/* DANH SÁCH CÂU HỎI */}
-                    <div className="space-y-6">
-                        {pageQuestions.map((q) => (
-                            // Class 'break-inside-avoid' là mấu chốt để khi in thật nó không bị cắt đôi
-                            <div key={q.realIndex} className="break-inside-avoid">
-                                <div className="flex items-baseline gap-3 mb-2">
-                                    {/* Số thứ tự câu hỏi */}
-                                    <span className="font-black text-lg text-gray-800 min-w-[28px]">
-                                        {q.realIndex}.
-                                    </span>
-                                    
-                                    {/* Nội dung câu hỏi (Căn lề Justify) */}
-                                    <span className="font-medium text-lg font-['Klee_One'] text-gray-900 text-justify leading-relaxed flex-1">
-                                        {q.question}
-                                    </span>
+                    <div>
+                        {/* --- HEADER --- */}
+                        {pageIndex === 0 ? (
+                            <div className="border-b-2 border-black pb-2 mb-4">
+                                <h2 className="text-3xl font-black text-center uppercase tracking-widest mb-2 text-black font-sans">{title}</h2>
+                                <div className="flex justify-between text-sm font-bold text-gray-600 font-sans uppercase tracking-wide border-t border-dashed border-gray-300 pt-2">
+                                    <span>Môn thi: TIẾNG NHẬT</span>
+                                    <span>Thời gian: 45 phút</span>
+                                    <span>Số câu: {questions.length}</span>
                                 </div>
+                            </div>
+                        ) : (
+                            <div className="border-b border-gray-400 pb-1 mb-4 flex justify-between items-end">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{title} (Tiếp theo)</span>
+                                <span className="text-[10px] text-gray-300">ID: {Math.floor(Math.random() * 10000)}</span>
+                            </div>
+                        )}
 
-                                {/* Các đáp án */}
-                                <div className="grid grid-cols-4 gap-4 pl-10">
-                                    {q.options.map((opt, optIdx) => (
-                                        <div key={optIdx} className="flex items-center gap-2 group cursor-pointer">
-                                            {/* Vòng tròn số thứ tự (1,2,3,4) */}
-                                            <div className="w-6 h-6 rounded-full border-2 border-gray-300 group-hover:border-gray-800 flex items-center justify-center text-[11px] font-bold text-gray-500 group-hover:text-gray-800 transition-colors">
-                                                {optIdx + 1}
+                        {/* --- DANH SÁCH CÂU HỎI --- */}
+                        <div className="flex flex-col gap-4"> {/* Gap nhỏ lại để tiết kiệm chỗ */}
+                            {pageQuestions.map((q) => (
+                                <div key={q.realIndex} className="break-inside-avoid relative">
+                                    {/* Hàng Câu Hỏi */}
+                                    <div className="flex items-start gap-2 mb-1.5">
+                                        <span className="font-black text-lg text-black leading-snug pt-0.5 min-w-[28px]">
+                                            Câu {q.realIndex}:
+                                        </span>
+                                        <span className="font-medium text-lg font-['Klee_One'] text-gray-900 text-justify leading-snug flex-1">
+                                            {q.question}
+                                        </span>
+                                    </div>
+
+                                    {/* Hàng Đáp Án (Chia cột đều tăm tắp) */}
+                                    <div className="grid grid-cols-4 gap-2 pl-9">
+                                        {q.options.map((opt, optIdx) => (
+                                            <div key={optIdx} className="flex items-center gap-1.5">
+                                                <div className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-[10px] font-bold shrink-0">
+                                                    {['A', 'B', 'C', 'D'][optIdx]}
+                                                </div>
+                                                <span className="text-[15px] font-sans text-gray-800 leading-none pt-0.5 truncate">
+                                                    {opt}
+                                                </span>
                                             </div>
-                                            {/* Nội dung đáp án */}
-                                            <span className="text-base font-medium text-gray-700 group-hover:text-black">
-                                                {opt}
-                                            </span>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Footer số trang */}
-                    <div className="absolute bottom-4 left-0 w-full text-center text-[10px] text-gray-400 font-sans font-bold uppercase tracking-widest">
-                        - Trang {pageIndex + 1} / {paginatedData.length} -
+                    {/* --- FOOTER --- */}
+                    <div className="w-full text-center border-t border-gray-200 pt-2 mt-2">
+                        <p className="text-[10px] text-gray-400 font-sans font-bold uppercase tracking-[0.2em]">
+                            Trang {pageIndex + 1} / {paginatedData.length}
+                        </p>
                     </div>
                 </div>
             ))}
             
-            {/* TRANG ĐÁP ÁN (Luôn nằm riêng 1 trang cuối cùng) */}
-            <div className="a4-page mx-auto bg-white relative p-[15mm] shadow-2xl break-before-page">
-                 <div className="border-b-2 border-gray-800 pb-4 mb-6">
-                    <h2 className="text-xl font-black text-center uppercase tracking-widest text-gray-800">BẢNG ĐÁP ÁN</h2>
-                    <p className="text-center text-xs text-gray-400 mt-1">Kiểm tra kết quả sau khi làm bài</p>
+            {/* --- TRANG ĐÁP ÁN --- */}
+            <div className="a4-page mx-auto bg-white relative shadow-2xl p-[15mm] break-before-page" style={{ width: '210mm', minHeight: '297mm' }}>
+                 <div className="border-b-2 border-black pb-4 mb-6">
+                    <h2 className="text-2xl font-black text-center uppercase tracking-widest">BẢNG ĐÁP ÁN & CHẤM ĐIỂM</h2>
                 </div>
                 
-                {/* Lưới đáp án */}
-                <div className="grid grid-cols-5 gap-y-4 gap-x-8">
+                {/* Lưới đáp án nhỏ gọn */}
+                <div className="grid grid-cols-5 gap-x-6 gap-y-3 font-sans text-sm">
                     {questions.map((q, i) => (
-                        <div key={i} className="flex items-center justify-between border-b border-gray-100 pb-1">
-                            <span className="font-bold text-gray-400 text-sm">Câu {i + 1}</span>
-                            {/* Đáp án đúng: Màu xanh đậm, font to */}
-                            <div className="w-6 h-6 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-black">
-                                {q.answer}
-                            </div>
+                        <div key={i} className="flex items-center justify-between border-b border-gray-200 border-dashed pb-1">
+                            <span className="font-bold text-gray-500">Câu {i + 1}</span>
+                            <span className="font-black text-lg text-black">
+                                {['A', 'B', 'C', 'D'][q.answer - 1] || q.answer}
+                            </span>
                         </div>
                     ))}
                 </div>
 
-                <div className="absolute bottom-4 left-0 w-full text-center text-[10px] text-gray-400 font-sans font-bold uppercase tracking-widest">
-                    - HẾT -
+                <div className="mt-10 p-4 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50">
+                    <p className="text-center text-gray-400 text-xs font-bold uppercase mb-2">Ghi chú của giáo viên</p>
+                    <div className="h-32"></div>
                 </div>
             </div>
         </div>
