@@ -4487,69 +4487,64 @@ useEffect(() => {
         </div>
     );
 };
-// --- BƯỚC 1: TRANG HIỂN THỊ ĐỀ THI (CĂN LỀ CHUẨN & TỰ ĐỘNG NGẮT TRANG) ---
+// --- BƯỚC 1: TRANG HIỂN THỊ ĐỀ THI (NATIVE PRINT LAYOUT) ---
 const QuizPage = ({ questions, title = "BÀI KIỂM TRA TỪ VỰNG" }) => {
     
-    // Style in ấn đặc biệt dành riêng cho Quiz
-    // Sử dụng !important để ghi đè CSS mặc định
-    const quizPrintStyles = `
+    // Tạo style in ấn đặc biệt để ép trình duyệt tuân thủ lề
+    const printStyles = `
+        @page {
+            size: A4;
+            /* Căn lề chuẩn theo yêu cầu của bạn */
+            margin: 2.0cm 2.0cm 2.0cm 2.5cm !important; 
+        }
         @media print {
-            @page {
-                size: A4;
-                /* CĂN LỀ CHUẨN: Trên 2cm, Phải 2cm, Dưới 2cm, Trái 2.5cm */
-                margin: 20mm 20mm 20mm 25mm !important; 
-            }
-            
             html, body {
-                height: auto !important;
-                min-height: 0 !important;
+                width: 210mm;
+                height: 297mm;
                 margin: 0 !important;
                 padding: 0 !important;
                 overflow: visible !important;
             }
-
-            /* Ẩn giao diện web thừa */
+            /* Ẩn các thành phần thừa khi in */
             .no-print { display: none !important; }
             
-            /* Container chính khi in */
-            .quiz-container {
+            /* Đảm bảo nội dung in tràn ra sát lề @page đã định */
+            .print-content {
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 box-shadow: none !important;
-                border: none !important;
             }
-
+            
             /* Ngắt trang sạch sẽ trước đáp án */
-            .answer-key {
+            .answer-key-section {
                 break-before: page;
-                margin-top: 0 !important;
             }
         }
     `;
 
     return (
-        <div className="flex flex-col items-center bg-gray-200 py-8 min-h-screen font-serif">
-            {/* Nhúng Style riêng cho trang này */}
-            <style>{quizPrintStyles}</style>
+        <div className="flex flex-col items-center bg-gray-200 py-8 min-h-screen">
+            <style>{printStyles}</style>
 
-            {/* --- TRANG ĐỀ THI (HIỂN THỊ MÀN HÌNH + IN) --- */}
+            {/* MÔ PHỎNG TRANG GIẤY TRÊN MÀN HÌNH */}
+            {/* Trên màn hình: Có padding để nhìn giống in. Khi in: Padding này bị ghi đè bởi @page */}
             <div 
-                className="quiz-container bg-white shadow-2xl mx-auto flex flex-col"
+                className="print-content bg-white shadow-2xl mx-auto flex flex-col"
                 style={{ 
                     width: '210mm', 
-                    minHeight: '297mm', // Trên màn hình thì hiện A4, khi in thì tự chảy
-                    // Padding giả lập trên màn hình để bạn dễ nhìn (khi in @page sẽ lo phần này)
-                    paddingTop: '20mm',
-                    paddingBottom: '20mm',
-                    paddingLeft: '25mm',
-                    paddingRight: '20mm',
+                    minHeight: '297mm',
+                    // Padding hiển thị trên màn hình (để bạn xem trước cho sướng mắt)
+                    paddingTop: '2.0cm',
+                    paddingBottom: '2.0cm',
+                    paddingRight: '2.0cm',
+                    paddingLeft: '2.5cm',
                     boxSizing: 'border-box'
                 }}
             >
-                {/* Header Bài Thi */}
+                {/* --- HEADER (CHỈ HIỆN 1 LẦN Ở ĐẦU) --- */}
                 <div className="border-b-2 border-black pb-4 mb-6">
-                    <h2 className="text-2xl font-black text-center uppercase tracking-widest mb-2 font-sans text-gray-900">{title}</h2>
+                    <h2 className="text-2xl font-black text-center uppercase tracking-widest mb-3 font-sans text-gray-900">{title}</h2>
                     <div className="flex justify-between text-sm font-bold text-gray-700 font-sans uppercase tracking-wide border-t border-dashed border-gray-300 pt-2">
                         <span>Môn thi: TIẾNG NHẬT</span>
                         <span>Thời gian: 45 phút</span>
@@ -4557,11 +4552,11 @@ const QuizPage = ({ questions, title = "BÀI KIỂM TRA TỪ VỰNG" }) => {
                     </div>
                 </div>
 
-                {/* Danh sách câu hỏi (Tự động chảy dòng) */}
-                <div className="flex-1 flex flex-col gap-6 text-justify">
+                {/* --- DANH SÁCH CÂU HỎI (LIỀN MẠCH) --- */}
+                <div className="flex-1 flex flex-col gap-5 text-justify">
                     {questions.map((q, index) => (
-                        // break-inside: avoid -> TUYỆT ĐỐI KHÔNG CẮT ĐÔI CÂU HỎI
-                        <div key={index} className="break-inside-avoid relative pl-1" style={{ pageBreakInside: 'avoid' }}>
+                        // break-inside-avoid: Mấu chốt để câu hỏi không bị cắt đôi khi sang trang
+                        <div key={index} className="break-inside-avoid relative pl-1">
                             {/* Câu hỏi */}
                             <div className="flex items-baseline gap-2 mb-2">
                                 <span className="font-black text-lg text-black min-w-[28px]">
@@ -4572,14 +4567,14 @@ const QuizPage = ({ questions, title = "BÀI KIỂM TRA TỪ VỰNG" }) => {
                                 </span>
                             </div>
 
-                            {/* Đáp án (4 cột) */}
+                            {/* Đáp án (Chia 4 cột) */}
                             <div className="grid grid-cols-4 gap-2 pl-9">
                                 {q.options.map((opt, optIdx) => (
                                     <div key={optIdx} className="flex items-center gap-1.5">
                                         <div className="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px] font-bold shrink-0 text-gray-600">
                                             {['A', 'B', 'C', 'D'][optIdx]}
                                         </div>
-                                        <span className="text-[15px] font-sans text-gray-800 leading-none pt-0.5">
+                                        <span className="text-[15px] font-sans text-gray-800 leading-none pt-0.5 break-words">
                                             {opt}
                                         </span>
                                     </div>
@@ -4589,29 +4584,27 @@ const QuizPage = ({ questions, title = "BÀI KIỂM TRA TỪ VỰNG" }) => {
                     ))}
                 </div>
 
-                <div className="mt-8 text-center text-[10px] text-gray-400 italic border-t border-gray-100 pt-2 font-sans">
-                    -- Hết phần câu hỏi --
+                {/* --- CHÂN TRANG MÔ PHỎNG (Chỉ hiện cuối nội dung) --- */}
+                <div className="mt-8 text-center text-xs text-gray-400 italic border-t border-gray-100 pt-2">
+                    - Hết phần câu hỏi -
                 </div>
             </div>
 
             {/* --- TRANG ĐÁP ÁN (TÁCH RIÊNG) --- */}
-            {/* Khoảng hở trên màn hình web */}
-            <div className="h-8 w-full no-print"></div> 
-
             <div 
-                className="quiz-container answer-key bg-white shadow-2xl mx-auto flex flex-col"
+                className="print-content answer-key-section bg-white shadow-2xl mx-auto mt-8 flex flex-col"
                 style={{ 
                     width: '210mm', 
                     minHeight: '297mm',
-                    paddingTop: '20mm',
-                    paddingBottom: '20mm',
-                    paddingLeft: '25mm',
-                    paddingRight: '20mm',
+                    paddingTop: '2.0cm',
+                    paddingBottom: '2.0cm',
+                    paddingRight: '2.0cm',
+                    paddingLeft: '2.5cm',
                     boxSizing: 'border-box'
                 }}
             >
                  <div className="border-b-2 border-black pb-4 mb-6">
-                    <h2 className="text-xl font-black text-center uppercase tracking-widest text-gray-900">BẢNG ĐÁP ÁN</h2>
+                    <h2 className="text-xl font-black text-center uppercase tracking-widest text-gray-900">BẢNG ĐÁP ÁN CHI TIẾT</h2>
                 </div>
                 
                 <div className="grid grid-cols-5 gap-x-8 gap-y-4 font-sans text-sm">
@@ -4623,6 +4616,107 @@ const QuizPage = ({ questions, title = "BÀI KIỂM TRA TỪ VỰNG" }) => {
                             </span>
                         </div>
                     ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+const QuizGeneratorModal = ({ isOpen, onClose, vocabList, onQuizGenerated }) => {
+    const [step, setStep] = useState(1); // 1: Copy Prompt, 2: Paste JSON
+    const [jsonInput, setJsonInput] = useState('');
+    const [error, setError] = useState(null);
+
+    // Reset khi mở lại
+    useEffect(() => { if (isOpen) { setStep(1); setJsonInput(''); setError(null); } }, [isOpen]);
+
+    // Tạo câu lệnh Prompt cho ChatGPT
+    const generatePrompt = () => {
+        const words = vocabList.replace(/[\n;]/g, ', ').replace(/\s+/g, ' ').trim();
+        return `Tôi muốn tạo một bài kiểm tra trắc nghiệm tiếng Nhật JLPT (N3-N2) cho danh sách từ vựng sau: "${words}".
+Hãy tạo 20 câu hỏi trắc nghiệm (bao gồm: tìm cách đọc Kanji, tìm nghĩa đúng, tìm từ đồng nghĩa, hoặc cách dùng từ trong câu).
+Yêu cầu QUAN TRỌNG:
+1. Chỉ trả về duy nhất một đoạn JSON (không giải thích thêm).
+2. Định dạng JSON phải là một Array như sau:
+[
+  { "question": "Nội dung câu hỏi (ví dụ: ...の読み方は？)", "options": ["Đáp án 1", "Đáp án 2", "Đáp án 3", "Đáp án 4"], "answer": 2 }
+]
+(Lưu ý: "answer" là số thứ tự đáp án đúng từ 1 đến 4).`;
+    };
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(generatePrompt());
+        alert("Đã sao chép lệnh! Hãy dán vào ChatGPT.");
+        setStep(2);
+    };
+
+    const handleProcess = () => {
+        try {
+            // Tìm đoạn JSON trong text (phòng trường hợp ChatGPT nói nhảm thêm)
+            const jsonMatch = jsonInput.match(/\[[\s\S]*\]/);
+            if (!jsonMatch) throw new Error("Không tìm thấy JSON hợp lệ.");
+            
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (!Array.isArray(parsed)) throw new Error("Dữ liệu không phải là danh sách.");
+            
+            onQuizGenerated(parsed); // Trả dữ liệu về App
+            onClose();
+        } catch (err) {
+            setError("Lỗi đọc file JSON: " + err.message + ". Hãy chắc chắn bạn copy đúng phần code JSON từ ChatGPT.");
+        }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="p-4 bg-indigo-600 text-white flex justify-between items-center">
+                    <h3 className="font-bold text-sm uppercase flex gap-2 items-center">🤖 Tạo đề thi với AI</h3>
+                    <button onClick={onClose}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                </div>
+
+                <div className="p-6 overflow-y-auto">
+                    {step === 1 ? (
+                        <div className="space-y-4 text-center">
+                            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            </div>
+                            <h4 className="font-bold text-gray-800">BƯỚC 1: Sao chép lệnh</h4>
+                            <p className="text-sm text-gray-500">Hệ thống đã chuẩn bị sẵn câu lệnh dựa trên từ vựng bạn nhập. Hãy sao chép và gửi cho ChatGPT.</p>
+                            
+                            <div className="bg-gray-100 p-3 rounded-lg text-xs text-left font-mono text-gray-600 max-h-32 overflow-y-auto border border-gray-200">
+                                {generatePrompt()}
+                            </div>
+
+                            <button onClick={handleCopy} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-all">
+                                SAO CHÉP & TIẾP TỤC
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                             <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                            <h4 className="font-bold text-gray-800 text-center">BƯỚC 2: Dán kết quả</h4>
+                            <p className="text-sm text-gray-500 text-center">Dán toàn bộ câu trả lời (JSON) của ChatGPT vào bên dưới.</p>
+                            
+                            <textarea 
+                                value={jsonInput}
+                                onChange={e => setJsonInput(e.target.value)}
+                                placeholder='Dán đoạn code JSON vào đây (Ví dụ: [{"question":...}] )'
+                                className="w-full h-40 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono"
+                            />
+                            
+                            {error && <p className="text-xs text-red-500 font-bold bg-red-50 p-2 rounded">{error}</p>}
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <button onClick={() => setStep(1)} className="py-3 text-gray-500 font-bold hover:bg-gray-100 rounded-xl">Quay lại</button>
+                                <button onClick={handleProcess} className="py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg active:scale-95">
+                                    TẠO ĐỀ THI
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
