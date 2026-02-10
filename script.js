@@ -253,7 +253,42 @@ const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars, db
         });
         return result;
     }, [srsData, dbData]);
+// --- MODAL THÔNG BÁO CAM KẾT (MỚI) ---
+const WelcomeModal = ({ onConfirm }) => {
+    return (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/95 backdrop-blur-md p-4 animate-in fade-in duration-500">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 border border-gray-200">
+                
+                {/* Header trang trí */}
+                <div className="bg-indigo-600 p-6 flex flex-col items-center justify-center text-white relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-full bg-white/10" style={{backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px)', backgroundSize: '10px 10px'}}></div>
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-3 backdrop-blur-sm relative z-10 shadow-inner">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h2 className="text-xl font-black uppercase tracking-widest relative z-10">THÔNG BÁO</h2>
+                </div>
 
+                {/* Nội dung chính */}
+                <div className="p-6 text-center">
+                    <p className="text-sm text-gray-600 font-medium leading-relaxed text-justify mb-6">
+                        <span className="font-bold text-indigo-700">Phá Đảo Tiếng Nhật</span> cam kết cung cấp công cụ luyện viết <span className="text-red-600 font-black bg-red-50 px-1 rounded">MIỄN PHÍ TRỌN ĐỜI</span> cho cộng đồng.
+                        <br/><br/>
+                        Tôi tin rằng kiến thức không nên bị độc chiếm hay thương mại hóa quá mức. Cảm ơn các bạn đã tin dùng.
+                    </p>
+
+                    <button 
+                        onClick={onConfirm}
+                        className="w-full py-3.5 bg-gray-900 hover:bg-black text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 uppercase tracking-widest text-xs flex items-center justify-center gap-2 group"
+                    >
+                        <span>ĐÃ HIỂU</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+    
     const levelColors = {
         N5: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', bar: 'bg-emerald-500' },
         N4: { bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200', bar: 'bg-sky-500' },
@@ -4453,7 +4488,8 @@ useEffect(() => {
 };
     
     const App = () => {
-// --- Các state cũ giữ nguyên ---
+
+ const [showWelcome, setShowWelcome] = useState(true);
 const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
 const [showMobilePreview, setShowMobilePreview] = useState(false);
 const [isConfigOpen, setIsConfigOpen] = React.useState(false);
@@ -4578,6 +4614,9 @@ if (!isDbLoaded) {
 // --- GIAO DIỆN CHÍNH (Khi đã có dữ liệu) ---
 return (
     <div className="min-h-screen flex flex-col md:flex-row print-layout-reset">
+    {showWelcome && (
+            <WelcomeModal onConfirm={() => setShowWelcome(false)} />
+        )}
     <div className="no-print z-50">
     <Sidebar 
         config={config} onChange={setConfig} onPrint={handlePrint} 
