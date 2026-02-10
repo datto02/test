@@ -4487,79 +4487,157 @@ useEffect(() => {
         </div>
     );
 };
-    // --- BƯỚC 1: TRANG HIỂN THỊ ĐỀ THI (A4 JLPT STYLE) ---
+  // --- BƯỚC 1: TRANG HIỂN THỊ ĐỀ THI (THUẬT TOÁN CHIA TRANG THÔNG MINH) ---
 const QuizPage = ({ questions, title = "BÀI KIỂM TRA TỪ VỰNG" }) => {
-    // Chia trang nếu đề quá dài (giả sử 20 câu/trang)
-    const QUESTIONS_PER_PAGE = 20;
-    const pages = [];
-    for (let i = 0; i < questions.length; i += QUESTIONS_PER_PAGE) {
-        pages.push(questions.slice(i, i + QUESTIONS_PER_PAGE));
-    }
+    
+    // 1. HÀM TÍNH TOÁN CHIỀU CAO (Ước lượng)
+    // Đơn vị: điểm (points). Một trang A4 an toàn khoảng 750-800 điểm.
+    const calculateQuestionHeight = (q) => {
+        let height = 0;
+        
+        // Chiều cao của câu hỏi: Cứ 45 ký tự tính là 1 dòng (khoảng 30 điểm/dòng)
+        const textLength = q.question.length;
+        const lines = Math.ceil(textLength / 45) || 1; 
+        height += lines * 30; 
+
+        // Chiều cao của phần đáp án (4 đáp án + khoảng cách)
+        // Mặc định khoảng 60 điểm cho khu vực đáp án
+        height += 60; 
+
+        // Khoảng cách bottom margin
+        height += 20; 
+
+        return height;
+    };
+
+    // 2. THUẬT TOÁN CHIA TRANG
+    const paginateQuestions = () => {
+        const pages = [];
+        let currentPage = [];
+        let currentHeight = 0;
+        const MAX_HEIGHT = 750; // Giới hạn chiều cao nội dung 1 trang A4
+
+        questions.forEach((q, index) => {
+            const qHeight = calculateQuestionHeight(q);
+
+            // Nếu cộng thêm câu này mà vượt quá chiều cao trang -> Sang trang mới
+            if (currentHeight + qHeight > MAX_HEIGHT) {
+                pages.push(currentPage); // Lưu trang cũ
+                currentPage = [];        // Tạo trang mới
+                currentHeight = 0;       // Reset chiều cao
+            }
+
+            // Thêm câu hỏi vào trang hiện tại
+            currentPage.push({ ...q, realIndex: index + 1 });
+            currentHeight += qHeight;
+        });
+
+        // Đẩy trang cuối cùng vào (nếu có)
+        if (currentPage.length > 0) {
+            pages.push(currentPage);
+        }
+
+        return pages;
+    };
+
+    const paginatedData = paginateQuestions();
 
     return (
-        <div className="flex flex-col gap-8 bg-gray-100 items-center">
-            {pages.map((pageQuestions, pageIndex) => (
-                <div key={pageIndex} className="a4-page mx-auto bg-white relative p-[15mm] shadow-lg">
-                    {/* Header Đề thi */}
-                    <div className="border-b-2 border-black pb-4 mb-6">
-                        <h2 className="text-2xl font-black text-center uppercase tracking-widest mb-2">{title}</h2>
-                        <div className="flex justify-between text-sm font-bold text-gray-600 font-sans">
-                            <span>Môn thi: TỪ VỰNG / KANJI</span>
-                            <span>Thời gian: ....... phút</span>
-                            <span>Điểm: ......./{questions.length}</span>
+        <div className="flex flex-col gap-8 bg-gray-200 items-center py-8">
+            {paginatedData.map((pageQuestions, pageIndex) => (
+                <div key={pageIndex} className="a4-page mx-auto bg-white relative p-[15mm] shadow-2xl">
+                    
+                    {/* Header: Chỉ hiện ở trang 1 */}
+                    {pageIndex === 0 && (
+                        <div className="border-b-2 border-gray-800 pb-4 mb-6">
+                            <h2 className="text-2xl font-black text-center uppercase tracking-widest mb-3 text-gray-800">{title}</h2>
+                            <div className="flex justify-between text-sm font-bold text-gray-600 font-sans uppercase tracking-wide">
+                                <span>Môn thi: TỪ VỰNG / KANJI</span>
+                                <span>Thời gian: 45 phút</span>
+                                <span>Tổng: {questions.length} câu</span>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
-                    {/* Danh sách câu hỏi */}
+                    {/* Header phụ cho các trang sau (cho đỡ trống) */}
+                    {pageIndex > 0 && (
+                        <div className="border-b border-gray-300 pb-2 mb-6 flex justify-between text-xs text-gray-400 font-bold uppercase">
+                            <span>{title}</span>
+                            <span>(Tiếp theo)</span>
+                        </div>
+                    )}
+
+                    {/* DANH SÁCH CÂU HỎI */}
                     <div className="space-y-6">
-                        {pageQuestions.map((q, idx) => {
-                            const realIdx = pageIndex * QUESTIONS_PER_PAGE + idx + 1;
-                            return (
-                                <div key={realIdx} className="break-inside-avoid">
-                                    <div className="flex items-baseline gap-2 mb-2">
-                                        <span className="font-black text-lg min-w-[24px]">Câu {realIdx}:</span>
-                                        <span className="font-bold text-lg font-['Klee_One']">{q.question}</span>
-                                    </div>
-                                    <div className="grid grid-cols-4 gap-4 pl-8">
-                                        {q.options.map((opt, optIdx) => (
-                                            <div key={optIdx} className="flex items-center gap-2">
-                                                <div className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-[10px] font-bold">
-                                                    {optIdx + 1}
-                                                </div>
-                                                <span className="text-base font-medium">{opt}</span>
-                                            </div>
-                                        ))}
-                                    </div>
+                        {pageQuestions.map((q) => (
+                            // Class 'break-inside-avoid' là mấu chốt để khi in thật nó không bị cắt đôi
+                            <div key={q.realIndex} className="break-inside-avoid">
+                                <div className="flex items-baseline gap-3 mb-2">
+                                    {/* Số thứ tự câu hỏi */}
+                                    <span className="font-black text-lg text-gray-800 min-w-[28px]">
+                                        {q.realIndex}.
+                                    </span>
+                                    
+                                    {/* Nội dung câu hỏi (Căn lề Justify) */}
+                                    <span className="font-medium text-lg font-['Klee_One'] text-gray-900 text-justify leading-relaxed flex-1">
+                                        {q.question}
+                                    </span>
                                 </div>
-                            );
-                        })}
+
+                                {/* Các đáp án */}
+                                <div className="grid grid-cols-4 gap-4 pl-10">
+                                    {q.options.map((opt, optIdx) => (
+                                        <div key={optIdx} className="flex items-center gap-2 group cursor-pointer">
+                                            {/* Vòng tròn số thứ tự (1,2,3,4) */}
+                                            <div className="w-6 h-6 rounded-full border-2 border-gray-300 group-hover:border-gray-800 flex items-center justify-center text-[11px] font-bold text-gray-500 group-hover:text-gray-800 transition-colors">
+                                                {optIdx + 1}
+                                            </div>
+                                            {/* Nội dung đáp án */}
+                                            <span className="text-base font-medium text-gray-700 group-hover:text-black">
+                                                {opt}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
                     </div>
 
-                    {/* Footer */}
-                    <div className="absolute bottom-4 left-0 w-full text-center text-xs text-gray-400 font-sans">
-                        - Trang {pageIndex + 1}/{pages.length} -
+                    {/* Footer số trang */}
+                    <div className="absolute bottom-4 left-0 w-full text-center text-[10px] text-gray-400 font-sans font-bold uppercase tracking-widest">
+                        - Trang {pageIndex + 1} / {paginatedData.length} -
                     </div>
                 </div>
             ))}
             
-            {/* Trang Đáp án (Nằm riêng ở cuối) */}
-            <div className="a4-page mx-auto bg-white relative p-[15mm] shadow-lg break-before-page">
-                 <div className="border-b-2 border-black pb-4 mb-6">
-                    <h2 className="text-xl font-black text-center uppercase">ĐÁP ÁN THAM KHẢO</h2>
+            {/* TRANG ĐÁP ÁN (Luôn nằm riêng 1 trang cuối cùng) */}
+            <div className="a4-page mx-auto bg-white relative p-[15mm] shadow-2xl break-before-page">
+                 <div className="border-b-2 border-gray-800 pb-4 mb-6">
+                    <h2 className="text-xl font-black text-center uppercase tracking-widest text-gray-800">BẢNG ĐÁP ÁN</h2>
+                    <p className="text-center text-xs text-gray-400 mt-1">Kiểm tra kết quả sau khi làm bài</p>
                 </div>
-                <div className="grid grid-cols-5 gap-4">
+                
+                {/* Lưới đáp án */}
+                <div className="grid grid-cols-5 gap-y-4 gap-x-8">
                     {questions.map((q, i) => (
-                        <div key={i} className="flex items-center justify-between border-b border-gray-200 pb-1">
-                            <span className="font-bold text-gray-500">Câu {i + 1}</span>
-                            <span className="font-black text-emerald-600">{q.answer}</span>
+                        <div key={i} className="flex items-center justify-between border-b border-gray-100 pb-1">
+                            <span className="font-bold text-gray-400 text-sm">Câu {i + 1}</span>
+                            {/* Đáp án đúng: Màu xanh đậm, font to */}
+                            <div className="w-6 h-6 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-black">
+                                {q.answer}
+                            </div>
                         </div>
                     ))}
+                </div>
+
+                <div className="absolute bottom-4 left-0 w-full text-center text-[10px] text-gray-400 font-sans font-bold uppercase tracking-widest">
+                    - HẾT -
                 </div>
             </div>
         </div>
     );
 };
-// --- BƯỚC 2: MODAL TẠO ĐỀ THI (COPY/PASTE CHATGPT) ---
+
 const QuizGeneratorModal = ({ isOpen, onClose, vocabList, onQuizGenerated }) => {
     const [step, setStep] = useState(1); // 1: Copy Prompt, 2: Paste JSON
     const [jsonInput, setJsonInput] = useState('');
