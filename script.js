@@ -225,70 +225,6 @@ const useKanjiReadings = (char, active, dbData) => {
   return readings;
 };
 
-// 1. Tính khoảng cách giữa 2 điểm
-const getDistance = (p1, p2) => {
-    const dx = p1.x - p2.x;
-    const dy = p1.y - p2.y;
-    return Math.sqrt(dx * dx + dy * dy);
-};
-
-// 2. Lấy mẫu điểm trên đường vẽ (Resampling) để so sánh
-const getPointsOnPath = (path, totalLen, numPoints) => {
-    const points = [];
-    for (let i = 0; i < numPoints; i++) {
-        const p = path.getPointAtLength((i * totalLen) / (numPoints - 1));
-        points.push(p);
-    }
-    return points;
-};
-
-// 3. Tính góc di chuyển của nét
-const getAngles = (points) => {
-    const angles = [];
-    for (let i = 0; i < points.length - 1; i++) {
-        const p1 = points[i];
-        const p2 = points[i+1];
-        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
-        angles.push(angle);
-    }
-    return angles;
-};
-
-
-const compareStrokes = (userPath, guidePath) => {
-    const userLen = userPath.getTotalLength();
-    const guideLen = guidePath.getTotalLength();
-
-  
-    const lengthRatio = Math.abs(1 - userLen / guideLen);
-    
-   
-    const SAMPLE_COUNT = 15; 
-    const userPoints = getPointsOnPath(userPath, userLen, SAMPLE_COUNT);
-    const guidePoints = getPointsOnPath(guidePath, guideLen, SAMPLE_COUNT);
-
-    let distSum = 0;
-    for(let i=0; i<SAMPLE_COUNT; i++) {
-        distSum += getDistance(userPoints[i], guidePoints[i]);
-    }
-    const avgDist = (distSum / SAMPLE_COUNT) / 20; 
-    const distScore = avgDist * avgDist; 
-
-   
-    const userAngles = getAngles(userPoints);
-    const guideAngles = getAngles(guidePoints);
-    let angleDiffSum = 0;
-    for(let i=0; i<userAngles.length; i++) {
-        let diff = userAngles[i] - guideAngles[i];
-        while(diff <= -180) diff += 360; 
-        while(diff > 180) diff -= 360;
-        angleDiffSum += Math.abs(diff);
-    }
-    const angleScore = (angleDiffSum / userAngles.length) / 15;
-
-  
-    return lengthRatio + distScore + angleScore;
-};
 const ReviewListModal = ({ isOpen, onClose, srsData, onResetSRS, onLoadChars, dbData }) => {
     const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
     const [isHelpOpen, setIsHelpOpen] = React.useState(false);
@@ -1201,201 +1137,6 @@ return (
     </div>
 );
 };
-
-// --- COMPONENT MỚI: KAKIMASHOU MODAL (LUYỆN VIẾT TƯƠNG TÁC) ---
-const KakimashouModal = ({ char, fullSvg, isOpen, onClose }) => {
-    const svgRef = useRef(null);
-    const [guidePaths, setGuidePaths] = useState([]); 
-    const [currentStrokeIdx, setCurrentStrokeIdx] = useState(0); 
-    const [userPathD, setUserPathD] = useState(''); 
-    const [finishedStrokes, setFinishedStrokes] = useState([]); 
-    const [isDrawing, setIsDrawing] = useState(false);
-
-    // Parse SVG string thành các đường dẫn (paths)
-    useEffect(() => {
-        if (fullSvg && isOpen) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(fullSvg, "image/svg+xml");
-            // Lấy tất cả thẻ path
-            const paths = Array.from(doc.querySelectorAll('path')).map(p => p.getAttribute('d'));
-            setGuidePaths(paths);
-            setCurrentStrokeIdx(0);
-            setFinishedStrokes([]);
-            setUserPathD('');
-        }
-    }, [fullSvg, isOpen]);
-
-    // Chuyển đổi tọa độ chuột/cảm ứng sang hệ tọa độ SVG 109x109
-    const getSvgPoint = (clientX, clientY) => {
-        const svg = svgRef.current;
-        if (!svg) return { x: 0, y: 0 };
-        const pt = svg.createSVGPoint();
-        pt.x = clientX;
-        pt.y = clientY;
-        return pt.matrixTransform(svg.getScreenCTM().inverse());
-    };
-
-    const handlePointerDown = (e) => {
-        if (currentStrokeIdx >= guidePaths.length) return; 
-        e.currentTarget.setPointerCapture(e.pointerId);
-        setIsDrawing(true);
-        const { x, y } = getSvgPoint(e.clientX, e.clientY);
-        setUserPathD(`M ${x.toFixed(1)} ${y.toFixed(1)}`);
-    };
-
-    const handlePointerMove = (e) => {
-        if (!isDrawing) return;
-        const { x, y } = getSvgPoint(e.clientX, e.clientY);
-        // Nối thêm đường thẳng vào path
-        setUserPathD(prev => `${prev} L ${x.toFixed(1)} ${y.toFixed(1)}`);
-    };
-
-    const handlePointerUp = (e) => {
-        if (!isDrawing) return;
-        setIsDrawing(false);
-        e.currentTarget.releasePointerCapture(e.pointerId);
-
-        // 1. Tạo Element ảo để tính toán
-        const userEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        userEl.setAttribute("d", userPathD);
-        
-        const guideEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        guideEl.setAttribute("d", guidePaths[currentStrokeIdx]);
-
-        // 2. Bỏ qua nếu chỉ chấm một điểm (ngắn quá)
-        if (userEl.getTotalLength() < 5) {
-            setUserPathD('');
-            return;
-        }
-
-        // 3. SO KHỚP (Dùng hàm compareStrokes đã thêm ở Bước 2)
-        const score = compareStrokes(userEl, guideEl);
-        
-        // 4. Xử lý kết quả
-        if (score > 4) {
-            // SAI: Hiện màu đỏ rồi biến mất
-            const wrongStroke = { d: userPathD, className: 'wrongStroke' };
-            setFinishedStrokes(prev => [...prev, wrongStroke]);
-            
-            setTimeout(() => {
-                setFinishedStrokes(prev => prev.filter(s => s !== wrongStroke));
-            }, 500); // 0.5s sau thì xóa
-            setUserPathD('');
-        } else {
-            // ĐÚNG: Thay nét vẽ xấu của user bằng nét mẫu (Snap-to-guide)
-            // Nếu điểm < 2 là rất tốt (correct), từ 2-4 là tạm được (warning)
-            const className = score < 2 ? 'correctStroke' : 'warningStroke';
-            
-            const strokeToShow = { 
-                d: guidePaths[currentStrokeIdx], // Lấy nét chuẩn để hiển thị cho đẹp
-                className: className 
-            };
-            
-            setFinishedStrokes(prev => [...prev, strokeToShow]);
-            setCurrentStrokeIdx(prev => prev + 1);
-            setUserPathD('');
-
-            // Kiểm tra hoàn thành
-            if (currentStrokeIdx + 1 === guidePaths.length) {
-                // Hiệu ứng pháo hoa hoặc thông báo nhỏ
-                // setTimeout(() => alert("Hoàn thành!"), 100); 
-            }
-        }
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center bg-gray-900/90 backdrop-blur-sm p-4" onClick={onClose}>
-            <div className="bg-white rounded-2xl p-4 shadow-2xl relative w-full max-w-sm flex flex-col items-center animate-in zoom-in-95" onClick={e => e.stopPropagation()}>
-                
-                {/* Header */}
-                <div className="flex justify-between items-center w-full mb-4">
-                    <h3 className="text-xl font-black text-gray-700">Luyện viết: <span className="text-indigo-600 text-3xl font-['Klee_One']">{char}</span></h3>
-                    <button onClick={onClose} className="p-2 bg-gray-100 rounded-full hover:bg-red-100 hover:text-red-500 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
-                </div>
-
-                {/* KHUNG VẼ SVG (Copy cấu trúc Kakimashou) */}
-                <div className="relative border-2 border-gray-300 rounded-xl bg-white cursor-crosshair overflow-hidden shadow-inner" 
-                     style={{ width: '300px', height: '300px', touchAction: 'none' }}>
-                    
-                    <svg 
-                        ref={svgRef}
-                        viewBox="0 0 109 109" 
-                        width="100%" height="100%"
-                        onPointerDown={handlePointerDown}
-                        onPointerMove={handlePointerMove}
-                        onPointerUp={handlePointerUp}
-                        onPointerCancel={handlePointerUp}
-                    >
-                        {/* 1. Filter Glow (Phát sáng) */}
-                        <defs>
-                            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                                <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
-                                <feMerge>
-                                    <feMergeNode in="coloredBlur"/>
-                                    <feMergeNode in="SourceGraphic"/>
-                                </feMerge>
-                            </filter>
-                        </defs>
-
-                        {/* 2. Lưới nền (Grid) */}
-                        <rect x="0" y="0" width="109" height="109" className="padBackground" />
-                        <line x1="0" y1="0" x2="109" y2="109" className="padLine1" />
-                        <line x1="109" y1="0" x2="0" y2="109" className="padLine1" />
-                        <line x1="54.5" y1="0" x2="54.5" y2="109" className="padLine2" />
-                        <line x1="0" y1="54.5" x2="109" y2="54.5" className="padLine2" />
-                        <rect x="0" y="0" width="109" height="109" fill="none" className="padBorder" />
-
-                        {/* 3. Nét mẫu mờ (Guide) - Chỉ hiện nét CHƯA viết để gợi ý */}
-                        <g id="kanjiVG">
-                            {guidePaths.map((d, i) => (
-                                <path 
-                                    key={i} 
-                                    d={d} 
-                                    className="hintStroke" // Dùng class hintStroke từ CSS
-                                    style={{ opacity: i === currentStrokeIdx ? 0.3 : 0 }} 
-                                />
-                            ))}
-                        </g>
-
-                        {/* 4. Các nét đã viết xong (Kết quả) */}
-                        <g id="finishedStrokes">
-                            {finishedStrokes.map((s, i) => (
-                                <path key={i} d={s.d} className={s.className} />
-                            ))}
-                        </g>
-
-                        {/* 5. Nét đang vẽ (User Drawing) */}
-                        <g id="userStrokes">
-                            {userPathD && <path d={userPathD} />}
-                        </g>
-                    </svg>
-                </div>
-
-                {/* Footer Controls */}
-                <div className="flex gap-3 mt-5 w-full">
-                    <button 
-                        onClick={() => {
-                            setFinishedStrokes([]);
-                            setCurrentStrokeIdx(0);
-                            setUserPathD('');
-                        }}
-                        className="flex-1 py-3 bg-yellow-50 text-yellow-700 font-bold rounded-xl border border-yellow-200 hover:bg-yellow-100 transition-all uppercase text-xs tracking-widest shadow-sm active:scale-95"
-                    >
-                        Viết lại
-                    </button>
-                </div>
-                
-                <div className="mt-3 text-[10px] text-gray-400 text-center italic">
-                    Viết theo nét mờ gợi ý. Sai nét sẽ bị đỏ.
-                </div>
-            </div>
-        </div>
-    );
-};
 // --- 2. HEADER SECTION (CẬP NHẬT HIỂN THỊ TỪ VỰNG) ---
 
 const HeaderSection = ({ char, paths, loading, failed, config, dbData }) => {
@@ -1596,9 +1337,7 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
         const { loading, paths, fullSvg, failed } = useKanjiSvg(char);
         const boxes = Array.from({ length: 12 }, (_, i) => i);
         const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
-        
-        // SỬA: Đổi tên state để rõ ràng hơn (dùng cho KakimashouModal)
-        const [isPracticeOpen, setIsPracticeOpen] = useState(false);
+        const [isAnimOpen, setIsAnimOpen] = useState(false);
 
         return (
             <div className="flex flex-col w-full px-[8mm]">
@@ -1621,18 +1360,18 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
                         config={config}
                         svgData={fullSvg}
                         failed={failed}
-                        // SỬA: Mở KakimashouModal khi click
-                        onClick={i === 0 ? () => setIsPracticeOpen(true) : undefined}
+                        onClick={i === 0 ? () => setIsAnimOpen(true) : undefined}
                     />
                     ))}
                 </div>
 
-                {/* SỬA: Thay KanjiAnimationModal bằng KakimashouModal */}
-                <KakimashouModal 
+                <KanjiAnimationModal 
                     char={char}
+                    paths={paths}
                     fullSvg={fullSvg} 
-                    isOpen={isPracticeOpen}
-                    onClose={() => setIsPracticeOpen(false)}
+                    dbData={dbData}    
+                    isOpen={isAnimOpen}
+                    onClose={() => setIsAnimOpen(false)}
                 />
             </div>
         );
