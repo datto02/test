@@ -1,430 +1,51 @@
-<html lang="en-US"><head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-44K3LXVHKX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-        <meta name="application-name" content="Kakimashou">
-        <meta name="description" content="A website to help you practice writing Japanese right on your screen. You can practice writing almost any Japanese character, and get instant feedback as you write.">
-
-        <title>Kakimashou - 以</title>
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-        <link rel="icon" href="/favicon.ico">
-        <link rel="manifest" href="/manifest.json">
-
-        <link rel="stylesheet" href="/css/style.css?id=ef4493d44bf5ca92d6de">
-        
-        <script src="/js/vendor.js?id=da6463172eb6204fac86"></script>
-        <script src="/js/all.js?id=1488eae644cc5226d194"></script>
-
-            </head>
-    <body id="bodyTag" onload="">
-        <div class="container-xl main-page">
-            <nav class="navbar navbar-expand-md navbar-dark bg-dark p-0">
-                <!-- Brand and toggle get grouped for better mobile display -->
-                <a class="navbar-brand px-3 py-0 mr-0" href="/">
-                    <span lang="ja" aria-hidden="true">書</span> Kakimashou
-                </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <!-- Collect the nav links, forms, and other content for toggling -->
-                <div class="collapse navbar-collapse pl-3 pl-md-0" id="navbarSupportedContent">
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item"><a class="nav-link" href="/dictionary"><span class="glyphicon glyphicon-book" aria-hidden="true"></span> Dictionary</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/curricula"><span class="glyphicon glyphicon-education" aria-hidden="true"></span> Curricula</a></li>
-                                            </ul>
-
-                    <ul id="rightNav" class="navbar-nav mr-3">
-                        <li class="nav-item"><a class="nav-link" href="/settings"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Settings</a></li>
-                                            </ul>
-                    
-
-                                    </div>
-            </nav>
-
-
-
-            <div class="content">
-                
-                
-                
-                
-                    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/dictionary">Dictionary</a></li>
-            <li lang="ja" class="breadcrumb-item active" aria-current="page">以</li>
-        </ol>
-    </nav>
-
-    <form method="POST" action="/dictionary/search" accept-charset="UTF-8" id="dictionarySearch">
-    <div class="input-group mb-3">
-        <input lang="ja" placeholder="Search Dictionary..." id="searchBox" class="form-control" name="search" type="text">
-        <div class="input-group-append">
-           <button class="btn btn-primary" type="submit">
-           <span class="glyphicon glyphicon-search"></span>
-           </button>
-       </div>
-    </div>
-    <script>
-        $('#dictionarySearch').on('submit', function (event) {
-            window.location.href = '/dictionary/search/' + encodeURIComponent($('#searchBox').val());
-            event.preventDefault();
-        });
-    </script>
-</form>
-    <div class="container">
-        <div class="row">
-            <div class="col-xl-8 col-lg-7 col-md-6">
-                <div class="row">
-                    <div class="col-lg-3 col-md-6">
-                        <h1 lang="ja" class="characterHeading">
-                                                            <svg version="1.1" width="6.8125rem" height="6.8125rem" viewBox="0 0 109 109"><title>以</title><path d="M21.928 70.254C21.928 70.254 24.163 57.161 24.376 52.052C24.482 46.304 24.163 42.578 23.95 41.088C23.418 38.214 22.354 35.872 20.97 33.85C20.012 32.466 19.905 31.508 20.438 30.976C20.863 30.55 21.715 30.23 23.099 30.656C26.505 31.401 28.634 32.572 29.592 33.424C30.443 34.169 30.656 35.233 30.443 36.511C30.124 38.32 28.74 60.142 28.527 65.996C28.527 68.657 21.396 72.809 21.928 70.254Z"></path><path d="M24.27 80.26C21.821 83.772 18.734 79.195 17.883 76.321C16.605 72.276 18.521 72.383 21.928 70.254C26.292 67.38 26.292 67.38 28.527 65.996C32.466 63.335 50.562 46.517 51.839 46.091C52.265 45.984 52.478 46.197 52.478 46.623C52.478 47.368 51.839 48.22 50.774 49.284C37.362 63.335 28.527 73.66 24.27 80.26Z"></path><path d="M47.475 25.76Q53.223 32.572 56.629 34.169Q58.332 34.595 59.503 33.104Q60.248 31.721 60.035 29.805Q58.758 24.695 49.071 21.502Q47.368 20.863 46.197 21.289Q45.452 21.396 45.665 22.779Q45.771 24.163 47.475 25.76Z"></path><path d="M73.979 60.035C77.599 52.584 79.408 46.942 81.005 41.301C83.347 31.082 85.05 25.015 86.221 22.886C87.072 21.396 86.753 20.225 85.476 19.373C81.537 16.393 77.812 15.115 75.683 15.754C74.512 16.073 74.192 16.925 74.618 18.202C75.683 20.757 76.002 26.718 75.576 31.721C74.618 37.788 73.66 42.685 70.786 51.732C65.251 65.57 56.842 72.809 45.346 81.218C43.962 82.176 42.472 83.027 41.088 83.985C39.917 84.73 39.811 85.263 40.981 85.476C41.939 85.582 44.813 85.05 47.794 83.985C53.116 81.856 56.842 79.089 61.738 75.363C67.593 69.935 69.935 67.273 72.489 62.803C73.447 60.993 73.447 60.993 73.979 60.035Z"></path><path d="M72.489 62.803Q80.792 71.105 90.053 82.282Q91.756 84.624 93.565 85.369Q94.63 85.476 95.481 84.411Q97.078 83.027 95.801 77.812Q94.523 71.105 73.979 60.035C73.128 59.503 71.744 62.058 72.489 62.803Z"></path></svg>
-                                                    </h1>
-                        <div>
-                                                            <strong>5</strong> strokes
-                                                    </div>
-
-                        <div><strong>Jouyou</strong> kanji</div>
-
-            <div>Taught in <strong>4th</strong> grade</div>
+  gtag('config', 'G-44K3LXVHKX');
+</script>
     
-                                                    <div>JLPT exam level <strong>N4</strong></div>
-                                            </div>
-
-                    <div class="col-lg-9 col-md-9 col-sm-10">
-                                                    <h3 style="padding-left: 20px; text-indent: -20px;">
-                                by means of, because, in view of, compared with
-                            </h3>
-                        
-                        <div><h5>Kun'yomi</h5><ul class="readingsGroup"><li><table><tbody><tr><td><table lang="ja"><tbody><tr><td class="pSep pH">も</td><td class="pL">っ</td><th class="pL">て</th></tr></tbody></table></td><td><span class="readingMeaning">with ②because of ③in addition (to being) ④therefore</span></td></tr></tbody></table></li></ul><h5>On'yomi</h5><ul class="readingsGroup"><li><table><tbody><tr><td><table lang="ja"><tbody><tr><td>イ</td><td></td></tr></tbody></table></td></tr></tbody></table></li></ul><h5>Nanori</h5><ul class="readingsGroup"><li><table><tbody><tr><td><table lang="ja"><tbody><tr><td>もち</td><td></td></tr></tbody></table></td></tr></tbody></table></li></ul></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-lg-5 col-md-6">
-                <div id="practiceForm">
-        <div style="position:relative;">
-            <div id="feedback" onclick="document.getElementById('feedback').style.display = 'none';" style="display: none;">
-                <div id="scriptText"><strong>Almost!</strong>  If your stroke is somewhat off from the correct position, it will be colored dark yellow.  This is a reminder to think about whether you really got this stroke right when you grade yourself at the end.</div>
-            </div>
-        </div>
-        <svg id="svgRoot" version="1.1" width="327" height="327" viewBox="0 0 109 109" touch-action="none" style="touch-action: none;">
-            <defs>
-                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feOffset result="offOut" in="SourceAlpha" dx="0" dy="0"></feOffset>
-                    <feColorMatrix id="glowMatrix" result="matrixOut" in="offOut" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"></feColorMatrix>
-                    <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="0.75"></feGaussianBlur>
-                    <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
-                </filter>
-            </defs>
-                <rect x="1" y="1" width="108" height="108" class="padBackground"></rect>
-                <line x1="1" y1="1" x2="108" y2="108" class="padLine1" stroke-dasharray="4,4"></line>
-                <line x1="108" y1="1" x2="1" y2="108" class="padLine1" stroke-dasharray="4,4"></line>
-                <line x1="54.5" y1="1" x2="54.5" y2="108" class="padLine2" stroke-dasharray="4,4"></line>
-                <line x1="1" y1="54.5" x2="108" y2="54.5" class="padLine2" stroke-dasharray="4,4"></line>
-                <rect x="1" y="1" width="107" height="107" fill="none" class="padBorder"></rect>
-
-            <g id="kanjiVG" style="stroke-opacity: 0;fill-opacity: 0;fill: none;stroke-width: 3;stroke-linecap: round;stroke-linejoin: round;" filter="">
-                <g id="char0" transform="translate(0,0) scale(1)"><path d="M20.87,27.5c1.09,0.5,2.28,1.72,2.46,3.25C25,45.12,27,61.75,28.25,70.5" class="null" transform="matrix(1, 0, 0, 1, 0, 0)" stroke-opacity="0" visibility="visible"></path><path d="M15.37,77.52c2.25,1.32,3.9,0.34,6.32-1.32c1.61-1.11,14.59-10.49,21.43-15.82" class="null" transform="matrix(1, 0, 0, 1, 0, 0)" stroke-opacity="0" visibility="visible"></path><path d="M43.62,23.12c4.3,4.16,11.11,17.12,12.18,23.59" transform="matrix(1, 0, 0, 1, 0, 0)" stroke-opacity="0" visibility="visible" class="null"></path><path d="M83.76,21.3c0.74,1.58,0.87,3.04,0.3,5.25C79.75,43.12,69.5,67.88,46.14,86.4" transform="matrix(1, 0, 0, 1, 0, 0)" stroke-opacity="0" visibility="visible" class="null"></path><path d="M71.52,61.33c8.04,4.26,20.78,17.51,22.79,24.13" class="null" transform="matrix(1, 0, 0, 1, 0, 0)" stroke-opacity="0" visibility="visible"></path></g>
-            </g>
-            <g id="userStrokes" style="fill: none;stroke-opacity: 0.75;stroke-width: 3;stroke-linecap: round;stroke-linejoin: round;"><path d="M20.87,21.65L21.09,22.75L21.97,32.66L21.75,44.11L20.65,56.00L20.21,63.05L19.99,71.19L18.89,76.04L18.89,78.46L18.89,78.68" class="wrongStroke" transform="matrix(0.7485939754397937, -0.15539568492585343, 0.15539568492585343, 0.7485939754397937, 1.8825276653888494, 14.536049872685275)" stroke-opacity="0" visibility="hidden"></path><path d="M25.05,72.96L25.27,72.96L30.78,68.33L35.62,62.17L41.79,54.02L46.19,48.52L47.95,45.65L48.83,43.45L48.83,42.79" class="warningStroke" transform="matrix(0.7975842712809843, 0.29113185775265304, -0.29113185775265304, 0.7975842712809843, 16.6314945625072, 12.035395711701085)" stroke-opacity="0" visibility="hidden"></path><path d="M38.04,22.75L37.60,22.53L40.91,26.72L43.33,29.80L45.31,32.22L47.29,34.64L47.73,35.08" class="correctStroke" transform="matrix(1.6626568000750308, 0.3188273696624474, -0.3188273696624474, 1.6626568000750308, -12.374145745529681, -26.83363536358705)" stroke-opacity="0" visibility="hidden"></path><path d="M67.11,19.23L67.11,22.75L66.01,29.58L61.60,41.69L56.98,51.60L49.49,66.57L46.63,73.18L39.14,84.19L36.50,87.05L35.40,87.93" class="correctStroke" transform="matrix(0.9895351122481102, 0.0908565491005794, -0.0908565491005794, 0.9895351122481102, 19.099471594897395, -3.826143358523751)" stroke-opacity="0" visibility="hidden"></path><path d="M63.81,37.29L63.81,37.51L69.09,47.86L74.37,53.36L81.86,61.51L86.26,64.59L89.35,65.91L92.43,68.55L93.75,70.31L94.41,70.97" class="warningStroke" transform="matrix(0.7292560640094259, -0.014096311049506382, 0.014096311049506382, 0.7292560640094259, 24.46051419242692, 35.035528109734095)" stroke-opacity="0" visibility="hidden"></path></g>
-        </svg>
-        <div id="formButtons">
-            <button id="showHintButton" class="btn btn-lg btn-info">Hint</button>
-            <button id="showRemainingStrokesButton" class="btn btn-lg btn-primary">Show Me</button>
-            <button id="resetStrokesButton" class="btn btn-lg btn-warning">Clear</button>
-        </div>
-    </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-lg-6">
-                                    <h3>Main Radical</h3>
-                    <p>
-                                                    <a lang="ja" href="/dictionary/character/%E4%BA%BA" class="charLink">人</a>(KanXi)
-                                            </p>
-                
-                                    <h3>Variants</h3>
-                    <p>
-                                                    <a lang="ja" href="/dictionary/character/%E3%81%84" class="charLink">い</a>
-                                            </p>
-                            </div>
-
-            <div class="col-lg-6">
-                                    <h3>Reading Commonality</h3>
-                    <table>
-                                                                                    <tbody><tr>
-                                    <td lang="ja">
-                                        <a href="/dictionary/character/%E4%BB%A5/common-words/#%E3%82%A4">
-                                        <span class="reading">イ</span>
-                                        </a>
-                                    </td>
-                                    <td>99.9%</td>
-                                </tr>
-                                                                                                                <tr>
-                                    <td lang="ja">
-                                        <a href="/dictionary/character/%E4%BB%A5/common-words/#%E3%82%82%E3%81%A3">
-                                        <span class="reading">もっ<em>て</em></span>
-                                        </a>
-                                    </td>
-                                    <td>0.1%</td>
-                                </tr>
-                                                                                                                            </tbody></table>
-                            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-6">
-                                    <h3>Character Breakdown</h3>
-                    <div class="kanjiItem"><div><a href="/dictionary/character/%E4%BB%A5" class="japaneseSerif" lang="ja">以</a></div><div><strong>by means of, because, in view of</strong></div><div><span class="japaneseSans" lang="ja">イ　もっ.て　もち</span><em>&nbsp;(4th, N4)</em></div><div class="kanjiBreakdownIndent"><div class="kanjiItem"><div><a href="/dictionary/character/%F0%A0%84%8C" class="japaneseSerif" lang="ja">𠄌</a></div><div>hook stroke</div><div></div></div><div class="kanjiItem"><div><a href="/dictionary/character/%E4%B8%B6" class="japaneseSerif" lang="ja">丶</a></div><div>dot, tick or dot radical (no. 3)</div><div><span class="japaneseSans" lang="ja">チュ</span><em>&nbsp;(Kentei 1)</em></div></div><div class="kanjiItem"><div><a href="/dictionary/character/%E4%BA%BA" class="japaneseSerif" lang="ja">人</a></div><div>person</div><div><span class="japaneseSans" lang="ja">ひと　ニン　ジン</span><em>&nbsp;(1st, N5)</em></div></div></div></div>
-                            </div>
-
-            <div class="col-lg-6">
-                                    <h3>Contained In</h3>
-                    <p>
-                                                    <a lang="ja" href="/dictionary/character/%E4%BC%BC" class="charLink">似</a>
-                                                    <a lang="ja" href="/dictionary/character/%E8%8B%A1" class="charLink">苡</a>
-                                            </p>
-                            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-lg-6">
-                                    <h3>Common Words</h3>
-                    <div>
-                                                    <div class="wordBrief">
-                                <div class="japaneseText">
-                                    <a href="/dictionary/word/%E4%BB%A5%E4%B8%8A" data-toggle="tooltip" data-placement="right" data-original-title="" title="">
-                                        <table lang="ja" class="ruby"><tbody><tr class="furi"><th class="pSep pH">い</th></tr><tr><td>以</td></tr></tbody></table><table lang="ja" class="ruby"><tbody><tr class="furi-cmp"><th class="pL">じょ</th><th class="pL">う</th></tr><tr><td>上</td></tr></tbody></table>
-                                    </a>
-                                </div>
-                                <div class="smallText">
-                                    not less than ... ②the above ③since ... ④that's all
-                                </div>
-                            </div>
-                                                    <div class="wordBrief">
-                                <div class="japaneseText">
-                                    <a href="/dictionary/word/%E4%BB%A5%E5%A4%96" data-toggle="tooltip" data-placement="right" data-original-title="" title="">
-                                        <table lang="ja" class="ruby"><tbody><tr class="furi"><th class="pSep pH">い</th></tr><tr><td>以</td></tr></tbody></table><table lang="ja" class="ruby"><tbody><tr class="furi"><th class="pL">が</th><th class="pL">い</th></tr><tr><td>外</td></tr></tbody></table>
-                                    </a>
-                                </div>
-                                <div class="smallText">
-                                    excluding ②outside (a boundary, scope, etc.)
-                                </div>
-                            </div>
-                                                    <div class="wordBrief">
-                                <div class="japaneseText">
-                                    <a href="/dictionary/word/%E4%BB%A5%E5%89%8D" data-toggle="tooltip" data-placement="right" data-original-title="" title="">
-                                        <table lang="ja" class="ruby"><tbody><tr class="furi"><th class="pSep pH">い</th></tr><tr><td>以</td></tr></tbody></table><table lang="ja" class="ruby"><tbody><tr class="furi"><th class="pL">ぜ</th><th class="pL">ん</th></tr><tr><td>前</td></tr></tbody></table>
-                                    </a>
-                                </div>
-                                <div class="smallText">
-                                    before ②the past
-                                </div>
-                            </div>
-                                                    <div class="wordBrief">
-                                <div class="japaneseText">
-                                    <a href="/dictionary/word/%E4%BB%A5%E4%B8%8B" data-toggle="tooltip" data-placement="right" data-original-title="" title="">
-                                        <table lang="ja" class="ruby"><tbody><tr class="furi"><th class="pSep pH">い</th></tr><tr><td>以</td></tr></tbody></table><table lang="ja" class="ruby"><tbody><tr class="furi"><th class="pL">か</th></tr><tr><td>下</td></tr></tbody></table>
-                                    </a>
-                                </div>
-                                <div class="smallText">
-                                    not exceeding ... ②below (a standard, level, etc.) ③the following ④including ...
-                                </div>
-                            </div>
-                                                    <div class="wordBrief">
-                                <div class="japaneseText">
-                                    <a href="/dictionary/word/%E4%BB%A5%E6%9D%A5" data-toggle="tooltip" data-placement="right" data-original-title="" title="">
-                                        <table lang="ja" class="ruby"><tbody><tr class="furi"><th>い</th></tr><tr><td>以</td></tr></tbody></table><table lang="ja" class="ruby"><tbody><tr class="furi"><th>らい</th></tr><tr><td>来</td></tr></tbody></table>
-                                    </a>
-                                </div>
-                                <div class="smallText">
-                                    since
-                                </div>
-                            </div>
-                                                    <div class="wordBrief">
-                                <div class="japaneseText">
-                                    <a href="/dictionary/word/%E4%BB%A5%E5%86%85" data-toggle="tooltip" data-placement="right" data-original-title="" title="">
-                                        <table lang="ja" class="ruby"><tbody><tr class="furi"><th>い</th></tr><tr><td>以</td></tr></tbody></table><table lang="ja" class="ruby"><tbody><tr class="furi"><th>ない</th></tr><tr><td>内</td></tr></tbody></table>
-                                    </a>
-                                </div>
-                                <div class="smallText">
-                                    within
-                                </div>
-                            </div>
-                                                    <div class="wordBrief">
-                                <div class="japaneseText">
-                                    <a href="/dictionary/word/%E4%BB%A5%E9%99%8D" data-toggle="tooltip" data-placement="right" data-original-title="" title="">
-                                        <table lang="ja" class="ruby"><tbody><tr class="furi"><th class="pSep pH">い</th></tr><tr><td>以</td></tr></tbody></table><table lang="ja" class="ruby"><tbody><tr class="furi"><th class="pL">こ</th><th class="pL">う</th></tr><tr><td>降</td></tr></tbody></table>
-                                    </a>
-                                </div>
-                                <div class="smallText">
-                                    on and after
-                                </div>
-                            </div>
-                                                    <div class="wordBrief">
-                                <div class="japaneseText">
-                                    <a href="/dictionary/word/%E4%BB%A5%E5%BE%8C" data-toggle="tooltip" data-placement="right" data-original-title="" title="">
-                                        <table lang="ja" class="ruby"><tbody><tr class="furi"><th class="pSep pH">い</th></tr><tr><td>以</td></tr></tbody></table><table lang="ja" class="ruby"><tbody><tr class="furi"><th class="pL">ご</th></tr><tr><td>後</td></tr></tbody></table>
-                                    </a>
-                                </div>
-                                <div class="smallText">
-                                    after this ②thereafter
-                                </div>
-                            </div>
-                                                    <div class="wordBrief">
-                                <div class="japaneseText">
-                                    <a href="/dictionary/word/%E3%81%9D%E3%82%8C%E4%BB%A5%E6%9D%A5" data-toggle="tooltip" data-placement="right" data-original-title="" title="">
-                                        <table lang="ja" class="ruby"><tbody><tr class="furi"><th>　</th></tr><tr><td>そ</td></tr></tbody></table><table lang="ja" class="ruby"><tbody><tr class="furi"><th>　</th></tr><tr><td>れ</td></tr></tbody></table><table lang="ja" class="ruby"><tbody><tr class="furi"><th>い</th></tr><tr><td>以</td></tr></tbody></table><table lang="ja" class="ruby"><tbody><tr class="furi"><th>らい</th></tr><tr><td>来</td></tr></tbody></table>
-                                    </a>
-                                </div>
-                                <div class="smallText">
-                                    since then
-                                </div>
-                            </div>
-                                                    <div class="wordBrief">
-                                <div class="japaneseText">
-                                    <a href="/dictionary/word/%E4%BB%A5%E6%9D%B1" data-toggle="tooltip" data-placement="right" data-original-title="" title="">
-                                        <table lang="ja" class="ruby"><tbody><tr class="furi"><th>い</th></tr><tr><td>以</td></tr></tbody></table><table lang="ja" class="ruby"><tbody><tr class="furi"><th>とう</th></tr><tr><td>東</td></tr></tbody></table>
-                                    </a>
-                                </div>
-                                <div class="smallText">
-                                    ... and eastward
-                                </div>
-                            </div>
-                                            </div>
-                    <a href="/dictionary/character/%E4%BB%A5/common-words">More Words...</a>
-                            </div>
-
-            <div class="col-lg-6">
-                                    <h3>References</h3>
-                    <table>
-                                                    <tbody><tr>
-                                <td> <em>Unicode hex code</em></td>
-                                <td><strong>4EE5</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td> <em>JIS X 0208</em></td>
-                                <td><strong>1-16-42</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Nelson, A. <em>Classic Nelson</em></td>
-                                <td><strong>348</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Haig, J. <em>New Nelson Japanese-English Character Dictionary</em></td>
-                                <td><strong>109</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Halpern, J. <em>New Japanese-English Character Dictionary</em></td>
-                                <td><strong>41</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Halpern, J. <em>Kodansha Kanji Dictionary</em></td>
-                                <td><strong>45</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Halpern, J. <em>Kanji Learners Dictionary (Kodansha)</em></td>
-                                <td><strong>25</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Halpern, J. <em>Kanji Learners Dictionary (Kodansha), 2nd edition (2013)</em></td>
-                                <td><strong>26</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Heisig, J. <em>Remembering The  Kanji</em></td>
-                                <td><strong>1028</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Heisig, J. <em>Remembering The  Kanji, Sixth Ed.</em></td>
-                                <td><strong>1105</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Gakken <em>A  New Dictionary of Kanji Usage</em></td>
-                                <td><strong>157</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>O'Neill, P.G. <em>Japanese Names</em></td>
-                                <td><strong>134</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>O'Neill, P.G. <em>Essential Kanji</em></td>
-                                <td><strong>221</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Morohashi <em>Daikanwajiten</em></td>
-                                <td><strong>388</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Henshall, K. <em>A Guide To Remembering Japanese Characters</em></td>
-                                <td><strong>419</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Spahn and Hadamitzky <em>Kanji and Kana</em></td>
-                                <td><strong>46</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Spahn and Hadamitzky <em>Kanji and Kana (2011 edition)</em></td>
-                                <td><strong>46</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Sakade, F. <em>A Guide To Reading and Writing Japanese</em></td>
-                                <td><strong>342</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Hodges &amp; Okazaki <em>Japanese Kanji Flashcards</em></td>
-                                <td><strong>112</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Henshall &amp; De Groot <em>A Guide To Reading and Writing Japanese, 3rd ed.</em></td>
-                                <td><strong>443</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Kask, A. <em>Tuttle Kanji Cards</em></td>
-                                <td><strong>446</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Crowley, D. <em>The Kanji Way to Japanese Language Power</em></td>
-                                <td><strong>118</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Nishiguchi &amp; Kono <em>Kanji in Context</em></td>
-                                <td><strong>420</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>AJLT <em>Japanese For Busy People vols I-III</em></td>
-                                <td><strong>3.10</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Kodansha <em>Kodansha Compact Kanji Guide</em></td>
-                                <td><strong>43</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td>Maniette, Y. <em>Les Kanjis dans la tete</em></td>
-                                <td><strong>1037</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td> <em>Tuttle Dictionary Descriptor Code</em></td>
-                                <td><strong>0a5.1</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td> <em>Four corner code</em></td>
-                                <td><strong>2810.0</strong></td>
-                            </tr>
-                                                    <tr>
-                                <td> <em>De Roo Code</em></td>
-                                <td><strong>1262</strong></td>
-                            </tr>
-                                            </tbody></table>
-                            </div>
-        </div>
-    </div>
-            </div>
-
-            
-                
-            
-        </div>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luyện viết tiếng Nhật</title>
+    <meta name="description" content="Công cụ tạo file tập viết Kanji, từ vựng, bảng chữ cái tiếng Nhật miễn phí.">
+    <meta property="og:title" content="Luyện viết tiếng Nhật - Phá Đảo Tiếng Nhật">
+    <meta property="og:description" content="Tạo file PDF tự luyện viết Kanji, từ vựng tiếng Nhật tại nhà cực dễ dàng.">
+    <meta property="og:image" content="https://i.ibb.co/dwSNXWnX/2434753923115317823.jpg">
+    <meta property="og:url" content="https://phadaotiengnhat.com">
+    <meta name="apple-mobile-web-app-title" content="Luyện Kanji">
     
-</body></html>
+    <link rel="canonical" href="https://phadaotiengnhat.com" />
+    <link rel="icon" type="image/x-icon" href="./icon/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="./icon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./icon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./icon/favicon-16x16.png">
+    <link rel="icon" type="image/svg+xml" href="./icon/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icon/apple-touch-icon.png">
+    <link rel="manifest" href="./icon/site.webmanifest">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel" src="./script.js"></script>
+  </body>
+</html>
