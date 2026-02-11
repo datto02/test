@@ -2325,26 +2325,37 @@ Yêu cầu định dạng đầu ra: CHỈ TRẢ VỀ DUY NHẤT MỘT MẢNG JS
         </div>
     );
 };
-// --- COMPONENT HIỂN THỊ ĐỀ THI (A4) ---
+// --- COMPONENT HIỂN THỊ ĐỀ THI (A4 - Tùy chỉnh số câu) ---
 const TestPaper = ({ data, onClose }) => {
-    // Logic phân trang: Ước lượng số câu hỏi mỗi trang (khoảng 6-7 câu tùy độ dài)
-    // Để an toàn và giống Word, ta cắt cứng 7 câu/trang.
-    const QUESTIONS_PER_PAGE = 7;
     
+    // Logic phân trang phức tạp hơn: Trang 1 lấy 13 câu, các trang sau lấy 14 câu
     const pages = useMemo(() => {
         if (!data) return [];
         const result = [];
-        for (let i = 0; i < data.length; i += QUESTIONS_PER_PAGE) {
-            result.push(data.slice(i, i + QUESTIONS_PER_PAGE));
+        
+        // --- XỬ LÝ TRANG 1 (13 câu) ---
+        // Cắt 13 câu đầu tiên cho trang 1
+        const firstPageData = data.slice(0, 13);
+        if (firstPageData.length > 0) {
+            result.push(firstPageData);
         }
+
+        // --- XỬ LÝ CÁC TRANG SAU (14 câu) ---
+        // Lấy phần dữ liệu còn lại (từ câu 14 trở đi)
+        const remainingData = data.slice(13);
+        
+        // Chia đều phần còn lại mỗi trang 14 câu
+        for (let i = 0; i < remainingData.length; i += 14) {
+            result.push(remainingData.slice(i, i + 14));
+        }
+        
         return result;
     }, [data]);
 
     return (
-        // Thêm print:bg-white print:p-0 để khi in nó xóa nền xám của web đi
         <div className="w-full bg-gray-100 min-h-screen flex flex-col items-center py-8 relative print:bg-white print:p-0 print:block">
             
-            {/* Nút thoát chế độ test (Nổi) - Class no-print sẽ ẩn nó khi in */}
+            {/* Nút thoát */}
             <div className="fixed top-4 right-4 z-[900] no-print">
                 <button onClick={onClose} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-full shadow-xl transition-transform active:scale-95 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
@@ -2355,37 +2366,53 @@ const TestPaper = ({ data, onClose }) => {
             {/* RENDER CÁC TRANG CÂU HỎI */}
             {pages.map((pageQuestions, pageIndex) => (
                 <div key={pageIndex} 
-                    // Thêm class print:shadow-none (tắt bóng khi in), print:mb-0 (bỏ margin khi in), print:break-after-page (ngắt trang)
                     className="bg-white shadow-lg mb-8 relative flex flex-col overflow-hidden print:shadow-none print:mb-0 print:break-after-page"
-                    // Kích thước chuẩn A4
                     style={{
                         width: '210mm',
-                        minHeight: '296mm',       // Dùng 296mm thay vì 297mm để an toàn, tránh bị nhảy trang trắng
-                        padding: '15mm 10mm 15mm 15mm', // Trên: 1.5cm, Phải: 1cm, Dưới: 1.5cm, Trái: 1.5cm (để đóng gáy)
-                        boxSizing: 'border-box'   // QUAN TRỌNG: Để padding nằm trong khổ 210mm
+                        minHeight: '296mm',       
+                        padding: '15mm 10mm 15mm 15mm', 
+                        boxSizing: 'border-box'
                     }}
                 >
-                    {/* Header mỗi trang */}
-                    <div className="border-b-2 border-black pb-2 mb-6 flex justify-between items-end">
-                        <h2 className="text-xl font-black uppercase tracking-wider">BÀI KIỂM TRA TỪ VỰNG</h2>
-                        <span className="text-sm font-bold">Trang {pageIndex + 1}/{pages.length + 1}</span>
-                    </div>
+                    {/* --- HEADER --- */}
+                    {pageIndex === 0 ? (
+                        <div className="border-b-2 border-black pb-2 mb-4 flex justify-between items-end">
+                            <h2 className="text-lg font-black uppercase tracking-wider">BÀI KIỂM TRA TỪ VỰNG</h2>
+                            <span className="text-[10pt] font-bold">Trang {pageIndex + 1}/{pages.length + 1}</span>
+                        </div>
+                    ) : (
+                        <div className="relative w-full h-0 mb-4">
+                             <span className="absolute -top-3 right-0 text-[9pt] text-gray-400 font-bold">
+                                Trang {pageIndex + 1}/{pages.length + 1}
+                             </span>
+                        </div>
+                    )}
 
                     {/* Danh sách câu hỏi */}
-                    <div className="flex-1 space-y-6">
+                    <div className="flex-1 space-y-4"> 
                         {pageQuestions.map((q, idx) => {
-                            const globalIndex = pageIndex * QUESTIONS_PER_PAGE + idx + 1;
+                            // Tính toán lại số thứ tự câu hỏi toàn cục
+                            // Nếu là trang 0: idx + 1
+                            // Nếu là trang > 0: 13 (số câu trang 1) + (pageIndex - 1) * 14 + idx + 1
+                            let globalIndex;
+                            if (pageIndex === 0) {
+                                globalIndex = idx + 1;
+                            } else {
+                                globalIndex = 13 + (pageIndex - 1) * 14 + idx + 1;
+                            }
+
                             return (
                                 <div key={idx} className="w-full text-justify">
-                                    {/* Câu hỏi */}
-                                    <div className="font-bold text-lg mb-2 flex items-start gap-1 leading-snug">
+                                    {/* CÂU HỎI */}
+                                    <div className="font-bold text-[11.5pt] mb-1 flex items-start gap-1 leading-snug">
                                         <span className="whitespace-nowrap">Câu {globalIndex}:</span>
                                         <span className="break-words">{q.q}</span>
                                     </div>
-                                    {/* Đáp án */}
-                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 pl-4">
+                                    
+                                    {/* ĐÁP ÁN */}
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 pl-4">
                                         {q.opts.map((opt, optIdx) => (
-                                            <div key={optIdx} className="text-base flex items-start gap-2">
+                                            <div key={optIdx} className="text-[11.5pt] flex items-start gap-2 leading-snug">
                                                 <span className="font-bold w-4">{['A','B','C','D'][optIdx]}.</span>
                                                 <span className="break-words">{opt}</span>
                                             </div>
@@ -2396,13 +2423,11 @@ const TestPaper = ({ data, onClose }) => {
                         })}
                     </div>
                     
-                    <div className="text-center text-xs text-gray-400 mt-auto pt-4 border-t border-gray-100">
-                        Phá Đảo Tiếng Nhật - Test System
-                    </div>
+                    {/* ĐÃ XÓA PHẦN FOOTER (Dòng chữ "Phá Đảo Tiếng Nhật..." ở cuối) */}
                 </div>
             ))}
 
-            {/* TRANG CUỐI CÙNG: ĐÁP ÁN (ANSWER KEY) */}
+            {/* TRANG CUỐI CÙNG: ĐÁP ÁN */}
             <div className="bg-white shadow-lg mb-8 relative flex flex-col overflow-hidden print:shadow-none print:mb-0 print:break-after-page"
                 style={{
                     width: '210mm',
@@ -2412,15 +2437,15 @@ const TestPaper = ({ data, onClose }) => {
                 }}
             >
                 <div className="border-b-2 border-black pb-2 mb-6 flex justify-between items-end">
-                    <h2 className="text-xl font-black uppercase tracking-wider">ĐÁP ÁN CHI TIẾT</h2>
-                    <span className="text-sm font-bold">Trang {pages.length + 1}/{pages.length + 1}</span>
+                    <h2 className="text-lg font-black uppercase tracking-wider">ĐÁP ÁN CHI TIẾT</h2>
+                    <span className="text-[10pt] font-bold">Trang {pages.length + 1}/{pages.length + 1}</span>
                 </div>
 
-                <div className="grid grid-cols-5 gap-4 text-center">
+                <div className="grid grid-cols-5 gap-3 text-center">
                     {data.map((q, i) => (
                         <div key={i} className="flex flex-col border border-gray-300 rounded p-1">
-                            <span className="text-xs text-gray-500 font-bold uppercase mb-1">Câu {i + 1}</span>
-                            <span className="text-xl font-black text-purple-700">
+                            <span className="text-[9pt] text-gray-500 font-bold uppercase">Câu {i + 1}</span>
+                            <span className="text-lg font-black text-purple-700">
                                 {['A', 'B', 'C', 'D'][q.ans]}
                             </span>
                         </div>
