@@ -1380,7 +1380,7 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
    // =================================================================
     // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (CÓ CHỨC NĂNG EDIT - GIAO DIỆN CHUẨN)
     // =================================================================
-    else {
+   else {
         const word = char.trim();
         const wordLen = word.length;
         const totalBoxes = 12;
@@ -1476,8 +1476,8 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
                 </div>
             </div>
         );
-    }   
-     };                             
+    }
+  };                              
     // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
   const Page = ({ chars, config, dbData, mode, customVocabData, onEditVocab }) => {
 // 1. Hàm Xuất dữ liệu (Tải file về máy)
@@ -1531,17 +1531,7 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
     const isSample = !config.text || config.text.trim().length === 0;
 
     return (
-       <div 
-            className="a4-page mx-auto relative flex flex-col pt-[15mm] pl-[3mm] bg-white shadow-xl" // Thêm shadow-xl cho đẹp
-            style={{
-                width: '210mm',        // Chiều rộng chuẩn A4
-                height: '297mm',       // Chiều cao chuẩn A4
-                minWidth: '210mm',     // Đảm bảo không bị co lại
-                minHeight: '297mm',    // Đảm bảo không bị co lại
-                boxSizing: 'border-box', // Để padding không làm phình to trang giấy
-                overflow: 'hidden'     // Ẩn nội dung tràn ra ngoài (giống in thật)
-            }}
-        >
+        <div className="a4-page mx-auto relative flex flex-col pt-[15mm] pl-[3mm] bg-white">
         
         {/* --- PHẦN TIÊU ĐỀ BẢN MẪU (CHỈ HIỆN KHI TRỐNG) --- */}
         {isSample && (
@@ -2234,7 +2224,7 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
     );
 };
 // 5. Sidebar (Phiên bản: Final)
-   const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen, mode, setPracticeMode, onOpenQuizModal }) => {
+   const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen, mode, setPracticeMode }) => {
    
 
 // 1. Logic bộ lọc mới
@@ -3748,20 +3738,7 @@ onKeyDown={(e) => {
                                     </button>
                                 </div>
                             </div>
-{/* --- NÚT MỚI: TẠO ĐỀ KIỂM TRA --- */}
-<div className="pt-2 border-t border-gray-100 mt-2">
-    <button 
-        onClick={() => {
-            if (!config.text || config.text.trim() === '') return alert("Hãy nhập từ vựng trước đã!");
-            onOpenQuizModal(); // Hàm này sẽ được truyền từ App xuống
-            setIsUtilsOpen(false);
-        }}
-        className="w-full py-2.5 bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white border border-purple-200 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 group shadow-sm"
-    >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15h6"/><path d="M9 11h6"/><path d="M9 19h6"/></svg>
-        <span className="text-xs font-bold uppercase tracking-wide">TẠO ĐỀ KIỂM TRA</span>
-    </button>
-</div>
+
             {/* 3. DANH SÁCH ÔN TẬP (MÀU CAM) */}
      {mode !== 'vocab' && (
             <div className="pt-1">
@@ -4414,19 +4391,19 @@ const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
 
                     {/* --- 4. THÊM Ô NHẬP ÂM HÁN VIỆT --- */}
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Âm Hán Việt (Tự động in hoa)</label>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Âm Hán Việt</label>
                         <input 
                             type="text" 
                             value={hanviet}
-                            onChange={(e) => setHanviet(e.target.value.toUpperCase())} // Tự động IN HOA
-                            placeholder="Ví dụ: NHẬT BẢN"
+                            onChange={(e) => setHanviet(e.target.value.toUpperCase())} 
+                            placeholder="Ví dụ: NHẬT BẢN NGỮ"
                             className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-bold uppercase transition-all"
                         />
                     </div>
 
                     <div>
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cách đọc (Furigana)</label>
-                        <input type="text" value={reading} onChange={(e) => setReading(e.target.value)} placeholder="Ví dụ: わたし" className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium transition-all" />
+                        <input type="text" value={reading} onChange={(e) => setReading(e.target.value)} placeholder="Ví dụ: にほんご" className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium transition-all" />
                     </div>
 
                     <div>
@@ -4435,7 +4412,7 @@ const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
                             type="text" 
                             value={meaning} 
                             onChange={(e) => setMeaning(e.target.value)} 
-                            placeholder="Ví dụ: Tôi, tớ, mình..." 
+                            placeholder="Ví dụ: tiếng Nhật" 
                             className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium transition-all" 
                         />
                     </div>
@@ -4454,241 +4431,7 @@ const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
         </div>
     );
 };
-// --- BƯỚC 1: TRANG HIỂN THỊ ĐỀ THI (NATIVE PRINT LAYOUT) ---
-const QuizPage = ({ questions, title = "BÀI KIỂM TRA TỪ VỰNG" }) => {
     
-    // Tạo style in ấn đặc biệt để ép trình duyệt tuân thủ lề
-    const printStyles = `
-        @page {
-            size: A4;
-            /* Căn lề chuẩn theo yêu cầu của bạn */
-            margin: 2.0cm 2.0cm 2.0cm 2.5cm !important; 
-        }
-        @media print {
-            html, body {
-                width: 210mm;
-                height: 297mm;
-                margin: 0 !important;
-                padding: 0 !important;
-                overflow: visible !important;
-            }
-            /* Ẩn các thành phần thừa khi in */
-            .no-print { display: none !important; }
-            
-            /* Đảm bảo nội dung in tràn ra sát lề @page đã định */
-            .print-content {
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                box-shadow: none !important;
-            }
-            
-            /* Ngắt trang sạch sẽ trước đáp án */
-            .answer-key-section {
-                break-before: page;
-            }
-        }
-    `;
-
-    return (
-        <div className="flex flex-col items-center bg-gray-200 py-8 min-h-screen">
-            <style>{printStyles}</style>
-
-            {/* MÔ PHỎNG TRANG GIẤY TRÊN MÀN HÌNH */}
-            {/* Trên màn hình: Có padding để nhìn giống in. Khi in: Padding này bị ghi đè bởi @page */}
-            <div 
-                className="print-content bg-white shadow-2xl mx-auto flex flex-col"
-                style={{ 
-                    width: '210mm', 
-                    minHeight: '297mm',
-                    // Padding hiển thị trên màn hình (để bạn xem trước cho sướng mắt)
-                    paddingTop: '2.0cm',
-                    paddingBottom: '2.0cm',
-                    paddingRight: '2.0cm',
-                    paddingLeft: '2.5cm',
-                    boxSizing: 'border-box'
-                }}
-            >
-                {/* --- HEADER (CHỈ HIỆN 1 LẦN Ở ĐẦU) --- */}
-                <div className="border-b-2 border-black pb-4 mb-6">
-                    <h2 className="text-2xl font-black text-center uppercase tracking-widest mb-3 font-sans text-gray-900">{title}</h2>
-                    <div className="flex justify-between text-sm font-bold text-gray-700 font-sans uppercase tracking-wide border-t border-dashed border-gray-300 pt-2">
-                        <span>Môn thi: TIẾNG NHẬT</span>
-                        <span>Thời gian: 45 phút</span>
-                        <span>Số câu: {questions.length}</span>
-                    </div>
-                </div>
-
-                {/* --- DANH SÁCH CÂU HỎI (LIỀN MẠCH) --- */}
-                <div className="flex-1 flex flex-col gap-5 text-justify">
-                    {questions.map((q, index) => (
-                        // break-inside-avoid: Mấu chốt để câu hỏi không bị cắt đôi khi sang trang
-                        <div key={index} className="break-inside-avoid relative pl-1">
-                            {/* Câu hỏi */}
-                            <div className="flex items-baseline gap-2 mb-2">
-                                <span className="font-black text-lg text-black min-w-[28px]">
-                                    {index + 1}.
-                                </span>
-                                <span className="font-medium text-lg font-['Klee_One'] text-gray-900 leading-snug">
-                                    {q.question}
-                                </span>
-                            </div>
-
-                            {/* Đáp án (Chia 4 cột) */}
-                            <div className="grid grid-cols-4 gap-2 pl-9">
-                                {q.options.map((opt, optIdx) => (
-                                    <div key={optIdx} className="flex items-center gap-1.5">
-                                        <div className="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px] font-bold shrink-0 text-gray-600">
-                                            {['A', 'B', 'C', 'D'][optIdx]}
-                                        </div>
-                                        <span className="text-[15px] font-sans text-gray-800 leading-none pt-0.5 break-words">
-                                            {opt}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* --- CHÂN TRANG MÔ PHỎNG (Chỉ hiện cuối nội dung) --- */}
-                <div className="mt-8 text-center text-xs text-gray-400 italic border-t border-gray-100 pt-2">
-                    - Hết phần câu hỏi -
-                </div>
-            </div>
-
-            {/* --- TRANG ĐÁP ÁN (TÁCH RIÊNG) --- */}
-            <div 
-                className="print-content answer-key-section bg-white shadow-2xl mx-auto mt-8 flex flex-col"
-                style={{ 
-                    width: '210mm', 
-                    minHeight: '297mm',
-                    paddingTop: '2.0cm',
-                    paddingBottom: '2.0cm',
-                    paddingRight: '2.0cm',
-                    paddingLeft: '2.5cm',
-                    boxSizing: 'border-box'
-                }}
-            >
-                 <div className="border-b-2 border-black pb-4 mb-6">
-                    <h2 className="text-xl font-black text-center uppercase tracking-widest text-gray-900">BẢNG ĐÁP ÁN CHI TIẾT</h2>
-                </div>
-                
-                <div className="grid grid-cols-5 gap-x-8 gap-y-4 font-sans text-sm">
-                    {questions.map((q, i) => (
-                        <div key={i} className="flex items-center justify-between border-b border-gray-200 border-dashed pb-1">
-                            <span className="font-bold text-gray-500">Câu {i + 1}</span>
-                            <span className="font-black text-lg text-black">
-                                {['A', 'B', 'C', 'D'][q.answer - 1] || q.answer}
-                            </span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-};
-const QuizGeneratorModal = ({ isOpen, onClose, vocabList, onQuizGenerated }) => {
-    const [step, setStep] = useState(1); // 1: Copy Prompt, 2: Paste JSON
-    const [jsonInput, setJsonInput] = useState('');
-    const [error, setError] = useState(null);
-
-    // Reset khi mở lại
-    useEffect(() => { if (isOpen) { setStep(1); setJsonInput(''); setError(null); } }, [isOpen]);
-
-    // Tạo câu lệnh Prompt cho ChatGPT
-    const generatePrompt = () => {
-        const words = vocabList.replace(/[\n;]/g, ', ').replace(/\s+/g, ' ').trim();
-        return `Tôi muốn tạo một bài kiểm tra trắc nghiệm tiếng Nhật JLPT (N3-N2) cho danh sách từ vựng sau: "${words}".
-Hãy tạo 20 câu hỏi trắc nghiệm (bao gồm: tìm cách đọc Kanji, tìm nghĩa đúng, tìm từ đồng nghĩa, hoặc cách dùng từ trong câu).
-Yêu cầu QUAN TRỌNG:
-1. Chỉ trả về duy nhất một đoạn JSON (không giải thích thêm).
-2. Định dạng JSON phải là một Array như sau:
-[
-  { "question": "Nội dung câu hỏi (ví dụ: ...の読み方は？)", "options": ["Đáp án 1", "Đáp án 2", "Đáp án 3", "Đáp án 4"], "answer": 2 }
-]
-(Lưu ý: "answer" là số thứ tự đáp án đúng từ 1 đến 4).`;
-    };
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(generatePrompt());
-        alert("Đã sao chép lệnh! Hãy dán vào ChatGPT.");
-        setStep(2);
-    };
-
-    const handleProcess = () => {
-        try {
-            // Tìm đoạn JSON trong text (phòng trường hợp ChatGPT nói nhảm thêm)
-            const jsonMatch = jsonInput.match(/\[[\s\S]*\]/);
-            if (!jsonMatch) throw new Error("Không tìm thấy JSON hợp lệ.");
-            
-            const parsed = JSON.parse(jsonMatch[0]);
-            if (!Array.isArray(parsed)) throw new Error("Dữ liệu không phải là danh sách.");
-            
-            onQuizGenerated(parsed); // Trả dữ liệu về App
-            onClose();
-        } catch (err) {
-            setError("Lỗi đọc file JSON: " + err.message + ". Hãy chắc chắn bạn copy đúng phần code JSON từ ChatGPT.");
-        }
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in" onClick={e => e.stopPropagation()}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
-                <div className="p-4 bg-indigo-600 text-white flex justify-between items-center">
-                    <h3 className="font-bold text-sm uppercase flex gap-2 items-center">🤖 Tạo đề thi với AI</h3>
-                    <button onClick={onClose}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-                </div>
-
-                <div className="p-6 overflow-y-auto">
-                    {step === 1 ? (
-                        <div className="space-y-4 text-center">
-                            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                            </div>
-                            <h4 className="font-bold text-gray-800">BƯỚC 1: Sao chép lệnh</h4>
-                            <p className="text-sm text-gray-500">Hệ thống đã chuẩn bị sẵn câu lệnh dựa trên từ vựng bạn nhập. Hãy sao chép và gửi cho ChatGPT.</p>
-                            
-                            <div className="bg-gray-100 p-3 rounded-lg text-xs text-left font-mono text-gray-600 max-h-32 overflow-y-auto border border-gray-200">
-                                {generatePrompt()}
-                            </div>
-
-                            <button onClick={handleCopy} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-all">
-                                SAO CHÉP & TIẾP TỤC
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                             <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
-                            </div>
-                            <h4 className="font-bold text-gray-800 text-center">BƯỚC 2: Dán kết quả</h4>
-                            <p className="text-sm text-gray-500 text-center">Dán toàn bộ câu trả lời (JSON) của ChatGPT vào bên dưới.</p>
-                            
-                            <textarea 
-                                value={jsonInput}
-                                onChange={e => setJsonInput(e.target.value)}
-                                placeholder='Dán đoạn code JSON vào đây (Ví dụ: [{"question":...}] )'
-                                className="w-full h-40 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono"
-                            />
-                            
-                            {error && <p className="text-xs text-red-500 font-bold bg-red-50 p-2 rounded">{error}</p>}
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <button onClick={() => setStep(1)} className="py-3 text-gray-500 font-bold hover:bg-gray-100 rounded-xl">Quay lại</button>
-                                <button onClick={handleProcess} className="py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg active:scale-95">
-                                    TẠO ĐỀ THI
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
     const App = () => {
 // --- Các state cũ giữ nguyên ---
 const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
@@ -4699,8 +4442,6 @@ const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
         const [isLearnGameOpen, setIsLearnGameOpen] = useState(false);
         const [isReviewListOpen, setIsReviewListOpen] = useState(false);
          const [practiceMode, setPracticeMode] = useState('kanji');
-        const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
-const [quizData, setQuizData] = useState(null); // Dữ liệu đề thi
         const [srsData, setSrsData] = useState(() => {
            
     // Tự động lấy dữ liệu cũ từ máy người dùng khi mở web
@@ -4711,7 +4452,7 @@ const [quizData, setQuizData] = useState(null); // Dữ liệu đề thi
 const [customVocabData, setCustomVocabData] = useState({}); 
     const [editingVocab, setEditingVocab] = useState(null); // Từ đang được sửa
 
-// --- 2. HÀM LƯU DỮ LIỆU (ĐÃ SỬA) ---
+   // --- 2. HÀM LƯU DỮ LIỆU  ---
     const handleSaveVocab = (word, newReading, newMeaning, newHanviet) => {
         setCustomVocabData(prev => ({
             ...prev,
@@ -4836,41 +4577,23 @@ return (
              mode={practiceMode}
                  mode={practiceMode} 
     setPracticeMode={setPracticeMode}
-      onOpenQuizModal={() => setIsQuizModalOpen(true)}
+      
     />
     </div>
 
-   <div id="preview-area" className={`flex-1 bg-gray-100 p-0 md:p-8 overflow-auto flex-col items-center min-h-screen print-layout-reset custom-scrollbar ${showMobilePreview ? 'flex' : 'hidden md:flex'}`}>
-
-    {/* NẾU CÓ DỮ LIỆU CÂU HỎI -> HIỆN TRANG ĐỀ THI */}
-    {quizData ? (
-        <div className="w-full flex flex-col items-center">
-            {/* Nút thoát chế độ đề thi */}
-            <button 
-                onClick={() => setQuizData(null)} 
-                className="mb-4 px-6 py-2 bg-gray-800 text-white font-bold rounded-full shadow-lg hover:bg-black transition-all no-print flex items-center gap-2"
-            >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 17l-5-5 5-5"/><path d="M18 17l-5-5 5-5"/></svg>
-                QUAY VỀ TẬP VIẾT
-            </button>
-
-            <QuizPage questions={quizData} />
-        </div>
-    ) : (
-        /* NẾU KHÔNG -> HIỆN TRANG TẬP VIẾT (CODE CŨ GIỮ NGUYÊN) */
-        pages.map((pageChars, index) => (
-            <Page 
-                key={index} 
-                chars={pageChars} 
-                config={config} 
-                mode={practiceMode}
-                dbData={dbData}
-                customVocabData={customVocabData}
+    <div id="preview-area" className={`flex-1 bg-gray-100 p-0 md:p-8 overflow-auto flex-col items-center min-h-screen print-layout-reset custom-scrollbar ${showMobilePreview ? 'flex' : 'hidden md:flex'}`}>
+    {pages.map((pageChars, index) => (
+        <Page 
+        key={index} 
+        chars={pageChars} 
+        config={config} 
+        mode={practiceMode}
+        dbData={dbData}
+            customVocabData={customVocabData}
                 onEditVocab={(word, currentData) => setEditingVocab({ word, ...currentData })}
-            /> 
-        ))
-    )}
-</div>
+        /> 
+    ))}
+    </div>
 
     {/* Popup Donate  */}
     {showPostPrintDonate && (
@@ -4937,15 +4660,7 @@ return (
         setIsReviewListOpen(false);           
     }}
             />
-<QuizGeneratorModal 
-    isOpen={isQuizModalOpen}
-    onClose={() => setIsQuizModalOpen(false)}
-    vocabList={config.text}
-    onQuizGenerated={(data) => {
-        setQuizData(data); // Lưu dữ liệu câu hỏi
-        setIsFlashcardOpen(false); // Đóng các modal khác nếu có
-    }}
-/>
+
         </div>
 );
 };
