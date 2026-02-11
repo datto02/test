@@ -2341,8 +2341,10 @@ const TestPaper = ({ data, onClose }) => {
     }, [data]);
 
     return (
-        <div className="w-full bg-gray-100 min-h-screen flex flex-col items-center py-8 relative">
-            {/* Nút thoát chế độ test (Nổi) */}
+        // Thêm print:bg-white print:p-0 để khi in nó xóa nền xám của web đi
+        <div className="w-full bg-gray-100 min-h-screen flex flex-col items-center py-8 relative print:bg-white print:p-0 print:block">
+            
+            {/* Nút thoát chế độ test (Nổi) - Class no-print sẽ ẩn nó khi in */}
             <div className="fixed top-4 right-4 z-[900] no-print">
                 <button onClick={onClose} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-full shadow-xl transition-transform active:scale-95 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
@@ -2352,15 +2354,15 @@ const TestPaper = ({ data, onClose }) => {
 
             {/* RENDER CÁC TRANG CÂU HỎI */}
             {pages.map((pageQuestions, pageIndex) => (
-                <div key={pageIndex} className="bg-white shadow-lg mb-8 relative flex flex-col overflow-hidden box-border"
+                <div key={pageIndex} 
+                    // Thêm class print:shadow-none (tắt bóng khi in), print:mb-0 (bỏ margin khi in), print:break-after-page (ngắt trang)
+                    className="bg-white shadow-lg mb-8 relative flex flex-col overflow-hidden print:shadow-none print:mb-0 print:break-after-page"
                     // Kích thước chuẩn A4
                     style={{
                         width: '210mm',
-                        minHeight: '296mm',
-                        paddingTop: '10mm',
-                        paddingBottom: '10mm',
-                        paddingRight: '10mm',
-                        paddingLeft: '15mm', // Lề trái 1.5cm
+                        minHeight: '296mm',       // Dùng 296mm thay vì 297mm để an toàn, tránh bị nhảy trang trắng
+                        padding: '15mm 10mm 15mm 15mm', // Trên: 1.5cm, Phải: 1cm, Dưới: 1.5cm, Trái: 1.5cm (để đóng gáy)
+                        boxSizing: 'border-box'   // QUAN TRỌNG: Để padding nằm trong khổ 210mm
                     }}
                 >
                     {/* Header mỗi trang */}
@@ -2401,11 +2403,12 @@ const TestPaper = ({ data, onClose }) => {
             ))}
 
             {/* TRANG CUỐI CÙNG: ĐÁP ÁN (ANSWER KEY) */}
-            <div className="bg-white shadow-lg mb-8 relative flex flex-col overflow-hidden box-border"
+            <div className="bg-white shadow-lg mb-8 relative flex flex-col overflow-hidden print:shadow-none print:mb-0 print:break-after-page"
                 style={{
                     width: '210mm',
                     minHeight: '296mm',
-                    padding: '10mm 10mm 10mm 15mm'
+                    padding: '15mm 10mm 15mm 15mm',
+                    boxSizing: 'border-box'
                 }}
             >
                 <div className="border-b-2 border-black pb-2 mb-6 flex justify-between items-end">
