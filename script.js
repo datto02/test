@@ -1386,7 +1386,6 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
         const totalBoxes = 12;
         const boxes = [];
         
-        // 1. Tạo mảng 12 ô trống & Logic điền từ (Giữ nguyên)
         for(let i=0; i<totalBoxes; i++) boxes.push(null);
         let currentIndex = 0;
         while (currentIndex + wordLen <= totalBoxes) {
@@ -1398,16 +1397,16 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
 
         const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
         
-        // --- LOGIC DỮ LIỆU MỚI: ƯU TIÊN CUSTOM DATA ---
-        // 1. Lấy dữ liệu gốc từ DB
+        // --- LOGIC DỮ LIỆU MỚI ---
         const dbInfo = dbData?.TUVUNG_DB?.[word] || {};
-        // 2. Lấy dữ liệu người dùng sửa (nếu có)
         const customInfo = customVocabData?.[word];
 
-        // 3. Merge: Nếu có custom thì dùng custom, không thì dùng DB, không thì rỗng
         const finalReading = customInfo?.reading !== undefined ? customInfo.reading : dbInfo.reading;
         const finalMeaning = customInfo?.meaning !== undefined ? customInfo.meaning : dbInfo.meaning;
 
+        // --- SỬA LOGIC HÁN VIỆT Ở ĐÂY ---
+        // 1. Nếu người dùng đã điền thủ công (customInfo.hanviet) -> Dùng cái đó
+        // 2. Nếu chưa -> Dùng logic cũ (ghép từng chữ Kanji)
         let hanviet = '';
         if (customInfo?.hanviet) {
             hanviet = customInfo.hanviet; // Ưu tiên cái người dùng nhập
@@ -1417,15 +1416,11 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
             }).filter(s => s).join(' ').toUpperCase();
         }
 
-        // --- LOGIC HIỂN THỊ ---
-        // Kiểm tra reading có trùng word không
         const isReadingRedundant = finalReading === word;
         const displayReading = (!isReadingRedundant && finalReading) ? finalReading : null;
-        
-        // Kiểm tra xem có thông tin nào để hiển thị trong ngoặc không?
         const hasInfo = displayReading || hanviet || finalMeaning;
 
-       return (
+        return (
             <div className="flex flex-col w-full px-[8mm]">
                 {/* HEADER TỪ VỰNG */}
                 <div className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" style={{ width: '184mm' }}>
@@ -1481,7 +1476,7 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
                 </div>
             </div>
         );
-    }                            
+    }                          
     // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
   const Page = ({ chars, config, dbData, mode, customVocabData, onEditVocab }) => {
 // 1. Hàm Xuất dữ liệu (Tải file về máy)
@@ -4349,94 +4344,64 @@ TÀI LIỆU HỌC TẬP
 const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
     const [reading, setReading] = useState('');
     const [meaning, setMeaning] = useState('');
-    const [hanviet, setHanviet] = useState('');
-useEffect(() => {
+    const [hanviet, setHanviet] = useState(''); // <--- 1. Thêm State Hán Việt
+
+    useEffect(() => {
         if (isOpen) {
-            // Khi mở modal: Khóa cuộn
             document.body.style.overflow = 'hidden';
         } else {
-            // Khi đóng modal: Mở lại cuộn
             document.body.style.overflow = 'unset';
         }
-        // Cleanup: Đảm bảo luôn mở lại cuộn khi component bị hủy
         return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
+
     useEffect(() => {
         if (isOpen && data) {
             setReading(data.reading || '');
             setMeaning(data.meaning || '');
-            setHanviet(data.hanviet || '');
+            setHanviet(data.hanviet || ''); // <--- 2. Load dữ liệu Hán Việt nếu có
         }
     }, [isOpen, data]);
 
-    // --- SỬA LOGIC KHÔI PHỤC: KHÔI PHỤC -> LƯU -> ĐÓNG ---
     const handleRestore = () => {
         if (!data) return;
         
-        // Tìm dữ liệu gốc, nếu không có (chữ tự thêm) thì mặc định là rỗng
+        // Lấy lại dữ liệu gốc từ DB
         const originalInfo = dbData?.TUVUNG_DB?.[data.word] || { reading: '', meaning: '' };
-        
+        // Lấy lại Hán việt gốc (tự động ghép từ các chữ đơn lẻ)
+        const originalHanviet = data.word.split('').map(c => dbData?.KANJI_DB?.[c]?.sound || '').filter(s => s).join(' ');
+
         const restoredReading = originalInfo.reading || '';
         const restoredMeaning = originalInfo.meaning || '';
 
-        // Cập nhật state để đồng bộ giao diện
         setReading(restoredReading);
         setMeaning(restoredMeaning);
-        setHanviet(originalHanviet);
+        setHanviet(originalHanviet); // <--- 3. Khôi phục Hán Việt tự động
 
-        // THỰC HIỆN LƯU LUÔN VÀ ĐÓNG BẢNG
-        // Lưu ý: hàm handleSaveVocab ở App sẽ tự động setEditingVocab(null) để đóng bảng
-        onSave(data.word, restoredReading, restoredMeaning);
+        // Lưu luôn 4 tham số
+        onSave(data.word, restoredReading, restoredMeaning, originalHanviet);
     };
 
     if (!isOpen || !data) return null;
 
     return (
-        /* BƯỚC 2: KHÓA NỀN - Xóa onClick={onClose} và xóa cursor-pointer */
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            
-            {/* NỘI DUNG BẢNG */}
-            <div 
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200" 
-                onClick={e => e.stopPropagation()}
-            >
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200" onClick={e => e.stopPropagation()}>
                 
                 <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                    <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2">
-                        ✏️ CHỈNH SỬA TỪ VỰNG
-                    </h3>
-                    {/* NÚT X TO VÀ RÕ RÀNG */}
-                
-<button 
-    onClick={onClose} 
-    className="text-gray-400 hover:text-red-500 transition-colors p-1.5 hover:bg-red-50 rounded-full"
->
-
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="22" 
-        height="22" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-    >
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
-</button>
+                    <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2">✏️ CHỈNH SỬA TỪ VỰNG</h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors p-1.5 hover:bg-red-50 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                 </div>
 
                 <div className="p-5 space-y-4">
                     <div>
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Từ vựng (Gốc)</label>
-                        <div className="text-2xl font-black text-gray-800 font-sans border-b border-gray-200 pb-2">
-                            {data.word}
-                        </div>
+                        <div className="text-2xl font-black text-gray-800 font-sans border-b border-gray-200 pb-2">{data.word}</div>
                     </div>
-{/* --- 4. THÊM Ô NHẬP ÂM HÁN VIỆT --- */}
+
+                    {/* --- 4. THÊM Ô NHẬP ÂM HÁN VIỆT --- */}
                     <div>
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Âm Hán Việt (Tự động in hoa)</label>
                         <input 
@@ -4447,43 +4412,25 @@ useEffect(() => {
                             className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-bold uppercase transition-all"
                         />
                     </div>
+
                     <div>
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cách đọc (Furigana)</label>
-                        <input 
-                            type="text" 
-                            value={reading}
-                            onChange={(e) => setReading(e.target.value)}
-                            placeholder="Ví dụ: わたし"
-                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium transition-all"
-                        />
+                        <input type="text" value={reading} onChange={(e) => setReading(e.target.value)} placeholder="Ví dụ: わたし" className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium transition-all" />
                     </div>
 
                     <div>
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Ý nghĩa (Tiếng Việt)</label>
-                        <textarea 
-                            value={meaning}
-                            onChange={(e) => setMeaning(e.target.value)}
-                            placeholder="Ví dụ: Tôi, tớ, mình..."
-                            rows={3}
-                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium resize-none transition-all"
-                        />
+                        <textarea value={meaning} onChange={(e) => setMeaning(e.target.value)} placeholder="Ví dụ: Tôi, tớ, mình..." rows={3} className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium resize-none transition-all" />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 pt-2">
-                        {/* NÚT KHÔI PHỤC: Giờ đây sẽ thực hiện Lưu & Đóng luôn */}
-                        <button 
-                            onClick={handleRestore}
-                            className="flex items-center justify-center gap-1.5 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-all active:scale-95 text-[11px] uppercase tracking-wider border border-red-100"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                            Khôi phục
+                        <button onClick={handleRestore} className="flex items-center justify-center gap-1.5 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-all active:scale-95 text-[11px] uppercase tracking-wider border border-red-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Khôi phục
                         </button>
-     <button 
-    onClick={() => onSave(data.word, reading, meaning, true)}
-    className="py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-100 transition-all active:scale-95 text-[11px] uppercase tracking-wider"
->
-    Lưu thay đổi
-</button>
+                        {/* 5. TRUYỀN THÊM HANVIET VÀO HÀM SAVE */}
+                        <button onClick={() => onSave(data.word, reading, meaning, hanviet)} className="py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-100 transition-all active:scale-95 text-[11px] uppercase tracking-wider">
+                            Lưu thay đổi
+                        </button>
                     </div>
                 </div>
             </div>
@@ -4747,13 +4694,17 @@ const [quizData, setQuizData] = useState(null); // Dữ liệu đề thi
 const [customVocabData, setCustomVocabData] = useState({}); 
     const [editingVocab, setEditingVocab] = useState(null); // Từ đang được sửa
 
-    // --- 2. HÀM LƯU DỮ LIỆU ---
-    const handleSaveVocab = (word, newReading, newMeaning) => {
+// --- 2. HÀM LƯU DỮ LIỆU (ĐÃ SỬA) ---
+    const handleSaveVocab = (word, newReading, newMeaning, newHanviet) => {
         setCustomVocabData(prev => ({
             ...prev,
-            [word]: { reading: newReading, meaning: newMeaning, hanviet: newHanviet }
+            [word]: { 
+                reading: newReading, 
+                meaning: newMeaning,
+                hanviet: newHanviet // <--- Lưu thêm Hán Việt
+            }
         }));
-        setEditingVocab(null); // Đóng modal
+        setEditingVocab(null); 
     };
 // Hàm để lưu kết quả học tập
 const updateSRSProgress = (char, quality) => {
