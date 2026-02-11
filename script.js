@@ -2223,6 +2223,210 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
         </div>
     );
 };
+const TestGeneratorModal = ({ isOpen, onClose, vocabList, onGenerate }) => {
+    const [step, setStep] = useState(1); // 1: Copy Prompt, 2: Paste JSON
+    const [jsonInput, setJsonInput] = useState('');
+    const [error, setError] = useState(null);
+
+    // Reset khi mở lại
+    useEffect(() => {
+        if (isOpen) {
+            setStep(1);
+            setJsonInput('');
+            setError(null);
+        }
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
+    // Tạo câu lệnh mẫu (Prompt) cho ChatGPT
+    const promptText = `Hãy đóng vai giáo viên tiếng Nhật. Dựa vào danh sách từ vựng sau đây:
+${vocabList}
+
+Hãy tạo một bài kiểm tra trắc nghiệm (4 lựa chọn A, B, C, D) kiểm tra ý nghĩa và cách đọc của các từ này.
+Yêu cầu định dạng đầu ra: CHỈ TRẢ VỀ DUY NHẤT MỘT MẢNG JSON (không giải thích thêm), cấu trúc như sau:
+[
+  { "q": "Câu hỏi 1...", "opts": ["Lựa chọn A", "Lựa chọn B", "Lựa chọn C", "Lựa chọn D"], "ans": 0 }, 
+  { "q": "Câu hỏi 2...", "opts": ["...", "...", "...", "..."], "ans": 1 }
+]
+(Trong đó "ans" là index của đáp án đúng: 0=A, 1=B, 2=C, 3=D)`;
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(promptText);
+        setStep(2); // Tự động chuyển bước sau khi copy
+    };
+
+    const handleProcess = () => {
+        try {
+            // Lọc tìm mảng JSON trong text (phòng trường hợp ChatGPT nói nhảm ở đầu/cuối)
+            const match = jsonInput.match(/\[\s*\{.*\}\s*\]/s);
+            if (!match) throw new Error("Không tìm thấy đoạn JSON hợp lệ.");
+            
+            const data = JSON.parse(match[0]);
+            if (!Array.isArray(data)) throw new Error("Dữ liệu không phải là mảng.");
+            
+            onGenerate(data); // Đẩy dữ liệu ra ngoài App
+            onClose();
+        } catch (err) {
+            setError("Lỗi đọc dữ liệu: " + err.message + ". Hãy chắc chắn bạn dán đúng đoạn JSON từ ChatGPT.");
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={onClose}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-purple-200" onClick={e => e.stopPropagation()}>
+                
+                {/* Header Tím */}
+                <div className="p-4 border-b border-purple-100 bg-purple-50 flex justify-between items-center">
+                    <h3 className="text-sm font-bold text-purple-800 uppercase flex items-center gap-2">
+                        🤖 TẠO ĐỀ KIỂM TRA AI
+                    </h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                </div>
+
+                <div className="p-6">
+                    {step === 1 ? (
+                        <div className="space-y-4">
+                            <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 text-sm text-purple-900 leading-relaxed">
+                                <p className="font-bold mb-2">Bước 1: Lấy câu lệnh</p>
+                                <p>Hệ thống đã chuẩn bị sẵn câu lệnh dựa trên từ vựng bạn nhập. Hãy sao chép và gửi cho ChatGPT (hoặc Claude, Gemini).</p>
+                            </div>
+                            <div className="relative group">
+                                <textarea readOnly value={promptText} className="w-full h-32 p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-500 focus:outline-none resize-none" />
+                            </div>
+                            <button onClick={handleCopy} className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-lg shadow-purple-200 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase text-xs tracking-wider">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                SAO CHÉP & TIẾP TỤC
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 text-sm text-purple-900 leading-relaxed">
+                                <p className="font-bold mb-2">Bước 2: Dán kết quả</p>
+                                <p>Sau khi ChatGPT trả lời, hãy copy đoạn mã JSON (thường nằm trong khung code) và dán vào đây.</p>
+                            </div>
+                            <textarea 
+                                value={jsonInput}
+                                onChange={(e) => setJsonInput(e.target.value)}
+                                placeholder='Dán nội dung JSON vào đây (Ví dụ: [{"q": "...", ...}])'
+                                className="w-full h-40 p-3 border-2 border-purple-100 focus:border-purple-500 rounded-xl text-sm focus:outline-none resize-none transition-colors" 
+                            />
+                            {error && <p className="text-red-500 text-xs font-bold italic">{error}</p>}
+                            <div className="flex gap-3">
+                                <button onClick={() => setStep(1)} className="px-4 py-3 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-gray-200 transition-all text-xs">QUAY LẠI</button>
+                                <button onClick={handleProcess} className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-lg shadow-purple-200 transition-all active:scale-95 uppercase text-xs tracking-wider">
+                                    TẠO ĐỀ THI NGAY
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+// --- COMPONENT HIỂN THỊ ĐỀ THI (A4) ---
+const TestPaper = ({ data, onClose }) => {
+    // Logic phân trang: Ước lượng số câu hỏi mỗi trang (khoảng 6-7 câu tùy độ dài)
+    // Để an toàn và giống Word, ta cắt cứng 7 câu/trang.
+    const QUESTIONS_PER_PAGE = 7;
+    
+    const pages = useMemo(() => {
+        if (!data) return [];
+        const result = [];
+        for (let i = 0; i < data.length; i += QUESTIONS_PER_PAGE) {
+            result.push(data.slice(i, i + QUESTIONS_PER_PAGE));
+        }
+        return result;
+    }, [data]);
+
+    return (
+        <div className="w-full bg-gray-100 min-h-screen flex flex-col items-center py-8 relative">
+            {/* Nút thoát chế độ test (Nổi) */}
+            <div className="fixed top-4 right-4 z-[900] no-print">
+                <button onClick={onClose} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-full shadow-xl transition-transform active:scale-95 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    THOÁT CHẾ ĐỘ ĐỀ THI
+                </button>
+            </div>
+
+            {/* RENDER CÁC TRANG CÂU HỎI */}
+            {pages.map((pageQuestions, pageIndex) => (
+                <div key={pageIndex} className="bg-white shadow-lg mb-8 relative flex flex-col overflow-hidden box-border"
+                    // Kích thước chuẩn A4
+                    style={{
+                        width: '210mm',
+                        minHeight: '296mm',
+                        paddingTop: '10mm',
+                        paddingBottom: '10mm',
+                        paddingRight: '10mm',
+                        paddingLeft: '15mm', // Lề trái 1.5cm
+                    }}
+                >
+                    {/* Header mỗi trang */}
+                    <div className="border-b-2 border-black pb-2 mb-6 flex justify-between items-end">
+                        <h2 className="text-xl font-black uppercase tracking-wider">BÀI KIỂM TRA TỪ VỰNG</h2>
+                        <span className="text-sm font-bold">Trang {pageIndex + 1}/{pages.length + 1}</span>
+                    </div>
+
+                    {/* Danh sách câu hỏi */}
+                    <div className="flex-1 space-y-6">
+                        {pageQuestions.map((q, idx) => {
+                            const globalIndex = pageIndex * QUESTIONS_PER_PAGE + idx + 1;
+                            return (
+                                <div key={idx} className="w-full text-justify">
+                                    {/* Câu hỏi */}
+                                    <div className="font-bold text-lg mb-2 flex items-start gap-1 leading-snug">
+                                        <span className="whitespace-nowrap">Câu {globalIndex}:</span>
+                                        <span className="break-words">{q.q}</span>
+                                    </div>
+                                    {/* Đáp án */}
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 pl-4">
+                                        {q.opts.map((opt, optIdx) => (
+                                            <div key={optIdx} className="text-base flex items-start gap-2">
+                                                <span className="font-bold w-4">{['A','B','C','D'][optIdx]}.</span>
+                                                <span className="break-words">{opt}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    
+                    <div className="text-center text-xs text-gray-400 mt-auto pt-4 border-t border-gray-100">
+                        Phá Đảo Tiếng Nhật - Test System
+                    </div>
+                </div>
+            ))}
+
+            {/* TRANG CUỐI CÙNG: ĐÁP ÁN (ANSWER KEY) */}
+            <div className="bg-white shadow-lg mb-8 relative flex flex-col overflow-hidden box-border"
+                style={{
+                    width: '210mm',
+                    minHeight: '296mm',
+                    padding: '10mm 10mm 10mm 15mm'
+                }}
+            >
+                <div className="border-b-2 border-black pb-2 mb-6 flex justify-between items-end">
+                    <h2 className="text-xl font-black uppercase tracking-wider">ĐÁP ÁN CHI TIẾT</h2>
+                    <span className="text-sm font-bold">Trang {pages.length + 1}/{pages.length + 1}</span>
+                </div>
+
+                <div className="grid grid-cols-5 gap-4 text-center">
+                    {data.map((q, i) => (
+                        <div key={i} className="flex flex-col border border-gray-300 rounded p-1">
+                            <span className="text-xs text-gray-500 font-bold uppercase mb-1">Câu {i + 1}</span>
+                            <span className="text-xl font-black text-purple-700">
+                                {['A', 'B', 'C', 'D'][q.ans]}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
 // 5. Sidebar (Phiên bản: Final)
    const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen, mode, setPracticeMode }) => {
    
@@ -3738,7 +3942,32 @@ onKeyDown={(e) => {
                                     </button>
                                 </div>
                             </div>
-
+{/* 4. TẠO BÀI KIỂM TRA (MÀU TÍM) - CHỈ HIỆN KHI Ở CHẾ ĐỘ TỪ VỰNG */}
+{mode === 'vocab' && (
+    <div className="pt-1">
+        <button
+            onClick={() => {
+                // Kiểm tra xem đã có từ vựng chưa
+                if (!config.text || config.text.trim().length === 0) {
+                    alert("Vui lòng nhập danh sách từ vựng vào ô trước!");
+                    return;
+                }
+                setIsTestGenModalOpen(true); // Mở Modal tạo đề
+                setIsUtilsOpen(false); // Đóng menu tiện ích
+            }}
+            className="w-full py-2.5 bg-purple-50 border border-purple-200 text-purple-600 hover:text-purple-700 hover:border-purple-300 hover:bg-purple-100 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 group shadow-sm"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500 group-hover:text-purple-600">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span className="text-xs font-bold uppercase tracking-wide">TẠO BÀI KIỂM TRA</span>
+        </button>
+    </div>
+)}
             {/* 3. DANH SÁCH ÔN TẬP (MÀU CAM) */}
      {mode !== 'vocab' && (
             <div className="pt-1">
@@ -4442,6 +4671,9 @@ const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
         const [isLearnGameOpen, setIsLearnGameOpen] = useState(false);
         const [isReviewListOpen, setIsReviewListOpen] = useState(false);
          const [practiceMode, setPracticeMode] = useState('kanji');
+        const [isTestGenModalOpen, setIsTestGenModalOpen] = useState(false); 
+const [testData, setTestData] = useState(null); 
+const [isTestMode, setIsTestMode] = useState(false);
         const [srsData, setSrsData] = useState(() => {
            
     // Tự động lấy dữ liệu cũ từ máy người dùng khi mở web
@@ -4558,97 +4790,103 @@ if (!isDbLoaded) {
         </div>
     );
 }
-
+const handleTestGenerate = (data) => {
+    setTestData(data);
+    setIsTestMode(true);
+};
 // --- GIAO DIỆN CHÍNH (Khi đã có dữ liệu) ---
 return (
-    <div className="min-h-screen flex flex-col md:flex-row print-layout-reset">
-    <div className="no-print z-50">
-    <Sidebar 
-        config={config} onChange={setConfig} onPrint={handlePrint} 
-        isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen}
-        isConfigOpen={isConfigOpen} setIsConfigOpen={setIsConfigOpen}
-        isCafeModalOpen={isCafeModalOpen} setIsCafeModalOpen={setIsCafeModalOpen} 
-        showMobilePreview={showMobilePreview} setShowMobilePreview={setShowMobilePreview}
-        setIsFlashcardOpen={setIsFlashcardOpen}
-        setIsLearnGameOpen={setIsLearnGameOpen}
-        dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống Sidebar
-            srsData={srsData}
-         onOpenReviewList={() => setIsReviewListOpen(true)}
-             mode={practiceMode}
-                 mode={practiceMode} 
-    setPracticeMode={setPracticeMode}
-      
-    />
-    </div>
-
-    <div id="preview-area" className={`flex-1 bg-gray-100 p-0 md:p-8 overflow-auto flex-col items-center min-h-screen print-layout-reset custom-scrollbar ${showMobilePreview ? 'flex' : 'hidden md:flex'}`}>
-    {pages.map((pageChars, index) => (
-        <Page 
-        key={index} 
-        chars={pageChars} 
-        config={config} 
-        mode={practiceMode}
-        dbData={dbData}
-            customVocabData={customVocabData}
-                onEditVocab={(word, currentData) => setEditingVocab({ word, ...currentData })}
-        /> 
-    ))}
-    </div>
-
-    {/* Popup Donate  */}
-    {showPostPrintDonate && (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative animate-in zoom-in-95 duration-300 border border-orange-100">
-        <button onClick={() => setShowPostPrintDonate(false)} className="absolute top-3 right-3 p-1.5 bg-gray-100 hover:bg-red-100 hover:text-red-500 rounded-full transition-colors z-10">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-        <div className="p-6 flex flex-col items-center text-center">
-            <h3 className="text-xl font-bold text-gray-800 mb-2">BẠN TẠO ĐƯỢC FILE CHƯA?</h3>
-            <p className="text-sm text-gray-500 mb-6 leading-relaxed">Nếu bạn thấy trang web hữu ích <br/> hãy mời mình một ly cafe nhé!</p>
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl shadow-inner border border-orange-200 mb-4">
-            <img src="https://i.ibb.co/JWGwcTL1/3381513652021492183.jpg" alt="QR Donate" className="w-40 h-auto rounded-lg mix-blend-multiply" />
+        <div className="min-h-screen flex flex-col md:flex-row print-layout-reset">
+            
+            {/* 1. SIDEBAR (KHÔNG BAO GIỜ BỊ ẨN) */}
+            {/* Lưu ý: Tôi để nó nằm ngoài các điều kiện if/else nên nó luôn hiện */}
+            <div className="no-print z-50">
+                <Sidebar 
+                    config={config} onChange={setConfig} onPrint={handlePrint} 
+                    isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen}
+                    isConfigOpen={isConfigOpen} setIsConfigOpen={setIsConfigOpen}
+                    isCafeModalOpen={isCafeModalOpen} setIsCafeModalOpen={setIsCafeModalOpen} 
+                    showMobilePreview={showMobilePreview} setShowMobilePreview={setShowMobilePreview}
+                    setIsFlashcardOpen={setIsFlashcardOpen}
+                    setIsLearnGameOpen={setIsLearnGameOpen}
+                    dbData={dbData} 
+                    srsData={srsData}
+                    onOpenReviewList={() => setIsReviewListOpen(true)}
+                    mode={practiceMode}
+                    setPracticeMode={setPracticeMode}
+                    // Dòng này rất quan trọng để nút màu tím hoạt động
+                    setIsTestGenModalOpen={setIsTestGenModalOpen} 
+                />
             </div>
-            <p className="text-[11px] font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-full mb-4">MB BANK: 99931082002</p>
-            <button onClick={() => setShowPostPrintDonate(false)} className="w-full py-2.5 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold rounded-xl transition-all shadow-lg active:scale-95">Lần sau nhé!</button>
-        </div>
-        </div>
-    </div>
-    )}
-        
-<FlashcardModal 
-    isOpen={isFlashcardOpen} 
-    onClose={() => setIsFlashcardOpen(false)} 
-    text={config.text} 
-    dbData={dbData} 
-    onSrsUpdate={updateSRSProgress}
-    srsData={srsData} 
-    mode={practiceMode}
-    onSrsRestore={(char, oldData) => {
-        // Hàm này sẽ đè dữ liệu cũ (snapshot) lên dữ liệu hiện tại
-        const newData = { ...srsData, [char]: oldData };
-        setSrsData(newData);
-        localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
-    }}
-/>
-<LearnGameModal 
-    isOpen={isLearnGameOpen}
-    onClose={() => setIsLearnGameOpen(false)}
-    text={config.text}
-    dbData={dbData}
-    mode={practiceMode}
-    onSwitchToFlashcard={() => {
-        setIsLearnGameOpen(false); // Đóng Game
-        setIsFlashcardOpen(true);  // Mở Flashcard ngay lập tức
-    }}
-/>
-        <EditVocabModal 
+
+            {/* 2. KHU VỰC BÊN PHẢI (THAY ĐỔI THEO CHẾ ĐỘ) */}
+            {/* Logic: Nếu đang ở chế độ Test (isTestMode = true) thì hiện Đề Thi. 
+                       Ngược lại thì hiện trang Tập Viết như bình thường. */}
+            
+            {isTestMode ? (
+                // === GIAO DIỆN A: BÀI KIỂM TRA ===
+                // Class 'flex-1' giúp nó tự lấp đầy khoảng trống còn lại bên phải Sidebar
+                <div className="flex-1 bg-gray-100 p-0 md:p-8 overflow-auto flex flex-col items-center min-h-screen custom-scrollbar">
+                    <TestPaper 
+                        data={testData} 
+                        onClose={() => setIsTestMode(false)} // Bấm nút thoát thì tắt chế độ Test
+                    />
+                </div>
+            ) : (
+                // === GIAO DIỆN B: TẬP VIẾT (CŨ) ===
+                <div id="preview-area" className={`flex-1 bg-gray-100 p-0 md:p-8 overflow-auto flex-col items-center min-h-screen print-layout-reset custom-scrollbar ${showMobilePreview ? 'flex' : 'hidden md:flex'}`}>
+                    {pages.map((pageChars, index) => (
+                        <Page 
+                            key={index} 
+                            chars={pageChars} 
+                            config={config} 
+                            mode={practiceMode}
+                            dbData={dbData}
+                            customVocabData={customVocabData}
+                            onEditVocab={(word, currentData) => setEditingVocab({ word, ...currentData })}
+                        /> 
+                    ))}
+                </div>
+            )}
+
+            {/* --- CÁC MODAL (POPUP) --- */}
+            {/* Để ở cuối cùng để luôn nổi lên trên */}
+            
+            <FlashcardModal 
+                isOpen={isFlashcardOpen} 
+                onClose={() => setIsFlashcardOpen(false)} 
+                text={config.text} 
+                dbData={dbData} 
+                onSrsUpdate={updateSRSProgress}
+                srsData={srsData} 
+                mode={practiceMode}
+                onSrsRestore={(char, oldData) => {
+                    const newData = { ...srsData, [char]: oldData };
+                    setSrsData(newData);
+                    localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
+                }}
+            />
+            
+            <LearnGameModal 
+                isOpen={isLearnGameOpen}
+                onClose={() => setIsLearnGameOpen(false)}
+                text={config.text}
+                dbData={dbData}
+                mode={practiceMode}
+                onSwitchToFlashcard={() => {
+                    setIsLearnGameOpen(false); 
+                    setIsFlashcardOpen(true);  
+                }}
+            />
+            
+            <EditVocabModal 
                 isOpen={!!editingVocab}
                 onClose={() => setEditingVocab(null)}
                 data={editingVocab}
                 onSave={handleSaveVocab}
                 dbData={dbData}
             />
-       {/* 3. RENDER MODAL MỚI */}
+            
             <ReviewListModal 
                 isOpen={isReviewListOpen}
                 onClose={() => setIsReviewListOpen(false)}
@@ -4656,13 +4894,41 @@ return (
                 dbData={dbData}
                 onResetSRS={handleResetAllSRS}
                 onLoadChars={(chars) => {
-        setConfig({ ...config, text: chars }); 
-        setIsReviewListOpen(false);           
-    }}
+                    setConfig({ ...config, text: chars }); 
+                    setIsReviewListOpen(false);            
+                }}
             />
 
+            {/* --- MODAL TẠO ĐỀ THI MỚI (QUAN TRỌNG) --- */}
+            <TestGeneratorModal 
+                isOpen={isTestGenModalOpen}
+                onClose={() => setIsTestGenModalOpen(false)}
+                vocabList={config.text}
+                onGenerate={handleTestGenerate}
+            />
+
+            {/* Popup Donate */}
+            {showPostPrintDonate && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+                   <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative animate-in zoom-in-95 duration-300 border border-orange-100">
+                        <button onClick={() => setShowPostPrintDonate(false)} className="absolute top-3 right-3 p-1.5 bg-gray-100 hover:bg-red-100 hover:text-red-500 rounded-full transition-colors z-10">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                        <div className="p-6 flex flex-col items-center text-center">
+                            <h3 className="text-xl font-bold text-gray-800 mb-2">BẠN TẠO ĐƯỢC FILE CHƯA?</h3>
+                            <p className="text-sm text-gray-500 mb-6 leading-relaxed">Nếu bạn thấy trang web hữu ích <br/> hãy mời mình một ly cafe nhé!</p>
+                            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl shadow-inner border border-orange-200 mb-4">
+                                <img src="https://i.ibb.co/JWGwcTL1/3381513652021492183.jpg" alt="QR Donate" className="w-40 h-auto rounded-lg mix-blend-multiply" />
+                            </div>
+                            <p className="text-[11px] font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-full mb-4">MB BANK: 99931082002</p>
+                            <button onClick={() => setShowPostPrintDonate(false)} className="w-full py-2.5 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold rounded-xl transition-all shadow-lg active:scale-95">Lần sau nhé!</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
-);
+    );
 };
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
