@@ -1408,10 +1408,14 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
         const finalReading = customInfo?.reading !== undefined ? customInfo.reading : dbInfo.reading;
         const finalMeaning = customInfo?.meaning !== undefined ? customInfo.meaning : dbInfo.meaning;
 
-        // --- XỬ LÝ ÂM HÁN VIỆT (Giữ nguyên) ---
-        const hanviet = word.split('').map(c => {
-            return dbData?.KANJI_DB?.[c]?.sound || ''; 
-        }).filter(s => s).join(' ').toUpperCase();
+        let hanviet = '';
+        if (customInfo?.hanviet) {
+            hanviet = customInfo.hanviet; // Ưu tiên cái người dùng nhập
+        } else {
+            hanviet = word.split('').map(c => {
+                return dbData?.KANJI_DB?.[c]?.sound || ''; 
+            }).filter(s => s).join(' ').toUpperCase();
+        }
 
         // --- LOGIC HIỂN THỊ ---
         // Kiểm tra reading có trùng word không
@@ -1421,19 +1425,14 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
         // Kiểm tra xem có thông tin nào để hiển thị trong ngoặc không?
         const hasInfo = displayReading || hanviet || finalMeaning;
 
-        return (
+       return (
             <div className="flex flex-col w-full px-[8mm]">
                 {/* HEADER TỪ VỰNG */}
-                <div 
-                    className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" 
-                    style={{ width: '184mm' }}
-                >
-                    {/* WRAPPER TƯƠNG TÁC: 
-                        
-                    */}
+                <div className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" style={{ width: '184mm' }}>
                     <div 
                         className="flex-shrink-0 flex items-baseline gap-2 mb-[3px] cursor-pointer group w-fit transition-colors hover:text-emerald-600"
-                        onClick={() => onEditVocab && onEditVocab(word, { reading: finalReading, meaning: finalMeaning })}
+                        // --- SỬA ONCLICK ĐỂ TRUYỀN HÁN VIỆT HIỆN TẠI VÀO MODAL ---
+                        onClick={() => onEditVocab && onEditVocab(word, { reading: finalReading, meaning: finalMeaning, hanviet: hanviet })} 
                         title="Bấm để chỉnh sửa"
                     >
                         {/* 1. TỪ VỰNG CHÍNH */}
@@ -1441,36 +1440,28 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
                             {word}
                         </span>
                         
-                      {/* 2. THÔNG TIN BỔ SUNG (Hán Việt, Cách đọc, Nghĩa) */}
-{hasInfo && (
-    <span className="text-[13px] font-normal text-black group-hover:text-emerald-600 leading-none whitespace-nowrap transition-colors ml-1">
-        (
-        {/* Hiện Hán Việt */}
-        {hanviet && <span className="font-bold text-black group-hover:text-emerald-600">{hanviet}</span>}
-        
-        {/* Gạch nối 1 */}
-        {hanviet && (displayReading || finalMeaning) && <span> - </span>}
+                        {/* 2. THÔNG TIN BỔ SUNG */}
+                        {hasInfo && (
+                            <span className="text-[13px] font-normal text-black group-hover:text-emerald-600 leading-none whitespace-nowrap transition-colors ml-1">
+                                (
+                                {/* Hiện Hán Việt (Sẽ in đậm nếu có) */}
+                                {hanviet && <span className="font-bold text-black group-hover:text-emerald-600">{hanviet}</span>}
+                                
+                                {hanviet && (displayReading || finalMeaning) && <span> - </span>}
+                                {displayReading && <span>{displayReading}</span>}
+                                {displayReading && finalMeaning && <span> - </span>}
+                                {finalMeaning && <span className="font-sans">{finalMeaning.toLowerCase()}</span>}
+                                )
+                            </span>
+                        )}
 
-        {/* Hiện Cách đọc */}
-        {displayReading && <span>{displayReading}</span>}
-
-        {/* Gạch nối 2 */}
-        {displayReading && finalMeaning && <span> - </span>}
-
-        {/* Hiện Nghĩa */}
-        {finalMeaning && <span className="font-sans">{finalMeaning.toLowerCase()}</span>}
-        )
-    </span>
-)}
-
-{/* 3. DÒNG NHẮC NHỞ (Nằm ngoài ngoặc và hiện khi thiếu Cách đọc + Nghĩa) */}
-{(!displayReading && !finalMeaning) && (
-    <span className="text-gray-400 text-[10px] italic ml-1 print:hidden">
-        ấn vào đây để thêm cách đọc, ý nghĩa
-    </span>
-)}
+                        {/* 3. DÒNG NHẮC NHỞ */}
+                        {(!displayReading && !finalMeaning && !hanviet) && ( // Thêm !hanviet vào điều kiện
+                            <span className="text-gray-400 text-[10px] italic ml-1 print:hidden">
+                                ấn vào đây để thêm cách đọc, ý nghĩa
+                            </span>
+                        )}
                         
-                        {/* Icon bút chì: Chỉ hiện khi hover vào vùng chữ */}
                         <svg className="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                     </div>
                 </div>
@@ -1490,8 +1481,7 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
                 </div>
             </div>
         );
-    }
-  };                              
+    }                            
     // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
   const Page = ({ chars, config, dbData, mode, customVocabData, onEditVocab }) => {
 // 1. Hàm Xuất dữ liệu (Tải file về máy)
@@ -4359,6 +4349,7 @@ TÀI LIỆU HỌC TẬP
 const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
     const [reading, setReading] = useState('');
     const [meaning, setMeaning] = useState('');
+    const [hanviet, setHanviet] = useState('');
 useEffect(() => {
         if (isOpen) {
             // Khi mở modal: Khóa cuộn
@@ -4374,6 +4365,7 @@ useEffect(() => {
         if (isOpen && data) {
             setReading(data.reading || '');
             setMeaning(data.meaning || '');
+            setHanviet(data.hanviet || '');
         }
     }, [isOpen, data]);
 
@@ -4390,6 +4382,7 @@ useEffect(() => {
         // Cập nhật state để đồng bộ giao diện
         setReading(restoredReading);
         setMeaning(restoredMeaning);
+        setHanviet(originalHanviet);
 
         // THỰC HIỆN LƯU LUÔN VÀ ĐÓNG BẢNG
         // Lưu ý: hàm handleSaveVocab ở App sẽ tự động setEditingVocab(null) để đóng bảng
@@ -4443,7 +4436,17 @@ useEffect(() => {
                             {data.word}
                         </div>
                     </div>
-
+{/* --- 4. THÊM Ô NHẬP ÂM HÁN VIỆT --- */}
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Âm Hán Việt (Tự động in hoa)</label>
+                        <input 
+                            type="text" 
+                            value={hanviet}
+                            onChange={(e) => setHanviet(e.target.value.toUpperCase())} // Tự động IN HOA
+                            placeholder="Ví dụ: NHẬT BẢN"
+                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-bold uppercase transition-all"
+                        />
+                    </div>
                     <div>
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cách đọc (Furigana)</label>
                         <input 
@@ -4748,7 +4751,7 @@ const [customVocabData, setCustomVocabData] = useState({});
     const handleSaveVocab = (word, newReading, newMeaning) => {
         setCustomVocabData(prev => ({
             ...prev,
-            [word]: { reading: newReading, meaning: newMeaning }
+            [word]: { reading: newReading, meaning: newMeaning, hanviet: newHanviet }
         }));
         setEditingVocab(null); // Đóng modal
     };
