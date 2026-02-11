@@ -1531,7 +1531,17 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
     const isSample = !config.text || config.text.trim().length === 0;
 
     return (
-        <div className="a4-page mx-auto relative flex flex-col pt-[15mm] pl-[3mm] bg-white">
+       <div 
+            className="a4-page mx-auto relative flex flex-col pt-[15mm] pl-[3mm] bg-white shadow-xl" // Thêm shadow-xl cho đẹp
+            style={{
+                width: '210mm',        // Chiều rộng chuẩn A4
+                height: '297mm',       // Chiều cao chuẩn A4
+                minWidth: '210mm',     // Đảm bảo không bị co lại
+                minHeight: '297mm',    // Đảm bảo không bị co lại
+                boxSizing: 'border-box', // Để padding không làm phình to trang giấy
+                overflow: 'hidden'     // Ẩn nội dung tràn ra ngoài (giống in thật)
+            }}
+        >
         
         {/* --- PHẦN TIÊU ĐỀ BẢN MẪU (CHỈ HIỆN KHI TRỐNG) --- */}
         {isSample && (
