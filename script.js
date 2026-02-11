@@ -1476,7 +1476,8 @@ const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab 
                 </div>
             </div>
         );
-    }                          
+    }   
+     };                             
     // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
   const Page = ({ chars, config, dbData, mode, customVocabData, onEditVocab }) => {
 // 1. Hàm Xuất dữ liệu (Tải file về máy)
