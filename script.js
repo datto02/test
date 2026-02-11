@@ -4421,7 +4421,13 @@ const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
 
                     <div>
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Ý nghĩa (Tiếng Việt)</label>
-                        <textarea value={meaning} onChange={(e) => setMeaning(e.target.value)} placeholder="Ví dụ: Tôi, tớ, mình..." rows={3} className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium resize-none transition-all" />
+                        <input 
+                            type="text" 
+                            value={meaning} 
+                            onChange={(e) => setMeaning(e.target.value)} 
+                            placeholder="Ví dụ: Tôi, tớ, mình..." 
+                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium transition-all" 
+                        />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 pt-2">
