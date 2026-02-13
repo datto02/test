@@ -716,7 +716,7 @@ const FlashcardModal = ({ isOpen, onClose, text, dbData, onSrsUpdate, srsData, o
         if (isOpen && text) { 
             let chars = [];
             if (mode === 'vocab') {
-                 // CHỈNH SỬA: Chỉ lấy những từ có độ dài > 0 VÀ tồn tại trong TUVUNG_DB
+                 
                  chars = text.split(/[\n;]+/)
                     .map(w => w.trim())
                     .filter(w => w.length > 0 && dbData?.TUVUNG_DB && dbData.TUVUNG_DB[w]);
@@ -1329,7 +1329,7 @@ return (
 );
 };
 
-const WorkbookRow = ({ char, config, dbData, mode }) => {
+const WorkbookRow = ({ char, config, dbData, mode, customVocabData, onEditVocab }) => {
     // =================================================================
     // TRƯỜNG HỢP 1: CHẾ ĐỘ KANJI (GIỮ NGUYÊN 100% CODE CŨ CỦA BẠN)
     // =================================================================
@@ -1377,19 +1377,16 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
         );
     }
 
-  // =================================================================
-    // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (ĐÃ SỬA LỖI LẶP VÀ NGOẶC THỪA)
+   // =================================================================
+    // TRƯỜNG HỢP 2: CHẾ ĐỘ TỪ VỰNG (CÓ CHỨC NĂNG EDIT - GIAO DIỆN CHUẨN)
     // =================================================================
-    else {
+   else {
         const word = char.trim();
         const wordLen = word.length;
         const totalBoxes = 12;
         const boxes = [];
         
-        // 1. Tạo mảng 12 ô trống
         for(let i=0; i<totalBoxes; i++) boxes.push(null);
-
-        // 2. Logic điền từ
         let currentIndex = 0;
         while (currentIndex + wordLen <= totalBoxes) {
             for (let i = 0; i < wordLen; i++) {
@@ -1399,63 +1396,72 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
         }
 
         const gridBorderColor = `rgba(0, 0, 0, ${config.gridOpacity})`;
-        const vocabInfo = dbData?.TUVUNG_DB?.[word] || {};
-
-        // --- XỬ LÝ ÂM HÁN VIỆT ---
-       const hanviet = word.split('').map(c => {
-            return dbData?.KANJI_DB?.[c]?.sound || ''; 
-        }).filter(s => s).join(' ').toUpperCase();
-
-        // --- XỬ LÝ LOGIC HIỂN THỊ (MỚI) ---
         
-        // 1. Kiểm tra nếu cách đọc giống hệt mặt chữ (trường hợp Hiragana/Katakana)
-        // Ví dụ: word="わたし", reading="わたし" => isReadingRedundant = true
-        const isReadingRedundant = vocabInfo.reading === word;
-        
-        // Biến này chứa reading nếu cần hiển thị, hoặc null nếu bị trùng
-        const displayReading = (!isReadingRedundant && vocabInfo.reading) ? vocabInfo.reading : null;
+        // --- LOGIC DỮ LIỆU MỚI ---
+        const dbInfo = dbData?.TUVUNG_DB?.[word] || {};
+        const customInfo = customVocabData?.[word];
 
-        // 2. Kiểm tra xem có thông tin nào để hiển thị trong ngoặc không?
-        // Có ít nhất 1 trong 3: (Reading khác word) HOẶC (Hán Việt) HOẶC (Nghĩa)
-        const hasInfo = displayReading || hanviet || vocabInfo.meaning;
+        const finalReading = customInfo?.reading !== undefined ? customInfo.reading : dbInfo.reading;
+        const finalMeaning = customInfo?.meaning !== undefined ? customInfo.meaning : dbInfo.meaning;
+
+        // --- SỬA LOGIC HÁN VIỆT Ở ĐÂY ---
+        // 1. Nếu người dùng đã điền thủ công (customInfo.hanviet) -> Dùng cái đó
+        // 2. Nếu chưa -> Dùng logic cũ (ghép từng chữ Kanji)
+        let hanviet = '';
+        if (customInfo?.hanviet) {
+            hanviet = customInfo.hanviet; // Ưu tiên cái người dùng nhập
+        } else {
+            hanviet = word.split('').map(c => {
+                return dbData?.KANJI_DB?.[c]?.sound || ''; 
+            }).filter(s => s).join(' ').toUpperCase();
+        }
+
+        const isReadingRedundant = finalReading === word;
+        const displayReading = (!isReadingRedundant && finalReading) ? finalReading : null;
+        const hasInfo = displayReading || hanviet || finalMeaning;
 
         return (
             <div className="flex flex-col w-full px-[8mm]">
                 {/* HEADER TỪ VỰNG */}
                 <div className="flex flex-row items-end px-1 mb-1 h-[22px] overflow-hidden border-b border-transparent" style={{ width: '184mm' }}>
-                    <div className="flex-shrink-0 mr-4 flex items-baseline gap-2 mb-[3px]">
-                        {/* Từ vựng chính */}
-                        <span className="font-bold text-sm leading-none text-black whitespace-nowrap">{word}</span>
+                    <div 
+                        className="flex-shrink-0 flex items-baseline gap-2 mb-[3px] cursor-pointer group w-fit transition-colors hover:text-emerald-600"
+                        // --- SỬA ONCLICK ĐỂ TRUYỀN HÁN VIỆT HIỆN TẠI VÀO MODAL ---
+                        onClick={() => onEditVocab && onEditVocab(word, { reading: finalReading, meaning: finalMeaning, hanviet: hanviet })} 
+                        title="Bấm để chỉnh sửa"
+                    >
+                        {/* 1. TỪ VỰNG CHÍNH */}
+                        <span className="font-bold text-sm leading-none text-black group-hover:text-emerald-600 transition-colors whitespace-nowrap">
+                            {word}
+                        </span>
                         
-                        {/* CHỈ HIỂN THỊ CẶP NGOẶC NẾU CÓ THÔNG TIN (hasInfo) */}
+                        {/* 2. THÔNG TIN BỔ SUNG */}
                         {hasInfo && (
-                            <span className="text-[13px] font-normal text-black leading-none whitespace-nowrap">
+                            <span className="text-[13px] font-normal text-black group-hover:text-emerald-600 leading-none whitespace-nowrap transition-colors ml-1">
                                 (
-                                 {/* 2. Âm Hán Việt */}
-                                {hanviet && <span className="font-bold text-black">{hanviet}</span>}
-                                   
-                                {/* Gạch nối 1: Giữa Reading và (Hán Việt hoặc Nghĩa) */}
-                                {displayReading && (hanviet || vocabInfo.meaning) && <span> - </span>}
-
-                                {/* 1. Cách đọc (Chỉ hiện nếu không trùng với mặt chữ) */}
+                                {/* Hiện Hán Việt (Sẽ in đậm nếu có) */}
+                                {hanviet && <span className="font-bold text-black group-hover:text-emerald-600">{hanviet}</span>}
+                                
+                                {hanviet && (displayReading || finalMeaning) && <span> - </span>}
                                 {displayReading && <span>{displayReading}</span>}
-
-                                {/* Gạch nối 2: Giữa Hán Việt và Nghĩa */}
-                                {hanviet && vocabInfo.meaning && <span> - </span>}
-
-                                {/* 3. Nghĩa tiếng Việt */}
-                            {vocabInfo.meaning && (
-                                    <span>
-                                        {vocabInfo.meaning.toLowerCase()}
-                                    </span>
-                                )}
-                             )
+                                {displayReading && finalMeaning && <span> - </span>}
+                                {finalMeaning && <span className="font-sans">{finalMeaning.toLowerCase()}</span>}
+                                )
                             </span>
                         )}
+
+                        {/* 3. DÒNG NHẮC NHỞ */}
+                        {(!displayReading && !finalMeaning && !hanviet) && ( // Thêm !hanviet vào điều kiện
+                            <span className="text-gray-400 text-[10px] italic ml-1 print:hidden">
+                                ấn vào đây để thêm cách đọc, ý nghĩa
+                            </span>
+                        )}
+                        
+                        <svg className="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                     </div>
                 </div>
 
-                {/* GRID TỪ VỰNG */}
+                {/* GRID TỪ VỰNG (Giữ nguyên) */}
                 <div className="flex border-l border-t w-fit" style={{ borderColor: gridBorderColor }}>
                     {boxes.map((charInBox, i) => (
                         <GridBox
@@ -1471,9 +1477,9 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
             </div>
         );
     }
-};
+  };                              
     // 4. Page Layout (Đã cập nhật giao diện Bản Mẫu)
-    const Page = ({ chars, config, dbData, mode }) => {
+  const Page = ({ chars, config, dbData, mode, customVocabData, onEditVocab }) => {
 // 1. Hàm Xuất dữ liệu (Tải file về máy)
     const handlePageExport = () => {
         const data = localStorage.getItem('phadao_srs_data');
@@ -1546,14 +1552,15 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
                             <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">2</span>
                             <span>Từ vựng phân cách nhau bằng dấu <span className="font-bold">xuống dòng</span> hoặc <span className="font-bold">chấm phẩy ;</span></span>
                         </p>
+                         <p className="flex items-center gap-2">
+                            <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">4</span>
+                            <span>Ấn vào <span className="font-bold">từ vựng</span> ở trang xem trước để chỉnh sửa.</span>
+                        </p>
                         <p className="flex items-center gap-2">
                             <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">3</span>
                             <span>Chế độ <span className="font-bold">HỌC, FLASHCARD</span> trong phần "tiện ích".</span>
                         </p>
-                        <p className="flex items-center gap-2">
-                            <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">4</span>
-                            <span>Tìm kiếm <span className="font-bold">từ vựng đi kèm kanji</span> ở thanh tìm kiếm.</span>
-                        </p>
+
                     </div>
                 ) : (
                     // === HƯỚNG DẪN KANJI (GIỮ NGUYÊN) ===
@@ -1588,6 +1595,8 @@ const WorkbookRow = ({ char, config, dbData, mode }) => {
                 config={config}
                 dbData={dbData}
                     mode={mode}
+                        customVocabData={customVocabData}
+                        onEditVocab={onEditVocab}
             />
             ))}
         </div>
@@ -2214,8 +2223,240 @@ const LearnGameModal = ({ isOpen, onClose, text, dbData, onSwitchToFlashcard, mo
         </div>
     );
 };
+const TestGeneratorModal = ({ isOpen, onClose, vocabList, onGenerate }) => {
+    const [step, setStep] = useState(1); // 1: Copy Prompt, 2: Paste JSON
+    const [jsonInput, setJsonInput] = useState('');
+    const [error, setError] = useState(null);
+
+    // Reset khi mở lại
+    useEffect(() => {
+        if (isOpen) {
+            setStep(1);
+            setJsonInput('');
+            setError(null);
+        }
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
+    // Tạo câu lệnh mẫu (Prompt) cho ChatGPT
+    const promptText = `Hãy đóng vai giáo viên tiếng Nhật. Dựa vào danh sách từ vựng sau đây:
+${vocabList}
+
+Hãy tạo một bài kiểm tra trắc nghiệm (4 lựa chọn A, B, C, D) kiểm tra ý nghĩa và cách đọc của các từ này.
+Yêu cầu định dạng đầu ra: CHỈ TRẢ VỀ DUY NHẤT MỘT MẢNG JSON (không giải thích thêm), cấu trúc như sau:
+[
+  { "q": "Câu hỏi 1...", "opts": ["Lựa chọn A", "Lựa chọn B", "Lựa chọn C", "Lựa chọn D"], "ans": 0 }, 
+  { "q": "Câu hỏi 2...", "opts": ["...", "...", "...", "..."], "ans": 1 }
+]
+(Trong đó "ans" là index của đáp án đúng: 0=A, 1=B, 2=C, 3=D)`;
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(promptText);
+        setStep(2); // Tự động chuyển bước sau khi copy
+    };
+
+    const handleProcess = () => {
+        try {
+            // Lọc tìm mảng JSON trong text (phòng trường hợp ChatGPT nói nhảm ở đầu/cuối)
+            const match = jsonInput.match(/\[\s*\{.*\}\s*\]/s);
+            if (!match) throw new Error("Không tìm thấy đoạn JSON hợp lệ.");
+            
+            const data = JSON.parse(match[0]);
+            if (!Array.isArray(data)) throw new Error("Dữ liệu không phải là mảng.");
+            
+            onGenerate(data); // Đẩy dữ liệu ra ngoài App
+            onClose();
+        } catch (err) {
+            setError("Lỗi đọc dữ liệu: " + err.message + ". Hãy chắc chắn bạn dán đúng đoạn JSON từ ChatGPT.");
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={onClose}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-purple-200" onClick={e => e.stopPropagation()}>
+                
+                {/* Header Tím */}
+                <div className="p-4 border-b border-purple-100 bg-purple-50 flex justify-between items-center">
+                    <h3 className="text-sm font-bold text-purple-800 uppercase flex items-center gap-2">
+                        🤖 TẠO ĐỀ KIỂM TRA AI
+                    </h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                </div>
+
+                <div className="p-6">
+                    {step === 1 ? (
+                        <div className="space-y-4">
+                            <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 text-sm text-purple-900 leading-relaxed">
+                                <p className="font-bold mb-2">Bước 1: Lấy câu lệnh</p>
+                                <p>Hệ thống đã chuẩn bị sẵn câu lệnh dựa trên từ vựng bạn nhập. Hãy sao chép và gửi cho ChatGPT (hoặc Claude, Gemini).</p>
+                            </div>
+                            <div className="relative group">
+                                <textarea readOnly value={promptText} className="w-full h-32 p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-500 focus:outline-none resize-none" />
+                            </div>
+                            <button onClick={handleCopy} className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-lg shadow-purple-200 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase text-xs tracking-wider">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                SAO CHÉP & TIẾP TỤC
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 text-sm text-purple-900 leading-relaxed">
+                                <p className="font-bold mb-2">Bước 2: Dán kết quả</p>
+                                <p>Sau khi ChatGPT trả lời, hãy copy đoạn mã JSON (thường nằm trong khung code) và dán vào đây.</p>
+                            </div>
+                            <textarea 
+                                value={jsonInput}
+                                onChange={(e) => setJsonInput(e.target.value)}
+                                placeholder='Dán nội dung JSON vào đây (Ví dụ: [{"q": "...", ...}])'
+                                className="w-full h-40 p-3 border-2 border-purple-100 focus:border-purple-500 rounded-xl text-sm focus:outline-none resize-none transition-colors" 
+                            />
+                            {error && <p className="text-red-500 text-xs font-bold italic">{error}</p>}
+                            <div className="flex gap-3">
+                                <button onClick={() => setStep(1)} className="px-4 py-3 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-gray-200 transition-all text-xs">QUAY LẠI</button>
+                                <button onClick={handleProcess} className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-lg shadow-purple-200 transition-all active:scale-95 uppercase text-xs tracking-wider">
+                                    TẠO ĐỀ THI NGAY
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+// --- COMPONENT HIỂN THỊ ĐỀ THI (A4 - Tùy chỉnh số câu) ---
+const TestPaper = ({ data, onClose }) => {
+    
+    // Logic phân trang phức tạp hơn: Trang 1 lấy 13 câu, các trang sau lấy 14 câu
+    const pages = useMemo(() => {
+        if (!data) return [];
+        const result = [];
+        
+        // --- XỬ LÝ TRANG 1 (13 câu) ---
+        // Cắt 13 câu đầu tiên cho trang 1
+        const firstPageData = data.slice(0, 13);
+        if (firstPageData.length > 0) {
+            result.push(firstPageData);
+        }
+
+        // --- XỬ LÝ CÁC TRANG SAU (14 câu) ---
+        // Lấy phần dữ liệu còn lại (từ câu 14 trở đi)
+        const remainingData = data.slice(13);
+        
+        // Chia đều phần còn lại mỗi trang 14 câu
+        for (let i = 0; i < remainingData.length; i += 14) {
+            result.push(remainingData.slice(i, i + 14));
+        }
+        
+        return result;
+    }, [data]);
+
+    return (
+        <div className="w-full bg-gray-100 min-h-screen flex flex-col items-center py-8 relative print:bg-white print:p-0 print:block">
+            
+            {/* Nút thoát */}
+            <div className="fixed top-4 right-4 z-[900] no-print">
+                <button onClick={onClose} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-full shadow-xl transition-transform active:scale-95 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    THOÁT CHẾ ĐỘ ĐỀ THI
+                </button>
+            </div>
+
+            {/* RENDER CÁC TRANG CÂU HỎI */}
+            {pages.map((pageQuestions, pageIndex) => (
+                <div key={pageIndex} 
+                    className="bg-white shadow-lg mb-8 relative flex flex-col overflow-hidden print:shadow-none print:mb-0 print:break-after-page"
+                    style={{
+                        width: '210mm',
+                        minHeight: '296mm',       
+                        padding: '15mm 10mm 15mm 15mm', 
+                        boxSizing: 'border-box'
+                    }}
+                >
+                    {/* --- HEADER --- */}
+                    {pageIndex === 0 ? (
+                        <div className="border-b-2 border-black pb-2 mb-4 flex justify-between items-end">
+                            <h2 className="text-lg font-black uppercase tracking-wider">BÀI KIỂM TRA TỪ VỰNG</h2>
+                            <span className="text-[10pt] font-bold">Trang {pageIndex + 1}/{pages.length + 1}</span>
+                        </div>
+                    ) : (
+                        <div className="relative w-full h-0 mb-4">
+                             <span className="absolute -top-3 right-0 text-[9pt] text-gray-400 font-bold">
+                                Trang {pageIndex + 1}/{pages.length + 1}
+                             </span>
+                        </div>
+                    )}
+
+                    {/* Danh sách câu hỏi */}
+                    <div className="flex-1 space-y-4"> 
+                        {pageQuestions.map((q, idx) => {
+                            // Tính toán lại số thứ tự câu hỏi toàn cục
+                            // Nếu là trang 0: idx + 1
+                            // Nếu là trang > 0: 13 (số câu trang 1) + (pageIndex - 1) * 14 + idx + 1
+                            let globalIndex;
+                            if (pageIndex === 0) {
+                                globalIndex = idx + 1;
+                            } else {
+                                globalIndex = 13 + (pageIndex - 1) * 14 + idx + 1;
+                            }
+
+                            return (
+                                <div key={idx} className="w-full text-justify">
+                                    {/* CÂU HỎI */}
+                                    <div className="font-bold text-[11.5pt] mb-1 flex items-start gap-1 leading-snug">
+                                        <span className="whitespace-nowrap">Câu {globalIndex}:</span>
+                                        <span className="break-words">{q.q}</span>
+                                    </div>
+                                    
+                                    {/* ĐÁP ÁN */}
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 pl-4">
+                                        {q.opts.map((opt, optIdx) => (
+                                            <div key={optIdx} className="text-[11.5pt] flex items-start gap-2 leading-snug">
+                                                <span className="font-bold w-4">{['A','B','C','D'][optIdx]}.</span>
+                                                <span className="break-words">{opt}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    
+                    {/* ĐÃ XÓA PHẦN FOOTER (Dòng chữ "Phá Đảo Tiếng Nhật..." ở cuối) */}
+                </div>
+            ))}
+
+            {/* TRANG CUỐI CÙNG: ĐÁP ÁN */}
+            <div className="bg-white shadow-lg mb-8 relative flex flex-col overflow-hidden print:shadow-none print:mb-0 print:break-after-page"
+                style={{
+                    width: '210mm',
+                    minHeight: '296mm',
+                    padding: '15mm 10mm 15mm 15mm',
+                    boxSizing: 'border-box'
+                }}
+            >
+                <div className="border-b-2 border-black pb-2 mb-6 flex justify-between items-end">
+                    <h2 className="text-lg font-black uppercase tracking-wider">ĐÁP ÁN CHI TIẾT</h2>
+                    <span className="text-[10pt] font-bold">Trang {pages.length + 1}/{pages.length + 1}</span>
+                </div>
+
+                <div className="grid grid-cols-5 gap-3 text-center">
+                    {data.map((q, i) => (
+                        <div key={i} className="flex flex-col border border-gray-300 rounded p-1">
+                            <span className="text-[9pt] text-gray-500 font-bold uppercase">Câu {i + 1}</span>
+                            <span className="text-lg font-black text-purple-700">
+                                {['A', 'B', 'C', 'D'][q.ans]}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
 // 5. Sidebar (Phiên bản: Final)
-   const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen, mode }) => {
+   const Sidebar = ({ config, onChange, onPrint, srsData, isMenuOpen, setIsMenuOpen, isConfigOpen, setIsConfigOpen, isCafeModalOpen, setIsCafeModalOpen, showMobilePreview, setShowMobilePreview, dbData, setIsFlashcardOpen, onOpenReviewList, setIsLearnGameOpen, mode, setPracticeMode, setIsTestGenModalOpen }) => {
    
 
 // 1. Logic bộ lọc mới
@@ -2414,7 +2655,7 @@ return () => document.removeEventListener("mousedown", handleClickOutside);
 
         if (options.hiragana) ranges += "\\u3040-\\u309F";
         if (options.katakana) ranges += "\\u30A0-\\u30FF";
-        if (options.kanji)    ranges += "\\u4E00-\\u9FAF\\u3400-\\u4DBF\\u2E80-\\u2FDF\\uF900-\\uFAFF"; 
+        if (options.kanji)    ranges += "\\u4E00-\\u9FAF\\u3400-\\u4DBF\\u2E80-\\u2FDF\\uF900-\\uFAFF\\u3005"; 
         return ranges;
     };
     // --- HÀM TRỢ GIÚP: XÓA TRÙNG LẶP ---
@@ -3293,7 +3534,22 @@ LÀM SẠCH
                 onChange={handleInputText} 
                 onCompositionStart={handleCompositionStart}
                 onCompositionEnd={handleCompositionEnd}
-                onBlur={handleBlurText}    
+                onBlur={handleBlurText}   
+                    onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+            const _d = (s) => {
+                try { return decodeURIComponent(escape(window.atob(s))); } catch{ return ''; }
+            };
+            const _k = 'cGhhZGFvdGllbmduaGF0'; 
+            const _m = 'QuG6o24gcXV54buBbiB0cmFuZyB3ZWIgdGh14buZYyBQaMOhIMSQ4bqjbyBUaeG6v25nIE5o4bqtdA==';
+            if (e.target.value.trim().toLowerCase() === _d(_k)) {
+                e.preventDefault(); 
+                alert(_d(_m));   
+                setLocalText('');
+                handleChange('text', '');
+            }
+        }
+    }}
                 />
             </div>
             
@@ -3467,9 +3723,16 @@ LÀM SẠCH
             <input 
                 type="number" min="1" max="12" placeholder="..." 
                 value={mimiN3} 
+onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
                 onChange={(e) => { setMimiN3(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }} 
                 onBlur={() => { if (Number(mimiN3) > 12) setMimiN3(12); if (Number(mimiN3) < 1 && mimiN3 !== '') setMimiN3(1); }} 
-                // --- ĐỔI text-lg THÀNH text-[16px] ---
+            
                 className={`w-14 text-center font-bold border-b-2 focus:border-amber-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${mimiN3 !== '' ? 'text-amber-600 border-amber-500' : 'text-gray-400 border-gray-200'}`} 
                
             />
@@ -3486,6 +3749,13 @@ LÀM SẠCH
             <input 
                 type="number" min="1" max="13" placeholder="..." 
                 value={mimiN2} 
+onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
                 onChange={(e) => { setMimiN2(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }} 
                 onBlur={() => { if (Number(mimiN2) > 13) setMimiN2(13); if (Number(mimiN2) < 1 && mimiN2 !== '') setMimiN2(1); }} 
                 className={`w-14 text-center font-bold border-b-2 focus:border-blue-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${mimiN2 !== '' ? 'text-blue-600 border-blue-500' : 'text-gray-400 border-gray-200'}`} 
@@ -3503,6 +3773,13 @@ LÀM SẠCH
             <input 
                 type="number" min="1" max="14" placeholder="..." 
                 value={mimiN1} 
+onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
                 onChange={(e) => { setMimiN1(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setTangoN3(''); setTangoN2(''); setTangoN1(''); } }} 
                 onBlur={() => { if (Number(mimiN1) > 14) setMimiN1(14); if (Number(mimiN1) < 1 && mimiN1 !== '') setMimiN1(1); }} 
                 className={`w-14 text-center font-bold border-b-2 focus:border-red-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${mimiN1 !== '' ? 'text-red-600 border-red-500' : 'text-gray-400 border-gray-200'}`} 
@@ -3523,6 +3800,13 @@ LÀM SẠCH
             <input 
                 type="number" min="1" max="12" placeholder="..." 
                 value={tangoN3} 
+onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
                 onChange={(e) => { setTangoN3(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN2(''); setTangoN1(''); } }} 
                 onBlur={() => { if (Number(tangoN3) > 12) setTangoN3(12); if (Number(tangoN3) < 1 && tangoN3 !== '') setTangoN3(1); }} 
                 // --- ĐỔI text-lg THÀNH text-[16px] ---
@@ -3541,6 +3825,13 @@ LÀM SẠCH
             <input 
                 type="number" min="1" max="12" placeholder="..." 
                 value={tangoN2} 
+onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
                 onChange={(e) => { setTangoN2(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN1(''); } }} 
                 onBlur={() => { if (Number(tangoN2) > 12) setTangoN2(12); if (Number(tangoN2) < 1 && tangoN2 !== '') setTangoN2(1); }} 
                 className={`w-14 text-center font-bold border-b-2 focus:border-rose-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${tangoN2 !== '' ? 'text-rose-600 border-rose-500' : 'text-gray-400 border-gray-200'}`} 
@@ -3558,6 +3849,13 @@ LÀM SẠCH
             <input 
                 type="number" min="1" max="14" placeholder="..." 
                 value={tangoN1} 
+onKeyDown={(e) => {
+                if (e.key === 'Enter') { handleSmartLoadVocabulary(); return; }
+                const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                if (!/[0-9]/.test(e.key) && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault(); 
+                }
+            }}
                 onChange={(e) => { setTangoN1(e.target.value); if (e.target.value) { setMinnaLesson(''); setMimiN3(''); setMimiN2(''); setMimiN1(''); setTangoN3(''); setTangoN2(''); } }} 
                 onBlur={() => { if (Number(tangoN1) > 14) setTangoN1(14); if (Number(tangoN1) < 1 && tangoN1 !== '') setTangoN1(1); }} 
                 className={`w-14 text-center font-bold border-b-2 focus:border-purple-500 outline-none bg-transparent transition-all text-[16px] pb-0.5 ${tangoN1 !== '' ? 'text-purple-600 border-purple-500' : 'text-gray-400 border-gray-200'}`} 
@@ -3586,9 +3884,9 @@ LÀM SẠCH
                                                 {mimiN3 && `TẢI MIMI N3 - PHẦN ${mimiN3}`}
                                                 {mimiN2 && `TẢI MIMI N2 - PHẦN ${mimiN2}`}
                                                 {mimiN1 && `TẢI MIMI N1 - PHẦN ${mimiN1}`}
-                                                {tangoN3 && `TẢI TANGO N3 - BÀI ${tangoN3}`}
-                                                {tangoN2 && `TẢI TANGO N2 - BÀI ${tangoN2}`}
-                                                {tangoN1 && `TẢI TANGO N1 - BÀI ${tangoN1}`}
+                                                {tangoN3 && `TẢI TANGO N3 - PHẦN ${tangoN3}`}
+                                                {tangoN2 && `TẢI TANGO N2 - PHẦN ${tangoN2}`}
+                                                {tangoN1 && `TẢI TANGO N1 - PHẦN ${tangoN1}`}
                                             </span>
                                         </>
                                     )}
@@ -3672,7 +3970,32 @@ LÀM SẠCH
                                     </button>
                                 </div>
                             </div>
-
+{/* 4. TẠO BÀI KIỂM TRA (MÀU TÍM) - CHỈ HIỆN KHI Ở CHẾ ĐỘ TỪ VỰNG */}
+{mode === 'vocab' && (
+    <div className="pt-1">
+        <button
+            onClick={() => {
+                // Kiểm tra xem đã có từ vựng chưa
+                if (!config.text || config.text.trim().length === 0) {
+                    alert("Vui lòng nhập danh sách từ vựng vào ô trước!");
+                    return;
+                }
+                setIsTestGenModalOpen(true); // Mở Modal tạo đề
+                setIsUtilsOpen(false); // Đóng menu tiện ích
+            }}
+            className="w-full py-2.5 bg-purple-50 border border-purple-200 text-purple-600 hover:text-purple-700 hover:border-purple-300 hover:bg-purple-100 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 group shadow-sm"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500 group-hover:text-purple-600">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span className="text-xs font-bold uppercase tracking-wide">TẠO BÀI KIỂM TRA</span>
+        </button>
+    </div>
+)}
             {/* 3. DANH SÁCH ÔN TẬP (MÀU CAM) */}
      {mode !== 'vocab' && (
             <div className="pt-1">
@@ -3968,7 +4291,7 @@ return (
         </a>
 
         {/* Nút Nhóm */}
-        <a href="https://zalo.me/g/ujgais332" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 hover:text-blue-600 transition-colors group">
+        <a href="https://zalo.me/g/jeflei549" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 hover:text-blue-600 transition-colors group">
             <div className="p-2 bg-blue-50 rounded-full text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             </div>
@@ -4014,13 +4337,13 @@ TÀI LIỆU HỌC TẬP
             <div className="p-4 space-y-3 overflow-y-auto custom-scrollbar">
 
                 {/* Luyện viết (tạo sẵn) */}
-                <a href="https://drive.google.com/drive/folders/1J8psBuUeV8VBUC90gxw5tTNPy050FDha?usp=sharing" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all group">
+                <a href="https://drive.google.com/drive/folders/1e7J-I6icRWjXla5WGUriUqgFXb7B72cP?usp=sharing" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all group">
                     <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-gray-800 truncate group-hover:text-purple-700 pb-1">File tập viết đã tạo sẵn</p>
-                        <p className="text-[10px] text-gray-400">Bảng chữ cái, bộ thủ, kanji</p>
+                        <p className="text-[10px] text-gray-400">Kanji, từ vựng</p>
                     </div>
                     <svg className="w-4 h-4 text-gray-300 group-hover:text-purple-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 </a>
@@ -4074,7 +4397,7 @@ TÀI LIỆU HỌC TẬP
                 </a>
 
                 {/* nhóm học tập */}
-                <a href="https://zalo.me/g/ujgais332" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all group">
+                <a href="https://zalo.me/g/jeflei549" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all group">
                     {/* Đã đổi: bg-blue -> bg-orange */}
                     <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
                         {/* Đã đổi: Icon File -> Icon Nhóm người */}
@@ -4150,7 +4473,7 @@ TÀI LIỆU HỌC TẬP
                                     <li>
                                         Hoặc có thể tải file tạo sẵn 
                                         <a 
-                                            href="https://drive.google.com/drive/folders/1J8psBuUeV8VBUC90gxw5tTNPy050FDha?usp=sharing" 
+                                            href="https://drive.google.com/drive/folders/1e7J-I6icRWjXla5WGUriUqgFXb7B72cP?usp=sharing" 
                                             target="_blank" 
                                             rel="noopener noreferrer"
                                             // LOGIC ĐẢO NGƯỢC MÀU:
@@ -4216,11 +4539,155 @@ TÀI LIỆU HỌC TẬP
             </div>
             </div>
         )}
+        {/* 4. NÚT CHUYỂN CHẾ ĐỘ */}
+<div className="fixed bottom-6 right-6 z-[60] no-print print:hidden">
+    <button
+        onClick={() => {
+         
+            const newMode = mode === 'kanji' ? 'vocab' : 'kanji';
+            setPracticeMode(newMode);
+            
+            if (newMode === 'vocab') {
+                setFilterOptions({
+                    hiragana: true,
+                    katakana: true,
+                    kanji: true,
+                    removeDuplicates: false
+                });
+            }
+          
+            onChange(prev => ({ 
+                ...prev, 
+                text: '', 
+               
+                traceCount: newMode === 'vocab' ? 12 : 9 
+            })); 
+        }}
+        className={`h-12 pl-4 pr-6 rounded-full font-black text-[11px] uppercase tracking-widest shadow-2xl border-2 transition-all active:scale-95 flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-300 ${
         
+            mode === 'kanji' 
+            ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-indigo-700 shadow-indigo-200' 
+            : 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-700 shadow-emerald-200'
+        }`}
+    >
+   
+        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">
+            
+                {mode === 'kanji' ? '字' : '語'}
+        </div>
+        
+        <div className="flex flex-col items-start leading-none gap-0.5">
+            <span className="opacity-70 text-[9px]">Chế độ</span>
+         
+            <span>{mode === 'kanji' ? 'KANJI' : 'TỪ VỰNG'}</span>
+        </div>
+    </button>
+</div>
         </div>
     );
     };
+const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
+    const [reading, setReading] = useState('');
+    const [meaning, setMeaning] = useState('');
+    const [hanviet, setHanviet] = useState(''); // <--- 1. Thêm State Hán Việt
 
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (isOpen && data) {
+            setReading(data.reading || '');
+            setMeaning(data.meaning || '');
+            setHanviet(data.hanviet || ''); // <--- 2. Load dữ liệu Hán Việt nếu có
+        }
+    }, [isOpen, data]);
+
+    const handleRestore = () => {
+        if (!data) return;
+        
+        // Lấy lại dữ liệu gốc từ DB
+        const originalInfo = dbData?.TUVUNG_DB?.[data.word] || { reading: '', meaning: '' };
+        // Lấy lại Hán việt gốc (tự động ghép từ các chữ đơn lẻ)
+        const originalHanviet = data.word.split('').map(c => dbData?.KANJI_DB?.[c]?.sound || '').filter(s => s).join(' ');
+
+        const restoredReading = originalInfo.reading || '';
+        const restoredMeaning = originalInfo.meaning || '';
+
+        setReading(restoredReading);
+        setMeaning(restoredMeaning);
+        setHanviet(originalHanviet); // <--- 3. Khôi phục Hán Việt tự động
+
+        // Lưu luôn 4 tham số
+        onSave(data.word, restoredReading, restoredMeaning, originalHanviet);
+    };
+
+    if (!isOpen || !data) return null;
+
+    return (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200" onClick={e => e.stopPropagation()}>
+                
+                <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                    <h3 className="text-sm font-bold text-gray-800 uppercase flex items-center gap-2">✏️ CHỈNH SỬA TỪ VỰNG</h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors p-1.5 hover:bg-red-50 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+
+                <div className="p-5 space-y-4">
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Từ vựng (Gốc)</label>
+                        <div className="text-2xl font-black text-gray-800 font-sans border-b border-gray-200 pb-2">{data.word}</div>
+                    </div>
+
+                    {/* --- 4. THÊM Ô NHẬP ÂM HÁN VIỆT --- */}
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Âm Hán Việt</label>
+                        <input 
+                            type="text" 
+                            value={hanviet}
+                            onChange={(e) => setHanviet(e.target.value.toUpperCase())} 
+                            placeholder="Ví dụ: NHẬT BẢN NGỮ"
+                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-bold uppercase transition-all"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cách đọc (Furigana)</label>
+                        <input type="text" value={reading} onChange={(e) => setReading(e.target.value)} placeholder="Ví dụ: にほんご" className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium transition-all" />
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Ý nghĩa (Tiếng Việt)</label>
+                        <input 
+                            type="text" 
+                            value={meaning} 
+                            onChange={(e) => setMeaning(e.target.value)} 
+                            placeholder="Ví dụ: tiếng Nhật" 
+                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium transition-all" 
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 pt-2">
+                        <button onClick={handleRestore} className="flex items-center justify-center gap-1.5 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-all active:scale-95 text-[11px] uppercase tracking-wider border border-red-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Khôi phục
+                        </button>
+                        {/* 5. TRUYỀN THÊM HANVIET VÀO HÀM SAVE */}
+                        <button onClick={() => onSave(data.word, reading, meaning, hanviet)} className="py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-100 transition-all active:scale-95 text-[11px] uppercase tracking-wider">
+                            Lưu thay đổi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
     
     const App = () => {
 // --- Các state cũ giữ nguyên ---
@@ -4232,6 +4699,9 @@ const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
         const [isLearnGameOpen, setIsLearnGameOpen] = useState(false);
         const [isReviewListOpen, setIsReviewListOpen] = useState(false);
          const [practiceMode, setPracticeMode] = useState('kanji');
+        const [isTestGenModalOpen, setIsTestGenModalOpen] = useState(false); 
+const [testData, setTestData] = useState(null); 
+const [isTestMode, setIsTestMode] = useState(false);
         const [srsData, setSrsData] = useState(() => {
            
     // Tự động lấy dữ liệu cũ từ máy người dùng khi mở web
@@ -4239,7 +4709,21 @@ const [isFlashcardOpen, setIsFlashcardOpen] = useState(false);
             
     return saved ? JSON.parse(saved) : {};
 });
+const [customVocabData, setCustomVocabData] = useState({}); 
+    const [editingVocab, setEditingVocab] = useState(null); // Từ đang được sửa
 
+   // --- 2. HÀM LƯU DỮ LIỆU  ---
+    const handleSaveVocab = (word, newReading, newMeaning, newHanviet) => {
+        setCustomVocabData(prev => ({
+            ...prev,
+            [word]: { 
+                reading: newReading, 
+                meaning: newMeaning,
+                hanviet: newHanviet // <--- Lưu thêm Hán Việt
+            }
+        }));
+        setEditingVocab(null); 
+    };
 // Hàm để lưu kết quả học tập
 const updateSRSProgress = (char, quality) => {
     const newProgress = calculateSRS(srsData[char], quality);
@@ -4334,86 +4818,103 @@ if (!isDbLoaded) {
         </div>
     );
 }
-
+const handleTestGenerate = (data) => {
+    setTestData(data);
+    setIsTestMode(true);
+};
 // --- GIAO DIỆN CHÍNH (Khi đã có dữ liệu) ---
 return (
-    <div className="min-h-screen flex flex-col md:flex-row print-layout-reset">
-    <div className="no-print z-50">
-    <Sidebar 
-        config={config} onChange={setConfig} onPrint={handlePrint} 
-        isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen}
-        isConfigOpen={isConfigOpen} setIsConfigOpen={setIsConfigOpen}
-        isCafeModalOpen={isCafeModalOpen} setIsCafeModalOpen={setIsCafeModalOpen} 
-        showMobilePreview={showMobilePreview} setShowMobilePreview={setShowMobilePreview}
-        setIsFlashcardOpen={setIsFlashcardOpen}
-        setIsLearnGameOpen={setIsLearnGameOpen}
-        dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống Sidebar
-            srsData={srsData}
-         onOpenReviewList={() => setIsReviewListOpen(true)}
-             mode={practiceMode}
-      
-    />
-    </div>
-
-    <div id="preview-area" className={`flex-1 bg-gray-100 p-0 md:p-8 overflow-auto flex-col items-center min-h-screen print-layout-reset custom-scrollbar ${showMobilePreview ? 'flex' : 'hidden md:flex'}`}>
-    {pages.map((pageChars, index) => (
-        <Page 
-        key={index} 
-        chars={pageChars} 
-        config={config} 
-        mode={practiceMode}
-        dbData={dbData} // <--- QUAN TRỌNG: Truyền dữ liệu xuống page 
-        /> 
-    ))}
-    </div>
-
-    {/* Popup Donate  */}
-    {showPostPrintDonate && (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative animate-in zoom-in-95 duration-300 border border-orange-100">
-        <button onClick={() => setShowPostPrintDonate(false)} className="absolute top-3 right-3 p-1.5 bg-gray-100 hover:bg-red-100 hover:text-red-500 rounded-full transition-colors z-10">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-        <div className="p-6 flex flex-col items-center text-center">
-            <h3 className="text-xl font-bold text-gray-800 mb-2">BẠN TẠO ĐƯỢC FILE CHƯA?</h3>
-            <p className="text-sm text-gray-500 mb-6 leading-relaxed">Nếu bạn thấy trang web hữu ích <br/> hãy mời mình một ly cafe nhé!</p>
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl shadow-inner border border-orange-200 mb-4">
-            <img src="https://i.ibb.co/JWGwcTL1/3381513652021492183.jpg" alt="QR Donate" className="w-40 h-auto rounded-lg mix-blend-multiply" />
+        <div className="min-h-screen flex flex-col md:flex-row print-layout-reset">
+            
+            {/* 1. SIDEBAR (KHÔNG BAO GIỜ BỊ ẨN) */}
+            {/* Lưu ý: Tôi để nó nằm ngoài các điều kiện if/else nên nó luôn hiện */}
+            <div className="no-print z-50">
+                <Sidebar 
+                    config={config} onChange={setConfig} onPrint={handlePrint} 
+                    isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen}
+                    isConfigOpen={isConfigOpen} setIsConfigOpen={setIsConfigOpen}
+                    isCafeModalOpen={isCafeModalOpen} setIsCafeModalOpen={setIsCafeModalOpen} 
+                    showMobilePreview={showMobilePreview} setShowMobilePreview={setShowMobilePreview}
+                    setIsFlashcardOpen={setIsFlashcardOpen}
+                    setIsLearnGameOpen={setIsLearnGameOpen}
+                    dbData={dbData} 
+                    srsData={srsData}
+                    onOpenReviewList={() => setIsReviewListOpen(true)}
+                    mode={practiceMode}
+                    setPracticeMode={setPracticeMode}
+                    // Dòng này rất quan trọng để nút màu tím hoạt động
+                    setIsTestGenModalOpen={setIsTestGenModalOpen} 
+                />
             </div>
-            <p className="text-[11px] font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-full mb-4">MB BANK: 99931082002</p>
-            <button onClick={() => setShowPostPrintDonate(false)} className="w-full py-2.5 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold rounded-xl transition-all shadow-lg active:scale-95">Lần sau nhé!</button>
-        </div>
-        </div>
-    </div>
-    )}
-        
-<FlashcardModal 
-    isOpen={isFlashcardOpen} 
-    onClose={() => setIsFlashcardOpen(false)} 
-    text={config.text} 
-    dbData={dbData} 
-    onSrsUpdate={updateSRSProgress}
-    srsData={srsData} 
-    mode={practiceMode}
-    onSrsRestore={(char, oldData) => {
-        // Hàm này sẽ đè dữ liệu cũ (snapshot) lên dữ liệu hiện tại
-        const newData = { ...srsData, [char]: oldData };
-        setSrsData(newData);
-        localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
-    }}
-/>
-<LearnGameModal 
-    isOpen={isLearnGameOpen}
-    onClose={() => setIsLearnGameOpen(false)}
-    text={config.text}
-    dbData={dbData}
-    mode={practiceMode}
-    onSwitchToFlashcard={() => {
-        setIsLearnGameOpen(false); // Đóng Game
-        setIsFlashcardOpen(true);  // Mở Flashcard ngay lập tức
-    }}
-/>
-       {/* 3. RENDER MODAL MỚI */}
+
+            {/* 2. KHU VỰC BÊN PHẢI (THAY ĐỔI THEO CHẾ ĐỘ) */}
+            {/* Logic: Nếu đang ở chế độ Test (isTestMode = true) thì hiện Đề Thi. 
+                       Ngược lại thì hiện trang Tập Viết như bình thường. */}
+            
+            {isTestMode ? (
+                // === GIAO DIỆN A: BÀI KIỂM TRA ===
+                // Class 'flex-1' giúp nó tự lấp đầy khoảng trống còn lại bên phải Sidebar
+                <div className="flex-1 bg-gray-100 p-0 md:p-8 overflow-auto flex flex-col items-center min-h-screen custom-scrollbar">
+                    <TestPaper 
+                        data={testData} 
+                        onClose={() => setIsTestMode(false)} // Bấm nút thoát thì tắt chế độ Test
+                    />
+                </div>
+            ) : (
+                // === GIAO DIỆN B: TẬP VIẾT (CŨ) ===
+                <div id="preview-area" className={`flex-1 bg-gray-100 p-0 md:p-8 overflow-auto flex-col items-center min-h-screen print-layout-reset custom-scrollbar ${showMobilePreview ? 'flex' : 'hidden md:flex'}`}>
+                    {pages.map((pageChars, index) => (
+                        <Page 
+                            key={index} 
+                            chars={pageChars} 
+                            config={config} 
+                            mode={practiceMode}
+                            dbData={dbData}
+                            customVocabData={customVocabData}
+                            onEditVocab={(word, currentData) => setEditingVocab({ word, ...currentData })}
+                        /> 
+                    ))}
+                </div>
+            )}
+
+            {/* --- CÁC MODAL (POPUP) --- */}
+            {/* Để ở cuối cùng để luôn nổi lên trên */}
+            
+            <FlashcardModal 
+                isOpen={isFlashcardOpen} 
+                onClose={() => setIsFlashcardOpen(false)} 
+                text={config.text} 
+                dbData={dbData} 
+                onSrsUpdate={updateSRSProgress}
+                srsData={srsData} 
+                mode={practiceMode}
+                onSrsRestore={(char, oldData) => {
+                    const newData = { ...srsData, [char]: oldData };
+                    setSrsData(newData);
+                    localStorage.setItem('phadao_srs_data', JSON.stringify(newData));
+                }}
+            />
+            
+            <LearnGameModal 
+                isOpen={isLearnGameOpen}
+                onClose={() => setIsLearnGameOpen(false)}
+                text={config.text}
+                dbData={dbData}
+                mode={practiceMode}
+                onSwitchToFlashcard={() => {
+                    setIsLearnGameOpen(false); 
+                    setIsFlashcardOpen(true);  
+                }}
+            />
+            
+            <EditVocabModal 
+                isOpen={!!editingVocab}
+                onClose={() => setEditingVocab(null)}
+                data={editingVocab}
+                onSave={handleSaveVocab}
+                dbData={dbData}
+            />
+            
             <ReviewListModal 
                 isOpen={isReviewListOpen}
                 onClose={() => setIsReviewListOpen(false)}
@@ -4421,44 +4922,41 @@ return (
                 dbData={dbData}
                 onResetSRS={handleResetAllSRS}
                 onLoadChars={(chars) => {
-        setConfig({ ...config, text: chars }); 
-        setIsReviewListOpen(false);           
-    }}
+                    setConfig({ ...config, text: chars }); 
+                    setIsReviewListOpen(false);            
+                }}
             />
-                    {/* 4. NÚT CHUYỂN CHẾ ĐỘ (GÓC DƯỚI BÊN PHẢI) */}
-<div className="fixed bottom-6 right-6 z-[40] no-print print:hidden">
-    <button
-        onClick={() => {
-            const newMode = practiceMode === 'kanji' ? 'vocab' : 'kanji';
-            setPracticeMode(newMode);
-            // Reset text mẫu để tránh rối mắt
-            setConfig(prev => ({ 
-            ...prev, 
-            text: '', // Reset văn bản
-            // Nếu là Vocab -> traceCount = 12 (full dòng nét mờ)
-            // Nếu là Kanji -> traceCount = 9 (mặc định cũ)
-            traceCount: newMode === 'vocab' ? 12 : 9 
-        })); 
-        }}
-        className={`h-12 pl-4 pr-6 rounded-full font-black text-[11px] uppercase tracking-widest shadow-2xl border-2 transition-all active:scale-95 flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-300 ${
-            practiceMode === 'kanji' 
-            ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-indigo-700 shadow-indigo-200' 
-            : 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-700 shadow-emerald-200'
-        }`}
-    >
-        {/* Icon chuyển đổi */}
-        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">
-                {practiceMode === 'kanji' ? '字' : '語'}
+
+            {/* --- MODAL TẠO ĐỀ THI MỚI (QUAN TRỌNG) --- */}
+            <TestGeneratorModal 
+                isOpen={isTestGenModalOpen}
+                onClose={() => setIsTestGenModalOpen(false)}
+                vocabList={config.text}
+                onGenerate={handleTestGenerate}
+            />
+
+            {/* Popup Donate */}
+            {showPostPrintDonate && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300 no-print">
+                   <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative animate-in zoom-in-95 duration-300 border border-orange-100">
+                        <button onClick={() => setShowPostPrintDonate(false)} className="absolute top-3 right-3 p-1.5 bg-gray-100 hover:bg-red-100 hover:text-red-500 rounded-full transition-colors z-10">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                        <div className="p-6 flex flex-col items-center text-center">
+                            <h3 className="text-xl font-bold text-gray-800 mb-2">BẠN TẠO ĐƯỢC FILE CHƯA?</h3>
+                            <p className="text-sm text-gray-500 mb-6 leading-relaxed">Nếu bạn thấy trang web hữu ích <br/> hãy mời mình một ly cafe nhé!</p>
+                            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-xl shadow-inner border border-orange-200 mb-4">
+                                <img src="https://i.ibb.co/JWGwcTL1/3381513652021492183.jpg" alt="QR Donate" className="w-40 h-auto rounded-lg mix-blend-multiply" />
+                            </div>
+                            <p className="text-[11px] font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-full mb-4">MB BANK: 99931082002</p>
+                            <button onClick={() => setShowPostPrintDonate(false)} className="w-full py-2.5 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold rounded-xl transition-all shadow-lg active:scale-95">Lần sau nhé!</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
-        
-        <div className="flex flex-col items-start leading-none gap-0.5">
-            <span className="opacity-70 text-[9px]">Chế độ hiện tại</span>
-            <span>{practiceMode === 'kanji' ? 'LUYỆN KANJI' : 'LUYỆN TỪ VỰNG'}</span>
-        </div>
-    </button>
-</div>
-        </div>
-);
+    );
 };
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
