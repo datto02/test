@@ -4070,18 +4070,6 @@ TÀI LIỆU HỌC TẬP
             {/* Danh sách tài liệu (Cuộn được nếu dài) */}
             <div className="p-4 space-y-3 overflow-y-auto custom-scrollbar">
 
-                {/* Luyện viết (tạo sẵn) */}
-                <a href="https://drive.google.com/drive/folders/1e7J-I6icRWjXla5WGUriUqgFXb7B72cP?usp=sharing" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all group">
-                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-gray-800 truncate group-hover:text-purple-700 pb-1">File tập viết đã tạo sẵn</p>
-                        <p className="text-[10px] text-gray-400">Kanji, từ vựng</p>
-                    </div>
-                    <svg className="w-4 h-4 text-gray-300 group-hover:text-purple-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                </a>
-
                 {/* 2139 kanji */}
                 <a href="https://drive.google.com/file/d/1Q3bbd3Aao7R71wemjESHddbvmXWYe542/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all group">
                     <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -4424,8 +4412,17 @@ const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
 };
     
     const App = () => {
-
+//thongbao
 const [showStartupNotice, setShowStartupNotice] = useState(true);
+        useEffect(() => {
+        if (showStartupNotice) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [showStartupNotice]);
+      //hetthông báo  
 const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
 const [showMobilePreview, setShowMobilePreview] = useState(false);
 const [isConfigOpen, setIsConfigOpen] = React.useState(false);
@@ -4541,15 +4538,8 @@ const handlePrint = () => {
 };
 
 // --- MÀN HÌNH CHỜ (LOADING) ---
-// Nếu dữ liệu chưa tải xong, hiện màn hình xoay vòng tròn
-if (!isDbLoaded) {
-    return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-            <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
-            <p className="text-gray-500 font-bold animate-pulse">Đang tải dữ liệu Kanji...</p>
-        </div>
-    );
-}
+
+if (!isDbLoaded) return null;
 
 // --- GIAO DIỆN CHÍNH (Khi đã có dữ liệu) ---
 return (
