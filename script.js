@@ -3909,23 +3909,14 @@ onKeyDown={(e) => {
 {/* --- PHẦN CUỐI CỦA SIDEBAR (CẬP NHẬT THÊM NÚT TÀI LIỆU) --- */}
     <div className="w-full mt-auto pt-4 flex flex-col gap-4"> 
     
-   {/* 1. NÚT IN (ĐÃ SỬA: ĐỔI MÀU THEO CHẾ ĐỘ) */}
+  {/* 1. NÚT IN (ĐÃ KHÓA) */}
     <button 
-        onClick={() => {
-        if (!config.text || config.text.trim().length === 0) {
-            alert("Vui lòng nhập nội dung để tạo file"); 
-            return; 
-        }
-        setIsPrintModalOpen(true); 
-        }} 
-        className={`w-full py-3.5 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 group ${
-            mode === 'vocab' 
-            ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200' 
-            : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200'
-        }`}
+        disabled={true} // Vô hiệu hóa chức năng click
+        className="w-full py-3.5 text-white text-lg font-bold rounded-xl shadow-none flex items-center justify-center gap-2 transition-all bg-gray-400 cursor-not-allowed opacity-70"
+        title="Tính năng đang tạm khóa"
     >
-        <svg className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg> 
-        IN / LƯU PDF
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg> 
+        IN / LƯU PDF (Đang khóa)
     </button>
 
 {/* --- 2. NÚT XEM TRƯỚC / XEM BẢN MẪU (MÀU: XANH KHI XEM, ĐỎ KHI ĐÓNG) --- */}
@@ -4433,7 +4424,8 @@ const EditVocabModal = ({ isOpen, onClose, data, onSave, dbData }) => {
 };
     
     const App = () => {
-// --- Các state cũ giữ nguyên ---
+
+const [showStartupNotice, setShowStartupNotice] = useState(true);
 const [isCafeModalOpen, setIsCafeModalOpen] = useState(false);
 const [showMobilePreview, setShowMobilePreview] = useState(false);
 const [isConfigOpen, setIsConfigOpen] = React.useState(false);
@@ -4562,6 +4554,33 @@ if (!isDbLoaded) {
 // --- GIAO DIỆN CHÍNH (Khi đã có dữ liệu) ---
 return (
     <div className="min-h-screen flex flex-col md:flex-row print-layout-reset">
+    {/* --- BẮT ĐẦU: POPUP THÔNG BÁO KHI VÀO WEB --- */}
+            {showStartupNotice && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center border-2 border-red-100 animate-in zoom-in-95 duration-300">
+                        
+                        {/* Icon cảnh báo */}
+                        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </div>
+
+                        <h3 className="text-xl font-black text-gray-800 mb-2 uppercase">THÔNG BÁO</h3>
+                        
+                        <p className="text-gray-600 mb-6 font-medium leading-relaxed text-sm">
+                            Tính năng IN đang tạm khóa do bảo trì hệ thống. <br/>
+                            Bạn vẫn có thể sử dụng chế độ HỌC và FLASHCARD bình thường!
+                        </p>
+
+                        <button 
+                            onClick={() => setShowStartupNotice(false)}
+                            className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-200 active:scale-95 transition-all uppercase text-xs tracking-widest"
+                        >
+                            Đã hiểu
+                        </button>
+                    </div>
+                </div>
+            )}
+            {/* --- KẾT THÚC POPUP --- */}
     <div className="no-print z-50">
     <Sidebar 
         config={config} onChange={setConfig} onPrint={handlePrint} 
